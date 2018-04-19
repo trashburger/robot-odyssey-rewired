@@ -166,7 +166,7 @@ void SBTProcess::failedDynamicBranch(uint16_t cs, uint16_t ip, uint32_t value)
 {
     PANIC(SBT86_RT_ERROR, ("Dynamic branch at %04X:%04X\n"
                            "to unsupported location 0x%04x\n",
-                           cs, ip, value));
+                           (unsigned)cs, (unsigned)ip, (unsigned)value));
 }
 
 uint8_t SBTProcess::peek8(uint16_t seg, uint16_t off) {

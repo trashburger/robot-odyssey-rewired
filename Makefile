@@ -2,22 +2,6 @@
 # Makefile for Robot Odyssey DS
 # -----------------------------
 
-# NOTE: This makefile builds our own copy of libnds and libfat!
-#
-# This is because we require a specific libnds bugfix (rev 3493)
-# and we need to build libfat with the correct headers so that
-# stat() works properly. Our 'lib' directory uses svn:externals
-# to pull in snapshots of libnds and libfat from the devkitpro
-# repository.
-#
-# Because of this, we do require the devkitARM toolchain (grit,
-# ndstool, and the arm-eabi toolchain) but we don't actually
-# require an installed copy of devkitPRO, since all the pieces
-# we use are built locally.
-#
-# -- Micah Elizabeth Scott <micah@scanlime.org>
-
-
 ############################################
 # Tools and Directories
 #
@@ -28,7 +12,7 @@ ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
 endif
 
-include $(DEVKITARM)/base_rules
+include $(DEVKITARM)/ds_rules
 
 # Python executable
 PYTHON      := python
@@ -41,7 +25,7 @@ INCLUDEDIR  := include
 DATADIR     := data
 TOPDIR      := $(shell pwd)
 
-LIBDIRS := lib/libfat/nds lib/libnds
+LIBDIRS := $(LIBNDS) $(PORTLIBS)
 
 # NDS file banner
 BANNER_ICON := $(DATADIR)/icon.bmp
@@ -166,19 +150,11 @@ all: $(NDSFILE)
 .PHONY: clean
 clean:
 	rm -rf $(BUILDDIR)/* $(NDSFILE)
-	make -C lib/libfat/nds clean
-	make -C lib/libnds clean
 
 # Simple size profiler
 .PHONY: sizeprof
 sizeprof: $(ARM9ELF)
 	@arm-eabi-nm --size-sort -S $< | egrep -v " [bBsS] "
-
-# Psuedo-target to build library dependencies
-$(BUILDDIR)/libs:
-	make -C lib/libnds
-	make -C lib/libfat/nds
-	@touch $@
 
 # Pseudo-target to clean up and extract original Robot Odyssey data
 $(BUILDDIR)/original:
@@ -232,11 +208,11 @@ $(ARM9BIN): $(ARM9ELF)
 	@echo "[OBJCOPY]" $@
 	@$(OBJCOPY) -O binary $< $@
 
-$(ARM7ELF): $(OBJS_A7) $(BUILDDIR)/libs
+$(ARM7ELF): $(OBJS_A7)
 	@echo "[LD-ARM7]" $@
 	@$(CXX) $(LDFLAGS_A7) $(OBJS_A7) $(LIBS_A7) -o $@
 
-$(ARM9ELF): $(OBJS_A9_ALL) $(BUILDDIR)/libs
+$(ARM9ELF): $(OBJS_A9_ALL)
 	@echo "[LD-ARM9]" $@
 	@$(CXX) $(LDFLAGS_A9) $(OBJS_A9_ALL) $(LIBS_A9) -o $@
 

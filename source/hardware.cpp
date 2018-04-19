@@ -99,10 +99,10 @@ void Hardware::init() {
     lcdMainOnTop();
     videoSetMode(MODE_5_2D);
     videoSetModeSub(MODE_5_2D);
-    vramSetMainBanks(VRAM_A_MAIN_BG_0x06000000,
-                     VRAM_B_MAIN_BG_0x06020000,
-                     VRAM_C_SUB_BG_0x06200000,
-                     VRAM_D_SUB_SPRITE);
+    vramSetPrimaryBanks(VRAM_A_MAIN_BG_0x06000000,
+                        VRAM_B_MAIN_BG_0x06020000,
+                        VRAM_C_SUB_BG_0x06200000,
+                        VRAM_D_SUB_SPRITE);
 
     /*
      * Palettes

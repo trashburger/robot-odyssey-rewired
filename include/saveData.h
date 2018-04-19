@@ -31,6 +31,7 @@
 
 #include <string>
 #include <list>
+#include <time.h>
 #include "hwCommon.h"
 
 class SaveFile;

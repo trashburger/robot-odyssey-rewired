@@ -33,6 +33,7 @@
 #include <string.h>
 #include <nds.h>
 #include <gbfs.h>
+#include <time.h>
 #include "panic.h"
 #include "sbt86.h"
 #include "hwCommon.h"
