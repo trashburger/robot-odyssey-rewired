@@ -40,14 +40,15 @@ BANNER_TEXT := "Robot Odyssey DS"
 # memory, SBT86 scripts, and ARM7 sources.
 #
 
-SOURCES_A9   := main.cpp sbtProcess.cpp roData.cpp hardware.cpp \
+CFILES_A9     := gbfs.c
+CPPFILES_A9   := main.cpp sbtProcess.cpp roData.cpp hardware.cpp \
                 hwCommon.cpp hwMain.cpp hwSub.cpp hwSpriteScraper.cpp \
                 mSprite.cpp spriteDraw.cpp rect.cpp saveData.cpp \
                 uiBase.cpp uiText.cpp uiEffects.cpp uiSubScreen.cpp \
                 uiMessageBox.cpp uiList.cpp
 
 SOURCES_ITCM := videoConvert.cpp
-SOURCES_A7   := arm7.cpp soundEngine.cpp
+CPPFILES_A7   := arm7.cpp soundEngine.cpp
 SOURCES_BT   := bt_lab.py bt_menu.py bt_game.py bt_tutorial.py bt_renderer.py
 
 SOURCES_GRIT := gfx_background.grit gfx_button_remote.grit \
@@ -56,7 +57,7 @@ SOURCES_GRIT := gfx_background.grit gfx_button_remote.grit \
                 gfx_box.grit
 
 # Optional: Debug version of malloc()
-#SOURCES_A9 += malloc_debug.cpp
+#CPPFILES_A9 += malloc_debug.cpp
 
 
 ############################################
@@ -120,8 +121,10 @@ SBT86_PYDEPS := $(SCRIPTDIR)/sbt86.py $(SCRIPTDIR)/bt_common.py $(BUILDDIR)/orig
 SBT86_CDEPS  := $(INCLUDEDIR)/sbt86.h
 
 # Other sources
-OBJS_A7      := $(addprefix $(BUILDDIR)/,$(subst .cpp,.o,$(SOURCES_A7)))
-OBJS_A9      := $(addprefix $(BUILDDIR)/,$(subst .cpp,.o,$(SOURCES_A9)))
+OBJS_A7      := $(addprefix $(BUILDDIR)/,$(subst .cpp,.o,$(CPPFILES_A7)))
+CPPOBJS_A9   := $(addprefix $(BUILDDIR)/,$(subst .cpp,.o,$(CPPFILES_A9)))
+COBJS_A9     := $(addprefix $(BUILDDIR)/,$(subst .c,.o,$(CFILES_A9)))
+OBJS_A9      := $(CPPOBJS_A9) $(COBJS_A9)
 OBJS_ITCM    := $(addprefix $(BUILDDIR)/,$(subst .cpp,.o,$(SOURCES_ITCM)))
 
 # We have a GBFS filesystem to hold all game datafiles
@@ -220,7 +223,11 @@ $(OBJS_A7): $(BUILDDIR)/%.o: $(SOURCEDIR)/%.cpp $(CDEPS)
 	@echo "[CC-ARM7]" $@
 	@$(CXX) $(CFLAGS_A7) -c -o $@ $<
 
-$(OBJS_A9): $(BUILDDIR)/%.o: $(SOURCEDIR)/%.cpp $(CDEPS)
+$(COBJS_A9): $(BUILDDIR)/%.o: $(SOURCEDIR)/%.c $(CDEPS)
+	@echo "[CC-ARM9]" $@
+	@$(CXX) $(CFLAGS_A9) -c -o $@ $<
+
+$(CPPOBJS_A9): $(BUILDDIR)/%.o: $(SOURCEDIR)/%.cpp $(CDEPS)
 	@echo "[CC-ARM9]" $@
 	@$(CXX) $(CFLAGS_A9) -c -o $@ $<
 
