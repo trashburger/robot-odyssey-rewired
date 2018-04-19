@@ -48,7 +48,7 @@
 #endif
 
 
-static void decompressRLE(uint8_t *dest, uint8_t *src, uint32_t srcLength)
+static void decompressRLE(uint8_t *dest, uint8_t *limit, uint8_t *src, uint32_t srcLength)
 {
     /*
      * Decompress our very simple RLE format. Runs of 2 or more zeroes
@@ -58,7 +58,6 @@ static void decompressRLE(uint8_t *dest, uint8_t *src, uint32_t srcLength)
      */
 
     int zeroes = 0;
-    uint8_t *limit = dest + 0x10000;
 
     while (srcLength) {
         uint8_t byte = *(src++);
@@ -92,7 +91,7 @@ void SBTProcess::exec(const char *cmdLine)
 
     // Initialize memory
     memset(mem, 0, MEM_SIZE);
-    decompressRLE(memSeg(reg.ds), getData(), getDataLen());
+    decompressRLE(memSeg(reg.ds), mem + MEM_SIZE, getData(), getDataLen());
 
     // Initialize emulated stack
     stack.reset();
