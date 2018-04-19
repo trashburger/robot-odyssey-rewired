@@ -28,8 +28,8 @@ TOPDIR      := $(shell pwd)
 LIBDIRS := $(LIBNDS) $(PORTLIBS)
 
 # NDS file banner
-BANNER_ICON := $(DATADIR)/icon.bmp
-BANNER_TEXT := "Robot Odyssey DS"
+GAME_ICON := $(DATADIR)/icon.bmp
+GAME_TITLE := Robot Odyssey DS
 
 
 ############################################
@@ -198,10 +198,10 @@ $(GRIT_ASM): $(BUILDDIR)/%.s: $(DATADIR)/%.grit $(DATADIR)/%.png
 # binary translated ARM9 code, and ARM7 code.
 #
 
-$(NDSFILE): $(ARM7BIN) $(ARM9BIN)
+$(NDSFILE): $(ARM7ELF) $(ARM9ELF)
 	@echo "[NDSTOOL]" $@
-	@ndstool -c $(NDSFILE) -7 $(ARM7BIN) -9 $(ARM9BIN) \
-		-o $(BANNER_ICON) -b $(BANNER_ICON) $(BANNER_TEXT)
+	@ndstool -c $(NDSFILE) -7 $(ARM7ELF) -9 $(ARM9ELF) \
+        -b $(GAME_ICON) "$(GAME_TITLE)" $(_ADDFILES)
 
 $(ARM7BIN): $(ARM7ELF)
 	@echo "[OBJCOPY]" $@
