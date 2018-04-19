@@ -3,7 +3,7 @@
  * SpriteDraw is a class for doing very simple runtime drawing on
  * 16-color tiled sprite images.
  *
- * Copyright (c) 2009 Micah Dowty <micah@navi.cx>
+ * Copyright (c) 2009 Micah Elizabeth Scott <micah@scanlime.org>
  *
  *    Permission is hereby granted, free of charge, to any person
  *    obtaining a copy of this software and associated documentation

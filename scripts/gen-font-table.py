@@ -6,7 +6,7 @@
 #
 # This uses the Kharon4a_v01 font, Copyright (C) 2001 http://www.orgdot.com
 #
-# Micah Dowty <micah@navi.cx>
+# Micah Elizabeth Scott <micah@scanlime.org>
 #
 
 import pygame

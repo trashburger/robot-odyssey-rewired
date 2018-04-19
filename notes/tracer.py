@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # Tracing tools, for use during binary translation.
-# Micah Dowty <micah@navi.cx>
+# Micah Elizabeth Scott <micah@scanlime.org>
 #
 
 def findSelfModifyingCode(b):

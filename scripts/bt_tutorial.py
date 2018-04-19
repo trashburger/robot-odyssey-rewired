@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # Patches and hooks for the binary translation of TUT.EXE.
-# Micah Dowty <micah@navi.cx>
+# Micah Elizabeth Scott <micah@scanlime.org>
 #
 
 import sbt86

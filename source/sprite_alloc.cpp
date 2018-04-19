@@ -3,7 +3,7 @@
  * This is a modified version of the sprite_alloc.c from libnds 1.3.2.
  * It includes a fix to a serious memory corruption bug in the allocator.
  *
- * Modified by Micah Dowty <micah@navi.cx>
+ * Modified by Micah Elizabeth Scott <micah@scanlime.org>
  *
  * --------------------------------------------------------------------
  *

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # Common binary translation patches and hooks for all Robot Odyssey binaries.
-# Micah Dowty <micah@navi.cx>
+# Micah Elizabeth Scott <micah@scanlime.org>
 #
 
 import sbt86

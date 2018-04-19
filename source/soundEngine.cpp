@@ -11,7 +11,7 @@
  * the first half is playing, we're filling the second half, and vice
  * versa.
  *
- * Copyright (c) 2009 Micah Dowty <micah@navi.cx>
+ * Copyright (c) 2009 Micah Elizabeth Scott <micah@scanlime.org>
  *
  *    Permission is hereby granted, free of charge, to any person
  *    obtaining a copy of this software and associated documentation

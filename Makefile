@@ -15,7 +15,7 @@
 # require an installed copy of devkitPRO, since all the pieces
 # we use are built locally.
 #
-# -- Micah Dowty <micah@navi.cx>
+# -- Micah Elizabeth Scott <micah@scanlime.org>
 
 
 ############################################

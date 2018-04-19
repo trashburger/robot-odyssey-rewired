@@ -8,7 +8,7 @@
 # having to care about the directory structure or filename case of the
 # original archive.
 #
-# Micah Dowty <micah@navi.cx>
+# Micah Elizabeth Scott <micah@scanlime.org>
 #
 
 import os

@@ -9,7 +9,7 @@
 # patching.  Everything that modifies the world state can be removed,
 # since we're just rendering the state copied from another binary.
 #
-# Micah Dowty <micah@navi.cx>
+# Micah Elizabeth Scott <micah@scanlime.org>
 #
 
 import sbt86

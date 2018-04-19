@@ -5,7 +5,7 @@
  * handle the PC speaker mode Robot Odyssey uses, in which the speaker
  * output is used as a 1-bit DAC.
  *
- * Copyright (c) 2009 Micah Dowty <micah@navi.cx>
+ * Copyright (c) 2009 Micah Elizabeth Scott <micah@scanlime.org>
  *
  *    Permission is hereby granted, free of charge, to any person
  *    obtaining a copy of this software and associated documentation
