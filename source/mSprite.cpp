@@ -281,7 +281,7 @@ void MSpriteOBJ::setGfx(const void *gfx) {
      */
 
     if (format != SpriteColorFormat_Bmp) {
-        entry->gfxIndex = oamGfxPtrToOffset(gfx);
+        entry->gfxIndex = oamGfxPtrToOffset(this->alloc->oam, gfx);
         entry->colorMode = (ObjColMode) format;
     } else {
         int sx = ((uint32_t)gfx >> 1) & ((1 << alloc->oam->gfxOffsetStep) - 1);
