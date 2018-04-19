@@ -1304,7 +1304,7 @@ class BinaryImage:
     def unpack(self, offset, fmt):
         return struct.unpack(fmt, self.read(offset, struct.calcsize(fmt)))
 
-    def disasm(self, addr, bits=16):
+    def disasm(self, addr, instructionLimit, bits=16):
         """This is an iterator which disassembles starting at the specified
            memory address. Uses a temporary file to pass the relocated
            binary image to ndisasm.
@@ -1338,6 +1338,12 @@ class BinaryImage:
             else:
                 yield i
 
+            instructionLimit -= 1
+            if instructionLimit <= 0:
+                break
+
+        proc.stdout.close()
+
     def iFetch(self, addr):
         """Fetch the next instruction, via the instruction cache.  If there's
            a cache miss, disassemble a block of code starting at this
@@ -1351,16 +1357,9 @@ class BinaryImage:
             raise InternalError("Failed to disassemble instruction at %s" % addr)
 
     def _disasmToCache(self, addr, instructionLimit=100):
-
-        # XXX: This ends up leaving many ndisasm subprocesses open in
-        #      the background until the translator finishes.
-
-        for i in self.disasm(addr):
+        for i in self.disasm(addr, instructionLimit):
             if i.addr and i.addr.linear not in self._iCache:
                 self._iCache[i.addr.linear] = i
-            instructionLimit -= 1
-            if instructionLimit <= 0:
-                break
 
 
 class Subroutine:
