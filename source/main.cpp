@@ -46,6 +46,7 @@ int main() {
 
     SBTProcess *game = NULL;
 
+#if 0
     if (!sd.init()) {
         UIMessageBox *mb = new UIMessageBox(sd.getInitErrorMessage());
         UIFade fader(SUB);
@@ -70,10 +71,17 @@ int main() {
 
     SaveFile file = games->run();
     delete games;
+#endif
 
     HwCommon *hw = new HwMainInteractive;
+
+#if 1
     game = new GameEXE(hw);
-    file.loadGame(game, hw);
+    //file.loadGame(game, hw);
+#else
+    game = new LabEXE(hw);
+    game->exec("30");  // New lab
+#endif
 
     ROData gameData(game);
     UISubScreen *subScreen = new UISubScreen(&gameData, hw);
