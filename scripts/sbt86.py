@@ -477,9 +477,8 @@ class Instruction:
         self.raw = line
         self._offset = offset
 
-        # Remove jump distances and superfluous segment prefixes
-        line = line.replace("far ", "")
-        line = line.replace("near ", "")
+        line = line.replace("far ", "dword ")
+        line = line.replace("near ", "word ")
 
         # Different versions of ndisasm treat prefixes differently...
         # Some of them disassemble prefixes correctly ("rep stosb"),
