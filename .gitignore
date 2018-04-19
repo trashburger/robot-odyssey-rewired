@@ -2,6 +2,8 @@ build/
 original/*.zip
 original/*.exe
 
+*.pyc
+
 # Object files
 *.o
 *.ko
