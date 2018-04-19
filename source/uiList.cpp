@@ -198,6 +198,13 @@ int UIList::findTappedItem(int x, int y) {
 }
 
 
+//********************************************************** UIListItem
+
+
+UIListItem::~UIListItem()
+{}
+
+
 //********************************************************** UIListDraw
 
 

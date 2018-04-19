@@ -126,6 +126,7 @@ public:
 class UIListItem
 {
 public:
+    virtual ~UIListItem();
     virtual void paint(UIListDraw *draw, int x, int y, bool hilight) = 0;
     virtual int getHeight() = 0;
     virtual bool hitTest(int x, int y) = 0;
