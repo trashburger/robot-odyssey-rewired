@@ -9,3 +9,9 @@ original/*.PIN
 
 *.pyc
 
+
+/target
+**/*.rs.bk
+
+/target
+**/*.rs.bk
