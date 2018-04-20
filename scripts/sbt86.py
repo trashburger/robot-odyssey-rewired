@@ -1251,7 +1251,7 @@ class BinaryImage:
         if offset:
             data = data[offset:]
 
-        assert type(data) == bytes
+        assert type(data) is bytes
         self.filename = filename
         self._data = data
         self.loadSegment = 0
