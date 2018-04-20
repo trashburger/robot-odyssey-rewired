@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 #
 # Check the original Robot Odyssey binaries in 'original', and copy
 # them to the proper place in 'build'.
@@ -12,7 +13,7 @@
 #
 
 import os
-import sha
+import hashlib
 import sys
 import zipfile
 
@@ -71,11 +72,11 @@ class OriginalFileCollector:
         self.remaining = self.hashes
 
     def scan(self, path, data):
-        hash = sha.new(data).hexdigest()
+        hash = hashlib.sha1(data).hexdigest()
         if hash in self.remaining:
             dest = self.remaining[hash]
             del self.remaining[hash]
-            print "%s => %s" % (path, dest)
+            print("%s => %s" % (path, dest))
             open(dest, 'wb').write(data)
 
     def scanFile(self, path):
@@ -96,17 +97,17 @@ class OriginalFileCollector:
 
     def finish(self, dir):
         if self.remaining:
-            print ("\n"
-                   "*** ERROR: Couldn't find the following original data files.\n"
-                   "           Your copy of Robot Odyssey is incomplete, "
-                   "corrupted, or cracked!\n\n"
-                   "Please place a complete and unmodified copy of Robot Odyssey\n"
-                   "in the %r directory. You can simply place a zip file in this\n"
-                   "directory, no need to extract it yourself.\n" % dir)
+            print("\n"
+                  "*** ERROR: Couldn't find the following original data files.\n"
+                  "           Your copy of Robot Odyssey is incomplete, "
+                  "corrupted, or cracked!\n\n"
+                  "Please place a complete and unmodified copy of Robot Odyssey\n"
+                  "in the %r directory. You can simply place a zip file in this\n"
+                  "directory, no need to extract it yourself.\n" % dir)
 
             for hash, filename in self.remaining.iteritems():
-                print "%s  %s" % (hash, filename)
-            print
+                print("%s  %s" % (hash, filename))
+            print()
             sys.exit(1)
 
 

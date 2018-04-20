@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # Common binary translation patches and hooks for all Robot Odyssey binaries.
 # Micah Elizabeth Scott <micah@scanlime.org>

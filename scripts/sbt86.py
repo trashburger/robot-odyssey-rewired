@@ -24,7 +24,7 @@
 # C-language routine, for example, you can patch in a 'ret'
 # instruction, then hook the 'ret'.
 #
-# Requires Python 2.5 and the ndisasm disassembler.
+# Requires the ndisasm disassembler.
 #
 # Copyright (c) 2009 Micah Elizabeth Scott <micah@scanlime.org>
 #
@@ -56,10 +56,11 @@ import subprocess
 import re
 import binascii
 import tempfile
+import io
 
 
 def log(msg):
-    print "SBT86: %s" % msg
+    print("SBT86: %s" % msg)
 
 
 class Signature:
@@ -97,32 +98,24 @@ class Signature:
             raise SignatureFormatError("Pattern must have exactly one ':' to"
                                        " mark the search address.")
         pre, post = parts
-        self.preLength = len(pre) / 2
+        self.preLength = len(pre) // 2
         t = pre + post
 
         if len(t) % 2:
             raise SignatureFormatError("Pattern must have an even "
                                        "number of digits: %r" % self.shortText)
 
-        regex = ""
-        for byte in xrange(len(t) / 2):
+        regex = b""
+        for byte in range(len(t) // 2):
             hexByte = t[byte * 2: (byte + 1) * 2]
             if '_' in hexByte:
                 if hexByte == '__':
-                    regex += '.'
+                    regex += b'.'
                 else:
                     SignatureFormatError("Pattern has blanks which are "
                                          "not byte aligned: %r" % self.shortText)
-            elif hexByte == '00':
-                # NUL is special, they get escaped in an unusual way
-                regex += r'\x00'
             else:
-                char = chr(int(hexByte, 16))
-                if char in ".^$*+?\\{}[]()|":
-                    # Special character. Escape it.
-                    regex += '\\' + char
-                else:
-                    regex += char
+                regex += b"\\x%02x" % int(hexByte, 16)
 
         self.re = re.compile(regex)
 
@@ -174,8 +167,11 @@ class Addr16:
         self.offset = offset
         self.linear = linear
 
-    def __cmp__(self, other):
-        return cmp(self.linear, other.linear)
+    def __lt__(self, other):
+        return self.linear < other.linear
+
+    def __eq__(self, other):
+        return self.linear == other.linear
 
     def add(self, x):
         if isinstance(x, Addr16):
@@ -515,9 +511,9 @@ class Instruction:
 
         self.op = op
         self.addr = Addr16(str=addr).add(offset or 0)
-        try:
+        if encoding and encoding != "-":
             self.encoding = binascii.a2b_hex(encoding)
-        except TypeError:
+        else:
             self.encoding = None
 
         # Figure out whether this instruction has dynamic literals
@@ -533,7 +529,7 @@ class Instruction:
         if offset is None:
             offset = Addr16(self.addr.segment, 0)
 
-        self.args = map(self._decodeOperand, args)
+        self.args = tuple(map(self._decodeOperand, args))
 
         # Propagate known widths to operands with unknown width
         for a in self.args:
@@ -704,7 +700,7 @@ class Instruction:
                 text = text[1:]
 
         if '+' in text:
-            offsets = map(self._decodeOperand, text.split('+'))
+            offsets = list(map(self._decodeOperand, text.split('+')))
         else:
             offsets = [self._decodeOperand(text)]
 
@@ -1255,6 +1251,7 @@ class BinaryImage:
         if offset:
             data = data[offset:]
 
+        assert type(data) == bytes
         self.filename = filename
         self._data = data
         self.loadSegment = 0
@@ -1290,7 +1287,7 @@ class BinaryImage:
             reloc = (reloc + segment) & 0xFFFF
             reloc = struct.pack("<H", reloc)
 
-            self._data = ''.join((pre, reloc, post))
+            self._data = b''.join((pre, reloc, post))
 
     def offset(self, offset):
         return BinaryImage(self.filename, offset=offset, data=self._data)
@@ -1330,7 +1327,7 @@ class BinaryImage:
         base = Addr16(addr.segment, 0)
 
         for line in proc.stdout:
-            i = Instruction(line, base, prefix, self.dynLiterals)
+            i = Instruction(line.decode('utf-8'), base, prefix, self.dynLiterals)
 
             prefix = None
             if i.isPrefix:
@@ -1460,7 +1457,7 @@ class Subroutine:
 
         # Sort the instruction memo, and store a list
         # of instructions sorted by address.
-        addrs = memo.values()
+        addrs = list(memo.values())
         addrs.sort()
         self.instructions = map(self.image.iFetch, addrs)
 
@@ -1492,7 +1489,7 @@ class BinaryData:
     """Represents the data portions of a binary image. These parts are RLE
        compressed and converted to an array in the generated code.
        """
-    def __init__(self, data='', baseAddr=Addr16(0,0)):
+    def __init__(self, data=b'', baseAddr=Addr16(0,0)):
         self.data = list(data)
         self.baseAddr = baseAddr
         self.preserved = {}
@@ -1513,19 +1510,19 @@ class BinaryData:
 
     def trim(self):
         """Zero out sections of memory that haven't been preserved."""
-        for i in xrange(len(self.data)):
+        for i in range(len(self.data)):
             if i not in self.preserved:
-                self.data[i] = '\0'
+                self.data[i] = 0
 
     def toHexArray(self):
         """Convert compressed binary data to a list of hexadecimal values
            suitable for including in a C array.
            """
-        return ''.join(["0x%02x,%s" % (ord(b), "\n"[:(i&15)==15])
+        return ''.join(["0x%02x,%s" % (b, "\n"[:(i&15)==15])
                         for i, b in enumerate(self.compressRLE())])
 
     def compressRLE(self):
-        """Compress a string using a simple form of RLE which
+        """Compress a byte list using a simple form of RLE which
            is optimized for eliminating long runs of zeroes. This
            is used to automatically avoid storing zeroed portions
            of the data segment.
@@ -1539,16 +1536,17 @@ class BinaryData:
         output = []
         zeroes = []
         for byte in self.data:
-            if byte == '\0':
+            if byte == 0:
                 zeroes.append(byte)
             elif not zeroes:
                 output.append(byte)
             elif len(zeroes) == 1:
-                output.append('\0')
+                output.append(0)
                 output.append(byte)
                 zeroes = []
             else:
-                output.extend(list('\0\0' + struct.pack("<H", len(zeroes) - 2) + byte))
+                output.extend(list(b'\0\0' + struct.pack("<H", len(zeroes) - 2)))
+                output.append(byte)
                 zeroes = []
         return output
 
@@ -1664,7 +1662,7 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
          initSS, initSP, checksum, entryIP, entryCS, relocTable,
          overlayNumber) = self.unpack(0, "<2sHHHHHHHHHHHHH")
 
-        if signature != "MZ":
+        if signature != b"MZ":
             raise ValueError("Input file is not a DOS executable")
 
         self.exeSize = (numPages - 1) * 512 + bytesInLastPage
@@ -1881,9 +1879,9 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
 
         vars['className'] = className
         vars['subCode'] = '\n'.join([s.codegen(traces=self._traces)
-                                     for s in self.subroutines.itervalues()])
+                                     for s in self.subroutines.values()])
         vars['subDecls'] = '\n'.join(["static void %s(void);" % s.name
-                                     for s in self.subroutines.itervalues()])
+                                     for s in self.subroutines.values()])
         vars['traceDecls'] = '\n'.join([t.codegen() for t in self._traces])
         vars['entryLinear'] = self.entryPoint.linear
         vars['entryCS'] = self.entryPoint.segment

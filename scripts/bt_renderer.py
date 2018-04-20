@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # This is a special-purpose binary translation patch which starts with
 # GAME.EXE, and creates a trimmed down binary which we run internally

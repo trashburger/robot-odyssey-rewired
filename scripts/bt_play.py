@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Patches and hooks for the binary translation of PLAY.EXE.
 # Micah Elizabeth Scott <micah@scanlime.org>
