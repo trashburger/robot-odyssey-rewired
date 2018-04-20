@@ -1,0 +1,7 @@
+[package]
+name = "robot-odyssey-rewired"
+version = "0.1.0"
+authors = ["Micah Elizabeth Scott <micah@misc.name>"]
+
+[dependencies]
+stdweb = "0.4.4"

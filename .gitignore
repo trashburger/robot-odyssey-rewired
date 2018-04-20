@@ -1,14 +1,15 @@
-original/*.zip
-original/*.WOR
-original/*.EXE
-original/*.CIR
-original/*.WLD
-original/*.SHW
-original/*.CSV
-original/*.PIN
+/original/*.zip
+/original/*.WOR
+/original/*.EXE
+/original/*.CIR
+/original/*.WLD
+/original/*.SHW
+/original/*.CSV
+/original/*.PIN
 
 *.pyc
 
+/build/
 
 /target
 **/*.rs.bk
