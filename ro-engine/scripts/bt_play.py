@@ -5,8 +5,10 @@
 #
 
 import sys
+import os
 import sbt86
 
-b = sbt86.DOSBinary('build/play.exe')
+basedir = sys.argv[1]
+b = sbt86.DOSBinary(os.path.join(basedir, 'play.exe'))
 
-b.writeCodeToFile('build/bt_play.cpp', "play_main")
+b.writeCodeToFile(os.path.join(basedir, 'bt_play.rs'), 'PlayEXE')

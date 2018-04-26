@@ -4,14 +4,16 @@
 # Micah Elizabeth Scott <micah@scanlime.org>
 #
 
+import os
 import sys
 import sbt86
 import bt_common
 
-b = sbt86.DOSBinary('build/lab.exe')
+basedir = sys.argv[1]
+b = sbt86.DOSBinary(os.path.join(basedir, 'lab.exe'))
 
 bt_common.patch(b)
 bt_common.patchChips(b)
 bt_common.patchLoadSave(b)
 
-b.writeCodeToFile('build/bt_lab.cpp', 'LabEXE')
+b.writeCodeToFile(os.path.join(basedir, 'bt_lab.rs'), 'LabEXE')

@@ -4,10 +4,12 @@
 # Micah Elizabeth Scott <micah@scanlime.org>
 #
 
+import os
 import sys
 import sbt86
 
-b = sbt86.DOSBinary('build/menu.exe')
+basedir = sys.argv[1]
+b = sbt86.DOSBinary(os.path.join(basedir, 'menu.exe'))
 
 # XXX: Dynamic branch, looks sound related.
 b.patch('010E:0778', 'nop', 2)
@@ -29,4 +31,4 @@ b.trace('w', '''
    }
 ''')
 
-b.writeCodeToFile('build/bt_menu.cpp', 'MenuEXE')
+b.writeCodeToFile(os.path.join(basedir, 'bt_menu.rs'), 'MenuEXE')

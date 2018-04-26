@@ -14,8 +14,11 @@
 
 import sbt86
 import bt_common
+import os
+import sys
 
-b = sbt86.DOSBinary('build/game.exe')
+basedir = sys.argv[1]
+b = sbt86.DOSBinary(os.path.join(basedir, 'game.exe'))
 
 bt_common.patch(b)
 bt_common.patchChips(b)
@@ -77,4 +80,4 @@ b.patch('0DAB:6758', 'jmp 0x675b')
 b.hook(b.findCode('a0____ :e8____ b500 8a0e____ 8bf9 8a85____'),
        'if (r.al == 0) goto ret;')
 
-b.writeCodeToFile('build/bt_renderer.cpp', 'RendererEXE')
+b.writeCodeToFile(os.path.join(basedir, 'bt_renderer.rs'), 'RendererEXE')

@@ -5,10 +5,12 @@
 #
 
 import sys
+import os
 import sbt86
 import bt_common
 
-b = sbt86.DOSBinary('build/game.exe')
+basedir = sys.argv[1]
+b = sbt86.DOSBinary(os.path.join(basedir, 'game.exe'))
 
 bt_common.patch(b)
 bt_common.patchChips(b)
@@ -20,4 +22,4 @@ b.patchAndHook(b.findCode('2c01 :2f a2____ a2____ b12c 32ed'),
    sassert(false, "Unimplemented DAS instruction\\n");
 ''')
 
-b.writeCodeToFile('build/bt_game.cpp', 'GameEXE')
+b.writeCodeToFile(os.path.join(basedir, 'bt_game.rs'), 'GameEXE')

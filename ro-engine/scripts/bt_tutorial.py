@@ -6,8 +6,11 @@
 
 import sbt86
 import bt_common
+import os
+import sys
 
-b = sbt86.DOSBinary('build/tut.exe')
+basedir = sys.argv[1]
+b = sbt86.DOSBinary(os.path.join(basedir, 'tut.exe'))
 
 bt_common.patch(b)
 #bt_common.findSelfModifyingCode(b)
@@ -15,4 +18,4 @@ bt_common.patch(b)
 # Debug: Trace all IPs which access memory (for diagnosing hangs)
 #b.trace('rw', 'return 1;', 'printf("%04x ", ip);')
 
-b.writeCodeToFile('build/bt_tutorial.cpp', 'TutorialEXE')
+b.writeCodeToFile(os.path.join(basedir, 'bt_tutorial.rs'), 'TutorialEXE')
