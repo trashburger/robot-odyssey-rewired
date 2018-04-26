@@ -1,0 +1,24 @@
+{
+  "name": "robot-odyssey-rewired",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Binary port of a classic 1984 adventure game into HTML5",
+  "scripts": {
+    "build": "node build.js build",
+    "serve": "node build.js serve"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scanlime/robot-odyssey-rewired.git"
+  },
+  "author": "Micah Elizabeth Scott",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/scanlime/robot-odyssey-rewired/issues"
+  },
+  "homepage": "https://github.com/scanlime/robot-odyssey-rewired#readme",
+  "dependencies": {
+    "parcel-bundler": "1.7.0",
+    "parcel-plugin-cargo-web": "^0.2.0"
+  }
+}
