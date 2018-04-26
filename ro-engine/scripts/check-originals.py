@@ -102,17 +102,16 @@ class OriginalFileCollector:
 
     def finish(self, dir):
         if self.remaining:
+            lines = []
+            for hash, filename in self.remaining.items():
+                lines.append("%s  %s" % (hash, filename))
             print("\n"
                   "*** ERROR: Couldn't find the following original data files.\n"
                   "           Your copy of Robot Odyssey is incomplete, "
                   "corrupted, or cracked!\n\n"
                   "Please place a complete and unmodified copy of Robot Odyssey\n"
                   "in the %r directory. You can simply place a zip file in this\n"
-                  "directory, no need to extract it yourself.\n" % dir)
-
-            for hash, filename in self.remaining.iteritems():
-                print("%s  %s" % (hash, filename))
-            print()
+                  "directory, no need to extract it yourself.\n\n%s\n\n" % (dir, "\n".join(lines)))
             sys.exit(1)
 
 

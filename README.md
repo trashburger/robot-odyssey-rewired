@@ -16,3 +16,11 @@ Dependencies
 - emscripten
 - python3
 - nasm with ndisasm
+
+
+Build Instructions
+------------------
+
+- Place original game files in the "original" directory
+- npm install
+- npm run build
