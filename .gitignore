@@ -9,10 +9,7 @@
 
 *.pyc
 
-/build/
-
-/target
+ro-engine/build/
+ro-engine/target
 **/*.rs.bk
 
-/target
-**/*.rs.bk
