@@ -23,7 +23,7 @@ fn python<S: AsRef<OsStr> + Debug>(args: &[S]) {
 
 fn main() {
     let out_dir = env::var("OUT_DIR").unwrap();
-    let original_dir = env::var("ORIGINAL_DIR").unwrap_or("../original".to_string());
+    let original_dir = env::var("ORIGINAL_DIR").unwrap_or_else(|_| "../original".to_string());
 
     python(&["scripts/check-originals.py", &original_dir, &out_dir]);
 
