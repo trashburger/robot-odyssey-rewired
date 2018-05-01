@@ -2,6 +2,7 @@
 
 #include "sbt86.h"
 #include "roData.h"
+#include "fspack.h"
 
 SBT_DECL_PROCESS(MenuEXE);
 SBT_DECL_PROCESS(LabEXE);
@@ -29,16 +30,12 @@ public:
     uint8_t saveFile[sizeof(ROSavedGame)];
 
 private:
-    struct OpenFile {
-        bool       open;
-        uint8_t   *data;
-        uint32_t   length;
-    };
-
     uint16_t allocateFD();
 
     static const unsigned MAX_OPEN_FILES = 16;
-    OpenFile openFiles[MAX_OPEN_FILES];
+    const FileInfo* openFiles[MAX_OPEN_FILES];
+    uint32_t fileOffsets[MAX_OPEN_FILES];
+    FileInfo saveFileInfo;
 };
 
 

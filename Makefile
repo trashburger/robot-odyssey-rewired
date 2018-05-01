@@ -8,17 +8,18 @@ GENERATED_BT := \
 	build/bt_renderer.cpp \
 	build/bt_tutorial.cpp
 
-all: build/original $(GENERATED_BT)
+all: build/original build/fspack.cpp $(GENERATED_BT)
 
 build/%.cpp: scripts/%.py scripts/sbt86.py
-	@echo "[SBT86  ]" $@
-	@$(PYTHON) $< build
+	$(PYTHON) $< build
+
+build/fspack.cpp: scripts/fs-packer.py build/fs/*
+	$(PYTHON) $< build/fs $@
 
 # Pseudo-target to clean up and extract original Robot Odyssey data
 build/original:
-	@echo "[UNPACK ] Unpacking original Robot Odyssey data..."
-	@mkdir -p build
-	@$(PYTHON) scripts/check-originals.py original build
-	@touch $@
+	mkdir -p build
+	$(PYTHON) scripts/check-originals.py original build
+	touch $@
 
 .PHONY: all

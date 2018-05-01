@@ -24,11 +24,13 @@
  *    OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <algorithm>
 #include <string.h>
 #include <time.h>
 #include <stdio.h>
 #include "sbt86.h"
 #include "hardware.h"
+#include "fspack.h"
 
 
 DOSFilesystem::DOSFilesystem()
@@ -39,66 +41,62 @@ DOSFilesystem::DOSFilesystem()
 uint16_t DOSFilesystem::open(const char *name)
 {
     uint16_t fd = allocateFD();
-    OpenFile *file = &openFiles[fd];
-
-    file->open = true;
+    const FileInfo *file;
 
     if (!strcmp(name, SBT_SAVE_FILE_NAME)) {
         /*
          * Save file
          */
 
-        file->data = saveFile;
-        file->length = sizeof saveFile;
+        saveFileInfo.data = saveFile;
+        saveFileInfo.data_size = sizeof saveFile;
+        file = &saveFileInfo;
 
     } else {
         /*
          * Game file
          */
 
-        file->data = /* TODO */ 0;
-        if (!file->data) {
+        file = FileInfo::lookup(name);
+        if (!file) {
             fprintf(stderr, "Failed to open file '%s'\n", name);
             assert(0 && "Failed to open file");
         }
     }
 
+    openFiles[fd] = file;
+    fileOffsets[fd] = 0;
     return fd;
 }
 
 void DOSFilesystem::close(uint16_t fd)
 {
-    OpenFile *file = &openFiles[fd];
-
     assert(fd < MAX_OPEN_FILES && "Closing an invalid file descriptor");
-    assert(file->open && "Closing a file which is not open");
-
-    openFiles[fd].open = false;
+    assert(openFiles[fd] && "Closing a file which is not open");
+    openFiles[fd] = 0;
 }
 
 uint16_t DOSFilesystem::read(uint16_t fd, void *buffer, uint16_t length)
 {
-    OpenFile *file = &openFiles[fd];
+    const FileInfo *file = openFiles[fd];
 
     assert(fd < MAX_OPEN_FILES && "Reading an invalid file descriptor");
-    assert(file->open && "Reading a file which is not open");
+    assert(file && "Reading a file which is not open");
 
-    if (length > file->length) {
-        length = file->length;
-    }
+    uint32_t offset = fileOffsets[fd];
+    uint16_t actual_length = std::min<unsigned>(length, file->data_size - offset);
 
-    memcpy(buffer, file->data, length);
-    file->data += length;
-    file->length -= length;
+    memcpy(buffer, file->data + offset, actual_length);
 
-    return length;
+    fileOffsets[fd] += actual_length;
+    return actual_length;
 }
 
 uint16_t DOSFilesystem::allocateFD()
 {
     uint16_t fd = 0;
 
-    while (openFiles[fd].open) {
+    while (openFiles[fd]) {
         fd++;
         if (fd >= MAX_OPEN_FILES) {
             assert(0 && "Too many open files");
@@ -274,6 +272,7 @@ void HwCommon::pollKeys(SBTProcess *proc) {
 void HwMain::drawScreen(SBTProcess *proc, uint8_t *framebuffer)
 {
     // TODO
+    fprintf(stderr, "Drawing a frame!\n");
 }
 
 void HwMainInteractive::writeSpeakerTimestamp(uint32_t timestamp) {
