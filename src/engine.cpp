@@ -1,6 +1,12 @@
+//parcel: -I. sbtProcess.cpp hardware.cpp ../build/bt_game.cpp
+
 #include <stdint.h>
 #include <emscripten.h>
+#include "hardware.h"
 
-extern "C" uint32_t EMSCRIPTEN_KEEPALIVE increment(uint32_t a) {
-	return a+1;
+extern "C" void EMSCRIPTEN_KEEPALIVE start() {
+	GameEXE *game;
+	HwMainInteractive hw;
+	game = new GameEXE(&hw);
+	game->run();
 }

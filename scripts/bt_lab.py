@@ -16,4 +16,4 @@ bt_common.patch(b)
 bt_common.patchChips(b)
 bt_common.patchLoadSave(b)
 
-b.writeCodeToFile(os.path.join(basedir, 'bt_lab.rs'), 'LabEXE')
+b.writeCodeToFile(os.path.join(basedir, 'bt_lab.cpp'), 'LabEXE')

@@ -29,23 +29,7 @@
 
 #include <string.h>
 #include <stdio.h>
-#include <nds.h>
 #include "sbt86.h"
-#include "panic.h"
-
-
-/*
- * Verify the architecture. SBT86 only supports little-endian, and the
- * jmp_buf setup code here only supports a particular jmp_buf layout
- * which in newlib is conditional on thumb2.
- */
-
-#ifndef __ARMEL__
-#define This SBTProcess implementation only supports ARM little-endian
-#endif
-#ifndef __thumb2__
-#define This SBTProcess implementation only supports ARM processors with thumb2
-#endif
 
 
 static void decompressRLE(uint8_t *dest, uint8_t *limit, uint8_t *src, uint32_t srcLength)
@@ -61,7 +45,7 @@ static void decompressRLE(uint8_t *dest, uint8_t *limit, uint8_t *src, uint32_t 
 
     while (srcLength) {
         uint8_t byte = *(src++);
-        sassert(dest < limit, "Overflow in decompressRLE");
+        assert(dest < limit && "Overflow in decompressRLE");
         *(dest++) = byte;
         srcLength--;
 
@@ -104,26 +88,13 @@ void SBTProcess::exec(const char *cmdLine)
     poke8(reg.es, 0x80, strlen(cmdLine));
     strcpy((char*) (memSeg(reg.es) + 0x81), cmdLine);
 
-    /*
-     * Set up the initial jmpHalt buffer to point to the program's
-     * entry point. This is very non-portable code, and it's the main
-     * reason for the platform checks at the top of the file.
-     *
-     * NOTE: The stack grows down, and arm-eabi specifies that it
-     *       must be 8-byte aligned!
-     */
-
-    uintptr_t sp = (uintptr_t) &nativeStack[NATIVE_STACK_WORDS-1];
-    sp &= ~7;
-
-    memset(jmpHalt, 0, sizeof(jmpHalt));
-    jmpHalt[9] = sp;
-    jmpHalt[10] = getEntryPtr();
+    // Use the entry point instead of jmpHalt
+    jmpHaltIsSet = false;
 }
 
 int SBTProcess::run(void)
 {
-    sassert(hardware != NULL, "SBTHardware must be defined\nbefore running a process");
+    assert(hardware != NULL && "SBTHardware must be defined\nbefore running a process");
 
     /*
      * Give us a way to exit from run mode. The halt() routine will
@@ -138,7 +109,12 @@ int SBTProcess::run(void)
      * Go back to executing this process.
      */
     loadCache();
-    longjmp(jmpHalt, 1);
+    if (jmpHaltIsSet) {
+        longjmp(jmpHalt, 1);
+    } else {
+        invokeEntry();
+        jmpHaltIsSet = false;
+    }
     return 0;
 }
 
@@ -148,6 +124,7 @@ void SBTProcess::halt(int code)
      * Save our current state, and exit from run().
      */
     if (!setjmp(jmpHalt)) {
+        jmpHaltIsSet = true;
         saveCache();
         longjmp(jmpRun, code);
     }
@@ -163,9 +140,7 @@ uint8_t *SBTProcess::memSeg(uint16_t seg)
 
 void SBTProcess::failedDynamicBranch(uint16_t cs, uint16_t ip, uint32_t value)
 {
-    PANIC(SBT86_RT_ERROR, ("Dynamic branch at %04X:%04X\n"
-                           "to unsupported location 0x%04x\n",
-                           (unsigned)cs, (unsigned)ip, (unsigned)value));
+    assert(0 && "Failed dynamic branch");
 }
 
 uint8_t SBTProcess::peek8(uint16_t seg, uint16_t off) {

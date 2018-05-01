@@ -4,8 +4,8 @@
   "private": true,
   "description": "Binary port of a classic 1984 adventure game into HTML5",
   "scripts": {
-    "build": "parcel build",
-    "serve": "parcel serve"
+    "build": "make; parcel build src/index.html",
+    "serve": "parcel serve src/index.html"
   },
   "repository": {
     "type": "git",

@@ -31,4 +31,4 @@ b.trace('w', '''
    }
 ''')
 
-b.writeCodeToFile(os.path.join(basedir, 'bt_menu.rs'), 'MenuEXE')
+b.writeCodeToFile(os.path.join(basedir, 'bt_menu.cpp'), 'MenuEXE')

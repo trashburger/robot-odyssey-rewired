@@ -11,4 +11,4 @@ import sbt86
 basedir = sys.argv[1]
 b = sbt86.DOSBinary(os.path.join(basedir, 'play.exe'))
 
-b.writeCodeToFile(os.path.join(basedir, 'bt_play.rs'), 'PlayEXE')
+b.writeCodeToFile(os.path.join(basedir, 'bt_play.cpp'), 'PlayEXE')

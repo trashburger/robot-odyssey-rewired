@@ -80,4 +80,4 @@ b.patch('0DAB:6758', 'jmp 0x675b')
 b.hook(b.findCode('a0____ :e8____ b500 8a0e____ 8bf9 8a85____'),
        'if (r.al == 0) goto ret;')
 
-b.writeCodeToFile(os.path.join(basedir, 'bt_renderer.rs'), 'RendererEXE')
+b.writeCodeToFile(os.path.join(basedir, 'bt_renderer.cpp'), 'RendererEXE')

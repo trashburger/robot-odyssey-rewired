@@ -1,11 +1,11 @@
 import engine from "./engine.cpp";
 
 const engine_inst = engine();
-const increment = engine_inst.cwrap('increment');
+const start = engine_inst.cwrap('start');
 
 engine_inst.then(() => {
 
-	alert(increment(1));
+	start();
 
 });
 

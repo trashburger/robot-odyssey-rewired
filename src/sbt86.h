@@ -32,12 +32,11 @@
  *    OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _SBT86_H_
-#define _SBT86_H_
+#pragma once
 
 #include <stdint.h>
 #include <setjmp.h>
-#include <nds/arm9/sassert.h>
+#include <assert.h>
 
 
 /*
@@ -229,14 +228,14 @@ class SBTStack
     }
 
     inline void pushw(uint16_t word) {
-        sassert(top < STACK_SIZE, "SBT86 stack overflow");
+        assert(top < STACK_SIZE && "SBT86 stack overflow");
         words[top] = word;
         tags[top] = STACK_TAG_WORD;
         top++;
     }
 
     inline void pushf(SBTRegs reg) {
-        sassert(top < STACK_SIZE, "SBT86 stack overflow");
+        assert(top < STACK_SIZE && "SBT86 stack overflow");
         flags[top].uresult = reg.uresult;
         flags[top].sresult = reg.sresult;
         tags[top] = STACK_TAG_FLAGS;
@@ -244,20 +243,20 @@ class SBTStack
     }
 
     inline void pushret() {
-        sassert(top < STACK_SIZE, "SBT86 stack overflow");
+        assert(top < STACK_SIZE && "SBT86 stack overflow");
         tags[top] = STACK_TAG_RETADDR;
         top++;
     }
 
     inline uint16_t popw() {
         top--;
-        sassert(tags[top] == STACK_TAG_WORD, "SBT86 stack tag mismatch");
+        assert(tags[top] == STACK_TAG_WORD && "SBT86 stack tag mismatch");
         return words[top];
     }
 
     inline SBTRegs popf(SBTRegs reg) {
         top--;
-        sassert(tags[top] == STACK_TAG_FLAGS, "SBT86 stack tag mismatch");
+        assert(tags[top] == STACK_TAG_FLAGS && "SBT86 stack tag mismatch");
         reg.uresult = flags[top].uresult;
         reg.sresult = flags[top].sresult;
         return reg;
@@ -265,7 +264,7 @@ class SBTStack
 
     inline void popret() {
         top--;
-        sassert(tags[top] == STACK_TAG_RETADDR, "SBT86 stack tag mismatch");
+        assert(tags[top] == STACK_TAG_RETADDR && "SBT86 stack tag mismatch");
     }
 
     /*
@@ -285,14 +284,14 @@ class SBTStack
      */
 
     inline void preSaveRet() {
-        sassert(tags[top - 1] == STACK_TAG_RETADDR, "SBT86 stack tag mismatch");
+        assert(tags[top - 1] == STACK_TAG_RETADDR && "SBT86 stack tag mismatch");
         words[top - 1] = RET_VERIFICATION;
         tags[top - 1] = STACK_TAG_WORD;
     }
 
     inline void postRestoreRet() {
-        sassert(tags[top - 1] == STACK_TAG_WORD, "SBT86 stack tag mismatch");
-        sassert(words[top - 1] == RET_VERIFICATION, "SBT86 stack retaddr mismatch");
+        assert(tags[top - 1] == STACK_TAG_WORD && "SBT86 stack tag mismatch");
+        assert(words[top - 1] == RET_VERIFICATION && "SBT86 stack retaddr mismatch");
         tags[top - 1] = STACK_TAG_RETADDR;
     }
 
@@ -412,7 +411,7 @@ class SBTProcess
     virtual uint32_t getDataLen() = 0;
     virtual uint16_t getRelocSegment() = 0;
     virtual uint16_t getEntryCS() = 0;
-    virtual uintptr_t getEntryPtr() = 0;
+    virtual void invokeEntry() = 0;
 
  private:
     /*
@@ -437,15 +436,7 @@ class SBTProcess
      * and jmpHalt is how we resume execution after a halt().
      */
     jmp_buf jmpRun, jmpHalt;
-
-    /*
-     * Native stack for this process. This is the stack we're executing
-     * native code off of, and it contains the physical return addresses
-     * for each translated procedure call. This is also the stack where we
-     * run SBTHardware implementations.
-     */
-    static const uint32_t NATIVE_STACK_WORDS = 4 * 1024;
-    uint32_t nativeStack[NATIVE_STACK_WORDS];
+    bool jmpHaltIsSet;
 };
 
 
@@ -526,10 +517,8 @@ class SBTSegmentCache
         virtual uint32_t getDataLen();                  \
         virtual uint16_t getRelocSegment();             \
         virtual uint16_t getEntryCS();                  \
-        virtual uintptr_t getEntryPtr();                \
+        virtual void invokeEntry();                     \
     public:                                             \
         virtual uint16_t getAddress(SBTAddressId id);   \
     }
 
-
-#endif // _SBT86_H_

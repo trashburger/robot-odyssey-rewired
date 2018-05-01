@@ -1,12 +1,6 @@
 /* -*- Mode: C++; c-basic-offset: 4 -*-
  *
- * Common hardware emulation support. This module is responsible for
- * basic DOS, BIOS, and PC hardware emulation. It provides read-only
- * filesystem access via GBFS, but all video, keyboard, and sound are
- * no-ops. Subclasses must provide specific implementations of all
- * user-visible I/O.
- *
- * Copyright (c) 2009 Micah Elizabeth Scott <micah@scanlime.org>
+ * Copyright (c) 2009-2018 Micah Elizabeth Scott <micah@scanlime.org>
  *
  *    Permission is hereby granted, free of charge, to any person
  *    obtaining a copy of this software and associated documentation
@@ -31,12 +25,10 @@
  */
 
 #include <string.h>
-#include <nds.h>
-#include <gbfs.h>
 #include <time.h>
-#include "panic.h"
+#include <stdio.h>
 #include "sbt86.h"
-#include "hwCommon.h"
+#include "hardware.h"
 
 
 DOSFilesystem::DOSFilesystem()
@@ -61,14 +53,13 @@ uint16_t DOSFilesystem::open(const char *name)
 
     } else {
         /*
-         * GBFS file
+         * Game file
          */
 
-        extern const GBFS_FILE data_gbfs;
-
-        file->data = (uint8_t*) gbfs_get_obj(&data_gbfs, name, &file->length);
+        file->data = /* TODO */ 0;
         if (!file->data) {
-            PANIC(SBT86_RT_ERROR, ("Can't open file '%s'\n", name));
+            fprintf(stderr, "Failed to open file '%s'\n", name);
+            assert(0 && "Failed to open file");
         }
     }
 
@@ -79,8 +70,8 @@ void DOSFilesystem::close(uint16_t fd)
 {
     OpenFile *file = &openFiles[fd];
 
-    sassert(fd < MAX_OPEN_FILES, "Closing an invalid file descriptor");
-    sassert(file->open, "Closing a file which is not open");
+    assert(fd < MAX_OPEN_FILES && "Closing an invalid file descriptor");
+    assert(file->open && "Closing a file which is not open");
 
     openFiles[fd].open = false;
 }
@@ -89,8 +80,8 @@ uint16_t DOSFilesystem::read(uint16_t fd, void *buffer, uint16_t length)
 {
     OpenFile *file = &openFiles[fd];
 
-    sassert(fd < MAX_OPEN_FILES, "Reading an invalid file descriptor");
-    sassert(file->open, "Reading a file which is not open");
+    assert(fd < MAX_OPEN_FILES && "Reading an invalid file descriptor");
+    assert(file->open && "Reading a file which is not open");
 
     if (length > file->length) {
         length = file->length;
@@ -110,7 +101,7 @@ uint16_t DOSFilesystem::allocateFD()
     while (openFiles[fd].open) {
         fd++;
         if (fd >= MAX_OPEN_FILES) {
-            PANIC(SBT86_RT_ERROR, ("Too many open files\n"));
+            assert(0 && "Too many open files");
         }
     }
 
@@ -130,7 +121,7 @@ uint8_t HwCommon::in(uint16_t port, uint32_t timestamp)
         return port61;
 
     default:
-        PANIC(SBT86_RT_ERROR, ("Unimplemented IN 0x%04x\n", port));
+        assert(0 && "Unimplemented IO IN");
         return 0;
     }
 }
@@ -158,7 +149,7 @@ void HwCommon::out(uint16_t port, uint8_t value, uint32_t timestamp)
         break;
 
     default:
-        PANIC(SBT86_RT_ERROR, ("Unimplemented OUT 0x%04x, 0x%02x\n", port, value));
+        assert(0 && "Unimplmented IO OUT");
     }
 }
 
@@ -171,8 +162,7 @@ SBTRegs HwCommon::interrupt10(SBTProcess *proc, SBTRegs reg)
         break;
 
     default:
-        PANIC(SBT86_RT_ERROR, ("Unimplemented BIOS Int10\n"
-                               "ax=0x%04x\n", reg.ax));
+        assert(0 && "Unimplemented BIOS Int10");
     }
     return reg;
 }
@@ -198,8 +188,7 @@ SBTRegs HwCommon::interrupt16(SBTProcess *proc, SBTRegs reg)
         break;
 
     default:
-        PANIC(SBT86_RT_ERROR, ("Unimplemented BIOS Int16\n"
-                               "ax=0x%04x\n", reg.ax));
+        assert(0 && "Unimplemented BIOS Int16");
     }
     return reg;
 }
@@ -257,12 +246,11 @@ SBTRegs HwCommon::interrupt21(SBTProcess *proc, SBTRegs reg)
         break;
 
     case 0x4C:                /* Exit with return code */
-        PANIC(SBT86_RT_ERROR, ("DOS Exit\n"));
+        assert(0 && "DOS Exit");
         break;
 
     default:
-        PANIC(SBT86_RT_ERROR, ("Unimplemented DOS Int21\n"
-                               "ax=0x%04x\n", reg.ax));
+        assert(0 && "Unimplemented DOS Int21");
     }
     return reg;
 }
@@ -282,3 +270,46 @@ void HwCommon::pressKey(uint8_t ascii, uint8_t scancode) {
 void HwCommon::pollKeys(SBTProcess *proc) {
     proc->halt(SBTHALT_KEYBOARD_POLL);
 }
+
+void HwMain::drawScreen(SBTProcess *proc, uint8_t *framebuffer)
+{
+    // TODO
+}
+
+void HwMainInteractive::writeSpeakerTimestamp(uint32_t timestamp) {
+    // TODO
+}
+
+void HwMainInteractive::pollKeys(SBTProcess *proc) {
+#if 0
+    unsigned int i;
+    static const struct {
+        uint16_t key;
+        uint16_t code;
+    } keyTable[] = {
+
+        { KEY_UP    | KEY_Y,  0x4800 | '8' },
+        { KEY_DOWN  | KEY_Y,  0x5000 | '2' },
+        { KEY_LEFT  | KEY_Y,  0x4B00 | '4' },
+        { KEY_RIGHT | KEY_Y,  0x4D00 | '6' },
+
+        { KEY_UP,    0x4800 },
+        { KEY_DOWN,  0x5000 },
+        { KEY_LEFT,  0x4B00 },
+        { KEY_RIGHT, 0x4D00 },
+
+        { KEY_B, ' ' },
+    };
+
+    HwCommon::pollKeys(proc);
+
+    for (i = 0; i < (sizeof keyTable / sizeof keyTable[0]); i++) {
+        uint16_t keys = keyTable[i].key;
+        if ((keysHeld() & keys) == keys) {
+            keycode = keyTable[i].code;
+            return;
+        }
+    }
+#endif
+}
+

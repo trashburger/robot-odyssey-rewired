@@ -1623,8 +1623,8 @@ void %(className)s::saveCache() {
 
 %(subCode)s
 
-uintptr_t %(className)s::getEntryPtr() {
-    return (uintptr_t) sub_%(entryLinear)X;
+void %(className)s::invokeEntry() {
+    sub_%(entryLinear)X();
 }
 
 uint16_t %(className)s::getAddress(SBTAddressId id) {
@@ -1632,7 +1632,7 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
 %(getAddrCode)s
 
     default:
-        sassert(0, "Bad SBTAddressId");
+        assert(0 && "Bad SBTAddressId");
         return 0;
     }
 }
