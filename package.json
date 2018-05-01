@@ -4,8 +4,8 @@
   "private": true,
   "description": "Binary port of a classic 1984 adventure game into HTML5",
   "scripts": {
-    "build": "node build.js build",
-    "serve": "node build.js serve"
+    "build": "parcel build",
+    "serve": "parcel serve"
   },
   "repository": {
     "type": "git",
@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/scanlime/robot-odyssey-rewired#readme",
   "dependencies": {
-    "parcel-bundler": "1.7.0",
-    "parcel-plugin-cargo-web": "^0.2.0"
+    "parcel-bundler": "^1.7.1",
+    "parcel-plugin-emscripten": "^0.2.0"
   }
 }

@@ -1,3 +1,11 @@
-import engine from "../ro-engine/Cargo.toml";
+import engine from "./engine.cpp";
 
-alert(engine.increment(1));
+const engine_inst = engine();
+const increment = engine_inst.cwrap('increment');
+
+engine_inst.then(() => {
+
+	alert(increment(1));
+
+});
+
