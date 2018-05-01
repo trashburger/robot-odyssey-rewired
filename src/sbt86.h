@@ -165,42 +165,42 @@ class SBTRegs
      * Inline accessors for manually setting/inspecting flags.
      */
 
-    inline bool getZF() {
+    inline __attribute__((always_inline)) bool getZF() {
         return (uresult & 0xFFFF) == 0;
     }
-    inline bool getSF() {
+    inline __attribute__((always_inline)) bool getSF() {
         return (uresult & 0x8000) != 0;
     }
-    inline bool getOF() {
+    inline __attribute__((always_inline)) bool getOF() {
         return (((sresult >> 1) ^ (sresult)) & 0x8000) != 0;
     }
-    inline bool getCF() {
+    inline __attribute__((always_inline)) bool getCF() {
         return (uresult & 0x10000) != 0;
     }
 
-    inline void setZF() {
+    inline __attribute__((always_inline)) void setZF() {
         uresult &= ~0xFFFF;
     }
-    inline void clearZF() {
+    inline __attribute__((always_inline)) void clearZF() {
         uresult |= 1;
     }
-    inline void setOF() {
+    inline __attribute__((always_inline)) void setOF() {
         sresult = 0x8000;
     }
-    inline void clearOF() {
+    inline __attribute__((always_inline)) void clearOF() {
         sresult = 0;
     }
-    inline void setCF() {
+    inline __attribute__((always_inline)) void setCF() {
         uresult |= 0x10000;
     }
-    inline void clearCF() {
+    inline __attribute__((always_inline)) void clearCF() {
         uresult &= 0xFFFF;
     }
 
-    inline uint32_t saveCF() {
+    inline __attribute__((always_inline)) uint32_t saveCF() {
         return uresult & 0x10000;
     }
-    inline void restoreCF(uint32_t saved) {
+    inline __attribute__((always_inline)) void restoreCF(uint32_t saved) {
         uresult = (uresult & 0xFFFF) | saved;
     }
 };
