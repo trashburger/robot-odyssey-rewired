@@ -102,6 +102,7 @@ int SBTProcess::run(void)
      */
     int result = setjmp(jmpRun);
     if (result) {
+        fprintf(stderr, "Halt code made it back to run(), %d\n", result);
         return result;
     }
 
@@ -110,6 +111,7 @@ int SBTProcess::run(void)
      */
     loadCache();
     if (jmpHaltIsSet) {
+        fprintf(stderr, "Trying to re-enter via longjmp, this probably wont work\n");
         longjmp(jmpHalt, 1);
     } else {
         invokeEntry();
@@ -120,14 +122,18 @@ int SBTProcess::run(void)
 
 void SBTProcess::halt(int code)
 {
+#if 0
     /*
      * Save our current state, and exit from run().
      */
+    fprintf(stderr, "Entering halt for code %d\n", code);
     if (!setjmp(jmpHalt)) {
         jmpHaltIsSet = true;
         saveCache();
+        fprintf(stderr, "Setjmp was okay!\n");
         longjmp(jmpRun, code);
     }
+#endif
 }
 
 uint8_t *SBTProcess::memSeg(uint16_t seg)

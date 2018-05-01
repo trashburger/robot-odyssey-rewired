@@ -273,6 +273,20 @@ void HwMain::drawScreen(SBTProcess *proc, uint8_t *framebuffer)
 {
     // TODO
     fprintf(stderr, "Drawing a frame!\n");
+
+    for (unsigned y=0; y < 200; y++) {
+        for (unsigned x=0; x < 320; x++) {
+            unsigned field = y % 2;
+            unsigned line = y / 2;
+            unsigned byte = (x + 320*(line + field*100))/4;
+            unsigned bit = x % 4;
+            unsigned color = 3 & (framebuffer[byte] >> (bit * 2));
+            fprintf(stderr, "%x", color);
+        }
+        fprintf(stderr, "\n");
+    }
+
+    HwCommon::drawScreen(proc, framebuffer);
 }
 
 void HwMainInteractive::writeSpeakerTimestamp(uint32_t timestamp) {

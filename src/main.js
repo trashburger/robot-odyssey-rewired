@@ -5,7 +5,7 @@ const start = engine_inst.cwrap('start');
 
 engine_inst.then(() => {
 
-	start();
+	setTimeout(() => start(), 1000);
 
 });
 
