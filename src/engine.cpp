@@ -1,4 +1,4 @@
-//parcel: -I. -s ASSERTIONS=1 sbtProcess.cpp hardware.cpp ../build/fspack.cpp ../build/bt_game.cpp
+//parcel: -g4 -I. -s ASSERTIONS=1 sbtProcess.cpp hardware.cpp ../build/fspack.cpp ../build/bt_game.cpp
 
 #include <stdint.h>
 #include <emscripten.h>
