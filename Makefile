@@ -13,7 +13,7 @@ all: build/original build/fspack.cpp $(GENERATED_BT)
 build/%.cpp: scripts/%.py scripts/sbt86.py
 	$(PYTHON) $< build
 
-build/fspack.cpp: scripts/fs-packer.py build/fs/*
+build/fspack.cpp: scripts/fs-packer.py build/fs/tut7.wor
 	$(PYTHON) $< build/fs $@
 
 # Pseudo-target to clean up and extract original Robot Odyssey data

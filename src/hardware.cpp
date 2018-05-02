@@ -39,9 +39,9 @@ DOSFilesystem::DOSFilesystem()
     memset(openFiles, 0, sizeof openFiles);
 }
 
-uint16_t DOSFilesystem::open(const char *name)
+int DOSFilesystem::open(const char *name)
 {
-    uint16_t fd = allocateFD();
+    int fd = allocateFD();
     const FileInfo *file;
 
     fprintf(stderr, "FILE, opening '%s'\n", name);
@@ -63,7 +63,7 @@ uint16_t DOSFilesystem::open(const char *name)
         file = FileInfo::lookup(name);
         if (!file) {
             fprintf(stderr, "Failed to open file '%s'\n", name);
-            assert(0 && "Failed to open file");
+            return -1;
         }
     }
 
@@ -237,10 +237,16 @@ SBTRegs Hardware::interrupt21(SBTProcess *proc, SBTRegs reg)
         }
         break;
 
-    case 0x3D:                /* Open File */
-        reg.ax = fs.open((char*)(proc->memSeg(reg.ds) + reg.dx));
-        reg.clearCF();
+    case 0x3D: {              /* Open File */
+        int fd = fs.open((char*)(proc->memSeg(reg.ds) + reg.dx));
+        if (fd < 0) {
+            reg.setCF();
+        } else {
+            reg.ax = fd;
+            reg.clearCF();
+        }
         break;
+    }
 
     case 0x3E:                /* Close File */
         fs.close(reg.bx);

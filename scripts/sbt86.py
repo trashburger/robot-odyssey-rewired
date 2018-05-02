@@ -1484,15 +1484,20 @@ class Subroutine:
                     i.codegen(traces=traces, clockEnable=self.clockEnable)))
         return """
 void
-%s(void)
+%(name)s(void)
 {
   gStack->pushret();
-  goto %s;
-%s
+  goto %(label)s;
+%(body)s
 ret:
   gStack->popret();
   return;
-}""" % (self.name, self.entryPoint.label(), '\n'.join(body))
+}""" % {
+    'name': self.name,
+    'addr': self.entryPoint,
+    'label': self.entryPoint.label(),
+    'body': '\n'.join(body)
+}
 
 
 class BinaryData:

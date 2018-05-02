@@ -5,17 +5,10 @@ const asm = engine();
 console.log("Loading wasm");
 
 function keycode(str, scancode) {
-	console.log('keycode', str, scancode);
-	if (str) {
-		asm._pressKey(str.charCodeAt(0), scancode);
-	} else {
-		asm._pressKey(0, scancode);
-	}
+	asm._pressKey((str || '\0').charCodeAt(0), scancode);
 }
 
 function onKeydown(e) {
-	console.log(e);
-
 	if (e.code == "ArrowUp" && e.shiftKey == false) keycode(0, 0x48);
 	else if (e.code == "ArrowUp" && e.shiftKey == true) keycode('8', 0x48);
 	else if (e.code == "ArrowDown" && e.shiftKey == false) keycode(0, 0x50);

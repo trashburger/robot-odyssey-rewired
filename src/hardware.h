@@ -4,10 +4,12 @@
 #include "roData.h"
 #include "fspack.h"
 
+SBT_DECL_PROCESS(PlayEXE);
 SBT_DECL_PROCESS(MenuEXE);
 SBT_DECL_PROCESS(LabEXE);
 SBT_DECL_PROCESS(GameEXE);
 SBT_DECL_PROCESS(TutorialEXE);
+SBT_DECL_PROCESS(RendererEXE);
 
 
 /*
@@ -23,7 +25,7 @@ class DOSFilesystem
 public:
     DOSFilesystem();
 
-    uint16_t open(const char *name);
+    int open(const char *name);
     void close(uint16_t fd);
     uint16_t read(uint16_t fd, void *buffer, uint16_t length);
 
