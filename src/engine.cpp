@@ -5,21 +5,15 @@
 #include "hardware.h"
 
 static SBTProcess *game;
-static HwMainInteractive *hw;
+static Hardware *hw;
 
 void loop() {
-	fprintf(stderr, "enter game->run\n");
 	game->run();
-	fprintf(stderr, "exit game->run\n");
 }
 	
 extern "C" void EMSCRIPTEN_KEEPALIVE start() {
-	hw = new HwMainInteractive();
-	game = new GameEXE(hw);
-//	game->exec("99");
-	//emscripten_set_main_loop(loop, 15, false);
-}
-
-extern "C" void EMSCRIPTEN_KEEPALIVE tick() {	
-	loop();
+	hw = new Hardware();
+	game = new LabEXE(hw);
+	game->exec("30");
+	emscripten_set_main_loop(loop, 15, false);
 }

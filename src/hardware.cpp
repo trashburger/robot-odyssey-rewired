@@ -24,6 +24,7 @@
  *    OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <emscripten.h>
 #include <algorithm>
 #include <string.h>
 #include <time.h>
@@ -42,6 +43,8 @@ uint16_t DOSFilesystem::open(const char *name)
 {
     uint16_t fd = allocateFD();
     const FileInfo *file;
+
+    fprintf(stderr, "FILE, opening '%s'\n", name);
 
     if (!strcmp(name, SBT_SAVE_FILE_NAME)) {
         /*
@@ -86,6 +89,7 @@ uint16_t DOSFilesystem::read(uint16_t fd, void *buffer, uint16_t length)
     uint32_t offset = fileOffsets[fd];
     uint16_t actual_length = std::min<unsigned>(length, file->data_size - offset);
 
+    fprintf(stderr, "FILE, read %d(%d) bytes at %d\n", length, actual_length, offset);
     memcpy(buffer, file->data + offset, actual_length);
 
     fileOffsets[fd] += actual_length;
@@ -106,12 +110,17 @@ uint16_t DOSFilesystem::allocateFD()
     return fd;
 }
 
-HwCommon::HwCommon()
+Hardware::Hardware()
 {
     port61 = 0;
+
+    rgb_palette[0] = 0xff000000;
+    rgb_palette[1] = 0xffffff55;
+    rgb_palette[2] = 0xffff55ff;
+    rgb_palette[3] = 0xffffffff;
 }
 
-uint8_t HwCommon::in(uint16_t port, uint32_t timestamp)
+uint8_t Hardware::in(uint16_t port, uint32_t timestamp)
 {
     switch (port) {
 
@@ -124,7 +133,7 @@ uint8_t HwCommon::in(uint16_t port, uint32_t timestamp)
     }
 }
 
-void HwCommon::out(uint16_t port, uint8_t value, uint32_t timestamp)
+void Hardware::out(uint16_t port, uint8_t value, uint32_t timestamp)
 {
     switch (port) {
 
@@ -151,7 +160,7 @@ void HwCommon::out(uint16_t port, uint8_t value, uint32_t timestamp)
     }
 }
 
-SBTRegs HwCommon::interrupt10(SBTProcess *proc, SBTRegs reg)
+SBTRegs Hardware::interrupt10(SBTProcess *proc, SBTRegs reg)
 {
     switch (reg.ah) {
 
@@ -165,7 +174,7 @@ SBTRegs HwCommon::interrupt10(SBTProcess *proc, SBTRegs reg)
     return reg;
 }
 
-SBTRegs HwCommon::interrupt16(SBTProcess *proc, SBTRegs reg)
+SBTRegs Hardware::interrupt16(SBTProcess *proc, SBTRegs reg)
 {
     switch (reg.ah) {
 
@@ -189,8 +198,10 @@ SBTRegs HwCommon::interrupt16(SBTProcess *proc, SBTRegs reg)
     return reg;
 }
 
-SBTRegs HwCommon::interrupt21(SBTProcess *proc, SBTRegs reg)
+SBTRegs Hardware::interrupt21(SBTProcess *proc, SBTRegs reg)
 {
+    fprintf(stderr, "int21 ax=%04x\n", reg.ax);
+
     switch (reg.ah) {
 
     case 0x06:                /* Direct console input/output (Only input supported) */
@@ -253,28 +264,34 @@ SBTRegs HwCommon::interrupt21(SBTProcess *proc, SBTRegs reg)
     return reg;
 }
 
-void HwCommon::pressKey(uint8_t ascii, uint8_t scancode) {
+void Hardware::pressKey(uint8_t ascii, uint8_t scancode) {
     keycode = (scancode << 8) | ascii;
 }
 
-void HwMain::drawScreen(SBTProcess *proc, uint8_t *framebuffer)
+void Hardware::drawScreen(SBTProcess *proc, uint8_t *framebuffer)
 {
-    // TODO
-    fprintf(stderr, "Drawing a frame!\n");
-
-    for (unsigned y=0; y < 200; y++) {
-        for (unsigned x=0; x < 320; x++) {
-            unsigned field = y % 2;
-            unsigned line = y / 2;
-            unsigned byte = 0x2000*field + (x + 320*line)/4;
-            unsigned bit = 3 - (x % 4);
-            unsigned color = 0x3 & (framebuffer[byte] >> (bit * 2));
-            fprintf(stderr, "%c", " .*#"[color]);
+    for (unsigned plane = 0; plane < 2; plane++) {
+        for (unsigned y=0; y < SCREEN_HEIGHT/2; y++) {
+            for (unsigned x=0; x < SCREEN_WIDTH; x++) {
+                unsigned byte = 0x2000*plane + (x + SCREEN_WIDTH*y)/4;
+                unsigned bit = 3 - (x % 4);
+                unsigned color = 0x3 & (framebuffer[byte] >> (bit * 2));
+                uint32_t rgb = rgb_palette[color];
+                rgb_pixels[x + (y*2+plane)*SCREEN_WIDTH] = rgb;
+            }
         }
-        fprintf(stderr, "\n");
     }
+
+    EM_ASM_({
+        var canvas = window.document.getElementById('framebuffer');
+        var context = canvas.getContext('2d');
+        var img = context.createImageData(320, 200);
+        img.data.set(HEAPU8.subarray($0, $0 + 320*200*4));
+        context.putImageData(img, 0, 0);
+        console.log(img);
+    }, rgb_pixels);
 }
 
-void HwMainInteractive::writeSpeakerTimestamp(uint32_t timestamp) {
+void Hardware::writeSpeakerTimestamp(uint32_t timestamp) {
     // TODO
 }

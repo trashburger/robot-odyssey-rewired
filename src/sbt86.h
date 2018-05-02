@@ -343,7 +343,7 @@ class SBTProcess
     /*
      * Next time run() this function.
      */
-    void continue_from(continue_func_t fn);
+    void continue_from(SBTRegs regs, continue_func_t fn);
 
     /*
      * Immediately return from run(), called on a DOS exit.
@@ -369,6 +369,7 @@ class SBTProcess
     SBTRegs reg;
     SBTStack stack;
     jmp_buf exitjmp;
+    continue_func_t continue_func;
 
     /*
      * Error handler for failed dynamic branches.
@@ -409,8 +410,6 @@ class SBTProcess
      *   2. It puts the CGA framebuffer somewhere useful.
      */
     static const uint32_t MAX_SEGMENT = (MEM_SIZE - 0x10000) >> 4;
-
-    continue_func_t continue_func;
 };
 
 

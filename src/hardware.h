@@ -40,19 +40,25 @@ private:
 
 
 /*
- * HwCommon --
+ * Hardware --
  *
  *    Subclass of SBTHardware that provides minimal
  *    implementations of all emulated interrupts and hardware.
- *    This class doesn't know how to do anything user-visible,
- *    but it can handle DOS interrupts and load files.
  */
 
-class HwCommon : public SBTHardware
+class Hardware : public SBTHardware
 {
  public:
-    HwCommon();
+    Hardware();
 
+    virtual void pressKey(uint8_t ascii, uint8_t scancode = 0);
+
+    static const unsigned SCREEN_WIDTH = 320;
+    static const unsigned SCREEN_HEIGHT = 200;
+
+    uint32_t rgb_pixels[SCREEN_WIDTH * SCREEN_HEIGHT];
+    uint32_t rgb_palette[4];
+    
     /*
      * SBT86 Entry points
      */
@@ -64,11 +70,7 @@ class HwCommon : public SBTHardware
     virtual SBTRegs interrupt16(SBTProcess *proc, SBTRegs reg);
     virtual SBTRegs interrupt21(SBTProcess *proc, SBTRegs reg);
 
-    /*
-     * Entry points useful to the main program
-     */
-
-    virtual void pressKey(uint8_t ascii, uint8_t scancode = 0);
+    virtual void drawScreen(SBTProcess *proc, uint8_t *framebuffer);
 
     DOSFilesystem fs;
 
@@ -76,30 +78,5 @@ class HwCommon : public SBTHardware
     uint8_t port61;
     uint16_t keycode;
 
-    virtual void writeSpeakerTimestamp(uint32_t timestamp) = 0;
-};
-
-
-/*
- * Basic double-buffered video using the main screen.
- */
-class HwMain : public HwCommon
-{
- public:
-
-    virtual void drawScreen(SBTProcess *proc, uint8_t *framebuffer);
-
-protected:
-    int bg;
-    uint16_t *backbuffer;
-};
-
-
-/*
- * Video on the main screen, plus sound and input.
- */
-class HwMainInteractive : public HwMain
-{
-protected:
     virtual void writeSpeakerTimestamp(uint32_t timestamp);
 };

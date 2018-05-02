@@ -21,7 +21,7 @@ def patch(b):
 
     for loopJumpAddr in b.findCodeMultiple('e8____ a0ac05a2____ a0____a2____ e8____ a0____a2____ :e9____'):
         loopEntry = b.jumpTarget(loopJumpAddr)
-        b.patchAndHook(loopJumpAddr, 'ret', 'proc->continue_from(&sub_%X);' % loopEntry.linear)
+        b.patchAndHook(loopJumpAddr, 'ret', 'proc->continue_from(r, &sub_%X);' % loopEntry.linear)
         b.exportSub(loopEntry)
 
     # Don't bother zeroing video memory, we already clear all of RAM.

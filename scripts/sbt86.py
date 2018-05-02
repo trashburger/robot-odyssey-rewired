@@ -1487,14 +1487,12 @@ void
 %s(void)
 {
   gStack->pushret();
-  fprintf(stderr, "Fn enter, %%s\\n", "%s");
   goto %s;
 %s
 ret:
-  fprintf(stderr, "Fn return, %%s\\n", "%s");
   gStack->popret();
   return;
-}""" % (self.name, self.name, self.entryPoint.label(), '\n'.join(body), self.name)
+}""" % (self.name, self.entryPoint.label(), '\n'.join(body))
 
 
 class BinaryData:

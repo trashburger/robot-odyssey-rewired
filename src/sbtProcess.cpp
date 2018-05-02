@@ -78,9 +78,6 @@ void SBTProcess::exec(const char *cmdLine)
     memset(mem, 0, MEM_SIZE);
     decompressRLE(memSeg(reg.ds), mem + MEM_SIZE, getData(), getDataLen());
 
-    // Initialize emulated stack
-    stack.reset();
-
     /*
      * Program Segment Prefix. Locate it just before the beginning of
      * the EXE, and copy our command line to it.
@@ -94,6 +91,9 @@ void SBTProcess::run(void)
 {
     assert(hardware != NULL && "SBTHardware must be defined\nbefore running a process");
 
+    // Get a fresh stack every time we call in
+    stack.reset();
+
     loadCache();
     if (!setjmp(exitjmp)) {
         continue_func();
@@ -105,11 +105,11 @@ void SBTProcess::exit(void)
     longjmp(exitjmp, 1);
 }
 
-void SBTProcess::continue_from(continue_func_t fn)
+void SBTProcess::continue_from(SBTRegs regs, continue_func_t fn)
 {
-    fprintf(stderr, "Changing continue point, %p\n", fn);
     assert(fn != 0);
     continue_func = fn;
+    reg = regs;
 }
 
 uint8_t *SBTProcess::memSeg(uint16_t seg)
