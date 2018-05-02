@@ -886,6 +886,16 @@ class Instruction:
                             (dest, 'w')),
             )
 
+    def codegen_das(self):
+        return ("if ((r.al & 0x0F) > 9) { "
+                    "r.uresult |= (((uint32_t)r.al) - 6) << 8; "
+                    "r.al -= 6; "
+                "}"
+                "if ((r.al > 0x9F) || r.getCF()) { "
+                    "r.setCF(); "
+                    "r.al -= 0x60; "
+                "}")
+
     def codegen_shl(self, r, cnt):
         return self._repeat(cnt,
                             ("r.sresult=0; r.uresult = ((uint32_t)%s) << 1;"
@@ -1477,12 +1487,14 @@ void
 %s(void)
 {
   gStack->pushret();
+  fprintf(stderr, "Fn enter, %%s\\n", "%s");
   goto %s;
 %s
 ret:
+  fprintf(stderr, "Fn return, %%s\\n", "%s");
   gStack->popret();
   return;
-}""" % (self.name, self.entryPoint.label(), '\n'.join(body))
+}""" % (self.name, self.name, self.entryPoint.label(), '\n'.join(body), self.name)
 
 
 class BinaryData:
@@ -1565,6 +1577,7 @@ class DOSBinary(BinaryImage):
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include "sbt86.h"
 
 SBT_DECL_PROCESS(%(className)s);
@@ -1623,8 +1636,8 @@ void %(className)s::saveCache() {
 
 %(subCode)s
 
-void %(className)s::invokeEntry() {
-    sub_%(entryLinear)X();
+SBTProcess::continue_func_t %(className)s::getEntry() {
+    return &sub_%(entryLinear)X;
 }
 
 uint16_t %(className)s::getAddress(SBTAddressId id) {
@@ -1656,6 +1669,7 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
         self._decls = ''
         self._dynBranches = {}
         self._publishedAddresses = {}
+        self._exportedSubs = []
 
         (signature, bytesInLastPage, numPages, numRelocations,
          headerParagraphs, minMemParagraphs, maxMemParagraphs,
@@ -1788,6 +1802,12 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
         self._traces.append(Trace("trace%d" % len(self._traces),
                                   mode, probe, fire))
 
+    def exportSub(self, address):
+        """Before analysis, mark an extra address to be considered as a subroutine entry point"""
+        if address in self._exportedSubs:
+            raise ValueError("Already exported %r as subroutine" % address)
+        self._exportedSubs.append(address)
+
     def analyze(self, verbose=False):
        """Analyze the whole program. This breaks it up into
           subroutines, and analyzes each routine.
@@ -1797,6 +1817,7 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
 
        self.subroutines = {}
        stack = [ self.entryPoint ]
+       stack.extend(self._exportedSubs)
 
        while stack:
            ptr = stack.pop()
@@ -1856,19 +1877,31 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
             addrs, self.filename, sig.shortText))
         return addrs
 
-    def peek8(self, addr):
-        """Read an 8-bit value. 'addr' may be a data segment offset or an Addr16."""
+    def peek(self, addr, fmt):
         if not isinstance(addr, Addr16):
             addr = Addr16(self.relocSegment, addr)
-        return self.image.unpack(addr.linear -
-                                 Addr16(self.relocSegment, 0).linear, "<B")[0]
+        return self.image.unpack(addr.linear - Addr16(self.relocSegment, 0).linear, fmt)[0]
+
+    def peek8(self, addr):
+        """Read an 8-bit value. 'addr' may be a data segment offset or an Addr16."""
+        return self.peek(addr, "<B")
 
     def peek16(self, addr):
         """Read a 16-bit value. 'addr' may be a data segment offset or an Addr16."""
-        if not isinstance(addr, Addr16):
-            addr = Addr16(self.relocSegment, addr)
-        return self.image.unpack(addr.linear -
-                                 Addr16(self.relocSegment, 0).linear, "<H")[0]
+        return self.peek(addr, "<H")
+
+    def peek16s(self, addr):
+        """Read a signed 16-bit value. 'addr' may be a data segment offset or an Addr16."""
+        return self.peek(addr, "<h")
+
+    def jumpTarget(self, addr):
+        """Determine the target of a jump at 'addr'. 
+           Currently only handles the specific jumps we care about.
+           """
+        assert self.peek8(addr) == 0xE9
+        target = addr.add(3 + self.peek16s(addr.add(1)))
+        log("Found jump from %r -> %r" % (addr, target))
+        return target
 
     def codegen(self, className):
         vars = dict(self.__class__.__dict__)

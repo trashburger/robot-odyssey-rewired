@@ -72,6 +72,7 @@ void SBTProcess::exec(const char *cmdLine)
     // Beginning of EXE image, after relocation
     reg.ds = getRelocSegment();
     reg.cs = getEntryCS();
+    continue_func = getEntry();
 
     // Initialize memory
     memset(mem, 0, MEM_SIZE);
@@ -87,53 +88,21 @@ void SBTProcess::exec(const char *cmdLine)
     reg.es = reg.ds - 0x10;
     poke8(reg.es, 0x80, strlen(cmdLine));
     strcpy((char*) (memSeg(reg.es) + 0x81), cmdLine);
-
-    // Use the entry point instead of jmpHalt
-    jmpHaltIsSet = false;
 }
 
-int SBTProcess::run(void)
+void SBTProcess::run(void)
 {
     assert(hardware != NULL && "SBTHardware must be defined\nbefore running a process");
 
-    /*
-     * Give us a way to exit from run mode. The halt() routine will
-     * bounce back here with a return code.
-     */
-    int result = setjmp(jmpRun);
-    if (result) {
-        fprintf(stderr, "Halt code made it back to run(), %d\n", result);
-        return result;
-    }
-
-    /*
-     * Go back to executing this process.
-     */
     loadCache();
-    if (jmpHaltIsSet) {
-        fprintf(stderr, "Trying to re-enter via longjmp, this probably wont work\n");
-        longjmp(jmpHalt, 1);
-    } else {
-        invokeEntry();
-        jmpHaltIsSet = false;
-    }
-    return 0;
+    continue_func();
 }
 
-void SBTProcess::halt(int code)
+void SBTProcess::continue_from(continue_func_t fn)
 {
-#if 0
-    /*
-     * Save our current state, and exit from run().
-     */
-    fprintf(stderr, "Entering halt for code %d\n", code);
-    if (!setjmp(jmpHalt)) {
-        jmpHaltIsSet = true;
-        saveCache();
-        fprintf(stderr, "Setjmp was okay!\n");
-        longjmp(jmpRun, code);
-    }
-#endif
+    fprintf(stderr, "Changing continue point, %p", fn);
+    assert(fn != 0);
+    continue_func = fn;
 }
 
 uint8_t *SBTProcess::memSeg(uint16_t seg)

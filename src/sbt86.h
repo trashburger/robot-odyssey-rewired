@@ -51,19 +51,6 @@ class SBTSegmentCache;
 
 
 /*
- * SBTHaltCode --
- *
- *    Enumeration with halt() values we use with SBTProcess.
- */
-
-enum SBTHaltCode {
-    SBTHALT_FRAME_DRAWN    = 1,    // We just rendered a frame
-    SBTHALT_LOAD_ROOM_ID   = 2,    // Loading room ID from AL
-    SBTHALT_KEYBOARD_POLL  = 3,    // About to poll key state
-};
-
-
-/*
  * SBT_SAVE_FILE_NAME --
  *
  *    Special filename we patch in for load/save operations
@@ -219,11 +206,11 @@ class SBTRegs
 class SBTStack
 {
  public:
-    SBTStack() {
+    inline SBTStack() {
         reset();
     }
 
-    void reset() {
+    inline void reset() {
         top = 0;
     }
 
@@ -325,10 +312,12 @@ class SBTStack
 class SBTProcess
 {
  public:
+    typedef void (*continue_func_t)(void);
+
     /*
      * Prepare an instance of this process to execute. This zeroes
      * memory, and resets the program counter. The process will begin
-     * executing from the beginning on the next run().
+     * executing from the entry point on the next run().
      *
      * A process is exec()'ed automatically by the constructor.
      * You may manually exec() it again at any time to reset it.
@@ -347,22 +336,14 @@ class SBTProcess
     SBTHardware *hardware;
 
     /*
-     * Run this process until the next halt(). Returns the code that
-     * was passed to halt(). To contine right where we left off, call
-     * run() again.
+     * Run this process until the current entry point returns.
      */
-    int run(void);
+    void run(void);
 
     /*
-     * Exit from the current run() invocation, with the supplied
-     * return code.  This function must be called while the process is
-     * running, so it may only be invoked by SBT86 hooks or
-     * SBTHardware implementations.
-     *
-     * While the process is halted, it may be copied in order to fork
-     * the process.
+     * Next time run() this function.
      */
-    void halt(int code);
+    void continue_from(continue_func_t fn);
 
     /*
      * Return a pointer to an emulated memory segment. Only 64K of
@@ -411,7 +392,7 @@ class SBTProcess
     virtual uint32_t getDataLen() = 0;
     virtual uint16_t getRelocSegment() = 0;
     virtual uint16_t getEntryCS() = 0;
-    virtual void invokeEntry() = 0;
+    virtual continue_func_t getEntry() = 0;
 
  private:
     /*
@@ -431,12 +412,7 @@ class SBTProcess
      */
     static const uint32_t MAX_SEGMENT = (MEM_SIZE - 0x10000) >> 4;
 
-    /*
-     * Jump buffers for run() and halt(). jmpRun is how we return to run(),
-     * and jmpHalt is how we resume execution after a halt().
-     */
-    jmp_buf jmpRun, jmpHalt;
-    bool jmpHaltIsSet;
+    continue_func_t continue_func;
 };
 
 
@@ -517,7 +493,7 @@ class SBTSegmentCache
         virtual uint32_t getDataLen();                  \
         virtual uint16_t getRelocSegment();             \
         virtual uint16_t getEntryCS();                  \
-        virtual void invokeEntry();                     \
+        virtual continue_func_t getEntry();             \
     public:                                             \
         virtual uint16_t getAddress(SBTAddressId id);   \
     }

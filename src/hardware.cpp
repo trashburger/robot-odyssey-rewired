@@ -170,13 +170,11 @@ SBTRegs HwCommon::interrupt16(SBTProcess *proc, SBTRegs reg)
     switch (reg.ah) {
 
     case 0x00:                /* Get keystroke */
-        pollKeys(proc);
         reg.ax = keycode;
         keycode = 0;
         break;
 
     case 0x01:                /* Check for keystroke */
-        pollKeys(proc);
         if (keycode) {
             reg.clearZF();
             reg.ax = keycode;
@@ -197,7 +195,6 @@ SBTRegs HwCommon::interrupt21(SBTProcess *proc, SBTRegs reg)
 
     case 0x06:                /* Direct console input/output (Only input supported) */
         if (reg.dl == 0xFF) {
-            pollKeys(proc);
             if (keycode) {
                 reg.al = (uint8_t) keycode;
                 reg.clearZF();
@@ -244,7 +241,9 @@ SBTRegs HwCommon::interrupt21(SBTProcess *proc, SBTRegs reg)
         break;
 
     case 0x4C:                /* Exit with return code */
-        assert(0 && "DOS Exit");
+        // The way we rewrite the main loop means that each frame exits via DOS.
+        // Ignore successful exit codes.
+        assert(reg.al == 0 && "DOS Exit with error");
         break;
 
     default:
@@ -253,20 +252,8 @@ SBTRegs HwCommon::interrupt21(SBTProcess *proc, SBTRegs reg)
     return reg;
 }
 
-void HwCommon::drawScreen(SBTProcess *proc, uint8_t *framebuffer) {
-    proc->halt(SBTHALT_FRAME_DRAWN);
-}
-
-void HwCommon::writeSpeakerTimestamp(uint32_t timestamp) {
-    /* Stub. Ignore audio output. */
-}
-
 void HwCommon::pressKey(uint8_t ascii, uint8_t scancode) {
     keycode = (scancode << 8) | ascii;
-}
-
-void HwCommon::pollKeys(SBTProcess *proc) {
-    proc->halt(SBTHALT_KEYBOARD_POLL);
 }
 
 void HwMain::drawScreen(SBTProcess *proc, uint8_t *framebuffer)
@@ -285,44 +272,9 @@ void HwMain::drawScreen(SBTProcess *proc, uint8_t *framebuffer)
         }
         fprintf(stderr, "\n");
     }
-
-    HwCommon::drawScreen(proc, framebuffer);
 }
 
 void HwMainInteractive::writeSpeakerTimestamp(uint32_t timestamp) {
     // TODO
-}
-
-void HwMainInteractive::pollKeys(SBTProcess *proc) {
-#if 0
-    unsigned int i;
-    static const struct {
-        uint16_t key;
-        uint16_t code;
-    } keyTable[] = {
-
-        { KEY_UP    | KEY_Y,  0x4800 | '8' },
-        { KEY_DOWN  | KEY_Y,  0x5000 | '2' },
-        { KEY_LEFT  | KEY_Y,  0x4B00 | '4' },
-        { KEY_RIGHT | KEY_Y,  0x4D00 | '6' },
-
-        { KEY_UP,    0x4800 },
-        { KEY_DOWN,  0x5000 },
-        { KEY_LEFT,  0x4B00 },
-        { KEY_RIGHT, 0x4D00 },
-
-        { KEY_B, ' ' },
-    };
-
-    HwCommon::pollKeys(proc);
-
-    for (i = 0; i < (sizeof keyTable / sizeof keyTable[0]); i++) {
-        uint16_t keys = keyTable[i].key;
-        if ((keysHeld() & keys) == keys) {
-            keycode = keyTable[i].code;
-            return;
-        }
-    }
-#endif
 }
 

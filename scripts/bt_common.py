@@ -11,6 +11,23 @@ def patch(b):
        Odyssey game engine. (TUT, GAME, LAB)
        """
 
+    # Each separate level has its own main loop, and each main loop needs to be
+    # transformed in order to replace the final jump with a function pointer continuation,
+    # and the loop body itself must be extracted into a separate function.
+    # This pattern matches a common chunk of code that each main loop has, starting with a
+    # call to the video_blit_frame utility (e8____) and ending with a jump back to the
+    # beginning of that level's main loop (e9____) with a predictable set of room number
+    # manipulations in-between.
+
+    for loopJumpAddr in b.findCodeMultiple('e8____ a0ac05a2____ a0____a2____ e8____ a0____a2____ :e9____'):
+        loopEntry = b.jumpTarget(loopJumpAddr)
+        b.patchAndHook(loopJumpAddr, 'ret', 'proc->continue_from(&sub_%X);' % loopEntry.linear)
+        b.exportSub(loopEntry)
+
+    # FIXME: Sound is infinite-looping, disable
+
+    b.patch(b.findCode(':a06848 3c07'), 'ret')
+
     # Don't bother zeroing video memory, we already clear all of RAM.
 
     b.patch(b.findCode(':9c 33c0 33ff 9d 7206 b90040 f3aa'), 'ret')
@@ -132,13 +149,6 @@ def patch(b):
     b.patchDynamicLiteral(b.findCode('7203 e9c000 8a9d____ b700d1e3'
                                      '8b87____ 86e0 :260b84fefe 268984fefe'),
                           178)
-
-    # Each of the per-level main loops has code to set the currently
-    # viewable room (playfield_room_number) based on the player's location.
-    # We may want to override that, so insert a halt() hook there.
-
-    for addr in b.findCodeMultiple('a0ac05 :a25848'):
-        b.hook(addr, 'proc->halt(SBTHALT_LOAD_ROOM_ID);')
 
     # Locate the robot data table, by finding the data itself.
     # The robot data table has two parts: A main table, and a grabber

@@ -42,7 +42,7 @@ private:
 /*
  * HwCommon --
  *
- *    Concrete subclass of SBTHardware that provides minimal
+ *    Subclass of SBTHardware that provides minimal
  *    implementations of all emulated interrupts and hardware.
  *    This class doesn't know how to do anything user-visible,
  *    but it can handle DOS interrupts and load files.
@@ -64,8 +64,6 @@ class HwCommon : public SBTHardware
     virtual SBTRegs interrupt16(SBTProcess *proc, SBTRegs reg);
     virtual SBTRegs interrupt21(SBTProcess *proc, SBTRegs reg);
 
-    virtual void drawScreen(SBTProcess *proc, uint8_t *framebuffer);
-
     /*
      * Entry points useful to the main program
      */
@@ -78,8 +76,7 @@ class HwCommon : public SBTHardware
     uint8_t port61;
     uint16_t keycode;
 
-    virtual void writeSpeakerTimestamp(uint32_t timestamp);
-    virtual void pollKeys(SBTProcess *proc);
+    virtual void writeSpeakerTimestamp(uint32_t timestamp) = 0;
 };
 
 
@@ -105,5 +102,4 @@ class HwMainInteractive : public HwMain
 {
 protected:
     virtual void writeSpeakerTimestamp(uint32_t timestamp);
-    virtual void pollKeys(SBTProcess *proc);
 };

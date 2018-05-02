@@ -16,10 +16,4 @@ bt_common.patch(b)
 bt_common.patchChips(b)
 bt_common.patchLoadSave(b)
 
-b.decl("#include <stdio.h>")
-b.patchAndHook(b.findCode('2c01 :2f a2____ a2____ b12c 32ed'),
-               'nop', length=1, cCode='''
-   assert(0 && "Unimplemented DAS instruction");
-''')
-
 b.writeCodeToFile(os.path.join(basedir, 'bt_game.cpp'), 'GameEXE')

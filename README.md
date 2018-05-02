@@ -11,11 +11,10 @@ This repository contains open source modifications which can be applied to the o
 Dependencies
 ------------
 
-- stdweb
-- rust nightly with wasm target
-- emscripten
 - python3
-- nasm with ndisasm
+- emscripten
+- nasm (with ndisasm)
+- node (with npm)
 
 
 Build Instructions
