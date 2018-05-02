@@ -7,13 +7,24 @@
 static SBTProcess *game;
 static Hardware *hw;
 
-void loop() {
+void loop()
+{
 	game->run();
 }
-	
-extern "C" void EMSCRIPTEN_KEEPALIVE start() {
+
+extern "C" void EMSCRIPTEN_KEEPALIVE start()
+{
 	hw = new Hardware();
+
 	game = new LabEXE(hw);
 	game->exec("30");
-	emscripten_set_main_loop(loop, 15, false);
+
+	// game = new GameEXE(hw);
+
+	emscripten_set_main_loop(loop, 12, false);
+}
+
+extern "C" void EMSCRIPTEN_KEEPALIVE pressKey(uint8_t ascii, uint8_t scancode) 
+{
+	hw->pressKey(ascii, scancode);
 }

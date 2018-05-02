@@ -284,11 +284,10 @@ void Hardware::drawScreen(SBTProcess *proc, uint8_t *framebuffer)
 
     EM_ASM_({
         var canvas = window.document.getElementById('framebuffer');
-        var context = canvas.getContext('2d');
-        var img = context.createImageData(320, 200);
+        var ctx = canvas.getContext('2d');
+        var img = ctx.createImageData(320, 200);
         img.data.set(HEAPU8.subarray($0, $0 + 320*200*4));
-        context.putImageData(img, 0, 0);
-        console.log(img);
+        ctx.putImageData(img, 0, 0);
     }, rgb_pixels);
 }
 
