@@ -242,8 +242,9 @@ SBTRegs HwCommon::interrupt21(SBTProcess *proc, SBTRegs reg)
 
     case 0x4C:                /* Exit with return code */
         // The way we rewrite the main loop means that each frame exits via DOS.
-        // Ignore successful exit codes.
+        // Ignore successful exit codes, but break control flow to exit.
         assert(reg.al == 0 && "DOS Exit with error");
+        proc->exit();
         break;
 
     default:
@@ -265,10 +266,10 @@ void HwMain::drawScreen(SBTProcess *proc, uint8_t *framebuffer)
         for (unsigned x=0; x < 320; x++) {
             unsigned field = y % 2;
             unsigned line = y / 2;
-            unsigned byte = (x + 320*(line + field*100))/4;
-            unsigned bit = x % 4;
-            unsigned color = 3 & (framebuffer[byte] >> (bit * 2));
-            fprintf(stderr, "%x", color);
+            unsigned byte = 0x2000*field + (x + 320*line)/4;
+            unsigned bit = 3 - (x % 4);
+            unsigned color = 0x3 & (framebuffer[byte] >> (bit * 2));
+            fprintf(stderr, "%c", " .*#"[color]);
         }
         fprintf(stderr, "\n");
     }
@@ -277,4 +278,3 @@ void HwMain::drawScreen(SBTProcess *proc, uint8_t *framebuffer)
 void HwMainInteractive::writeSpeakerTimestamp(uint32_t timestamp) {
     // TODO
 }
-

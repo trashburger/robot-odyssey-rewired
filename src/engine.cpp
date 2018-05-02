@@ -4,7 +4,7 @@
 #include <emscripten.h>
 #include "hardware.h"
 
-static GameEXE *game;
+static SBTProcess *game;
 static HwMainInteractive *hw;
 
 void loop() {
@@ -16,6 +16,7 @@ void loop() {
 extern "C" void EMSCRIPTEN_KEEPALIVE start() {
 	hw = new HwMainInteractive();
 	game = new GameEXE(hw);
+//	game->exec("99");
 	//emscripten_set_main_loop(loop, 15, false);
 }
 

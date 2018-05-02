@@ -24,10 +24,6 @@ def patch(b):
         b.patchAndHook(loopJumpAddr, 'ret', 'proc->continue_from(&sub_%X);' % loopEntry.linear)
         b.exportSub(loopEntry)
 
-    # FIXME: Sound is infinite-looping, disable
-
-    b.patch(b.findCode(':a06848 3c07'), 'ret')
-
     # Don't bother zeroing video memory, we already clear all of RAM.
 
     b.patch(b.findCode(':9c 33c0 33ff 9d 7206 b90040 f3aa'), 'ret')

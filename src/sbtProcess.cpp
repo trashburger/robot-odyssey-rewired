@@ -95,12 +95,19 @@ void SBTProcess::run(void)
     assert(hardware != NULL && "SBTHardware must be defined\nbefore running a process");
 
     loadCache();
-    continue_func();
+    if (!setjmp(exitjmp)) {
+        continue_func();
+    }
+}
+
+void SBTProcess::exit(void)
+{
+    longjmp(exitjmp, 1);
 }
 
 void SBTProcess::continue_from(continue_func_t fn)
 {
-    fprintf(stderr, "Changing continue point, %p", fn);
+    fprintf(stderr, "Changing continue point, %p\n", fn);
     assert(fn != 0);
     continue_func = fn;
 }

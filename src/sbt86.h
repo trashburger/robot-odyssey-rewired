@@ -346,6 +346,11 @@ class SBTProcess
     void continue_from(continue_func_t fn);
 
     /*
+     * Immediately return from run(), called on a DOS exit.
+     */
+    void exit();
+
+    /*
      * Return a pointer to an emulated memory segment. Only 64K of
      * memory past the returned pointer is guaranteed to be valid.  If
      * the address is out of range, returns NULL.
@@ -361,16 +366,9 @@ class SBTProcess
     int16_t peek16(uint16_t seg, uint16_t off);
     void poke16(uint16_t seg, uint16_t off, uint16_t value);
 
-    /*
-     * Register state. May be manipulated by anyone, but only when the
-     * process is halted. Running processes use cached register state.
-     */
     SBTRegs reg;
-
-    /*
-     * Emulated stack for this process.
-     */
     SBTStack stack;
+    jmp_buf exitjmp;
 
     /*
      * Error handler for failed dynamic branches.

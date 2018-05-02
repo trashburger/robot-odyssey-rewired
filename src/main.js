@@ -9,11 +9,9 @@ console.log("Loading wasm");
 engine_inst.then(() => {
 	console.log("Engine ready");
 
-	document.getElementById('start_btn').onclick = () => {
-		console.log("starting");
-		start();
-		console.log("back from starting");
-	}
+	console.log("starting");
+	start();
+	console.log("back from starting");
 
 	document.getElementById('tick_btn').onclick = () => {
 		console.log("tick");
