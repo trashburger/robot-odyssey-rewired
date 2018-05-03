@@ -31,6 +31,8 @@
 #include <stdio.h>
 #include "sbt86.h"
 
+static const bool full_stack_trace = false;
+
 
 static void decompressRLE(uint8_t *dest, uint8_t *limit, uint8_t *src, uint32_t srcLength)
 {
@@ -77,17 +79,26 @@ void SBTProcess::exec(const char *cmdLine)
     // Not yet exited
     exit_code = -1;
 
-    decompressRLE(hardware->memSeg(reg.ds),
-        hardware->mem + SBTHardware::MEM_SIZE,
-        getData(), getDataLen());
+    uint8_t *end_of_mem = hardware->mem + SBTHardware::MEM_SIZE;
+    uint8_t *data_segment = hardware->memSeg(reg.ds);
+
+    // Clear memory at and above the app's data segment.
+    // Leave lower memory intact (for play.exe)
+    memset(data_segment, 0, end_of_mem - data_segment);
+
+    // Decompress nonzero data
+    decompressRLE(data_segment, end_of_mem, getData(), getDataLen());
 
     /*
      * Program Segment Prefix. Locate it just before the beginning of
      * the EXE, and copy our command line to it.
      */
     reg.es = reg.ds - 0x10;
-    hardware->poke8(reg.es, 0x80, strlen(cmdLine));
-    strcpy((char*) (hardware->memSeg(reg.es) + 0x81), cmdLine);
+    uint8_t *psp = hardware->memSeg(reg.es);
+    memset(psp, 0, 0x80);
+    psp[0x80] = strlen(cmdLine);
+    memset(&psp[0x81], 0x0D, 0x7f);
+    strncpy((char*) &psp[0x81], cmdLine, 0x7e);
 }
 
 void SBTProcess::run(void)
@@ -149,6 +160,14 @@ void SBTHardware::poke16(uint16_t seg, uint16_t off, uint16_t value) {
     SBTSegmentCache::write16(memSeg(seg) + off, value);
 }
 
+SBTStack::SBTStack() {
+    reset();
+}
+
+void SBTStack::reset() {
+    top = 0;
+}
+
 void SBTStack::trace() {
     fprintf(stderr, "--- Stack trace:\n");
     for (unsigned addr = 0; addr < top; addr++) {
@@ -172,4 +191,82 @@ void SBTStack::trace() {
         }
     }
     fprintf(stderr, "---\n");
+}
+
+void SBTStack::pushw(uint16_t word) {
+    assert(top < STACK_SIZE && "SBT86 stack overflow");
+    words[top] = word;
+    tags[top] = STACK_TAG_WORD;
+    top++;
+}
+
+void SBTStack::pushf(SBTRegs reg) {
+    assert(top < STACK_SIZE && "SBT86 stack overflow");
+    flags[top].uresult = reg.uresult;
+    flags[top].sresult = reg.sresult;
+    tags[top] = STACK_TAG_FLAGS;
+    top++;
+}
+
+void SBTStack::pushret(const char *fn) {
+    if (full_stack_trace) {
+        fprintf(stderr, "+%s\n", fn);
+    }
+    assert(top < STACK_SIZE && "SBT86 stack overflow");
+    fn_addrs[top] = fn;
+    tags[top] = STACK_TAG_RETADDR;
+    top++;
+}
+
+uint16_t SBTStack::popw() {
+    top--;
+    assert(tags[top] == STACK_TAG_WORD && "SBT86 stack tag mismatch");
+    return words[top];
+}
+
+SBTRegs SBTStack::popf(SBTRegs reg) {
+    top--;
+    assert(tags[top] == STACK_TAG_FLAGS && "SBT86 stack tag mismatch");
+    reg.uresult = flags[top].uresult;
+    reg.sresult = flags[top].sresult;
+    return reg;
+}
+
+void SBTStack::popret(const char *fn) {
+    top--;
+    assert(tags[top] == STACK_TAG_RETADDR && "SBT86 stack tag mismatch");
+    if (full_stack_trace) {
+        fprintf(stderr, "-%s\n", fn);
+        if (fn_addrs[top] != fn) {
+            fprintf(stderr, "TAG MISMATCH, expected %s\n", fn_addrs[top]);
+        }
+    }
+}
+
+/*
+ * These are special stack accessors for use in hook routines.
+ * Some routines in Robot Odyssey save the return value off
+ * the stack, manipulate the caller's stack, then restore
+ * the return value.
+ *
+ * preSaveRet() should be called before the return value is
+ * saved at the beginning of such a function. It converts the
+ * top of the stack from a RETADDR to a WORD, and stores a
+ * verification value in that word.
+ *
+ * postRestoreRet() should be called after the return value is
+ * restored. It verifies the value saved by preSaveRet, and
+ * converts the top of stack back to a RETADDR.
+ */
+
+void SBTStack::preSaveRet() {
+    assert(tags[top - 1] == STACK_TAG_RETADDR && "SBT86 stack tag mismatch");
+    words[top - 1] = RET_VERIFICATION;
+    tags[top - 1] = STACK_TAG_WORD;
+}
+
+void SBTStack::postRestoreRet() {
+    assert(tags[top - 1] == STACK_TAG_WORD && "SBT86 stack tag mismatch");
+    assert(words[top - 1] == RET_VERIFICATION && "SBT86 stack retaddr mismatch");
+    tags[top - 1] = STACK_TAG_RETADDR;
 }

@@ -124,9 +124,9 @@ Hardware::Hardware()
 
 void Hardware::exec(const char *program, const char *args)
 {
+    fprintf(stderr, "EXEC, '%s' '%s'\n", program, args);
     for (std::vector<SBTProcess*>::iterator i = process_vec.begin(); i != process_vec.end(); i++) {
         const char *filename = (*i)->getFilename();
-        fprintf(stderr, "EXEC, looking for '%s', checking '%s'\n", program, filename);
         if (!strcasecmp(program, filename)) {
             process = *i;
             process->exec(args);

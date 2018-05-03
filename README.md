@@ -23,3 +23,25 @@ Build Instructions
 - Place original game files in the "original" directory
 - npm install
 - npm run build
+
+
+To do
+-----
+
+- Fix modals in main game
+  - esc
+  - ?
+
+- load/save
+  - needs in-game modals?
+  - redirect "savefile" to local storage
+  - un-remove in-game file picker, for "authentic" mode?
+
+- output
+  - queue output items
+  - nicer video scaling
+  - sound
+
+- input
+  - touch controls
+  - controls help

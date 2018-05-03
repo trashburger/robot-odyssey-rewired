@@ -1,12 +1,10 @@
-//parcel: -g4 -I. sbt86.cpp hardware.cpp ../build/fspack.cpp ../build/bt_lab.cpp ../build/bt_menu.cpp ../build/bt_menu2.cpp ../build/bt_game.cpp ../build/bt_tutorial.cpp ../build/bt_play.cpp ../build/bt_renderer.cpp
+//parcel: -Oz -I. sbt86.cpp hardware.cpp ../build/fspack.cpp ../build/bt_lab.cpp ../build/bt_menu.cpp ../build/bt_menu2.cpp ../build/bt_game.cpp ../build/bt_tutorial.cpp ../build/bt_play.cpp ../build/bt_renderer.cpp
 
 #include <stdint.h>
 #include <emscripten.h>
 #include "hardware.h"
 
-static SBTProcess *game;
 static Hardware hw;
-
 
 void loop()
 {
@@ -22,7 +20,9 @@ extern "C" void EMSCRIPTEN_KEEPALIVE start()
 	hw.register_process(new Menu2EXE(&hw));
 	hw.register_process(new PlayEXE(&hw));
 
-	hw.exec("play.exe", "");
+	// hw.exec("play.exe", "");
+	// hw.exec("game.exe", "");
+	hw.exec("lab.exe", "30");
 
 	emscripten_set_main_loop(loop, 12, false);
 }

@@ -38,6 +38,7 @@
 #include <setjmp.h>
 #include <assert.h>
 
+#define SBT_INLINE inline __attribute__((always_inline))
 
 /*
  * Forward declarations
@@ -199,42 +200,42 @@ class SBTRegs
      * Inline accessors for manually setting/inspecting flags.
      */
 
-    inline __attribute__((always_inline)) bool getZF() {
+    SBT_INLINE bool getZF() {
         return (uresult & 0xFFFF) == 0;
     }
-    inline __attribute__((always_inline)) bool getSF() {
+    SBT_INLINE bool getSF() {
         return (uresult & 0x8000) != 0;
     }
-    inline __attribute__((always_inline)) bool getOF() {
+    SBT_INLINE bool getOF() {
         return (((sresult >> 1) ^ (sresult)) & 0x8000) != 0;
     }
-    inline __attribute__((always_inline)) bool getCF() {
+    SBT_INLINE bool getCF() {
         return (uresult & 0x10000) != 0;
     }
 
-    inline __attribute__((always_inline)) void setZF() {
+    SBT_INLINE void setZF() {
         uresult &= ~0xFFFF;
     }
-    inline __attribute__((always_inline)) void clearZF() {
+    SBT_INLINE void clearZF() {
         uresult |= 1;
     }
-    inline __attribute__((always_inline)) void setOF() {
+    SBT_INLINE void setOF() {
         sresult = 0x8000;
     }
-    inline __attribute__((always_inline)) void clearOF() {
+    SBT_INLINE void clearOF() {
         sresult = 0;
     }
-    inline __attribute__((always_inline)) void setCF() {
+    SBT_INLINE void setCF() {
         uresult |= 0x10000;
     }
-    inline __attribute__((always_inline)) void clearCF() {
+    SBT_INLINE void clearCF() {
         uresult &= 0xFFFF;
     }
 
-    inline __attribute__((always_inline)) uint32_t saveCF() {
+    SBT_INLINE uint32_t saveCF() {
         return uresult & 0x10000;
     }
-    inline __attribute__((always_inline)) void restoreCF(uint32_t saved) {
+    SBT_INLINE void restoreCF(uint32_t saved) {
         uresult = (uresult & 0xFFFF) | saved;
     }
 };
@@ -253,86 +254,21 @@ class SBTRegs
 class SBTStack
 {
  public:
-    inline SBTStack() {
-        reset();
-    }
+    SBTStack();
+    void reset();
 
-    inline void reset() {
-        top = 0;
-    }
+    void pushw(uint16_t word);
+    void pushf(SBTRegs reg);
+    void pushret(const char *fn);
 
-    inline void pushw(uint16_t word) {
-        assert(top < STACK_SIZE && "SBT86 stack overflow");
-        words[top] = word;
-        tags[top] = STACK_TAG_WORD;
-        top++;
-    }
-
-    inline void pushf(SBTRegs reg) {
-        assert(top < STACK_SIZE && "SBT86 stack overflow");
-        flags[top].uresult = reg.uresult;
-        flags[top].sresult = reg.sresult;
-        tags[top] = STACK_TAG_FLAGS;
-        top++;
-    }
-
-    inline void pushret(const char *fn) {
-        assert(top < STACK_SIZE && "SBT86 stack overflow");
-        fn_addrs[top] = fn;
-        tags[top] = STACK_TAG_RETADDR;
-        top++;
-    }
-
-    inline uint16_t popw() {
-        top--;
-        assert(tags[top] == STACK_TAG_WORD && "SBT86 stack tag mismatch");
-        return words[top];
-    }
-
-    inline SBTRegs popf(SBTRegs reg) {
-        top--;
-        assert(tags[top] == STACK_TAG_FLAGS && "SBT86 stack tag mismatch");
-        reg.uresult = flags[top].uresult;
-        reg.sresult = flags[top].sresult;
-        return reg;
-    }
-
-    inline void popret(const char *fn) {
-        top--;
-        assert(tags[top] == STACK_TAG_RETADDR && "SBT86 stack tag mismatch");
-        // TODO
-        // assert(fn_addrs[top] == fn && "SBT86 return address mismatch");
-    }
-
+    uint16_t popw();
+    SBTRegs popf(SBTRegs reg);    
+    void popret(const char *fn);
+    
     void trace();
 
-    /*
-     * These are special stack accessors for use in hook routines.
-     * Some routines in Robot Odyssey save the return value off
-     * the stack, manipulate the caller's stack, then restore
-     * the return value.
-     *
-     * preSaveRet() should be called before the return value is
-     * saved at the beginning of such a function. It converts the
-     * top of the stack from a RETADDR to a WORD, and stores a
-     * verification value in that word.
-     *
-     * postRestoreRet() should be called after the return value is
-     * restored. It verifies the value saved by preSaveRet, and
-     * converts the top of stack back to a RETADDR.
-     */
-
-    inline void preSaveRet() {
-        assert(tags[top - 1] == STACK_TAG_RETADDR && "SBT86 stack tag mismatch");
-        words[top - 1] = RET_VERIFICATION;
-        tags[top - 1] = STACK_TAG_WORD;
-    }
-
-    inline void postRestoreRet() {
-        assert(tags[top - 1] == STACK_TAG_WORD && "SBT86 stack tag mismatch");
-        assert(words[top - 1] == RET_VERIFICATION && "SBT86 stack retaddr mismatch");
-        tags[top - 1] = STACK_TAG_RETADDR;
-    }
+    void preSaveRet();
+    void postRestoreRet();
 
  private:
     enum Tag {
@@ -375,7 +311,7 @@ class SBTProcess
      *
      * (This function does not start the process, only prepares it.)
      */
-    void exec(const char *cmdLine = "");
+    void exec(const char *cmdLine);
 
     /*
      * The SBTHardware instance used by this process to emulate
@@ -393,7 +329,7 @@ class SBTProcess
 
     void exit(uint8_t code);
 
-    inline bool has_exited() {
+    SBT_INLINE bool has_exited() {
         return (exit_code < 0);
     }
 
@@ -446,20 +382,20 @@ class SBTSegmentCache
     /*
      * Functions to load each cached segment.
      */
-    inline void loadCS(SBTProcess *process, SBTRegs reg) {
+    SBT_INLINE void loadCS(SBTProcess *process, SBTRegs reg) {
         cs = process->hardware->memSeg(reg.cs);
     }
-    inline void loadDS(SBTProcess *process, SBTRegs reg) {
+    SBT_INLINE void loadDS(SBTProcess *process, SBTRegs reg) {
         ds = process->hardware->memSeg(reg.ds);
     }
-    inline void loadES(SBTProcess *process, SBTRegs reg) {
+    SBT_INLINE void loadES(SBTProcess *process, SBTRegs reg) {
         es = process->hardware->memSeg(reg.es);
     }
-    inline void loadSS(SBTProcess *process, SBTRegs reg) {
+    SBT_INLINE void loadSS(SBTProcess *process, SBTRegs reg) {
         ss = process->hardware->memSeg(reg.ss);
     }
 
-    inline void load(SBTProcess *process, SBTRegs reg) {
+    SBT_INLINE void load(SBTProcess *process, SBTRegs reg) {
         loadCS(process, reg);
         loadDS(process, reg);
         loadES(process, reg);
@@ -471,10 +407,10 @@ class SBTSegmentCache
      * this up into two 8-bit reads/writes, to avoid the ARM's
      * alignment constraints.
      */
-    static inline uint16_t read16(uint8_t *ptr) {
+    static SBT_INLINE uint16_t read16(uint8_t *ptr) {
         return ptr[0] | (ptr[1] << 8);
     }
-    static inline void write16(uint8_t *ptr, uint16_t x) {
+    static SBT_INLINE void write16(uint8_t *ptr, uint16_t x) {
         ptr[0] = (uint8_t) x;
         ptr[1] = x >> 8;
     }
