@@ -81,7 +81,8 @@ def patch(b):
                               'bb2800 a1____ 8cda 8ed8 be0020 33 c0'),
                    'ret', '''
         if (!noBlit) {
-            hw->drawScreen(proc, proc->memSeg(proc->peek16(r.ds, 0x3AD5)));
+            hw->outputFrame(proc, proc->hardware->memSeg(proc->hardware->peek16(r.ds, 0x3AD5)));
+            hw->outputDelay(proc, 80);
         }
     ''')
 
@@ -171,6 +172,23 @@ def patch(b):
 
     worldPtr = b.peek16(b.findCode('8bd8 b43f 8b0e____ 8b16:____ cd21 b43e cd21'))
     b.publishAddress('SBTADDR_WORLD_DATA', b.peek16(worldPtr))
+
+
+def patchMenu(b):
+    # Trace the framebuffer to emit frames periodically during animated transitions
+    b.decl("#include <stdio.h>")
+    b.trace('w', '''
+       return segment == 0xB800;
+    ''', '''
+        static uint32_t hit = 0;
+
+        hit++;
+        if (hit == 200) {
+            hit = 0;
+            hw->outputFrame(proc, hw->memSeg(0xB800));
+            hw->outputDelay(proc, 20);
+        }
+    ''')
 
 
 def patchChips(b):

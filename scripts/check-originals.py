@@ -25,6 +25,7 @@ class OriginalFileCollector:
         '756a92e6647a105695ac61e374fd2e9edbe8d935': 'game.exe',
         '692a9bb5caca7827eb933cc3e88efef4812b30c5': 'lab.exe',
         'a6293df401a3d4b8b516aa6a832b9dd07f782a39': 'menu.exe',
+        '360e983c090c95c99e39a7ebdb9d6649b537d75f': 'menu2.exe',
         '12df28e9c3998714feaa81b99542687fc36f792f': 'play.exe',
 
         # Game data files

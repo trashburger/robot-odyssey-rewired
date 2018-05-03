@@ -6,6 +6,7 @@
 
 SBT_DECL_PROCESS(PlayEXE);
 SBT_DECL_PROCESS(MenuEXE);
+SBT_DECL_PROCESS(Menu2EXE);
 SBT_DECL_PROCESS(LabEXE);
 SBT_DECL_PROCESS(GameEXE);
 SBT_DECL_PROCESS(TutorialEXE);
@@ -60,7 +61,7 @@ class Hardware : public SBTHardware
 
     uint32_t rgb_pixels[SCREEN_WIDTH * SCREEN_HEIGHT];
     uint32_t rgb_palette[4];
-    
+
     /*
      * SBT86 Entry points
      */
@@ -68,11 +69,12 @@ class Hardware : public SBTHardware
     virtual uint8_t in(uint16_t port, uint32_t timestamp);
     virtual void out(uint16_t port, uint8_t value, uint32_t timestamp);
 
-    virtual SBTRegs interrupt10(SBTProcess *proc, SBTRegs reg);
-    virtual SBTRegs interrupt16(SBTProcess *proc, SBTRegs reg);
-    virtual SBTRegs interrupt21(SBTProcess *proc, SBTRegs reg);
+    virtual SBTRegs interrupt10(SBTProcess *proc, SBTRegs reg, SBTStack *stack);
+    virtual SBTRegs interrupt16(SBTProcess *proc, SBTRegs reg, SBTStack *stack);
+    virtual SBTRegs interrupt21(SBTProcess *proc, SBTRegs reg, SBTStack *stack);
 
-    virtual void drawScreen(SBTProcess *proc, uint8_t *framebuffer);
+    virtual void outputFrame(SBTProcess *proc, uint8_t *framebuffer);
+    virtual void outputDelay(SBTProcess *proc, uint32_t millis);    
 
     DOSFilesystem fs;
 

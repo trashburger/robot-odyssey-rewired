@@ -27,7 +27,6 @@
 #include <emscripten.h>
 #include <algorithm>
 #include <string.h>
-#include <time.h>
 #include <stdio.h>
 #include "sbt86.h"
 #include "hardware.h"
@@ -112,6 +111,8 @@ uint16_t DOSFilesystem::allocateFD()
 
 Hardware::Hardware()
 {
+    memset(mem, 0, MEM_SIZE);
+
     port61 = 0;
 
     rgb_palette[0] = 0xff000000;
@@ -160,7 +161,7 @@ void Hardware::out(uint16_t port, uint8_t value, uint32_t timestamp)
     }
 }
 
-SBTRegs Hardware::interrupt10(SBTProcess *proc, SBTRegs reg)
+SBTRegs Hardware::interrupt10(SBTProcess *proc, SBTRegs reg, SBTStack *stack)
 {
     switch (reg.ah) {
 
@@ -174,7 +175,7 @@ SBTRegs Hardware::interrupt10(SBTProcess *proc, SBTRegs reg)
     return reg;
 }
 
-SBTRegs Hardware::interrupt16(SBTProcess *proc, SBTRegs reg)
+SBTRegs Hardware::interrupt16(SBTProcess *proc, SBTRegs reg, SBTStack *stack)
 {
     switch (reg.ah) {
 
@@ -198,9 +199,9 @@ SBTRegs Hardware::interrupt16(SBTProcess *proc, SBTRegs reg)
     return reg;
 }
 
-SBTRegs Hardware::interrupt21(SBTProcess *proc, SBTRegs reg)
+SBTRegs Hardware::interrupt21(SBTProcess *proc, SBTRegs reg, SBTStack *stack)
 {
-    fprintf(stderr, "int21 ax=%04x\n", reg.ax);
+    // fprintf(stderr, "int21 ax=%04x\n", reg.ax);
 
     switch (reg.ah) {
 
@@ -221,24 +222,8 @@ SBTRegs Hardware::interrupt21(SBTProcess *proc, SBTRegs reg)
         /* Ignored. Robot Odyssey uses this to set the INT 24h error handler. */
         break;
 
-    case 0x2C:                /* Get system time */
-        /*
-         * XXX: Currently a stub. This is used by MENU.EXE
-         */
-        {
-            static time_t unixTime;
-            struct tm* timeStruct = gmtime((const time_t *)&unixTime);
-            unixTime++;
-
-            reg.ch = timeStruct->tm_hour;
-            reg.cl = timeStruct->tm_min;
-            reg.dh = timeStruct->tm_sec;
-            reg.dl = 0;
-        }
-        break;
-
     case 0x3D: {              /* Open File */
-        int fd = fs.open((char*)(proc->memSeg(reg.ds) + reg.dx));
+        int fd = fs.open((char*)(memSeg(reg.ds) + reg.dx));
         if (fd < 0) {
             reg.setCF();
         } else {
@@ -253,15 +238,15 @@ SBTRegs Hardware::interrupt21(SBTProcess *proc, SBTRegs reg)
         break;
 
     case 0x3F:                /* Read File */
-        reg.ax = fs.read(reg.bx, proc->memSeg(reg.ds) + reg.dx, reg.cx);
+        reg.ax = fs.read(reg.bx, memSeg(reg.ds) + reg.dx, reg.cx);
         reg.clearCF();
         break;
 
+    case 0x4A:                /* Reserve memory */
+        break;
+
     case 0x4C:                /* Exit with return code */
-        // The way we rewrite the main loop means that each frame exits via DOS.
-        // Ignore successful exit codes, but break control flow to exit.
-        assert(reg.al == 0 && "DOS Exit with error");
-        proc->exit();
+        proc->exit(reg.al);
         break;
 
     default:
@@ -274,8 +259,12 @@ void Hardware::pressKey(uint8_t ascii, uint8_t scancode) {
     keycode = (scancode << 8) | ascii;
 }
 
-void Hardware::drawScreen(SBTProcess *proc, uint8_t *framebuffer)
+void Hardware::outputFrame(SBTProcess *proc, uint8_t *framebuffer)
 {
+    // TODO: This should send frames to a queue in js instead of directly to the canvas
+
+    // fprintf(stderr, "frame!\n");
+
     for (unsigned plane = 0; plane < 2; plane++) {
         for (unsigned y=0; y < SCREEN_HEIGHT/2; y++) {
             for (unsigned x=0; x < SCREEN_WIDTH; x++) {
@@ -295,6 +284,13 @@ void Hardware::drawScreen(SBTProcess *proc, uint8_t *framebuffer)
         img.data.set(HEAPU8.subarray($0, $0 + 320*200*4));
         ctx.putImageData(img, 0, 0);
     }, rgb_pixels);
+}
+
+void Hardware::outputDelay(SBTProcess *proc, uint32_t millis)
+{
+    // TODO: Send timing messages to the same queue as outputFrame
+
+    // fprintf(stderr, "Skipping delay of %dms\n", millis);
 }
 
 void Hardware::writeSpeakerTimestamp(uint32_t timestamp) {

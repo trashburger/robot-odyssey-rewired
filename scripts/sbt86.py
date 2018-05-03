@@ -1239,7 +1239,7 @@ class Instruction:
         return self.codegen_ret()
 
     def codegen_int(self, arg):
-        return "r = hw->interrupt%X(proc, r);" % arg
+        return "r = hw->interrupt%X(proc, r, gStack);" % arg
 
     def codegen_out(self, port, value):
         return "hw->out(%s,%s,gClock);" % (port.codegen(), value.codegen())
@@ -1267,6 +1267,7 @@ class BinaryImage:
         self.loadSegment = 0
         self.parseHeader()
         self._iCache = {}
+        self.fetchedInstructions = {}
         self.dynLiterals = {}
         self._tempFile = None
 
@@ -1354,14 +1355,19 @@ class BinaryImage:
     def iFetch(self, addr):
         """Fetch the next instruction, via the instruction cache.  If there's
            a cache miss, disassemble a block of code starting at this
-           address.
+           address. On successful disassembly, the instruction is removed from
+           memory unless it's needed for dynamic literals later on.
            """
         if addr.linear not in self._iCache:
             self._disasmToCache(addr)
+
         try:
-            return self._iCache[addr.linear]
+            inst = self._iCache[addr.linear]
         except KeyError:
             raise InternalError("Failed to disassemble instruction at %s" % addr)
+
+        self.fetchedInstructions[addr.linear] = inst
+        return inst
 
     def _disasmToCache(self, addr, instructionLimit=100):
         for i in self.disasm(addr, instructionLimit):
@@ -1419,10 +1425,6 @@ class Subroutine:
             memo[ptr.linear] = ptr
             i = self.image.iFetch(ptr)
             i.referent = referent
-
-            # Remove this instruction from our static data
-            if i.dynamicLiterals:
-                self.staticData.markPreserved(i.addr, i.length)
 
             if verbose:
                 sys.stderr.write("%s R[%-9s] D%-3d %-50s -> %-22s || %s\n" % (
@@ -1486,11 +1488,11 @@ class Subroutine:
 void
 %(name)s(void)
 {
-  gStack->pushret();
+  gStack->pushret("%(addr)r");
   goto %(label)s;
 %(body)s
 ret:
-  gStack->popret();
+  gStack->popret("%(addr)r");
   return;
 }""" % {
     'name': self.name,
@@ -1507,7 +1509,6 @@ class BinaryData:
     def __init__(self, data=b'', baseAddr=Addr16(0,0)):
         self.data = list(data)
         self.baseAddr = baseAddr
-        self.preserved = {}
 
     def patch(self, addr, data):
         """Overwrite bytes with 'data', starting at 'addr'."""
@@ -1515,19 +1516,11 @@ class BinaryData:
         for i, byte in enumerate(data):
             self.data[offset + i] = byte
 
-    def markPreserved(self, addr, len):
-        """Mark a range of bytes to be preserved in the memory image."""
+    def fill(self, addr, bytecount, pattern=0):
+        """Zero out a range of bytes"""
         offset = addr.linear - self.baseAddr.linear
-        while len:
-            self.preserved[offset] = True
-            len -= 1
-            offset += 1
-
-    def trim(self):
-        """Zero out sections of memory that haven't been preserved."""
-        for i in range(len(self.data)):
-            if i not in self.preserved:
-                self.data[i] = 0
+        for i in range(bytecount):
+            self.data[offset + i] = pattern
 
     def toHexArray(self):
         """Convert compressed binary data to a list of hexadecimal values
@@ -1620,10 +1613,10 @@ uint16_t %(className)s::getEntryCS() {
     return 0x%(entryCS)04x;
 }
 
-void %(className)s::loadCache() {
+void %(className)s::loadCache(SBTStack *stack) {
     r = reg;
     proc = this;
-    gStack = &stack;
+    gStack = stack;
     hw = hardware;
     s.load(proc, r);
 }
@@ -1695,13 +1688,11 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
             relocs.append(Addr16(segment, offset))
         self.image.relocate(self.relocSegment, relocs)
 
-        # Create a binary image for our initial memory contents. We'll
-        # by default keep all bytes prior to the CS (the data segment)
-        # but during translation we may also mark additional parts of
-        # the binary to keep due to self-modifying code.
+        # Create a binary image for our initial memory contents.
+        # This can be edited during patching and analysis. Fetched
+        # instructions will be trimmed from this image in analyze()
 
         self.staticData = BinaryData(self.image._data, Addr16(self.relocSegment, 0))
-        self.staticData.markPreserved(Addr16(self.relocSegment, 0), entryCS << 4)
 
     def decl(self, code):
         """Add code to the declarations in the generated C file.
@@ -1812,17 +1803,17 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
         self._exportedSubs.append(address)
 
     def analyze(self, verbose=False):
-       """Analyze the whole program. This breaks it up into
+        """Analyze the whole program. This breaks it up into
           subroutines, and analyzes each routine.
           """
 
-       log("Analyzing %s..." % self.filename)
+        log("Analyzing %s..." % self.filename)
 
-       self.subroutines = {}
-       stack = [ self.entryPoint ]
-       stack.extend(self._exportedSubs)
+        self.subroutines = {}
+        stack = [ self.entryPoint ]
+        stack.extend(self._exportedSubs)
 
-       while stack:
+        while stack:
            ptr = stack.pop()
            if ptr.linear in self.subroutines:
                if verbose:
@@ -1833,6 +1824,10 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
            sub.analyze(self._dynBranches, verbose)
            stack.extend(sub.callsTo.values())
            self.subroutines[ptr.linear] = sub
+
+        for inst in self.image.fetchedInstructions.values():
+            if inst.length and not inst.dynamicLiterals:
+                self.staticData.fill(inst.addr, inst.length)
 
     def findCode(self, signature):
         """Find a signature in the binary's code segment.
@@ -1901,7 +1896,7 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
         """Determine the target of a jump at 'addr'. 
            Currently only handles the specific jumps we care about.
            """
-        assert self.peek8(addr) == 0xE9
+        assert self.peek8(addr) in [0xE9, 0xE8]
         target = addr.add(3 + self.peek16s(addr.add(1)))
         log("Found jump from %r -> %r" % (addr, target))
         return target
@@ -1922,7 +1917,6 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
         vars['entryLinear'] = self.entryPoint.linear
         vars['entryCS'] = self.entryPoint.segment
 
-        self.staticData.trim()
         vars['dataImage'] = self.staticData.toHexArray()
 
         vars['getAddrCode'] = '\n'.join(['case %s: return 0x%04x;' % i

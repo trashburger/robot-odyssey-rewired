@@ -74,35 +74,42 @@ void SBTProcess::exec(const char *cmdLine)
     reg.cs = getEntryCS();
     continue_func = getEntry();
 
-    // Initialize memory
-    memset(mem, 0, MEM_SIZE);
-    decompressRLE(memSeg(reg.ds), mem + MEM_SIZE, getData(), getDataLen());
+    // Not yet exited
+    exit_code = -1;
+
+    decompressRLE(hardware->memSeg(reg.ds),
+        hardware->mem + SBTHardware::MEM_SIZE,
+        getData(), getDataLen());
 
     /*
      * Program Segment Prefix. Locate it just before the beginning of
      * the EXE, and copy our command line to it.
      */
     reg.es = reg.ds - 0x10;
-    poke8(reg.es, 0x80, strlen(cmdLine));
-    strcpy((char*) (memSeg(reg.es) + 0x81), cmdLine);
+    hardware->poke8(reg.es, 0x80, strlen(cmdLine));
+    strcpy((char*) (hardware->memSeg(reg.es) + 0x81), cmdLine);
 }
 
 void SBTProcess::run(void)
 {
     assert(hardware != NULL && "SBTHardware must be defined\nbefore running a process");
 
-    // Get a fresh stack every time we call in
-    stack.reset();
+    SBTStack stack;
+    loadCache(&stack);
 
-    loadCache();
-    if (!setjmp(exitjmp)) {
+    if (!setjmp(jmp_yield)) {
         continue_func();
     }
 }
 
-void SBTProcess::exit(void)
+static void continue_after_exit() {
+    assert(0 && "Continuing to run an exited SBTProcess");
+}
+
+void SBTProcess::exit(uint8_t code)
 {
-    longjmp(exitjmp, 1);
+    exit_code = (int)code;
+    continue_from(reg, continue_after_exit);
 }
 
 void SBTProcess::continue_from(SBTRegs regs, continue_func_t fn)
@@ -110,14 +117,7 @@ void SBTProcess::continue_from(SBTRegs regs, continue_func_t fn)
     assert(fn != 0);
     continue_func = fn;
     reg = regs;
-}
-
-uint8_t *SBTProcess::memSeg(uint16_t seg)
-{
-    if (seg > MAX_SEGMENT) {
-        seg = MAX_SEGMENT;
-    }
-    return mem + (((uint32_t)seg) << 4);
+    longjmp(jmp_yield, 1);
 }
 
 void SBTProcess::failedDynamicBranch(uint16_t cs, uint16_t ip, uint32_t value)
@@ -125,18 +125,51 @@ void SBTProcess::failedDynamicBranch(uint16_t cs, uint16_t ip, uint32_t value)
     assert(0 && "Failed dynamic branch");
 }
 
-uint8_t SBTProcess::peek8(uint16_t seg, uint16_t off) {
+uint8_t *SBTHardware::memSeg(uint16_t seg)
+{
+    if (seg > MAX_SEGMENT) {
+        seg = MAX_SEGMENT;
+    }
+    return mem + (((uint32_t)seg) << 4);
+}
+
+uint8_t SBTHardware::peek8(uint16_t seg, uint16_t off) {
     return memSeg(seg)[off];
 }
 
-void SBTProcess::poke8(uint16_t seg, uint16_t off, uint8_t value) {
+void SBTHardware::poke8(uint16_t seg, uint16_t off, uint8_t value) {
     memSeg(seg)[off] = value;
 }
 
-int16_t SBTProcess::peek16(uint16_t seg, uint16_t off) {
+int16_t SBTHardware::peek16(uint16_t seg, uint16_t off) {
     return SBTSegmentCache::read16(memSeg(seg) + off);
 }
 
-void SBTProcess::poke16(uint16_t seg, uint16_t off, uint16_t value) {
+void SBTHardware::poke16(uint16_t seg, uint16_t off, uint16_t value) {
     SBTSegmentCache::write16(memSeg(seg) + off, value);
+}
+
+void SBTStack::trace() {
+    fprintf(stderr, "--- Stack trace:\n");
+    for (unsigned addr = 0; addr < top; addr++) {
+        fprintf(stderr, "[%d] ", addr);
+        switch (tags[addr]) {
+            case STACK_TAG_INVALID:
+                fprintf(stderr, "INVALID\n");
+                break;
+            case STACK_TAG_WORD:
+                fprintf(stderr, "word %04x\n", words[addr]);
+                break;
+            case STACK_TAG_FLAGS:
+                fprintf(stderr, "flags u=%08x s=%08x\n", flags[addr].uresult, flags[addr].sresult);
+                break;
+            case STACK_TAG_RETADDR:
+                fprintf(stderr, "ret fn %s\n", fn_addrs[addr]);
+                break;
+            default:
+                fprintf(stderr, "BAD TAG %x\n", tags[addr]);
+                break;
+        }
+    }
+    fprintf(stderr, "---\n");
 }
