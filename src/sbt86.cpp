@@ -75,6 +75,8 @@ void SBTProcess::exec(const char *cmdLine)
     reg.ds = getRelocSegment();
     reg.cs = getEntryCS();
     continue_func = getEntry();
+    default_func = continue_func;
+    default_reg = reg;
 
     // Not yet exited
     exit_code = -1;

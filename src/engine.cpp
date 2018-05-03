@@ -1,4 +1,5 @@
-//parcel: -Oz -I. -s ASSERTIONS=1 sbt86.cpp hardware.cpp ../build/fspack.cpp ../build/bt_lab.cpp ../build/bt_menu.cpp ../build/bt_menu2.cpp ../build/bt_game.cpp ../build/bt_tutorial.cpp ../build/bt_play.cpp ../build/bt_renderer.cpp
+//parcel: -g4 -I. -s ASSERTIONS=2 sbt86.cpp hardware.cpp ../build/fspack.cpp ../build/bt_lab.cpp ../build/bt_menu.cpp ../build/bt_menu2.cpp ../build/bt_game.cpp ../build/bt_tutorial.cpp ../build/bt_play.cpp ../build/bt_renderer.cpp
+// TODO: Use -Oz, no -g4
 
 #include <stdint.h>
 #include <emscripten.h>
