@@ -30,7 +30,6 @@ for call_site in [
     '010E:019c',
     '010E:02f7',
     '010E:0315',
-    '010E:074c',
 ]:
     call_site = sbt86.Addr16(str=call_site)
     continue_at = call_site.add(1)
@@ -39,9 +38,16 @@ for call_site in [
     # Redraw the screen and yield on the way out, check input on the way back in
     b.patchAndHook(call_site, 'ret',
         'hw->outputFrame(proc, hw->memSeg(0xB800));'
-        'proc->continue_from(r, &sub_%X);' % continue_at.linear)
+        'fprintf(stderr, "continue from %r\\n");'
+        'proc->continue_from(r, &sub_%X);' % (continue_at, continue_at.linear))
     b.patch(continue_at, 'call 0x%04x' % input_poll_func.offset, length=2)
     b.exportSub(continue_at)
+
+# This is also an input poll callsite, but it's for skipping cutscenes and there isn't
+# a good way to break it up with continuations. Just remove it, the cutscenes don't
+# need to be skippable like this anyway, we can include a fast forward mode.
+
+b.patch('010E:074c', 'nop', length=3)
 
 # The menu uses wallclock time for some delays.
 # A save function is called before drawing the screen, to store a seconds timestamp.

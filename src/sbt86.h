@@ -142,7 +142,7 @@ class SBTHardware
      * OS hooks
      */
     virtual void exec(const char *program, const char *args) = 0;
-    virtual void resume_default_process() = 0;
+    virtual void resume_default_process(uint8_t exit_code) = 0;
 };
 
 
@@ -330,10 +330,6 @@ class SBTProcess
 
     void exit(uint8_t code);
 
-    SBT_INLINE bool has_exited() {
-        return (exit_code < 0);
-    }
-
     /*
      * Yield execution now (exiting all nested functions) and
      * resume at fn() next time run() is called. If default_entry
@@ -347,7 +343,6 @@ class SBTProcess
     jmp_buf jmp_yield;
     continue_func_t continue_func;
     continue_func_t default_func;
-    int exit_code;
 
     void failedDynamicBranch(uint16_t cs, uint16_t ip, uint32_t value);
 

@@ -79,7 +79,7 @@ class Hardware : public SBTHardware
     virtual void outputFrame(SBTProcess *proc, uint8_t *framebuffer);
     virtual void outputDelay(SBTProcess *proc, uint32_t millis);    
     virtual void exec(const char *program, const char *args);
-    virtual void resume_default_process();
+    virtual void resume_default_process(uint8_t exit_code);
 
     DOSFilesystem fs;
 

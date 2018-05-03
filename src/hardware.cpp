@@ -136,10 +136,11 @@ void Hardware::exec(const char *program, const char *args)
     assert(0 && "Program not found in exec()");
 }
 
-void Hardware::resume_default_process()
+void Hardware::resume_default_process(uint8_t exit_code)
 {
     fprintf(stderr, "EXIT, resuming default process\n");
     process = default_process;
+    process->reg.ax = exit_code;
 }
 
 void Hardware::register_process(SBTProcess *p, bool is_default)

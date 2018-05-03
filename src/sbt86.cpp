@@ -78,8 +78,6 @@ void SBTProcess::exec(const char *cmdLine)
     default_func = continue_func;
     default_reg = reg;
 
-    // Not yet exited
-    exit_code = -1;
 
     uint8_t *end_of_mem = hardware->mem + SBTHardware::MEM_SIZE;
     uint8_t *data_segment = hardware->memSeg(reg.ds);
@@ -126,8 +124,7 @@ static void continue_after_exit() {
 void SBTProcess::exit(uint8_t code)
 {
     fprintf(stderr, "EXIT, code %d\n", code);
-    exit_code = (int)code;
-    hardware->resume_default_process();
+    hardware->resume_default_process(code);
     continue_from(reg, continue_after_exit);
 }
 
@@ -197,7 +194,7 @@ void SBTStack::trace() {
                 fprintf(stderr, "flags u=%08x s=%08x\n", flags[addr].uresult, flags[addr].sresult);
                 break;
             case STACK_TAG_RETADDR:
-                fprintf(stderr, "ret fn %s\n", fn_addrs[addr]);
+                fprintf(stderr, "ret fn=%04x\n", fn_addrs[addr]);
                 break;
             default:
                 fprintf(stderr, "BAD TAG %x\n", tags[addr]);
