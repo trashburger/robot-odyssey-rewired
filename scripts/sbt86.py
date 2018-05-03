@@ -50,6 +50,7 @@
 #    OTHER DEALINGS IN THE SOFTWARE.
 #
 
+import os
 import sys
 import struct
 import subprocess
@@ -1251,6 +1252,7 @@ class Instruction:
 class BinaryImage:
     def __init__(self, filename=None, file=None, offset=0, data=None):
         if file is None:
+            self.fileName = os.path.basename(filename)
             file = open(filename, "rb")
 
         if data is None:
@@ -1611,6 +1613,10 @@ uint16_t %(className)s::getRelocSegment() {
 
 uint16_t %(className)s::getEntryCS() {
     return 0x%(entryCS)04x;
+}
+
+const char *%(className)s::getFilename() {
+    return "%(fileName)s";
 }
 
 void %(className)s::loadCache(SBTStack *stack) {

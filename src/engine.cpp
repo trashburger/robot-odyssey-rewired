@@ -7,38 +7,22 @@
 static SBTProcess *game;
 static Hardware hw;
 
+
 void loop()
 {
-	// fprintf(stderr, "entering run\n");
-	game->run();
-	// fprintf(stderr, "left run\n");
+	hw.run();
 }
 
 extern "C" void EMSCRIPTEN_KEEPALIVE start()
 {
-	// works, first level, sewer.wor. Crashes on modal dialog or at end of level.
-	game = new GameEXE(&hw);
+	hw.register_process(new GameEXE(&hw));
+	hw.register_process(new LabEXE(&hw));
+	hw.register_process(new TutorialEXE(&hw));
+	hw.register_process(new MenuEXE(&hw));
+	hw.register_process(new Menu2EXE(&hw));
+	hw.register_process(new PlayEXE(&hw));
 
-	// works, normal innovation lab
-	// game = new LabEXE(&hw);
-	// game->exec("30");
-
-	// First 6 tutorial levels are in tut.exe
-	// game = new TutorialEXE(&hw);
-	// game->exec("21");
-
-	// game = new TutorialEXE(&hw);
-	// game->exec("26");
-
-	// Last tutorial is actually part of lab.exe
-	// game = new LabEXE(&hw);
-	// game->exec("27");
-
-	// fixme, Main entry point. Needs patches to break up main loop at each exec_wrapper call site
-	// game = new PlayEXE(&hw);
-
-	// menu, kinda works, return code good, cut scenes still not drawing/running really
-	// game = new MenuEXE(&hw);
+	hw.exec("play.exe", "");
 
 	emscripten_set_main_loop(loop, 12, false);
 }

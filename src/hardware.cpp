@@ -111,6 +111,7 @@ uint16_t DOSFilesystem::allocateFD()
 
 Hardware::Hardware()
 {
+    process = 0;
     memset(mem, 0, MEM_SIZE);
 
     port61 = 0;
@@ -119,6 +120,31 @@ Hardware::Hardware()
     rgb_palette[1] = 0xffffff55;
     rgb_palette[2] = 0xffff55ff;
     rgb_palette[3] = 0xffffffff;
+}
+
+void Hardware::exec(const char *program, const char *args)
+{
+    for (std::vector<SBTProcess*>::iterator i = process_vec.begin(); i != process_vec.end(); i++) {
+        const char *filename = (*i)->getFilename();
+        fprintf(stderr, "EXEC, looking for '%s', checking '%s'\n", program, filename);
+        if (!strcasecmp(program, filename)) {
+            process = *i;
+            process->exec(args);
+            return;
+        }
+    }
+    assert(0 && "Program not found in exec()");
+}
+
+void Hardware::register_process(SBTProcess *p)
+{
+    process_vec.push_back(p);
+}
+
+void Hardware::run()
+{
+    assert(process);
+    process->run();
 }
 
 uint8_t Hardware::in(uint16_t port, uint32_t timestamp)

@@ -136,6 +136,11 @@ class SBTHardware
      */
     virtual void outputFrame(SBTProcess *proc, uint8_t *framebuffer) = 0;
     virtual void outputDelay(SBTProcess *proc, uint32_t millis) = 0;    
+
+    /*
+     * OS hooks
+     */
+    virtual void exec(const char *program, const char *args) = 0;
 };
 
 
@@ -404,15 +409,10 @@ class SBTProcess
     continue_func_t continue_func;
     int exit_code;
 
-    /*
-     * Error handler for failed dynamic branches.
-     */
     void failedDynamicBranch(uint16_t cs, uint16_t ip, uint32_t value);
 
-    /*
-     * Look up an address which was calculated statically by SBT86.
-     */
     virtual uint16_t getAddress(SBTAddressId id) = 0;
+    virtual const char *getFilename() = 0;
 
  protected:
     /*
@@ -508,5 +508,6 @@ class SBTSegmentCache
         virtual continue_func_t getEntry();             \
     public:                                             \
         virtual uint16_t getAddress(SBTAddressId id);   \
+        virtual const char *getFilename();              \
     }
 

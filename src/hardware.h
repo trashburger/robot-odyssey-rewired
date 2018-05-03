@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include "sbt86.h"
 #include "roData.h"
 #include "fspack.h"
@@ -54,7 +55,9 @@ class Hardware : public SBTHardware
  public:
     Hardware();
 
-    virtual void pressKey(uint8_t ascii, uint8_t scancode = 0);
+    void pressKey(uint8_t ascii, uint8_t scancode = 0);
+    void run();
+    void register_process(SBTProcess *p);
 
     static const unsigned SCREEN_WIDTH = 320;
     static const unsigned SCREEN_HEIGHT = 200;
@@ -75,12 +78,15 @@ class Hardware : public SBTHardware
 
     virtual void outputFrame(SBTProcess *proc, uint8_t *framebuffer);
     virtual void outputDelay(SBTProcess *proc, uint32_t millis);    
+    virtual void exec(const char *program, const char *args);
 
     DOSFilesystem fs;
 
  protected:
+    std::vector<SBTProcess*> process_vec;
+    SBTProcess *process;
     uint8_t port61;
     uint16_t keycode;
 
-    virtual void writeSpeakerTimestamp(uint32_t timestamp);
+    void writeSpeakerTimestamp(uint32_t timestamp);
 };
