@@ -57,7 +57,7 @@ class Hardware : public SBTHardware
 
     void pressKey(uint8_t ascii, uint8_t scancode = 0);
     void run();
-    void register_process(SBTProcess *p);
+    void register_process(SBTProcess *p, bool is_default = false);
 
     static const unsigned SCREEN_WIDTH = 320;
     static const unsigned SCREEN_HEIGHT = 200;
@@ -79,12 +79,14 @@ class Hardware : public SBTHardware
     virtual void outputFrame(SBTProcess *proc, uint8_t *framebuffer);
     virtual void outputDelay(SBTProcess *proc, uint32_t millis);    
     virtual void exec(const char *program, const char *args);
+    virtual void resume_default_process();
 
     DOSFilesystem fs;
 
  protected:
     std::vector<SBTProcess*> process_vec;
     SBTProcess *process;
+    SBTProcess *default_process;
     uint8_t port61;
     uint16_t keycode;
 

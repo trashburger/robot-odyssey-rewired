@@ -110,6 +110,10 @@ void SBTProcess::run(void)
 
     if (!setjmp(jmp_yield)) {
         continue_func();
+
+        // Continuation function returned; back to the default func.
+        continue_func = default_func;
+        reg = default_reg;
     }
 }
 
@@ -119,15 +123,23 @@ static void continue_after_exit() {
 
 void SBTProcess::exit(uint8_t code)
 {
+    fprintf(stderr, "EXIT, code %d\n", code);
     exit_code = (int)code;
+    hardware->resume_default_process();
     continue_from(reg, continue_after_exit);
 }
 
-void SBTProcess::continue_from(SBTRegs regs, continue_func_t fn)
+void SBTProcess::continue_from(SBTRegs regs, continue_func_t fn, bool default_entry)
 {
+    // Does not return
+
     assert(fn != 0);
     continue_func = fn;
     reg = regs;
+    if (default_entry) {
+        default_func = fn;
+        default_reg = regs;
+    }
     longjmp(jmp_yield, 1);
 }
 
@@ -208,9 +220,9 @@ void SBTStack::pushf(SBTRegs reg) {
     top++;
 }
 
-void SBTStack::pushret(const char *fn) {
+void SBTStack::pushret(uint16_t fn) {
     if (full_stack_trace) {
-        fprintf(stderr, "+%s\n", fn);
+        fprintf(stderr, "+%04x\n", fn);
     }
     assert(top < STACK_SIZE && "SBT86 stack overflow");
     fn_addrs[top] = fn;
@@ -232,13 +244,13 @@ SBTRegs SBTStack::popf(SBTRegs reg) {
     return reg;
 }
 
-void SBTStack::popret(const char *fn) {
+void SBTStack::popret(uint16_t fn) {
     top--;
     assert(tags[top] == STACK_TAG_RETADDR && "SBT86 stack tag mismatch");
     if (full_stack_trace) {
-        fprintf(stderr, "-%s\n", fn);
+        fprintf(stderr, "-%04x\n", fn);
         if (fn_addrs[top] != fn) {
-            fprintf(stderr, "TAG MISMATCH, expected %s\n", fn_addrs[top]);
+            fprintf(stderr, "STACK MISMATCH, expected 0x%04x\n", fn_addrs[top]);
         }
     }
 }

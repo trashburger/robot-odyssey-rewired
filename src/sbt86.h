@@ -142,6 +142,7 @@ class SBTHardware
      * OS hooks
      */
     virtual void exec(const char *program, const char *args) = 0;
+    virtual void resume_default_process() = 0;
 };
 
 
@@ -259,11 +260,11 @@ class SBTStack
 
     void pushw(uint16_t word);
     void pushf(SBTRegs reg);
-    void pushret(const char *fn);
+    void pushret(uint16_t offset);
 
     uint16_t popw();
     SBTRegs popf(SBTRegs reg);    
-    void popret(const char *fn);
+    void popret(uint16_t offset);
     
     void trace();
 
@@ -284,7 +285,7 @@ class SBTStack
 
     Tag tags[STACK_SIZE];
     uint32_t words[STACK_SIZE];
-    const char* fn_addrs[STACK_SIZE];
+    uint16_t fn_addrs[STACK_SIZE];
     struct {
         uint32_t uresult;
         int32_t sresult;
@@ -335,14 +336,17 @@ class SBTProcess
 
     /*
      * Yield execution now (exiting all nested functions) and
-     * resume at fn() next time run() is called.
+     * resume at fn() next time run() is called. If default_entry
+     * is true, this also becomes the fn() we run after the last fn() returns.
      */
     typedef void (*continue_func_t)(void);
-    void continue_from(SBTRegs regs, continue_func_t fn);
+    void continue_from(SBTRegs regs, continue_func_t fn, bool default_entry = false);
 
     SBTRegs reg;
+    SBTRegs default_reg;
     jmp_buf jmp_yield;
     continue_func_t continue_func;
+    continue_func_t default_func;
     int exit_code;
 
     void failedDynamicBranch(uint16_t cs, uint16_t ip, uint32_t value);

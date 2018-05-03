@@ -1490,15 +1490,16 @@ class Subroutine:
 void
 %(name)s(void)
 {
-  gStack->pushret("%(addr)r");
+  gStack->pushret(0x%(offset)04x);
   goto %(label)s;
 %(body)s
 ret:
-  gStack->popret("%(addr)r");
+  gStack->popret(0x%(offset)04x);
   return;
 }""" % {
     'name': self.name,
     'addr': self.entryPoint,
+    'offset': self.entryPoint.offset,
     'label': self.entryPoint.label(),
     'body': '\n'.join(body)
 }
@@ -1653,14 +1654,16 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
 }
 """
 
-    # Memory map:
-    #
-    #  relocSegment -- Segment to relocate binary to. This must be
-    #  after the BIOS data area, IVT, and other low-memory areas.
-    #
-    relocSegment = 0x70
-
+    relocSegment = None
     subroutines = None
+
+    def __init__(self, filename=None, file=None, offset=0, data=None, relocSegment=0x70):
+        self.relocSegment = relocSegment
+        BinaryImage.__init__(self, filename=filename, file=file, offset=offset, data=data)
+
+    def loadAddress(self, addr):
+        assert addr.offset == 0
+        self.relocSegment = addr.segment
 
     def toLinear(self, segmentOffset):
         return ((segmentOffset >> 16) << 4) | (segmentOffset & 0xFFFF)

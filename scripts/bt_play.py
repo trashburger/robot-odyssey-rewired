@@ -9,7 +9,9 @@ import os
 import sbt86
 
 basedir = sys.argv[1]
-b = sbt86.DOSBinary(os.path.join(basedir, 'play.exe'))
+
+# PLAY.EXE stays resident while the other game binaries run, put it lower in memory.
+b = sbt86.DOSBinary(os.path.join(basedir, 'play.exe'), relocSegment=0x20)
 
 # Break control flow every time we would be exec()'ing another EXE file.
 # This is a wrapper that handles changing disks if necessary. BX is a pointer
@@ -18,10 +20,10 @@ b = sbt86.DOSBinary(os.path.join(basedir, 'play.exe'))
 b.decl('#include <string.h>')
 
 for call_site in [
-    '0070:003E',
-    '0070:0044',
-    '0070:004E',
-    '0070:0057',
+    '0020:003E',
+    '0020:0044',
+    '0020:004E',
+    '0020:0057',
 ]:
     call_site = sbt86.Addr16(str=call_site)
     continue_at = call_site.add(3)
