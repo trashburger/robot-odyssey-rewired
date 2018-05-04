@@ -78,7 +78,6 @@ void SBTProcess::exec(const char *cmdLine)
     default_func = continue_func;
     default_reg = reg;
 
-
     uint8_t *end_of_mem = hardware->mem + SBTHardware::MEM_SIZE;
     uint8_t *data_segment = hardware->memSeg(reg.ds);
 
