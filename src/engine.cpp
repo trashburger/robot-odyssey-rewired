@@ -20,7 +20,7 @@ extern "C" void EMSCRIPTEN_KEEPALIVE start()
     hw.register_process(new Menu2EXE(&hw));
     hw.register_process(new PlayEXE(&hw), true);
 
-    hw.exec("tut.exe", "21"); // temp, start at first tutorial
+    hw.exec("game.exe", ""); // temp
 
     emscripten_set_main_loop(loop, 12, false);
 }

@@ -238,8 +238,6 @@ SBTRegs Hardware::interrupt16(SBTProcess *proc, SBTRegs reg, SBTStack *stack)
 
 SBTRegs Hardware::interrupt21(SBTProcess *proc, SBTRegs reg, SBTStack *stack)
 {
-    // fprintf(stderr, "int21 ax=%04x\n", reg.ax);
-
     switch (reg.ah) {
 
     case 0x06:                /* Direct console input/output (Only input supported) */
@@ -287,6 +285,7 @@ SBTRegs Hardware::interrupt21(SBTProcess *proc, SBTRegs reg, SBTStack *stack)
         break;
 
     default:
+        fprintf(stderr, "int21 ax=%04x\n", reg.ax);
         assert(0 && "Unimplemented DOS Int21");
     }
     return reg;
