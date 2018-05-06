@@ -4,7 +4,6 @@ GENERATED_BT := \
 	build/bt_game.cpp \
 	build/bt_lab.cpp \
 	build/bt_menu.cpp \
-	build/bt_menu2.cpp \
 	build/bt_play.cpp \
 	build/bt_renderer.cpp \
 	build/bt_tutorial.cpp
