@@ -17,21 +17,21 @@ bt_common.patchChips(b)
 bt_common.patchLoadSave(b)
 
 # Remove modal "Insert disk 1" message on world load failure
-b.patchAndHook('0DAB:2CBE', 'ret', 'assert(0 && "World file load failure");')
+b.patchAndHook('0E3B:2CBE', 'ret', 'assert(0 && "World file load failure");')
 
 # Remove modal "A disk error has occurred"
-b.patch('0DAB:2E03', 'ret')
+b.patch('0E3B:2E03', 'ret')
 
 # Remove modal "Insert disk 1" message before exiting back to menu
-b.patch('0DAB:2E83', 'jmp 0x2E9C')
+b.patch('0E3B:2E83', 'jmp 0x2E9C')
 
 # Remove modal "Insert storage disk" message for loading/saving chips
-b.patch('0DAB:2EA9', 'jmp 0x2EDC')
+b.patch('0E3B:2EA9', 'jmp 0x2EDC')
 
 # Break control flow at remaining locations that wait for keyboard
 for call_site in [
-    '0DAB:3B8D',    # Menu for "?" key
-    '0DAB:3B9A',    # Menu for "ESC" key
+    '0E3B:3B8D',    # Menu for "?" key
+    '0E3B:3B9A',    # Menu for "ESC" key
 ]:
     call_site = sbt86.Addr16(str=call_site)
     continue_at = call_site.add(1)

@@ -1,4 +1,4 @@
-//parcel: -Oz -I. -s ASSERTIONS=2 sbt86.cpp hardware.cpp ../build/fspack.cpp ../build/bt_lab.cpp ../build/bt_menu.cpp ../build/bt_game.cpp ../build/bt_tutorial.cpp ../build/bt_play.cpp ../build/bt_renderer.cpp
+//parcel: -Oz -I. -s ASSERTIONS=2 sbt86.cpp hardware.cpp ../build/fspack.cpp ../build/bt_lab.cpp ../build/bt_menu.cpp ../build/bt_game.cpp ../build/bt_tutorial.cpp ../build/bt_play.cpp
 
 #include <stdint.h>
 #include <emscripten.h>
@@ -13,12 +13,11 @@ void loop()
 
 extern "C" void EMSCRIPTEN_KEEPALIVE start()
 {
+    hw.register_process(new PlayEXE(&hw), true);
+    hw.register_process(new MenuEXE(&hw));
     hw.register_process(new GameEXE(&hw));
     hw.register_process(new LabEXE(&hw));
     hw.register_process(new TutorialEXE(&hw));
-    hw.register_process(new MenuEXE(&hw));
-    hw.register_process(new Menu2EXE(&hw));
-    hw.register_process(new PlayEXE(&hw), true);
 
     emscripten_set_main_loop(loop, 12, false);
 }

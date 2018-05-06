@@ -797,13 +797,13 @@ class Instruction:
         if (len(operand.offsets) != 1 or
             not isinstance(operand.offsets[0], int)):
             log("Warning! Access (%s) to code segment "
-                "@%s with dynamic offset %r" % (
-                    mode, self.addr, operand.offsets))
+                "@%s with dynamic offset %r. \nInstruction: %r" % (
+                    mode, self.addr, operand.offsets, self))
 
         elif int(operand.offsets[0]) not in self.dynLiteralsMap:
             log("Warning! Access (%s) to code segment "
-                "@%s with offset %04x. Mark as dynamic literal."
-                % (mode, self.addr, operand.offsets[0]))
+                "@%s with offset %04x. Mark as dynamic literal. \nInstruction: %r"
+                % (mode, self.addr, operand.offsets[0], self))
 
     def codegen_mov(self, dest, src):
         return "%s%s);%s" % (
@@ -1657,7 +1657,7 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
     relocSegment = None
     subroutines = None
 
-    def __init__(self, filename=None, file=None, offset=0, data=None, relocSegment=0x70):
+    def __init__(self, filename=None, file=None, offset=0, data=None, relocSegment=0x100):
         self.relocSegment = relocSegment
         BinaryImage.__init__(self, filename=filename, file=file, offset=offset, data=data)
 

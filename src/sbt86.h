@@ -90,7 +90,7 @@ class SBTHardware
     /*
      * Real mode memory for this process.
      */
-    static const uint32_t MEM_SIZE = 128 * 1024;
+    static const uint32_t MEM_SIZE = 256 * 1024;
     uint8_t mem[MEM_SIZE];
 
     /*

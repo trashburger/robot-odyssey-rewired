@@ -14,22 +14,30 @@ b = sbt86.DOSBinary(os.path.join(basedir, 'menu.exe'))
 
 bt_common.patchMenu(b)
 
-# XXX: Dynamic branch, looks sound related.
-b.patch('010E:0778', 'nop', 2)
+# Dynamic branch for cutscene sound effects
+b.patchDynamicBranch('019E:0778', [
+    sbt86.Addr16(str='019E:07D0'), 
+    sbt86.Addr16(str='019E:07AB')
+])
+
+# This isn't actually self-modifying code, but some data stored in the code segment
+# will trigger some warnings that we can silence by marking the area explicitly as data.
+b.patchDynamicLiteral('019E:0517', length=2)
+b.patchDynamicLiteral('019E:0519', length=2)
 
 # The main menu is a subroutine with a single caller; inline it to make cutting the control flow easier
-b.patch('010E:012A', 'jmp 0x310')
-b.patch('010E:034A', 'jmp 0x12d')
+b.patch('019E:012A', 'jmp 0x310')
+b.patch('019E:034A', 'jmp 0x12d')
 
-# Now break control flow every time we see a call site for the main input polling function at 010E:0428
-input_poll_func = sbt86.Addr16(str='010E:0428')
+# Now break control flow every time we see a call site for the main input polling function at 019E:0428
+input_poll_func = sbt86.Addr16(str='019E:0428')
 for call_site in [
-    '010E:0141',
-    '010E:014e',
-    '010E:0178',
-    '010E:019c',
-    '010E:02f7',
-    '010E:0315',
+    '019E:0141',
+    '019E:014e',
+    '019E:0178',
+    '019E:019c',
+    '019E:02f7',
+    '019E:0315',
 ]:
     call_site = sbt86.Addr16(str=call_site)
     continue_at = call_site.add(1)
@@ -47,7 +55,7 @@ for call_site in [
 # a good way to break it up with continuations. Just remove it, the cutscenes don't
 # need to be skippable like this anyway, we can include a fast forward mode.
 
-b.patch('010E:074c', 'nop', length=3)
+b.patch('019E:074c', 'nop', length=3)
 
 # The menu uses wallclock time for some delays.
 # A save function is called before drawing the screen, to store a seconds timestamp.
@@ -58,9 +66,9 @@ b.patch('010E:074c', 'nop', length=3)
 b.patch(b.findCode(':b42c cd21 ________ c3'), 'ret')
 
 for (call_site, delay) in [
-    ('010E:010F', 4000),
-    ('010E:0118', 4000),
-    ('010E:01BD', 1000),
+    ('019E:010F', 4000),
+    ('019E:0118', 4000),
+    ('019E:01BD', 1000),
 ]:
     call_site = sbt86.Addr16(str=call_site)
     continue_at = call_site.add(3)

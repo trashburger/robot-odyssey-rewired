@@ -15,12 +15,12 @@ b = sbt86.DOSBinary(os.path.join(basedir, 'tut.exe'))
 bt_common.patch(b)
 
 # Remove modal "Insert disk 1" message before exiting back to menu
-b.patch('09FF:3B0F', 'jmp 0x3B28')
+b.patch('0A8F:3B0F', 'jmp 0x3B28')
 
 # Break control flow at remaining locations that wait for keyboard
 for call_site in [
-    '09FF:405C',     # Menu for help "?" key
-    '09FF:4069',     # Menu for "ESC" key
+    '0A8F:405C',     # Menu for help "?" key
+    '0A8F:4069',     # Menu for "ESC" key
 ]:
     call_site = sbt86.Addr16(str=call_site)
     continue_at = call_site.add(1)

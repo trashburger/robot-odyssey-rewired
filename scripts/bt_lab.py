@@ -17,19 +17,19 @@ bt_common.patchChips(b)
 bt_common.patchLoadSave(b)
 
 # Remove modal "Insert disk 1" message on save-file load failure
-b.patch('0CD3:5CFB', 'jmp 0x5D14')
+b.patch('0D63:5CFB', 'jmp 0x5D14')
 
-# Remove modal "A disk error has occurred"
-b.patch('0CD3:5E3E', 'ret')
+# Remove model "A disk error has occurred"
+b.patch('0D63:5E3E', 'ret')
 
 # Remove modal "Insert disk 1" message before exiting back to menu
-b.patch('0CD3:5FFD', 'jmp 0x6016')
+b.patch('0D63:5FFD', 'jmp 0x6016')
 
 # Break control flow at remaining locations that wait for keyboard
 for call_site in [
-    '0CD3:820B',    # Related to "?" key?
-    '0CD3:26D7',    # Menu for "?" key
-    '0CD3:26E4',    # Menu for "ESC" key
+    '0D63:820B',    # Related to "?" key?
+    '0D63:26D7',    # Menu for "?" key
+    '0D63:26E4',    # Menu for "ESC" key
 ]:
     call_site = sbt86.Addr16(str=call_site)
     continue_at = call_site.add(1)
