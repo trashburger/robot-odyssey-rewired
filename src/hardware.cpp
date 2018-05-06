@@ -350,11 +350,13 @@ void Hardware::pressKey(uint8_t ascii, uint8_t scancode) {
     keycode = (scancode << 8) | ascii;
 }
 
-void Hardware::outputFrame(uint8_t *framebuffer)
+void Hardware::outputFrame(SBTStack *stack, uint8_t *framebuffer)
 {
     if (output_queue_depth > 500) {
+        stack->trace();
         assert(0 && "Frame queue is too deep! Infinite loop likely.");
     }
+
     OutputItem item;
     item.otype = OUT_FRAME;
     item.u.framebuffer = new CGAFramebuffer;

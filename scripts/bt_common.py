@@ -22,7 +22,7 @@ def patch(b):
     for loopJumpAddr in b.findCodeMultiple('e8____ a0ac05a2____ a0____a2____ e8____ a0____a2____ :e9____'):
         loopEntry = b.jumpTarget(loopJumpAddr)
         b.patchAndHook(loopJumpAddr, 'ret',
-            'proc->continue_from(r, &sub_%X, true);' % loopEntry.linear)
+            'proc->continueFrom(r, &sub_%X, true);' % loopEntry.linear)
         b.exportSub(loopEntry)
 
     # Don't bother zeroing video memory, we already clear all of RAM.
@@ -83,7 +83,7 @@ def patch(b):
                    'ret', '''
         if (!noBlit) {
             const unsigned normal_frame_rate = 12;
-            hw->outputFrame(proc->hardware->memSeg(proc->hardware->peek16(r.ds, 0x3AD5)));
+            hw->outputFrame(gStack, proc->hardware->memSeg(proc->hardware->peek16(r.ds, 0x3AD5)));
             hw->outputDelay(1000 / normal_frame_rate);
         }
     ''')
@@ -176,21 +176,24 @@ def patch(b):
     b.publishAddress('SBTADDR_WORLD_DATA', b.peek16(worldPtr))
 
 
-def patchFramebufferTrace(b):
+def patchFramebufferTrace(b, interval=200, delay=8):
     # Trace the framebuffer to emit frames periodically during animated transitions
     b.decl("#include <stdio.h>")
+    b.decl("static bool enable_framebuffer_trace = true;")
     b.trace('w', '''
        return segment == 0xB800;
     ''', '''
-        static uint32_t hit = 0;
+        if (enable_framebuffer_trace) {
+            static uint32_t hit = 0;
 
-        hit++;
-        if (hit == 400) {
-            hit = 0;
-            hw->outputFrame(hw->memSeg(0xB800));
-            hw->outputDelay(10);
+            hit++;
+            if (hit == %d) {
+                hit = 0;
+                hw->outputFrame(gStack, hw->memSeg(0xB800));
+                hw->outputDelay(%d);
+            }
         }
-    ''')
+    ''' % (interval, delay))
 
 
 def patchChips(b):

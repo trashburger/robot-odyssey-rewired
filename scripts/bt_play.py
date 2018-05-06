@@ -32,7 +32,7 @@ for call_site in [
     b.patchAndHook(call_site, 'ret',
   		'const char *argv = (const char*) (hw->memSeg(r.ds) + r.bx);'
         'hw->exec(argv, argv+strlen(argv)+1);'
-        'proc->continue_from(r, &sub_%X);' % continue_at.linear)
+        'proc->continueFrom(r, &sub_%X);' % continue_at.linear)
     b.exportSub(continue_at)
 
 b.writeCodeToFile(os.path.join(basedir, 'bt_play.cpp'), 'PlayEXE')

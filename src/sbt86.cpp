@@ -124,10 +124,10 @@ static void continue_after_exit()
 
 void SBTProcess::exit()
 {
-    continue_from(reg, continue_after_exit);
+    continueFrom(reg, continue_after_exit);
 }
 
-void SBTProcess::continue_from(SBTRegs regs, continue_func_t fn, bool default_entry)
+void SBTProcess::continueFrom(SBTRegs regs, continue_func_t fn, bool default_entry)
 {
     // Does not return
 

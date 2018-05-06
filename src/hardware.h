@@ -85,7 +85,7 @@ class Hardware : public SBTHardware
     virtual SBTRegs interrupt16(SBTRegs reg, SBTStack *stack);
     virtual SBTRegs interrupt21(SBTRegs reg, SBTStack *stack);
 
-    virtual void outputFrame(uint8_t *framebuffer);
+    virtual void outputFrame(SBTStack *stack, uint8_t *framebuffer);
     virtual void outputDelay(uint32_t millis);    
 
     virtual void exec(const char *program, const char *args);

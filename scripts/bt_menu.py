@@ -26,9 +26,11 @@ b.patchDynamicBranch('019E:0778', [
 b.patchDynamicLiteral('019E:0517', length=2)
 b.patchDynamicLiteral('019E:0519', length=2)
 
-# The main menu is a subroutine with a single caller; inline it to make cutting the control flow easier
-b.patch('019E:012A', 'jmp 0x310')
-b.patch('019E:034A', 'jmp 0x12d')
+# The main menu is a subroutine with a single caller;
+# inline it to make cutting the control flow easier. Also disable framebuffer traces
+# while drawing the main menu, so we can draw it faster.
+b.patchAndHook('019E:012A', 'jmp 0x310', 'enable_framebuffer_trace = false;')
+b.patchAndHook('019E:034A', 'jmp 0x12d', 'enable_framebuffer_trace = true;')
 
 # Now break control flow every time we see a call site for the main input polling function at 019E:0428
 input_poll_func = sbt86.Addr16(str='019E:0428')
@@ -46,9 +48,9 @@ for call_site in [
   
     # Redraw the screen and yield on the way out, check input on the way back in
     b.patchAndHook(call_site, 'ret',
-        'hw->outputFrame(hw->memSeg(0xB800));'
+        'hw->outputFrame(gStack, hw->memSeg(0xB800));'
         'hw->outputDelay(20);'
-        'proc->continue_from(r, &sub_%X);' % continue_at.linear)
+        'proc->continueFrom(r, &sub_%X);' % continue_at.linear)
     b.patch(continue_at, 'call 0x%04x' % input_poll_func.offset, length=2)
     b.exportSub(continue_at)
 
@@ -76,7 +78,7 @@ for (call_site, delay) in [
 
     b.patchAndHook(call_site, 'ret',
         'hw->outputDelay(%d);'
-        'proc->continue_from(r, &sub_%X);' % (delay, continue_at.linear))    
+        'proc->continueFrom(r, &sub_%X);' % (delay, continue_at.linear))    
     b.exportSub(continue_at)
 
 # Break up more main loop call sites, related to the cutscenes. None of these
@@ -151,7 +153,7 @@ for call_site in [
     call_site = sbt86.Addr16(str=call_site)
     target = b.jumpTarget(call_site)
     continue_at = call_site.add(1)
-    b.patchAndHook(call_site, 'ret', 'proc->continue_from(r, &sub_%X);' % continue_at.linear)
+    b.patchAndHook(call_site, 'ret', 'proc->continueFrom(r, &sub_%X);' % continue_at.linear)
     b.patch(continue_at, 'call 0x%04x' % target.offset, length=2)
     b.exportSub(continue_at)
 

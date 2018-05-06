@@ -135,7 +135,7 @@ class SBTHardware
     /*
      * Output hooks
      */
-    virtual void outputFrame(uint8_t *framebuffer) = 0;
+    virtual void outputFrame(SBTStack *stack, uint8_t *framebuffer) = 0;
     virtual void outputDelay(uint32_t millis) = 0;    
 
     /*
@@ -340,7 +340,7 @@ class SBTProcess
      * is true, this also becomes the fn() we run after the last fn() returns.
      */
     typedef void (*continue_func_t)(void);
-    void continue_from(SBTRegs regs, continue_func_t fn, bool default_entry = false);
+    void continueFrom(SBTRegs regs, continue_func_t fn, bool default_entry = false);
 
     SBTRegs reg;
     SBTRegs default_reg;
