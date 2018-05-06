@@ -1240,7 +1240,7 @@ class Instruction:
         return self.codegen_ret()
 
     def codegen_int(self, arg):
-        return "r = hw->interrupt%X(proc, r, gStack);" % arg
+        return "r = hw->interrupt%X(r, gStack);" % arg
 
     def codegen_out(self, port, value):
         return "hw->out(%s,%s,gClock);" % (port.codegen(), value.codegen())

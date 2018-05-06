@@ -4,10 +4,14 @@ GENERATED_BT := \
 	build/bt_game.cpp \
 	build/bt_lab.cpp \
 	build/bt_menu.cpp \
+	build/bt_menu2.cpp \
 	build/bt_play.cpp \
 	build/bt_tutorial.cpp
 
 all: build/original build/fspack.cpp $(GENERATED_BT)
+
+clean:
+	rm -Rf build/ dist/ .cache/
 
 build/%.cpp: scripts/%.py scripts/sbt86.py
 	$(PYTHON) $< build
@@ -21,4 +25,4 @@ build/original:
 	$(PYTHON) scripts/check-originals.py original build
 	touch $@
 
-.PHONY: all
+.PHONY: all clean

@@ -128,21 +128,20 @@ class SBTHardware
     /*
      * Emulated interrupt handlers for DOS and BIOS
      */
-    virtual SBTRegs interrupt10(SBTProcess *proc, SBTRegs reg, SBTStack *stack) = 0;
-    virtual SBTRegs interrupt16(SBTProcess *proc, SBTRegs reg, SBTStack *stack) = 0;
-    virtual SBTRegs interrupt21(SBTProcess *proc, SBTRegs reg, SBTStack *stack) = 0;
+    virtual SBTRegs interrupt10(SBTRegs reg, SBTStack *stack) = 0;
+    virtual SBTRegs interrupt16(SBTRegs reg, SBTStack *stack) = 0;
+    virtual SBTRegs interrupt21(SBTRegs reg, SBTStack *stack) = 0;
 
     /*
      * Output hooks
      */
-    virtual void outputFrame(SBTProcess *proc, uint8_t *framebuffer) = 0;
-    virtual void outputDelay(SBTProcess *proc, uint32_t millis) = 0;    
+    virtual void outputFrame(uint8_t *framebuffer) = 0;
+    virtual void outputDelay(uint32_t millis) = 0;    
 
     /*
      * OS hooks
      */
     virtual void exec(const char *program, const char *args) = 0;
-    virtual void resume_default_process(uint8_t exit_code) = 0;
 };
 
 
@@ -328,7 +327,11 @@ class SBTProcess
      */
     void run(void);
 
-    void exit(uint8_t code);
+    /*
+     * Interrupt the process.
+     * It's an error to run() again without resetting via exec().
+     */
+    void exit(void);
 
     /*
      * Yield execution now (exiting all nested functions) and

@@ -120,10 +120,8 @@ static void continue_after_exit() {
     assert(0 && "Continuing to run an exited SBTProcess");
 }
 
-void SBTProcess::exit(uint8_t code)
+void SBTProcess::exit()
 {
-    fprintf(stderr, "EXIT, code %d\n", code);
-    hardware->resume_default_process(code);
     continue_from(reg, continue_after_exit);
 }
 
@@ -143,6 +141,7 @@ void SBTProcess::continue_from(SBTRegs regs, continue_func_t fn, bool default_en
 
 void SBTProcess::failedDynamicBranch(uint16_t cs, uint16_t ip, uint32_t value)
 {
+    fprintf(stderr, "SBT86, failed dynamic branch at %04x:%04x, to %x\n", cs, ip, value);
     assert(0 && "Failed dynamic branch");
 }
 

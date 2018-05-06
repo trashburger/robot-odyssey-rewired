@@ -111,6 +111,7 @@ uint16_t DOSFilesystem::allocateFD()
 
 Hardware::Hardware()
 {
+    clearOutputQueue();
     process = 0;
     memset(mem, 0, MEM_SIZE);
 
@@ -120,6 +121,24 @@ Hardware::Hardware()
     rgb_palette[1] = 0xffffff55;
     rgb_palette[2] = 0xffff55ff;
     rgb_palette[3] = 0xffffffff;
+}
+
+Hardware::~Hardware()
+{
+    clearOutputQueue();
+}
+
+void Hardware::clearOutputQueue()
+{
+    while (!output_queue.empty()) {
+        OutputItem item = output_queue.front();
+        output_queue.pop_front();
+        if (item.otype == OUT_FRAME) {
+            delete item.u.framebuffer;
+        }
+    }
+    output_queue_depth = 0;
+    output_queue_delay_remaining = 0;
 }
 
 void Hardware::exec(const char *program, const char *args)
@@ -136,14 +155,16 @@ void Hardware::exec(const char *program, const char *args)
     assert(0 && "Program not found in exec()");
 }
 
-void Hardware::resume_default_process(uint8_t exit_code)
+void Hardware::exit(uint8_t code)
 {
-    fprintf(stderr, "EXIT, resuming default process\n");
+    fprintf(stderr, "EXIT, code %d\n", code);
+    SBTProcess *exiting_process = process;
     process = default_process;
-    process->reg.ax = exit_code;
+    process->reg.ax = code;
+    exiting_process->exit();
 }
 
-void Hardware::register_process(SBTProcess *p, bool is_default)
+void Hardware::registerProcess(SBTProcess *p, bool is_default)
 {
     process_vec.push_back(p);
     if (is_default) {
@@ -152,11 +173,45 @@ void Hardware::register_process(SBTProcess *p, bool is_default)
     }
 }
 
-void Hardware::run()
+uint32_t Hardware::run(uint32_t max_delay_per_step)
 {
-    assert(process);
-    process->run();
+    // Generate output until we hit the next delay, and run() when the output queue is empty.
+    // Returns the number of milliseconds to wait until the next call.
+
+    while (true) {
+        if (output_queue_delay_remaining > 0) {
+            uint32_t delay = std::min(output_queue_delay_remaining, max_delay_per_step);
+            output_queue_delay_remaining -= delay;
+            return delay;
+
+        } else if (output_queue.empty()) {
+            assert(process);
+            process->run();
+
+        } else {
+            OutputItem item = output_queue.front();
+            output_queue.pop_front();
+            output_queue_depth--;
+
+            switch (item.otype) {
+
+                case OUT_FRAME:
+                    renderFrame(item.u.framebuffer->bytes);
+                    delete item.u.framebuffer;
+                    break;
+
+                case OUT_DELAY:
+                    output_queue_delay_remaining += item.u.delay;
+                    break;
+
+                case OUT_SPEAKER_TIMESTAMP:
+                    // fprintf(stderr, "TODO, sound at %d\n", item.u.timestamp);
+                    break;
+            }
+        }
+    }
 }
+
 
 uint8_t Hardware::in(uint16_t port, uint32_t timestamp)
 {
@@ -198,7 +253,7 @@ void Hardware::out(uint16_t port, uint8_t value, uint32_t timestamp)
     }
 }
 
-SBTRegs Hardware::interrupt10(SBTProcess *proc, SBTRegs reg, SBTStack *stack)
+SBTRegs Hardware::interrupt10(SBTRegs reg, SBTStack *stack)
 {
     switch (reg.ah) {
 
@@ -212,7 +267,7 @@ SBTRegs Hardware::interrupt10(SBTProcess *proc, SBTRegs reg, SBTStack *stack)
     return reg;
 }
 
-SBTRegs Hardware::interrupt16(SBTProcess *proc, SBTRegs reg, SBTStack *stack)
+SBTRegs Hardware::interrupt16(SBTRegs reg, SBTStack *stack)
 {
     switch (reg.ah) {
 
@@ -236,7 +291,7 @@ SBTRegs Hardware::interrupt16(SBTProcess *proc, SBTRegs reg, SBTStack *stack)
     return reg;
 }
 
-SBTRegs Hardware::interrupt21(SBTProcess *proc, SBTRegs reg, SBTStack *stack)
+SBTRegs Hardware::interrupt21(SBTRegs reg, SBTStack *stack)
 {
     switch (reg.ah) {
 
@@ -281,7 +336,7 @@ SBTRegs Hardware::interrupt21(SBTProcess *proc, SBTRegs reg, SBTStack *stack)
         break;
 
     case 0x4C:                /* Exit with return code */
-        proc->exit(reg.al);
+        exit(reg.al);
         break;
 
     default:
@@ -295,12 +350,39 @@ void Hardware::pressKey(uint8_t ascii, uint8_t scancode) {
     keycode = (scancode << 8) | ascii;
 }
 
-void Hardware::outputFrame(SBTProcess *proc, uint8_t *framebuffer)
+void Hardware::outputFrame(uint8_t *framebuffer)
 {
-    // TODO: This should send frames to a queue in js instead of directly to the canvas
+    if (output_queue_depth > 500) {
+        assert(0 && "Frame queue is too deep! Infinite loop likely.");
+    }
+    OutputItem item;
+    item.otype = OUT_FRAME;
+    item.u.framebuffer = new CGAFramebuffer;
+    memcpy(item.u.framebuffer, framebuffer, sizeof *item.u.framebuffer);
+    output_queue.push_back(item);
+    output_queue_depth++;
+}
 
-    // fprintf(stderr, "frame!\n");
+void Hardware::outputDelay(uint32_t millis)
+{
+    OutputItem item;
+    item.otype = OUT_DELAY;
+    item.u.delay = millis;
+    output_queue.push_back(item);
+    output_queue_depth++;
+}
 
+void Hardware::writeSpeakerTimestamp(uint32_t timestamp)
+{
+    OutputItem item;
+    item.otype = OUT_SPEAKER_TIMESTAMP;
+    item.u.timestamp = timestamp;
+    output_queue.push_back(item);
+    output_queue_depth++;
+}
+
+void Hardware::renderFrame(uint8_t *framebuffer)
+{
     for (unsigned plane = 0; plane < 2; plane++) {
         for (unsigned y=0; y < SCREEN_HEIGHT/2; y++) {
             for (unsigned x=0; x < SCREEN_WIDTH; x++) {
@@ -318,17 +400,6 @@ void Hardware::outputFrame(SBTProcess *proc, uint8_t *framebuffer)
         var ctx = canvas.getContext('2d');
         var img = ctx.createImageData(320, 200);
         img.data.set(HEAPU8.subarray($0, $0 + 320*200*4));
-        ctx.putImageData(img, 0, 0);
+        ctx.putImageData(img, 1, 1);
     }, rgb_pixels);
-}
-
-void Hardware::outputDelay(SBTProcess *proc, uint32_t millis)
-{
-    // TODO: Send timing messages to the same queue as outputFrame
-
-    // fprintf(stderr, "Skipping delay of %dms\n", millis);
-}
-
-void Hardware::writeSpeakerTimestamp(uint32_t timestamp) {
-    // TODO
 }

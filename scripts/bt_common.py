@@ -82,8 +82,9 @@ def patch(b):
                               'bb2800 a1____ 8cda 8ed8 be0020 33 c0'),
                    'ret', '''
         if (!noBlit) {
-            hw->outputFrame(proc, proc->hardware->memSeg(proc->hardware->peek16(r.ds, 0x3AD5)));
-            hw->outputDelay(proc, 80);
+            const unsigned normal_frame_rate = 12;
+            hw->outputFrame(proc->hardware->memSeg(proc->hardware->peek16(r.ds, 0x3AD5)));
+            hw->outputDelay(1000 / normal_frame_rate);
         }
     ''')
 
@@ -175,7 +176,7 @@ def patch(b):
     b.publishAddress('SBTADDR_WORLD_DATA', b.peek16(worldPtr))
 
 
-def patchMenu(b):
+def patchFramebufferTrace(b):
     # Trace the framebuffer to emit frames periodically during animated transitions
     b.decl("#include <stdio.h>")
     b.trace('w', '''
@@ -184,10 +185,10 @@ def patchMenu(b):
         static uint32_t hit = 0;
 
         hit++;
-        if (hit == 200) {
+        if (hit == 400) {
             hit = 0;
-            hw->outputFrame(proc, hw->memSeg(0xB800));
-            hw->outputDelay(proc, 20);
+            hw->outputFrame(hw->memSeg(0xB800));
+            hw->outputDelay(10);
         }
     ''')
 

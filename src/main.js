@@ -4,9 +4,12 @@ import './main.css';
 const asm = engine();
 console.log("Loading wasm");
 
+const exec = asm.cwrap('exec', 'number', ['string', 'string'])
+
 function keycode(str, scancode) {
     asm._pressKey((str || '\0').charCodeAt(0), scancode);
 }
+
 
 function onKeydown(e) {
     if (e.code == "ArrowUp" && e.shiftKey == false) keycode(0, 0x48);
@@ -26,6 +29,19 @@ asm.then(() => {
     console.log("Engine ready");
     
     document.body.addEventListener('keydown', onKeydown);
+
+    for (let button of document.getElementsByClassName('exec_btn')) {
+        button.addEventListener('click', () => {
+            exec(button.dataset.program, button.dataset.args);
+            document.getElementById('framebuffer').focus();
+        });
+    }
+
+    for (let button of document.getElementsByClassName('keyboard_btn')) {
+        button.addEventListener('click', () => {
+            keycode(button.dataset.ascii, parseInt(button.dataset.scancode, 0));
+        });
+    }
 
     asm._start();
     console.log("Started game");

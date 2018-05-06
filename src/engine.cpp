@@ -1,28 +1,41 @@
-//parcel: -Oz -I. -s ASSERTIONS=2 sbt86.cpp hardware.cpp ../build/fspack.cpp ../build/bt_lab.cpp ../build/bt_menu.cpp ../build/bt_game.cpp ../build/bt_tutorial.cpp ../build/bt_play.cpp
+//parcel: -Oz -I. -s ASSERTIONS=2 sbt86.cpp hardware.cpp ../build/fspack.cpp ../build/bt_lab.cpp ../build/bt_menu.cpp ../build/bt_menu2.cpp ../build/bt_game.cpp ../build/bt_tutorial.cpp ../build/bt_play.cpp
 
 #include <stdint.h>
 #include <emscripten.h>
+#include <algorithm>
 #include "hardware.h"
 
 static Hardware hw;
 
-void loop()
+static void loop()
 {
-    hw.run();
+    uint32_t millis = hw.run();
+    emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, millis);
 }
 
 extern "C" void EMSCRIPTEN_KEEPALIVE start()
 {
-    hw.register_process(new PlayEXE(&hw), true);
-    hw.register_process(new MenuEXE(&hw));
-    hw.register_process(new GameEXE(&hw));
-    hw.register_process(new LabEXE(&hw));
-    hw.register_process(new TutorialEXE(&hw));
+    hw.registerProcess(new PlayEXE(&hw), true);
+    hw.registerProcess(new MenuEXE(&hw));
+    hw.registerProcess(new Menu2EXE(&hw));
+    hw.registerProcess(new GameEXE(&hw));
+    hw.registerProcess(new LabEXE(&hw));
+    hw.registerProcess(new TutorialEXE(&hw));
 
-    emscripten_set_main_loop(loop, 12, false);
+    emscripten_set_main_loop(loop, 0, false);
+}
+
+extern "C" void EMSCRIPTEN_KEEPALIVE exec(const char *process, const char *arg)
+{
+	hw.clearOutputQueue();
+	hw.exec(process, arg);
+	loop();
 }
 
 extern "C" void EMSCRIPTEN_KEEPALIVE pressKey(uint8_t ascii, uint8_t scancode) 
 {
     hw.pressKey(ascii, scancode);
+
+	// Skip cutscenes
+	hw.clearOutputQueue();
 }

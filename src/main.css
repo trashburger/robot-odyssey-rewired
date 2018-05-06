@@ -1,12 +1,16 @@
 h4 {
-    text-align: center;
     font-size: 18px;
+}
+
+button {
+    font-size: 25px;
+    margin: 5px;
 }
 
 body {
     background: black;
     color: #eee;
-    font: 12px sans;
+    font: 12px sans-serif;
 }
 
 div.cga {
@@ -16,6 +20,6 @@ div.cga {
 }
 
 canvas.cga {
-    width: 640px;
-    height: 500px;
+    width: 644px;
+    height: 505px;
 }
