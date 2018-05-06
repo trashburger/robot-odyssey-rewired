@@ -10,7 +10,6 @@ function keycode(str, scancode) {
     asm._pressKey((str || '\0').charCodeAt(0), scancode);
 }
 
-
 function onKeydown(e) {
     if (e.code == "ArrowUp" && e.shiftKey == false) keycode(0, 0x48);
     else if (e.code == "ArrowUp" && e.shiftKey == true) keycode('8', 0x48);

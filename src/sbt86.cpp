@@ -32,6 +32,7 @@
 #include "sbt86.h"
 
 static const bool full_stack_trace = false;
+static const uint32_t total_calls_threshold = 100000;
 
 
 static void decompressRLE(uint8_t *dest, uint8_t *limit, uint8_t *src, uint32_t srcLength)
@@ -116,7 +117,8 @@ void SBTProcess::run(void)
     }
 }
 
-static void continue_after_exit() {
+static void continue_after_exit()
+{
     assert(0 && "Continuing to run an exited SBTProcess");
 }
 
@@ -153,31 +155,39 @@ uint8_t *SBTHardware::memSeg(uint16_t seg)
     return mem + (((uint32_t)seg) << 4);
 }
 
-uint8_t SBTHardware::peek8(uint16_t seg, uint16_t off) {
+uint8_t SBTHardware::peek8(uint16_t seg, uint16_t off)
+{
     return memSeg(seg)[off];
 }
 
-void SBTHardware::poke8(uint16_t seg, uint16_t off, uint8_t value) {
+void SBTHardware::poke8(uint16_t seg, uint16_t off, uint8_t value)
+{
     memSeg(seg)[off] = value;
 }
 
-int16_t SBTHardware::peek16(uint16_t seg, uint16_t off) {
+int16_t SBTHardware::peek16(uint16_t seg, uint16_t off)
+{
     return SBTSegmentCache::read16(memSeg(seg) + off);
 }
 
-void SBTHardware::poke16(uint16_t seg, uint16_t off, uint16_t value) {
+void SBTHardware::poke16(uint16_t seg, uint16_t off, uint16_t value)
+{
     SBTSegmentCache::write16(memSeg(seg) + off, value);
 }
 
-SBTStack::SBTStack() {
+SBTStack::SBTStack()
+{
     reset();
 }
 
-void SBTStack::reset() {
+void SBTStack::reset()
+{
     top = 0;
+    total_calls_made = 0;
 }
 
-void SBTStack::trace() {
+void SBTStack::trace()
+{
     fprintf(stderr, "--- Stack trace:\n");
     for (unsigned addr = 0; addr < top; addr++) {
         fprintf(stderr, "[%d] ", addr);
@@ -202,14 +212,16 @@ void SBTStack::trace() {
     fprintf(stderr, "---\n");
 }
 
-void SBTStack::pushw(uint16_t word) {
+void SBTStack::pushw(uint16_t word)
+{
     assert(top < STACK_SIZE && "SBT86 stack overflow");
     words[top] = word;
     tags[top] = STACK_TAG_WORD;
     top++;
 }
 
-void SBTStack::pushf(SBTRegs reg) {
+void SBTStack::pushf(SBTRegs reg)
+{
     assert(top < STACK_SIZE && "SBT86 stack overflow");
     flags[top].uresult = reg.uresult;
     flags[top].sresult = reg.sresult;
@@ -217,23 +229,34 @@ void SBTStack::pushf(SBTRegs reg) {
     top++;
 }
 
-void SBTStack::pushret(uint16_t fn) {
+void SBTStack::pushret(uint16_t fn)
+{
     if (full_stack_trace) {
         fprintf(stderr, "+%04x\n", fn);
     }
+
+    total_calls_made++;
+    if (total_calls_made > total_calls_threshold) {
+        fprintf(stderr, "SBT86, over %d calls since entry, infinite loop?\n", total_calls_threshold);
+        trace();
+        assert(0 && "loop detected");
+    }
+
     assert(top < STACK_SIZE && "SBT86 stack overflow");
     fn_addrs[top] = fn;
     tags[top] = STACK_TAG_RETADDR;
     top++;
 }
 
-uint16_t SBTStack::popw() {
+uint16_t SBTStack::popw()
+{
     top--;
     assert(tags[top] == STACK_TAG_WORD && "SBT86 stack tag mismatch");
     return words[top];
 }
 
-SBTRegs SBTStack::popf(SBTRegs reg) {
+SBTRegs SBTStack::popf(SBTRegs reg)
+{
     top--;
     assert(tags[top] == STACK_TAG_FLAGS && "SBT86 stack tag mismatch");
     reg.uresult = flags[top].uresult;
@@ -241,7 +264,8 @@ SBTRegs SBTStack::popf(SBTRegs reg) {
     return reg;
 }
 
-void SBTStack::popret(uint16_t fn) {
+void SBTStack::popret(uint16_t fn)
+{
     top--;
     assert(tags[top] == STACK_TAG_RETADDR && "SBT86 stack tag mismatch");
     if (full_stack_trace) {
@@ -268,13 +292,15 @@ void SBTStack::popret(uint16_t fn) {
  * converts the top of stack back to a RETADDR.
  */
 
-void SBTStack::preSaveRet() {
+void SBTStack::preSaveRet()
+{
     assert(tags[top - 1] == STACK_TAG_RETADDR && "SBT86 stack tag mismatch");
     words[top - 1] = RET_VERIFICATION;
     tags[top - 1] = STACK_TAG_WORD;
 }
 
-void SBTStack::postRestoreRet() {
+void SBTStack::postRestoreRet()
+{
     assert(tags[top - 1] == STACK_TAG_WORD && "SBT86 stack tag mismatch");
     assert(words[top - 1] == RET_VERIFICATION && "SBT86 stack retaddr mismatch");
     tags[top - 1] = STACK_TAG_RETADDR;

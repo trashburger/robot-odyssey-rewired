@@ -281,6 +281,7 @@ class SBTStack
     static const uint32_t STACK_SIZE = 512;
     static const uint16_t RET_VERIFICATION = 0xBEEF;
     uint32_t top;
+    uint32_t total_calls_made;
 
     Tag tags[STACK_SIZE];
     uint32_t words[STACK_SIZE];

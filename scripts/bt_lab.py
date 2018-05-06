@@ -34,7 +34,9 @@ for call_site in [
     call_site = sbt86.Addr16(str=call_site)
     continue_at = call_site.add(1)
     subroutine = b.jumpTarget(call_site)
-    b.patchAndHook(call_site, 'ret', 'proc->continue_from(r, &sub_%X);' % continue_at.linear)
+    b.patchAndHook(call_site, 'ret',
+    	'hw->outputDelay(20);'
+		'proc->continue_from(r, &sub_%X);' % continue_at.linear)
     b.patch(continue_at, 'call 0x%04x' % subroutine.offset, length=2)
     b.exportSub(continue_at)
 
