@@ -46,10 +46,13 @@ for call_site in [
     continue_at = call_site.add(1)
     assert b.jumpTarget(call_site).linear == input_poll_func.linear
   
-    # Redraw the screen and yield on the way out, check input on the way back in
+    # Redraw the screen and yield on the way out, check input on the way back in.
+    # Use an arbitrarily low frame rate here, since we'll rely on skipping the delay
+    # when the key event comes in.
+
     b.patchAndHook(call_site, 'ret',
         'hw->outputFrame(gStack, hw->memSeg(0xB800));'
-        'hw->outputDelay(20);'
+        'hw->outputDelay(1000);'
         'proc->continueFrom(r, &sub_%X);' % continue_at.linear)
     b.patch(continue_at, 'call 0x%04x' % input_poll_func.offset, length=2)
     b.exportSub(continue_at)
@@ -67,7 +70,8 @@ b.patch('019E:074c', 'nop', length=3)
 # Stub out the function which saves the wallclock time ref
 b.patch(b.findCode(':b42c cd21 ________ c3'), 'ret')
 
-# Split up the actual delays
+# Split up the actual delays.
+# Keyboard input will skip the delay, so flush any queued keystrokes after we come back.
 for (call_site, delay) in [
     ('019E:010F', 4000),
     ('019E:0118', 4000),
@@ -80,6 +84,7 @@ for (call_site, delay) in [
         'hw->outputDelay(%d);'
         'proc->continueFrom(r, &sub_%X);' % (delay, continue_at.linear))    
     b.exportSub(continue_at)
+    b.hook(continue_at, 'hw->clearKeyboardBuffer();');
 
 # Break up more main loop call sites, related to the cutscenes. None of these
 # are required, but exiting earlier will reduce cutscene load times and memory

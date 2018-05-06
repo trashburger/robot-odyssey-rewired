@@ -24,21 +24,27 @@ function onKeydown(e) {
     else if (e.key.length == 1) keycode(e.key.toUpperCase(), 0);
 }
 
+function refocus(e) {
+    e.target.blur();
+    document.getElementById('framebuffer').focus();    
+}
+
 asm.then(() => {
     console.log("Engine ready");
     
     document.body.addEventListener('keydown', onKeydown);
 
     for (let button of document.getElementsByClassName('exec_btn')) {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', (e) => {
             exec(button.dataset.program, button.dataset.args);
-            document.getElementById('framebuffer').focus();
+            refocus(e);
         });
     }
 
     for (let button of document.getElementsByClassName('keyboard_btn')) {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', (e) => {
             keycode(button.dataset.ascii, parseInt(button.dataset.scancode, 0));
+            refocus(e);
         });
     }
 

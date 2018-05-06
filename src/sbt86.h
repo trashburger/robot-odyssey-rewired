@@ -133,15 +133,12 @@ class SBTHardware
     virtual SBTRegs interrupt21(SBTRegs reg, SBTStack *stack) = 0;
 
     /*
-     * Output hooks
+     * Hooks
      */
     virtual void outputFrame(SBTStack *stack, uint8_t *framebuffer) = 0;
     virtual void outputDelay(uint32_t millis) = 0;    
-
-    /*
-     * OS hooks
-     */
     virtual void exec(const char *program, const char *args) = 0;
+    virtual void clearKeyboardBuffer() = 0;
 };
 
 

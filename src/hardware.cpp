@@ -141,6 +141,11 @@ void Hardware::clearOutputQueue()
     output_queue_delay_remaining = 0;
 }
 
+void Hardware::clearKeyboardBuffer()
+{
+    keycode = 0;
+}
+
 void Hardware::exec(const char *program, const char *args)
 {
     fprintf(stderr, "EXEC, '%s' '%s'\n", program, args);

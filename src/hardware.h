@@ -89,6 +89,7 @@ class Hardware : public SBTHardware
     virtual void outputDelay(uint32_t millis);    
 
     virtual void exec(const char *program, const char *args);
+    virtual void clearKeyboardBuffer();
 
     DOSFilesystem fs;
 
