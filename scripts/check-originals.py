@@ -40,7 +40,6 @@ class OriginalFileCollector:
         'dabd64458ba5ff6e8ce08810d5a6f2435115edf8': 'fs/countton.chp',
         '191753097a89ae326dbbdb6725ab51b9282c985f': 'fs/countton.pin',
         'cd000439bb2d137bd6b9ecfd86d432708f23aa3a': 'fs/font.fon',
-        '0df0e301260e06ded7c64996aa99b04d8030f18b': 'fs/joyfile.joy',
         '82563b7b1b44e4784afd1221c894e71f92725643': 'fs/lab.wor',
         'ece893a440bfcf81ae0c438f6035713a825bc6ba': 'fs/pulse.chp',
         'b0aa4b549f325cca9c9dfa6ce1bd6072aeaeac71': 'fs/pulse.pin',

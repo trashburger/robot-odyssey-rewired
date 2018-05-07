@@ -2,7 +2,7 @@
  *
  * Accessor functions for Robot Odyssey's in-memory data.
  *
- * Copyright (c) 2009 Micah Elizabeth Scott <micah@scanlime.org>
+ * Copyright (c) 2009-2018 Micah Elizabeth Scott <micah@scanlime.org>
  *
  *    Permission is hereby granted, free of charge, to any person
  *    obtaining a copy of this software and associated documentation
@@ -26,12 +26,10 @@
  *    OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <assert.h>
 #include <string.h>
 #include <vector>
 #include "roData.h"
-
-
-//********************************************************** ROWorld
 
 
 ROWorld::ROWorld() {
@@ -43,7 +41,7 @@ ROWorld::ROWorld() {
 }
 
 ROWorld *ROWorld::fromProcess(SBTProcess *proc) {
-    return (ROWorld*) (proc->memSeg(proc->reg.ds) +
+    return (ROWorld*) (proc->hardware->memSeg(proc->reg.ds) +
                        proc->getAddress(SBTADDR_WORLD_DATA));
 }
 
@@ -143,34 +141,22 @@ void ROWorld::setRobotXY(ROObjectId obj, int x, int y) {
 }
 
 
-//********************************************************** ROCircuit
-
-
 ROCircuit *ROCircuit::fromProcess(SBTProcess *proc) {
-    return (ROCircuit*) (proc->memSeg(proc->reg.ds) +
+    return (ROCircuit*) (proc->hardware->memSeg(proc->reg.ds) +
                        proc->getAddress(SBTADDR_CIRCUIT_DATA));
 }
 
 
-//********************************************************** RORobot
-
-
 RORobot *RORobot::fromProcess(SBTProcess *proc) {
-    return (RORobot*) (proc->memSeg(proc->reg.ds) +
+    return (RORobot*) (proc->hardware->memSeg(proc->reg.ds) +
                        proc->getAddress(SBTADDR_ROBOT_DATA_MAIN));
 }
 
 
-//********************************************************** RORobotGrabber
-
-
 RORobotGrabber *RORobotGrabber::fromProcess(SBTProcess *proc) {
-    return (RORobotGrabber*) (proc->memSeg(proc->reg.ds) +
+    return (RORobotGrabber*) (proc->hardware->memSeg(proc->reg.ds) +
                               proc->getAddress(SBTADDR_ROBOT_DATA_GRABBER));
 }
-
-
-//********************************************************** ROSavedGame
 
 
 const char *ROSavedGame::getWorldName() {
@@ -184,9 +170,6 @@ const char *ROSavedGame::getWorldName() {
     default:               return "(Unknown)";
     }
 }
-
-
-//********************************************************** ROData
 
 
 ROData::ROData(SBTProcess *proc) {
@@ -205,11 +188,10 @@ ROData::ROData(SBTProcess *proc) {
      */
 
     robots.count = (RORobotGrabber*)robots.state - robots.grabbers;
-    sassert(robots.count == 3 || robots.count == 4,
-            "Robot table sanity check failed");
+    assert((robots.count == 3 || robots.count == 4) && "Robot table sanity check failed");
 
     uint8_t *endOfTable = (uint8_t*)&robots.state[robots.count];
-    sassert(*endOfTable == 0xFF, "End of robot table not found");
+    assert(*endOfTable == 0xFF && "End of robot table not found");
 
     /*
      * Just after the robot's table terminator, there is an array of
@@ -262,4 +244,21 @@ void ROData::copyFrom(ROData *source) {
         memcpy(&world->sprites[RO_SPR_GRABBER_LEFT],
                &source->world->sprites[RO_SPR_GAME_GRABBER_LEFT], sizeof(ROSprite));
     }
+}
+
+
+ROJoyfile::ROJoyfile()
+{
+    // Default contents... Possibly from unmodified installation media?
+    memset(this, 0, sizeof *this);
+    joyfile_1 = 0x01;
+    joyfile_2 = 0x02;
+    joyfile_A = 0x38;
+    joyfile_B = 0x02;
+    joyfile_C = 0x01;
+}
+
+void ROJoyfile::setCheatsEnabled(bool enable)
+{
+    cheats_enabled_if_5e = enable ? 0x5e : 0x00;
 }

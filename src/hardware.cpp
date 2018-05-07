@@ -55,10 +55,26 @@ int DOSFilesystem::open(const char *name)
          * Save file
          */
 
-        saveFileInfo.data = saveFile;
-        saveFileInfo.data_size = saveFileSize;
-        saveFileWriteMode = false;
+        saveFileInfo.data = save.buffer;
+        saveFileInfo.data_size = save.size;
+        save.writeMode = false;
         file = &saveFileInfo;
+
+    } else if (!strcmp(name, SBT_JOYFILE)) {
+        /*
+         * Joystick/configuration file
+         */
+
+        joyFileInfo.data = (const uint8_t*) &joyfile;
+        joyFileInfo.data_size = sizeof joyfile;
+        file = &joyFileInfo;
+
+        // This is a tiny 16-byte config file, log the contents
+        printf("FILE, %s contains:", SBT_JOYFILE);
+        for (unsigned i = 0; i < sizeof joyfile; i++) {
+            printf(" %02x", joyFileInfo.data[i]);
+        }
+        printf("\n");
 
     } else {
         /*
@@ -86,13 +102,14 @@ int DOSFilesystem::create(const char *name)
 
     if (!strcmp(name, SBT_SAVE_FILE_NAME)) {
 
-        saveFileInfo.data = saveFile;
+        saveFileInfo.data = save.buffer;
         saveFileInfo.data_size = 0;
-        saveFileSize = 0;
-        saveFileWriteMode = true;
+        save.size = 0;
+        save.writeMode = true;
         file = &saveFileInfo;
 
     } else {
+        fprintf(stderr, "FILE, failed to open '%s' for writing\n", name);
         return -1;
     }
 
@@ -106,10 +123,10 @@ void DOSFilesystem::close(uint16_t fd)
     assert(fd < MAX_OPEN_FILES && "Closing an invalid file descriptor");
     assert(openFiles[fd] && "Closing a file which is not open");
 
-    if (openFiles[fd] == &saveFileInfo && saveFileWriteMode) {
+    if (openFiles[fd] == &saveFileInfo && save.writeMode) {
         EM_ASM_({
             Module.onSaveFileWrite(HEAPU8.subarray($0, $0 + $1));
-        }, saveFile, saveFileSize);
+        }, save.buffer, save.size);
     }
 
     openFiles[fd] = 0;
@@ -141,13 +158,13 @@ uint16_t DOSFilesystem::write(uint16_t fd, const void *buffer, uint16_t length)
     assert(file == &saveFileInfo && "Writing a file that isn't the saved game file");
 
     uint32_t offset = fileOffsets[fd];
-    uint16_t actual_length = std::min<unsigned>(length, sizeof saveFile - offset);
+    uint16_t actual_length = std::min<unsigned>(length, sizeof save.buffer - offset);
 
     printf("FILE, write %d(%d) bytes at %d\n", length, actual_length, offset);
-    memcpy(saveFile + offset, buffer, actual_length);
+    memcpy(save.buffer + offset, buffer, actual_length);
 
     fileOffsets[fd] += actual_length;
-    saveFileSize = fileOffsets[fd];
+    save.size = fileOffsets[fd];
     return actual_length;
 }
 

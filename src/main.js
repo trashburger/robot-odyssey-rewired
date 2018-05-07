@@ -5,6 +5,9 @@ import './main.css';
 const asm = engine();
 console.log("Loading wasm");
 
+// For console debugging later
+window.ROEngine = asm;
+
 const exec = asm.cwrap('exec', 'number', ['string', 'string'])
 
 function keycode(str, scancode)

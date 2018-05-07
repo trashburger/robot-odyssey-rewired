@@ -1,4 +1,4 @@
-//parcel: -Oz -I. -s ASSERTIONS=2 sbt86.cpp hardware.cpp ../build/fspack.cpp ../build/bt_lab.cpp ../build/bt_menu.cpp ../build/bt_menu2.cpp ../build/bt_game.cpp ../build/bt_tutorial.cpp ../build/bt_play.cpp
+//parcel: -Oz -I. -s ASSERTIONS=2 sbt86.cpp hardware.cpp roData.cpp ../build/fspack.cpp ../build/bt_lab.cpp ../build/bt_menu.cpp ../build/bt_menu2.cpp ../build/bt_game.cpp ../build/bt_tutorial.cpp ../build/bt_play.cpp
 
 #include <stdint.h>
 #include <emscripten.h>
@@ -60,15 +60,27 @@ extern "C" uint32_t EMSCRIPTEN_KEEPALIVE memSize()
 
 extern "C" uint8_t* EMSCRIPTEN_KEEPALIVE saveFilePointer()
 {
-	return hw.fs.saveFile;
+	return hw.fs.save.buffer;
 }
 
 extern "C" uint32_t EMSCRIPTEN_KEEPALIVE getSaveFileSize()
 {
-	return hw.fs.saveFileSize;
+	return hw.fs.save.size;
 }
 
 extern "C" void EMSCRIPTEN_KEEPALIVE setSaveFileSize(uint32_t size)
 {
-	hw.fs.saveFileSize = size;
+	hw.fs.save.size = size;
+}
+
+extern "C" void EMSCRIPTEN_KEEPALIVE setCheatsEnabled(bool enable)
+{
+	// Set a byte in JOYFILE to enable cheats. Game must restart to take effect.
+	hw.fs.joyfile.setCheatsEnabled(enable);
+}
+
+extern "C" void EMSCRIPTEN_KEEPALIVE cheatToggleCollisions()
+{
+	// CTRL-E, this is a hidden cheat that's enabled only when a byte in JOYFILE is set.
+	hw.pressKey(5, 0);
 }

@@ -27,9 +27,13 @@ public:
     uint16_t read(uint16_t fd, void *buffer, uint16_t length);
     uint16_t write(uint16_t fd, const void *buffer, uint16_t length);
 
-    uint8_t saveFile[0x10000];
-    uint32_t saveFileSize;
-    bool saveFileWriteMode;
+    ROJoyfile joyfile;
+
+    struct {
+        uint32_t size;
+        bool writeMode;
+        uint8_t buffer[0x10000];
+    } save;
 
 private:
     uint16_t allocateFD();
@@ -38,6 +42,7 @@ private:
     const FileInfo* openFiles[MAX_OPEN_FILES];
     uint32_t fileOffsets[MAX_OPEN_FILES];
     FileInfo saveFileInfo;
+    FileInfo joyFileInfo;
 };
 
 

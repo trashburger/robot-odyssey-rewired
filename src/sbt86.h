@@ -52,12 +52,11 @@ class SBTSegmentCache;
 
 
 /*
- * SBT_SAVE_FILE_NAME --
- *
- *    Special filename we patch in for load/save operations
+ * Special filenames
  */
 
 #define SBT_SAVE_FILE_NAME "savefile"
+#define SBT_JOYFILE        "joyfile.joy"
 
 
 /*

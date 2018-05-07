@@ -562,4 +562,37 @@ class ROData {
 };
 
 
+/*
+ * Saved joystick (and other) configuration data, the 16-byte joyfile.dat
+ */
+class ROJoyfile {
+ public:
+    ROJoyfile();
+
+    // When enabled, CTRL-E toggles collision detection on/off
+    void setCheatsEnabled(bool enable);
+
+    uint8_t joyfile_0;
+    uint8_t joyfile_1;
+    uint8_t joyfile_2;
+    uint8_t joyfile_3;
+
+    uint8_t joyfile_4;
+    uint8_t joyfile_5;
+    uint8_t joyfile_6;
+    uint8_t joyfile_7;
+
+    uint8_t joyfile_8;
+    uint8_t cheats_enabled_if_5e;
+    uint8_t joyfile_A;
+    uint8_t joyfile_B;
+
+    uint8_t joyfile_C;
+    uint8_t joyfile_D;
+    uint8_t joyfile_E;
+    uint8_t joyfile_F;
+
+} __attribute__ ((packed));
+
+
 #endif // _RODATA_H_
