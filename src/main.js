@@ -33,6 +33,26 @@ function refocus(e)
     document.getElementById('framebuffer').focus();    
 }
 
+const LAB_WORLD = 30;
+
+function worldIdFromSaveData(bytes)
+{
+    if (bytes.length == 24389) {
+        return bytes[bytes.length - 1];
+    }
+}
+
+function filenameForSaveData(bytes)
+{
+    const world = worldIdFromSaveData(bytes);
+    const now = new Date();
+    if (world == LAB_WORLD) {
+        return "robotodyssey-lab-" + now.toISOString() + ".lsv";
+    } else {
+        return "robotodyssey-world" + (world+1) + "-" + now.toISOString() + ".gsv";
+    }
+}
+
 asm.then(() =>
 {
     const fbCanvas = document.getElementById('framebuffer');
@@ -51,7 +71,7 @@ asm.then(() =>
     };
 
     asm.onSaveFileWrite = (saveData) => {
-        downloadjs(saveData, 'savefile.bin', 'application/octet-stream');
+        downloadjs(saveData, filenameForSaveData(saveData), 'application/octet-stream');
     };
 
     for (let button of document.getElementsByClassName('exec_btn')) {
@@ -95,16 +115,10 @@ asm.then(() =>
         asm._setSaveFileSize(bytes.length);
         asm.HEAPU8.set(bytes, asm._saveFilePointer());
 
-        // Correct size for a saved world?
-        if (bytes.length == 24389) {
-            // Check world ID; is it a saved lab?
-            if (bytes[bytes.length - 1] == 30) {
-                exec("lab.exe", "99");
-            } else {
-                exec("game.exe", "99");
-            }
+        if (worldIdFromSaveData(bytes) == LAB_WORLD) {
+            exec("lab.exe", "99");
         } else {
-            console.warn("Incorrect length for saved world");
+            exec("game.exe", "99");
         }
     };
 
