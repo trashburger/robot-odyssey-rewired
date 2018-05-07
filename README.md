@@ -28,20 +28,27 @@ Build Instructions
 To do
 -----
 
-- Fix modals in main game
-  - esc
-  - ?
+- chip load/save is broken
+  - modals need patching
+
+- end-game is broken
+  - Final cutscene still needs patching and testing
+  - Needs play testing
 
 - load/save
-  - needs in-game modals?
-  - redirect "savefile" to local storage
-  - un-remove in-game file picker, for "authentic" mode?
+  - package thumbnails plus game data into PNG/JPEG/GIF for mobile+social
+  - local browser storage
 
 - output
-  - queue output items
   - nicer video scaling
   - sound
 
 - input
   - touch controls
   - controls help
+
+- enhancements
+  - touch/mouse controls for schematic editing
+  - built-in chip decompiler
+  - enhanced graphics modes
+  - input UI / mobile experience
