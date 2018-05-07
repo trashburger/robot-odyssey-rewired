@@ -69,13 +69,6 @@ int DOSFilesystem::open(const char *name)
         joyFileInfo.data_size = sizeof joyfile;
         file = &joyFileInfo;
 
-        // This is a tiny 16-byte config file, log the contents
-        printf("FILE, %s contains:", SBT_JOYFILE);
-        for (unsigned i = 0; i < sizeof joyfile; i++) {
-            printf(" %02x", joyFileInfo.data[i]);
-        }
-        printf("\n");
-
     } else {
         /*
          * Game file
@@ -379,6 +372,16 @@ static void set_result_for_fd(SBTRegs &reg, int fd) {
     }    
 }
 
+static void small_hexdump_and_newline(const uint8_t *bytes, uint16_t count)
+{
+    if (count <= 32) {
+        for (unsigned i = 0; i < count; i++) {
+            printf(" %02x", bytes[i]);
+        }
+    }
+    printf("\n");
+}
+
 SBTRegs Hardware::interrupt21(SBTRegs reg, SBTStack *stack)
 {
     switch (reg.ah) {
@@ -413,24 +416,28 @@ SBTRegs Hardware::interrupt21(SBTRegs reg, SBTStack *stack)
 
     case 0x3F:                /* Read File */
         reg.ax = fs.read(reg.bx, memSeg(reg.ds) + reg.dx, reg.cx);
-        printf("FILE, reading %d bytes into %04x:%04x\n", reg.ax, reg.ds, reg.dx);
         reg.clearCF();
+        printf("FILE, reading %d bytes into %04x:%04x ", reg.ax, reg.ds, reg.dx);
+        small_hexdump_and_newline(memSeg(reg.ds) + reg.dx, reg.ax);
         break;
 
     case 0x40:                /* Write file */
         reg.ax = fs.write(reg.bx, memSeg(reg.ds) + reg.dx, reg.cx);
-        printf("FILE, writing %d bytes from %04x:%04x\n", reg.ax, reg.ds, reg.dx);
         reg.clearCF();
+        printf("FILE, writing %d bytes from %04x:%04x ", reg.ax, reg.ds, reg.dx);
+        small_hexdump_and_newline(memSeg(reg.ds) + reg.dx, reg.ax);
         break;
 
     case 0x4A:                /* Reserve memory */
         break;
 
     case 0x4C:                /* Exit with return code */
+        stack->trace();
         exit(reg.al);
         break;
 
     default:
+        stack->trace();
         fprintf(stderr, "int21 ax=%04x\n", reg.ax);
         assert(0 && "Unimplemented DOS Int21");
     }

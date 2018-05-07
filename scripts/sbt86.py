@@ -174,11 +174,16 @@ class Addr16:
     def __eq__(self, other):
         return self.linear == other.linear
 
-    def add(self, x):
+    def add(self, x, wrap=False):
         if isinstance(x, Addr16):
-            return Addr16(self.segment + x.segment, self.offset + x.offset)
+            s = self.segment + x.segment
+            o = self.offset + x.offset
         else:
-            return Addr16(self.segment, self.offset + x)
+            s = self.segment
+            o = self.offset + x
+        if wrap:
+            o = o & 0xffff
+        return Addr16(s, o)
 
     def __repr__(self):
         return str(self)
@@ -1905,7 +1910,7 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
            Currently only handles the specific jumps we care about.
            """
         assert self.peek8(addr) in [0xE9, 0xE8]
-        target = addr.add(3 + self.peek16s(addr.add(1)))
+        target = addr.add(3 + self.peek16s(addr.add(1)), wrap=True)
         log("Found jump from %r -> %r" % (addr, target))
         return target
 
