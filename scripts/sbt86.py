@@ -1807,9 +1807,8 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
 
     def exportSub(self, address):
         """Before analysis, mark an extra address to be considered as a subroutine entry point"""
-        if address in self._exportedSubs:
-            raise ValueError("Already exported %r as subroutine" % address)
-        self._exportedSubs.append(address)
+        if address not in self._exportedSubs:
+            self._exportedSubs.append(address)
 
     def analyze(self, verbose=False):
         """Analyze the whole program. This breaks it up into

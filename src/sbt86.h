@@ -87,9 +87,8 @@ enum SBTAddressId {
 class SBTHardware
 {
  public:
-    /*
-     * Real mode memory for this process.
-     */
+    static const int CLOCK_HZ = 4770000;
+
     static const uint32_t MEM_SIZE = 256 * 1024;
     uint8_t mem[MEM_SIZE];
 

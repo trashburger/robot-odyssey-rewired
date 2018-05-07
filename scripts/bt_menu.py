@@ -15,6 +15,8 @@ import bt_common
 basedir = sys.argv[1]
 b = sbt86.DOSBinary(os.path.join(basedir, 'menu.exe'))
 
+b.decl('#include <string.h>')
+
 bt_common.patchFramebufferTrace(b)
 b.hook(b.entryPoint, 'enable_framebuffer_trace = true;')
 
@@ -36,10 +38,16 @@ b.patchDynamicLiteral('019E:0519', length=2)
 b.patchAndHook('019E:012A', 'jmp 0x310', 'enable_framebuffer_trace = false;')
 b.patchAndHook('019E:034A', 'jmp 0x12d', 'enable_framebuffer_trace = true;')
 
-# Remove the new/old game menu before entering robotropolis.
-# We handle game loading separately.
-# This will start the new-game cutscene right away, then enter game.exe
+# Bypass the wait on the new/old game menu before entering robotropolis.
 b.patch('019E:0178', 'jmp 0x1A6')
+
+# The new/old game prompt itself isn't easy to remove entirely, since
+# it's stored sequentially prior to the cutscene in the cutscene file.
+# Instead, turn off framebuffer traces so we don't see it, and clear the
+# screen before the actual cutscene starts.
+b.hook('019E:016C', 'enable_framebuffer_trace = false;')
+b.hook('019E:0178', 'enable_framebuffer_trace = true;'
+                    'memset(hw->memSeg(0xB800), 0, 0x4000);')
 
 # Remove the new/old game menu and disk swap before Innovation Lab
 # As above, we'll handle game loading using an external UI.
@@ -74,11 +82,6 @@ for call_site in [
     b.patch(continue_at, 'call 0x%04x' % input_poll_func.offset, length=2)
     b.exportSub(continue_at)
 
-# This is also an input poll callsite, but it's for skipping cutscenes and there isn't
-# a good way to break it up with continuations. Just remove it, the cutscenes don't
-# need to be skippable like this anyway, we can include a fast forward mode.
-b.patch('019E:074c', 'nop', length=3)
-
 # The menu uses wallclock time for some delays.
 # A save function is called before drawing the screen, to store a seconds timestamp.
 # Then, one of two fixed-duration delay functions are called to wait 4 seconds or 1 second
@@ -93,53 +96,44 @@ for (call_site, delay) in [
     ('019E:010F', 4000),
     ('019E:0118', 4000),
     ('019E:01BD', 1000),
+    ('019E:01DB', 250),
 ]:
     call_site = sbt86.Addr16(str=call_site)
     continue_at = call_site.add(3)
 
     b.patchAndHook(call_site, 'ret',
+        'hw->outputFrame(gStack, hw->memSeg(0xB800));'
         'hw->outputDelay(%d);'
         'proc->continueFrom(r, &sub_%X);' % (delay, continue_at.linear))    
     b.exportSub(continue_at)
     b.hook(continue_at, 'hw->clearKeyboardBuffer();')
 
-# Break up more main loop call sites, related to the cutscenes. None of these
-# are required, but exiting earlier will reduce cutscene load times and memory
-# requirements since we don't have to queue so many frames before displaying them.
+# The cutscenes use a function I'm calling show_sfx_interruptible, which
+# polls for keyboard input while playing a buffer of sound effects.
+# Wrap each call site with some code that inserts a delay and breaks control flow.
+show_sfx_interruptible = sbt86.Addr16(str='019E:0748')
 for call_site in [
+    '019E:01C6',
+    '019E:01CC',
     '019E:01D5',
     '019E:01E1',
     '019E:01E7',
     '019E:01ED',
-    '019E:01F0',
     '019E:01F9',
-    '019E:01FC',
     '019E:0205',
     '019E:020B',
     '019E:0211',
     '019E:0217',
-    '019E:021A',
     '019E:0223',
-    '019E:0226',
-    '019E:0229',
     '019E:022F',
-    '019E:0232',
     '019E:023D',
-    '019E:0240',
     '019E:024B',
     '019E:0259',
-    '019E:025C',
     '019E:0267',
-    '019E:026A',
     '019E:0275',
-    '019E:0278',
-    '019E:027B',
     '019E:0286',
-    '019E:0289',
     '019E:0294',
-    '019E:0297',
     '019E:02A2',
-    '019E:02A5',
     '019E:02B0',
     '019E:02BB',
     '019E:02C1',
@@ -150,12 +144,17 @@ for call_site in [
 ]:
     call_site = sbt86.Addr16(str=call_site)
     target = b.jumpTarget(call_site)
-    continue_at = call_site.add(1)
-    b.patchAndHook(call_site, 'ret',
-            'fprintf(stderr, "Menu cont %r\\n");'
-            'proc->continueFrom(r, &sub_%X);' % (continue_at, continue_at.linear))
-    b.patch(continue_at, 'call 0x%04x' % target.offset, length=2)
+    assert target.linear == show_sfx_interruptible.linear
+    continue_at = call_site.add(3)
     b.exportSub(continue_at)
-
+    b.exportSub(target)
+    b.patchAndHook(call_site, 'ret',
+        'hw->outputFrame(gStack, hw->memSeg(0xB800));'
+        'uint32_t clockref = gClock;'
+        'sub_%X();'
+        'uint32_t elapsed = gClock - clockref;'
+        'hw->outputDelay(elapsed / (SBTHardware::CLOCK_HZ / 1000));'
+        'proc->continueFrom(r, &sub_%X);' % (
+            target.linear, continue_at.linear))
 
 b.writeCodeToFile(os.path.join(basedir, 'bt_menu.cpp'), 'MenuEXE')
