@@ -13,6 +13,7 @@ basedir = sys.argv[1]
 b = sbt86.DOSBinary(os.path.join(basedir, 'menu.exe'))
 
 bt_common.patchFramebufferTrace(b)
+b.hook(b.entryPoint, 'enable_framebuffer_trace = true;')
 
 # Dynamic branch for cutscene sound effects
 b.patchDynamicBranch('019E:0778', [
@@ -84,7 +85,7 @@ for (call_site, delay) in [
         'hw->outputDelay(%d);'
         'proc->continueFrom(r, &sub_%X);' % (delay, continue_at.linear))    
     b.exportSub(continue_at)
-    b.hook(continue_at, 'hw->clearKeyboardBuffer();');
+    b.hook(continue_at, 'hw->clearKeyboardBuffer();')
 
 # Break up more main loop call sites, related to the cutscenes. None of these
 # are required, but exiting earlier will reduce cutscene load times and memory

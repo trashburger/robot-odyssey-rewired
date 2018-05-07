@@ -179,7 +179,7 @@ def patch(b):
 def patchFramebufferTrace(b, interval=200, delay=8):
     # Trace the framebuffer to emit frames periodically during animated transitions
     b.decl("#include <stdio.h>")
-    b.decl("static bool enable_framebuffer_trace = true;")
+    b.decl("static bool enable_framebuffer_trace;")
     b.trace('w', '''
        return segment == 0xB800;
     ''', '''
