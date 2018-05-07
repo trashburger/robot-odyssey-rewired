@@ -6,11 +6,12 @@
 #include "hardware.h"
 
 static Hardware hw;
+static float delay_multiplier = 1.0f;
 
 static void loop()
 {
     uint32_t millis = hw.run();
-    emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, millis);
+    emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, millis * delay_multiplier);
 }
 
 extern "C" void EMSCRIPTEN_KEEPALIVE start()
@@ -30,6 +31,13 @@ extern "C" void EMSCRIPTEN_KEEPALIVE exec(const char *process, const char *arg)
 	hw.clearOutputQueue();
 	hw.exec(process, arg);
 	loop();
+}
+
+extern "C" void EMSCRIPTEN_KEEPALIVE setSpeed(float speed)
+{
+	if (speed > 0.0f) {
+		delay_multiplier = 1.0 / speed;
+	}
 }
 
 extern "C" void EMSCRIPTEN_KEEPALIVE pressKey(uint8_t ascii, uint8_t scancode) 

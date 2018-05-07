@@ -82,8 +82,20 @@ asm.then(() =>
     }
 
     for (let button of document.getElementsByClassName('keyboard_btn')) {
+        const key = () => keycode(button.dataset.ascii, parseInt(button.dataset.scancode, 0));
         button.addEventListener('click', (e) => {
-            keycode(button.dataset.ascii, parseInt(button.dataset.scancode, 0));
+            key();
+            refocus(e);
+        });
+        button.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            key();
+        });
+    }
+
+    for (let button of document.getElementsByClassName('setspeed_btn')) {
+        button.addEventListener('click', (e) => {
+            asm._setSpeed(parseFloat(button.dataset.speed));
             refocus(e);
         });
     }
