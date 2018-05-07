@@ -22,10 +22,14 @@ public:
     void reset();
 
     int open(const char *name);
+    int create(const char *name);
     void close(uint16_t fd);
     uint16_t read(uint16_t fd, void *buffer, uint16_t length);
+    uint16_t write(uint16_t fd, const void *buffer, uint16_t length);
 
-    uint8_t saveFile[sizeof(ROSavedGame)];
+    uint8_t saveFile[0x10000];
+    uint32_t saveFileSize;
+    bool saveFileWriteMode;
 
 private:
     uint16_t allocateFD();

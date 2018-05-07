@@ -49,3 +49,18 @@ extern "C" uint32_t EMSCRIPTEN_KEEPALIVE memSize()
 {
 	return Hardware::MEM_SIZE;
 }
+
+extern "C" uint8_t* EMSCRIPTEN_KEEPALIVE saveFilePointer()
+{
+	return hw.fs.saveFile;
+}
+
+extern "C" uint32_t EMSCRIPTEN_KEEPALIVE getSaveFileSize()
+{
+	return hw.fs.saveFileSize;
+}
+
+extern "C" void EMSCRIPTEN_KEEPALIVE setSaveFileSize(uint32_t size)
+{
+	hw.fs.saveFileSize = size;
+}

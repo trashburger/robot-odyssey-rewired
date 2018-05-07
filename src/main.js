@@ -7,11 +7,13 @@ console.log("Loading wasm");
 
 const exec = asm.cwrap('exec', 'number', ['string', 'string'])
 
-function keycode(str, scancode) {
+function keycode(str, scancode)
+{
     asm._pressKey((str || '\0').charCodeAt(0), scancode);
 }
 
-function onKeydown(e) {
+function onKeydown(e)
+{
     if (e.code == "ArrowUp" && e.shiftKey == false) keycode(0, 0x48);
     else if (e.code == "ArrowUp" && e.shiftKey == true) keycode('8', 0x48);
     else if (e.code == "ArrowDown" && e.shiftKey == false) keycode(0, 0x50);
@@ -25,15 +27,32 @@ function onKeydown(e) {
     else if (e.key.length == 1) keycode(e.key.toUpperCase(), 0);
 }
 
-function refocus(e) {
+function refocus(e)
+{
     e.target.blur();
     document.getElementById('framebuffer').focus();    
 }
 
-asm.then(() => {
-    console.log("Engine ready");
-    
+asm.then(() =>
+{
+    const fbCanvas = document.getElementById('framebuffer');
+    const fbContext = fbCanvas.getContext('2d');
+    const fbImage = fbContext.createImageData(320, 200);
+
+    // Blank canvas, including a 1-pixel black border for consistent edge blending
+    fbContext.fillStyle = '#000000';
+    fbContext.fillRect(0, 0, 322, 202);
+
     document.body.addEventListener('keydown', onKeydown);
+
+    asm.onRenderFrame = (rgbData) => {
+        fbImage.data.set(rgbData);
+        fbContext.putImageData(fbImage, 1, 1);
+    };
+
+    asm.onSaveFileWrite = (saveData) => {
+        downloadjs(saveData, 'savefile.bin', 'application/octet-stream');
+    };
 
     for (let button of document.getElementsByClassName('exec_btn')) {
         button.addEventListener('click', (e) => {
@@ -57,6 +76,37 @@ asm.then(() => {
         refocus(e);
     });
 
+    document.getElementById('savefile_btn').addEventListener('click', (e) => {
+        document.getElementById('savefile_input').click();
+        refocus(e);
+    });
+
+    document.getElementById('savefile_input').addEventListener('change', (e) => {
+        const files = e.target.files;
+        if (files.length == 1 && files[0].size <= 0x10000) {
+            const reader = new FileReader();
+            reader.onload = (e) => asm.loadSaveFile(reader.result);
+            reader.readAsArrayBuffer(files[0]);
+        }
+    });
+
+    asm.loadSaveFile = (array) => {
+        const bytes = new Uint8Array(array);
+        asm._setSaveFileSize(bytes.length);
+        asm.HEAPU8.set(bytes, asm._saveFilePointer());
+
+        // Correct size for a saved world?
+        if (bytes.length == 24389) {
+            // Check world ID; is it a saved lab?
+            if (bytes[bytes.length - 1] == 30) {
+                exec("lab.exe", "99");
+            } else {
+                exec("game.exe", "99");
+            }
+        } else {
+            console.warn("Incorrect length for saved world");
+        }
+    };
+
     asm._start();
-    console.log("Started game");
 });

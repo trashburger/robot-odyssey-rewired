@@ -24,3 +24,7 @@ canvas.cga {
     width: 644px;
     height: 505px;
 }
+
+#savefile_input {
+    display: none;
+}

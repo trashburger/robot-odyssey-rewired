@@ -56,7 +56,8 @@ int DOSFilesystem::open(const char *name)
          */
 
         saveFileInfo.data = saveFile;
-        saveFileInfo.data_size = sizeof saveFile;
+        saveFileInfo.data_size = saveFileSize;
+        saveFileWriteMode = false;
         file = &saveFileInfo;
 
     } else {
@@ -76,10 +77,41 @@ int DOSFilesystem::open(const char *name)
     return fd;
 }
 
+int DOSFilesystem::create(const char *name)
+{
+    int fd = allocateFD();
+    const FileInfo *file;
+
+    printf("FILE, creating '%s'\n", name);
+
+    if (!strcmp(name, SBT_SAVE_FILE_NAME)) {
+
+        saveFileInfo.data = saveFile;
+        saveFileInfo.data_size = 0;
+        saveFileSize = 0;
+        saveFileWriteMode = true;
+        file = &saveFileInfo;
+
+    } else {
+        return -1;
+    }
+
+    openFiles[fd] = file;
+    fileOffsets[fd] = 0;
+    return fd;
+}
+
 void DOSFilesystem::close(uint16_t fd)
 {
     assert(fd < MAX_OPEN_FILES && "Closing an invalid file descriptor");
     assert(openFiles[fd] && "Closing a file which is not open");
+
+    if (openFiles[fd] == &saveFileInfo && saveFileWriteMode) {
+        EM_ASM_({
+            Module.onSaveFileWrite(HEAPU8.subarray($0, $0 + $1));
+        }, saveFile, saveFileSize);
+    }
+
     openFiles[fd] = 0;
 }
 
@@ -97,6 +129,25 @@ uint16_t DOSFilesystem::read(uint16_t fd, void *buffer, uint16_t length)
     memcpy(buffer, file->data + offset, actual_length);
 
     fileOffsets[fd] += actual_length;
+    return actual_length;
+}
+
+uint16_t DOSFilesystem::write(uint16_t fd, const void *buffer, uint16_t length)
+{
+    const FileInfo *file = openFiles[fd];
+
+    assert(fd < MAX_OPEN_FILES && "Writing an invalid file descriptor");
+    assert(file && "Writing a file which is not open");
+    assert(file == &saveFileInfo && "Writing a file that isn't the saved game file");
+
+    uint32_t offset = fileOffsets[fd];
+    uint16_t actual_length = std::min<unsigned>(length, sizeof saveFile - offset);
+
+    printf("FILE, write %d(%d) bytes at %d\n", length, actual_length, offset);
+    memcpy(saveFile + offset, buffer, actual_length);
+
+    fileOffsets[fd] += actual_length;
+    saveFileSize = fileOffsets[fd];
     return actual_length;
 }
 
@@ -302,20 +353,28 @@ SBTRegs Hardware::interrupt16(SBTRegs reg, SBTStack *stack)
     return reg;
 }
 
+static void set_result_for_fd(SBTRegs &reg, int fd) {
+    if (fd < 0) {
+        reg.setCF();
+    } else {
+        reg.ax = fd;
+        reg.clearCF();
+    }    
+}
+
 SBTRegs Hardware::interrupt21(SBTRegs reg, SBTStack *stack)
 {
     switch (reg.ah) {
 
     case 0x06:                /* Direct console input/output (Only input supported) */
         if (reg.dl == 0xFF) {
+            reg.al = (uint8_t) keycode;
             if (keycode) {
-                reg.al = (uint8_t) keycode;
                 reg.clearZF();
-                keycode = 0;
             } else {
-                reg.al = 0;
                 reg.setZF();
             }
+            keycode = 0;
         }
         break;
 
@@ -323,16 +382,13 @@ SBTRegs Hardware::interrupt21(SBTRegs reg, SBTStack *stack)
         /* Ignored. Robot Odyssey uses this to set the INT 24h error handler. */
         break;
 
-    case 0x3D: {              /* Open File */
-        int fd = fs.open((char*)(memSeg(reg.ds) + reg.dx));
-        if (fd < 0) {
-            reg.setCF();
-        } else {
-            reg.ax = fd;
-            reg.clearCF();
-        }
+    case 0x3D:                /* Open File */
+        set_result_for_fd(reg, fs.open((char*)(memSeg(reg.ds) + reg.dx)));
         break;
-    }
+
+    case 0x3C:                /* Create file */
+        set_result_for_fd(reg, fs.create((char*)(memSeg(reg.ds) + reg.dx)));
+        break;
 
     case 0x3E:                /* Close File */
         fs.close(reg.bx);
@@ -340,6 +396,13 @@ SBTRegs Hardware::interrupt21(SBTRegs reg, SBTStack *stack)
 
     case 0x3F:                /* Read File */
         reg.ax = fs.read(reg.bx, memSeg(reg.ds) + reg.dx, reg.cx);
+        printf("FILE, reading %d bytes into %04x:%04x\n", reg.ax, reg.ds, reg.dx);
+        reg.clearCF();
+        break;
+
+    case 0x40:                /* Write file */
+        reg.ax = fs.write(reg.bx, memSeg(reg.ds) + reg.dx, reg.cx);
+        printf("FILE, writing %d bytes from %04x:%04x\n", reg.ax, reg.ds, reg.dx);
         reg.clearCF();
         break;
 
@@ -409,10 +472,6 @@ void Hardware::renderFrame(uint8_t *framebuffer)
     }
 
     EM_ASM_({
-        var canvas = window.document.getElementById('framebuffer');
-        var ctx = canvas.getContext('2d');
-        var img = ctx.createImageData(320, 200);
-        img.data.set(HEAPU8.subarray($0, $0 + 320*200*4));
-        ctx.putImageData(img, 1, 1);
+        Module.onRenderFrame(HEAPU8.subarray($0, $0 + 320*200*4))
     }, rgb_pixels);
 }
