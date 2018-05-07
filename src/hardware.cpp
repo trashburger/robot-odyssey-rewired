@@ -35,6 +35,11 @@
 
 DOSFilesystem::DOSFilesystem()
 {
+    reset();
+}
+
+void DOSFilesystem::reset()
+{
     memset(openFiles, 0, sizeof openFiles);
 }
 
@@ -153,6 +158,7 @@ void Hardware::exec(const char *program, const char *args)
         const char *filename = (*i)->getFilename();
         if (!strcasecmp(program, filename)) {
             process = *i;
+            fs.reset();
             process->exec(args);
             return;
         }

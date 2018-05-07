@@ -1,4 +1,5 @@
 import engine from "./engine.cpp";
+import downloadjs from 'downloadjs';
 import './main.css';
 
 const asm = engine();
@@ -47,6 +48,14 @@ asm.then(() => {
             refocus(e);
         });
     }
+
+    document.getElementById('ram_snapshot_btn').addEventListener('click', (e) => {
+        const ptr = asm._memPointer();
+        const size = asm._memSize();
+        const ram = asm.HEAPU8.subarray(ptr, ptr+size);
+        downloadjs(ram, 'ram-snapshot.bin', 'application/octet-stream');
+        refocus(e);
+    });
 
     asm._start();
     console.log("Started game");

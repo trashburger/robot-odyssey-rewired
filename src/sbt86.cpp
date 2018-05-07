@@ -76,11 +76,12 @@ void SBTProcess::exec(const char *cmdLine)
     reg.ds = getRelocSegment();
     reg.cs = getEntryCS();
     continue_func = getEntry();
-    default_func = continue_func;
-    default_reg = reg;
 
     uint8_t *end_of_mem = hardware->mem + SBTHardware::MEM_SIZE;
     uint8_t *data_segment = hardware->memSeg(reg.ds);
+
+    // Clear low memory including the BIOS data area
+    memset(hardware->mem, 0, 0x600);
 
     // Clear memory at and above the app's data segment.
     // Leave lower memory intact (for play.exe)
@@ -99,6 +100,10 @@ void SBTProcess::exec(const char *cmdLine)
     psp[0x80] = strlen(cmdLine);
     memset(&psp[0x81], 0x0D, 0x7f);
     strncpy((char*) &psp[0x81], cmdLine, 0x7e);
+
+    // Capture current state for future re-entry
+    default_func = continue_func;
+    default_reg = reg;
 }
 
 void SBTProcess::run(void)

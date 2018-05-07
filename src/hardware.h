@@ -19,6 +19,7 @@ class DOSFilesystem
 {
 public:
     DOSFilesystem();
+    void reset();
 
     int open(const char *name);
     void close(uint16_t fd);

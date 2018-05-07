@@ -39,3 +39,13 @@ extern "C" void EMSCRIPTEN_KEEPALIVE pressKey(uint8_t ascii, uint8_t scancode)
 	// Skip cutscenes
 	hw.clearOutputQueue();
 }
+
+extern "C" uint8_t* EMSCRIPTEN_KEEPALIVE memPointer()
+{
+	return hw.mem;
+}
+
+extern "C" uint32_t EMSCRIPTEN_KEEPALIVE memSize()
+{
+	return Hardware::MEM_SIZE;
+}

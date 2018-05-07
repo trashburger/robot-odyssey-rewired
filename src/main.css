@@ -1,3 +1,10 @@
+body {
+    background: black;
+    overflow: hidden;
+    color: #eee;
+    font: 12px sans-serif;
+}
+
 h4 {
     font-size: 18px;
 }
@@ -5,12 +12,6 @@ h4 {
 button {
     font-size: 25px;
     margin: 5px;
-}
-
-body {
-    background: black;
-    color: #eee;
-    font: 12px sans-serif;
 }
 
 div.cga {
