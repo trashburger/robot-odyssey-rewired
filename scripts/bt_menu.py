@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 #
 # Patches and hooks for the binary translation of MENU.EXE.
+# This has the main menu, as well as the intro cutscene,
+# and some disk related menus we don't need.
+#
 # Micah Elizabeth Scott <micah@scanlime.org>
 #
 
@@ -33,15 +36,27 @@ b.patchDynamicLiteral('019E:0519', length=2)
 b.patchAndHook('019E:012A', 'jmp 0x310', 'enable_framebuffer_trace = false;')
 b.patchAndHook('019E:034A', 'jmp 0x12d', 'enable_framebuffer_trace = true;')
 
-# Now break control flow every time we see a call site for the main input polling function at 019E:0428
+# Remove the new/old game menu before entering robotropolis.
+# We handle game loading separately.
+# This will start the new-game cutscene right away, then enter game.exe
+b.patch('019E:0178', 'jmp 0x1A6')
+
+# Remove the new/old game menu and disk swap before Innovation Lab
+# As above, we'll handle game loading using an external UI.
+b.patch('019E:013e', 'jmp 0x162')
+
+# Remove the "insert disk 2" and corresponding wait when entering the tutorials
+b.patch('019E:018f', 'jmp 0x1A3')
+
+# Remove the "insert disk 2" and the wait when loading the final cutscene
+b.patch('019E:02e5', 'jmp 0x2fe')
+
+# Now break control flow every time we see a call site for the
+# main input polling function at 019E:0428. Though actually, this
+# seems to be down to a single call site now, even though we prepared for multiple.
 input_poll_func = sbt86.Addr16(str='019E:0428')
 for call_site in [
-    '019E:0141',
-    '019E:014e',
-    '019E:0178',
-    '019E:019c',
-    '019E:02f7',
-    '019E:0315',
+    '019E:0315',    # Main menu wait (space/enter)
 ]:
     call_site = sbt86.Addr16(str=call_site)
     continue_at = call_site.add(1)
@@ -54,7 +69,8 @@ for call_site in [
     b.patchAndHook(call_site, 'ret',
         'hw->outputFrame(gStack, hw->memSeg(0xB800));'
         'hw->outputDelay(1000);'
-        'proc->continueFrom(r, &sub_%X);' % continue_at.linear)
+        'fprintf(stderr, "Menu cont %r\\n");'
+        'proc->continueFrom(r, &sub_%X);' % (continue_at, continue_at.linear))
     b.patch(continue_at, 'call 0x%04x' % input_poll_func.offset, length=2)
     b.exportSub(continue_at)
 
@@ -91,25 +107,6 @@ for (call_site, delay) in [
 # are required, but exiting earlier will reduce cutscene load times and memory
 # requirements since we don't have to queue so many frames before displaying them.
 for call_site in [
-    '019E:011E',
-    '019E:0121',
-    '019E:0124',
-    '019E:0127',
-    '019E:0134',
-    '019E:013E',
-    '019E:0148',
-    '019E:014B',
-    '019E:016C',
-    '019E:016F',
-    '019E:0172',
-    '019E:0175',
-    '019E:018F',
-    '019E:0199',
-    '019E:01BA',
-    '019E:01C0',
-    '019E:01C6',
-    '019E:01CC',
-    '019E:01CF',
     '019E:01D5',
     '019E:01E1',
     '019E:01E7',
@@ -150,16 +147,13 @@ for call_site in [
     '019E:02CD',
     '019E:02D3',
     '019E:02D9',
-    '019E:02E5',
-    '019E:02E8',
-    '019E:02EE',
-    '019E:02F1',
-    '019E:02F4',
 ]:
     call_site = sbt86.Addr16(str=call_site)
     target = b.jumpTarget(call_site)
     continue_at = call_site.add(1)
-    b.patchAndHook(call_site, 'ret', 'proc->continueFrom(r, &sub_%X);' % continue_at.linear)
+    b.patchAndHook(call_site, 'ret',
+            'fprintf(stderr, "Menu cont %r\\n");'
+            'proc->continueFrom(r, &sub_%X);' % (continue_at, continue_at.linear))
     b.patch(continue_at, 'call 0x%04x' % target.offset, length=2)
     b.exportSub(continue_at)
 

@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 #
 # Patches and hooks for the binary translation of MENU2.EXE.
+# This is an alternate build of the main menu for Disk 2,
+# and it's also where the final cutscene is stored.
+#
+# Since we don't emulate disk swapping, this file is only used
+# for the final cutscene in this port.
+#
 # Micah Elizabeth Scott <micah@scanlime.org>
 #
 
