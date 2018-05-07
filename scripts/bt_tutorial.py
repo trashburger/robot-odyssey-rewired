@@ -31,4 +31,14 @@ for call_site in [
     b.patch(continue_at, 'call 0x%04x' % subroutine.offset, length=2)
     b.exportSub(continue_at)
 
+# Break control flow in the transporter animation loop; after animating
+# it will change rooms (to demonstrate the teleporter) then we can safely restart the main loop.
+for call_site in ['0A8F:54CE']:
+    call_site = sbt86.Addr16(str=call_site)
+    continue_at = call_site.add(1)
+    subroutine = b.jumpTarget(call_site)
+    b.patchAndHook(call_site, 'ret', 'proc->continueFrom(r, &sub_%X);' % continue_at.linear)
+    b.patch(continue_at, 'call 0x%04x' % subroutine.offset, length=2)
+    b.exportSub(continue_at)
+
 b.writeCodeToFile(os.path.join(basedir, 'bt_tutorial.cpp'), 'TutorialEXE')

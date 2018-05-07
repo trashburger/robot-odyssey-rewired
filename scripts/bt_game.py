@@ -32,6 +32,7 @@ b.patch('0E3B:2EA9', 'jmp 0x2EDC')
 for call_site in [
     '0E3B:3B8D',    # Menu for "?" key
     '0E3B:3B9A',    # Menu for "ESC" key
+    '0E3B:6921',    # "To go back to the room you just left, press Enter"
 ]:
     call_site = sbt86.Addr16(str=call_site)
     continue_at = call_site.add(1)
@@ -41,5 +42,20 @@ for call_site in [
 		'proc->continueFrom(r, &sub_%X);' % continue_at.linear)
     b.patch(continue_at, 'call 0x%04x' % subroutine.offset, length=2)
     b.exportSub(continue_at)
+
+# Break control flow in the transporter animation loop,
+# it's too long to store in the output queue.
+for call_site in [
+	'0E3B:6E77',  # Main transporter animation
+]:
+    call_site = sbt86.Addr16(str=call_site)
+    continue_at = call_site.add(1)
+    subroutine = b.jumpTarget(call_site)
+    b.patchAndHook(call_site, 'ret', 'proc->continueFrom(r, &sub_%X);' % continue_at.linear)
+    b.patch(continue_at, 'call 0x%04x' % subroutine.offset, length=2)
+    b.exportSub(continue_at)
+
+# Skip the disk prompts after the transporter animation
+b.patch('0E3B:691C', 'jmp 0x692D')
 
 b.writeCodeToFile(os.path.join(basedir, 'bt_game.cpp'), 'GameEXE')
