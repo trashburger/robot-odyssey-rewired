@@ -100,7 +100,7 @@ class Hardware : public SBTHardware
 
  protected:
     std::list<OutputItem> output_queue;
-    uint32_t output_queue_depth;
+    uint32_t output_queue_frame_count;
     uint32_t output_queue_delay_remaining;
     std::vector<SBTProcess*> process_vec;
     SBTProcess *process;

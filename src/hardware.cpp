@@ -193,7 +193,7 @@ void Hardware::clearOutputQueue()
             delete item.u.framebuffer;
         }
     }
-    output_queue_depth = 0;
+    output_queue_frame_count = 0;
     output_queue_delay_remaining = 0;
 }
 
@@ -253,12 +253,12 @@ uint32_t Hardware::run(uint32_t max_delay_per_step)
         } else {
             OutputItem item = output_queue.front();
             output_queue.pop_front();
-            output_queue_depth--;
 
             switch (item.otype) {
 
                 case OUT_FRAME:
                     renderFrame(item.u.framebuffer->bytes);
+                    output_queue_frame_count--;
                     delete item.u.framebuffer;
                     break;
 
@@ -426,7 +426,7 @@ void Hardware::pressKey(uint8_t ascii, uint8_t scancode) {
 
 void Hardware::outputFrame(SBTStack *stack, uint8_t *framebuffer)
 {
-    if (output_queue_depth > 500) {
+    if (output_queue_frame_count > 500) {
         stack->trace();
         assert(0 && "Frame queue is too deep! Infinite loop likely.");
     }
@@ -436,7 +436,7 @@ void Hardware::outputFrame(SBTStack *stack, uint8_t *framebuffer)
     item.u.framebuffer = new CGAFramebuffer;
     memcpy(item.u.framebuffer, framebuffer, sizeof *item.u.framebuffer);
     output_queue.push_back(item);
-    output_queue_depth++;
+    output_queue_frame_count++;
 }
 
 void Hardware::outputDelay(uint32_t millis)
@@ -445,7 +445,6 @@ void Hardware::outputDelay(uint32_t millis)
     item.otype = OUT_DELAY;
     item.u.delay = millis;
     output_queue.push_back(item);
-    output_queue_depth++;
 }
 
 void Hardware::writeSpeakerTimestamp(uint32_t timestamp)
@@ -454,7 +453,6 @@ void Hardware::writeSpeakerTimestamp(uint32_t timestamp)
     item.otype = OUT_SPEAKER_TIMESTAMP;
     item.u.timestamp = timestamp;
     output_queue.push_back(item);
-    output_queue_depth++;
 }
 
 void Hardware::renderFrame(uint8_t *framebuffer)
