@@ -77,8 +77,7 @@ for call_site in [
     b.patchAndHook(call_site, 'ret',
         'hw->outputFrame(gStack, hw->memSeg(0xB800));'
         'hw->outputDelay(1000);'
-        'fprintf(stderr, "Menu cont %r\\n");'
-        'proc->continueFrom(r, &sub_%X);' % (continue_at, continue_at.linear))
+        'proc->continueFrom(r, &sub_%X);' % (continue_at.linear))
     b.patch(continue_at, 'call 0x%04x' % input_poll_func.offset, length=2)
     b.exportSub(continue_at)
 

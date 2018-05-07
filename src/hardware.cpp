@@ -48,7 +48,7 @@ int DOSFilesystem::open(const char *name)
     int fd = allocateFD();
     const FileInfo *file;
 
-    fprintf(stderr, "FILE, opening '%s'\n", name);
+    printf("FILE, opening '%s'\n", name);
 
     if (!strcmp(name, SBT_SAVE_FILE_NAME)) {
         /*
@@ -93,7 +93,7 @@ uint16_t DOSFilesystem::read(uint16_t fd, void *buffer, uint16_t length)
     uint32_t offset = fileOffsets[fd];
     uint16_t actual_length = std::min<unsigned>(length, file->data_size - offset);
 
-    fprintf(stderr, "FILE, read %d(%d) bytes at %d\n", length, actual_length, offset);
+    printf("FILE, read %d(%d) bytes at %d\n", length, actual_length, offset);
     memcpy(buffer, file->data + offset, actual_length);
 
     fileOffsets[fd] += actual_length;
@@ -153,7 +153,7 @@ void Hardware::clearKeyboardBuffer()
 
 void Hardware::exec(const char *program, const char *args)
 {
-    fprintf(stderr, "EXEC, '%s' '%s'\n", program, args);
+    printf("EXEC, '%s' '%s'\n", program, args);
     for (std::vector<SBTProcess*>::iterator i = process_vec.begin(); i != process_vec.end(); i++) {
         const char *filename = (*i)->getFilename();
         if (!strcasecmp(program, filename)) {
@@ -168,7 +168,7 @@ void Hardware::exec(const char *program, const char *args)
 
 void Hardware::exit(uint8_t code)
 {
-    fprintf(stderr, "EXIT, code %d\n", code);
+    printf("EXIT, code %d\n", code);
     SBTProcess *exiting_process = process;
     process = default_process;
     process->reg.ax = code;
