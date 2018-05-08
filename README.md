@@ -44,6 +44,7 @@ To do
   - sound
 
 - input
+  - joystick emulation (high-level)
   - touch controls
   - controls help
 

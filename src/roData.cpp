@@ -251,14 +251,12 @@ ROJoyfile::ROJoyfile()
 {
     // Default contents... Possibly from unmodified installation media?
     memset(this, 0, sizeof *this);
-    joyfile_1 = 0x01;
-    joyfile_2 = 0x02;
-    joyfile_A = 0x38;
-    joyfile_B = 0x02;
-    joyfile_C = 0x01;
+    joystick_io_port = DEFAULT_JOYSTICK_PORT;
+    debug_control = DEBUG_NORMAL;
+    disk_drive_id = DRIVE_A;
 }
 
 void ROJoyfile::setCheatsEnabled(bool enable)
 {
-    cheats_enabled_if_5e = enable ? 0x5e : 0x00;
+    cheat_control = enable ? CHEATS_ENABLED : 0;
 }

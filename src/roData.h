@@ -572,22 +572,29 @@ class ROJoyfile {
     // When enabled, CTRL-E toggles collision detection on/off
     void setCheatsEnabled(bool enable);
 
-    uint8_t joyfile_0;
-    uint8_t joyfile_1;
-    uint8_t joyfile_2;
-    uint8_t joyfile_3;
+    uint8_t joystick_enabled;
 
-    uint8_t joyfile_4;
-    uint8_t joyfile_5;
-    uint8_t joyfile_6;
-    uint8_t joyfile_7;
+    uint16_t joystick_io_port;
+    const uint8_t DEFAULT_JOYSTICK_PORT = 0x201;
 
-    uint8_t joyfile_8;
-    uint8_t cheats_enabled_if_5e;
-    uint8_t joyfile_A;
-    uint8_t joyfile_B;
+    uint8_t joystick_x_center;
+    uint8_t joystick_y_center;
+    uint8_t joystick_xplus_divisor;
+    uint8_t joystick_yplus_divisor;
+    uint8_t joystick_xminus_divisor;
+    uint8_t joystick_yminus_divisor;
 
-    uint8_t joyfile_C;
+    uint8_t cheat_control;
+    const uint8_t CHEATS_ENABLED = 0x5e;
+
+    uint16_t debug_control;
+    const uint16_t DEBUG_NORMAL = 0x238;
+    const uint16_t DEBUG_DELAY_IN_STREET_LOOP_AT_C1FD = 0x500;
+
+    uint8_t disk_drive_id;
+    const uint8_t DRIVE_A = 0x01;
+    const uint8_t DRIVE_B = 0x02;
+
     uint8_t joyfile_D;
     uint8_t joyfile_E;
     uint8_t joyfile_F;
