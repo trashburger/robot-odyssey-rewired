@@ -28,9 +28,6 @@ Build Instructions
 To do
 -----
 
-- chip load/save is broken
-  - modals need patching
-
 - end-game is broken
   - Final cutscene still needs patching and testing
   - Needs play testing
@@ -38,14 +35,15 @@ To do
 - load/save
   - package thumbnails plus game data into PNG/JPEG/GIF for mobile+social
   - local browser storage
+  - picker for chip load
 
 - output
-  - nicer video scaling
   - sound
+  - nicer video scaling
 
 - input
-  - joystick emulation (high-level)
-  - touch controls
+  - keyboard event queueing
+  - nicer touch controls
   - controls help
 
 - enhancements
@@ -53,3 +51,5 @@ To do
   - built-in chip decompiler
   - enhanced graphics modes
   - input UI / mobile experience
+    - player-follows-finger?
+    - zoomed detail loupe for soldering?
