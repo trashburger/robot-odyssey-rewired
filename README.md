@@ -46,6 +46,10 @@ To do
   - nicer touch controls
   - controls help
 
+- offline support
+  - manifest file
+  - home screen icon, favicon
+
 - enhancements
   - touch/mouse controls for schematic editing
   - built-in chip decompiler
