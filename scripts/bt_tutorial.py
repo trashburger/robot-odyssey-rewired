@@ -13,6 +13,7 @@ basedir = sys.argv[1]
 b = sbt86.DOSBinary(os.path.join(basedir, 'tut.exe'))
 
 bt_common.patch(b)
+bt_common.patchJoystick(b)
 
 # Remove modal "Insert disk 1" message before exiting back to menu
 b.patch('0A8F:3B0F', 'jmp 0x3B28')

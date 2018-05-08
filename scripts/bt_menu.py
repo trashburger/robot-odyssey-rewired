@@ -17,6 +17,7 @@ b = sbt86.DOSBinary(os.path.join(basedir, 'menu.exe'))
 
 b.decl('#include <string.h>')
 
+bt_common.patchJoystick(b)
 bt_common.patchFramebufferTrace(b)
 b.hook(b.entryPoint, 'enable_framebuffer_trace = true;')
 
@@ -71,13 +72,14 @@ for call_site in [
     assert b.jumpTarget(call_site).linear == input_poll_func.linear
   
     # Redraw the screen and yield on the way out, check input on the way back in.
-    # Use an arbitrarily low frame rate here, since we'll rely on skipping the delay
-    # when the key event comes in.
+    # Note that the frame rate here can be arbitrarily low if we only care about
+    # keyboard navigation, but joystick polling requires a higher frame rate here.
 
     b.patchAndHook(call_site, 'ret',
         'hw->outputFrame(gStack, hw->memSeg(0xB800));'
-        'hw->outputDelay(1000);'
-        'proc->continueFrom(r, &sub_%X);' % (continue_at.linear))
+        'hw->outputDelay(%d * 4);'
+        'proc->continueFrom(r, &sub_%X);' % (
+            bt_common.FRAME_RATE_DELAY, continue_at.linear))
     b.patch(continue_at, 'call 0x%04x' % input_poll_func.offset, length=2)
     b.exportSub(continue_at)
 

@@ -18,7 +18,9 @@ import bt_common
 basedir = sys.argv[1]
 b = sbt86.DOSBinary(os.path.join(basedir, 'menu2.exe'))
 
+bt_common.patchJoystick(b)
 bt_common.patchFramebufferTrace(b)
+b.hook(b.entryPoint, 'enable_framebuffer_trace = true;')
 
 # Dynamic branch for cutscene sound effects
 b.patchDynamicBranch('019E:068B', [

@@ -48,6 +48,11 @@ extern "C" void EMSCRIPTEN_KEEPALIVE pressKey(uint8_t ascii, uint8_t scancode)
 	hw.clearOutputQueue();
 }
 
+extern "C" void EMSCRIPTEN_KEEPALIVE setJoystick(int x, int y, bool button)
+{
+	hw.setJoystick(x, y, button);
+}
+
 extern "C" uint8_t* EMSCRIPTEN_KEEPALIVE memPointer()
 {
 	return hw.mem;

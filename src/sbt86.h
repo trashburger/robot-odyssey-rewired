@@ -137,6 +137,7 @@ class SBTHardware
     virtual void outputDelay(uint32_t millis) = 0;    
     virtual void exec(const char *program, const char *args) = 0;
     virtual void clearKeyboardBuffer() = 0;
+    virtual void pollJoystick(uint16_t &x, uint16_t &y, uint8_t &status) = 0;
 };
 
 

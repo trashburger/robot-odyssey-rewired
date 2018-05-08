@@ -249,11 +249,19 @@ void ROData::copyFrom(ROData *source) {
 
 ROJoyfile::ROJoyfile()
 {
-    // Default contents... Possibly from unmodified installation media?
+    // Start out empty
     memset(this, 0, sizeof *this);
+
+    // These values seem to be factory defaults
     joystick_io_port = DEFAULT_JOYSTICK_PORT;
     debug_control = DEBUG_NORMAL;
     disk_drive_id = DRIVE_A;
+
+    // Enable joystick support with generic values
+    joystick_enabled = true;
+    x_center = y_center = 0x80;
+    xplus_divisor = yplus_divisor = 1;
+    xminus_divisor = yminus_divisor = 1;
 }
 
 void ROJoyfile::setCheatsEnabled(bool enable)

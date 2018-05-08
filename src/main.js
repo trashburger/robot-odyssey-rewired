@@ -1,5 +1,6 @@
 import engine from "./engine.cpp";
 import downloadjs from 'downloadjs';
+import nipplejs from 'nipplejs';
 import './main.css';
 
 const asm = engine();
@@ -76,6 +77,20 @@ asm.then(() =>
     asm.onSaveFileWrite = (saveData) => {
         downloadjs(saveData, filenameForSaveData(saveData), 'application/octet-stream');
     };
+
+    const joystick = nipplejs.create({
+        zone: document.getElementById('joystick_zone'),
+        maxNumberOfNipples: 1,
+    });
+    joystick.on('move', (e, data) => {
+        const scale = 4.0;
+        const x = scale * data.force * Math.cos(data.angle.radian);
+        const y = scale * data.force * Math.sin(data.angle.radian);
+        asm._setJoystick(x, -y, 0);
+    });
+    joystick.on('end', (e) => {
+        asm._setJoystick(0, 0, 0);
+    });
 
     for (let button of document.getElementsByClassName('exec_btn')) {
         button.addEventListener('click', (e) => {

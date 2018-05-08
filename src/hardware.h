@@ -79,6 +79,7 @@ class Hardware : public SBTHardware
 
     void clearOutputQueue();
     void pressKey(uint8_t ascii, uint8_t scancode = 0);
+    void setJoystick(int x, int y, bool button);
     uint32_t run(uint32_t max_delay_per_step = 100);
     void registerProcess(SBTProcess *p, bool is_default = false);
 
@@ -100,6 +101,7 @@ class Hardware : public SBTHardware
 
     virtual void exec(const char *program, const char *args);
     virtual void clearKeyboardBuffer();
+    virtual void pollJoystick(uint16_t &x, uint16_t &y, uint8_t &status);
 
     DOSFilesystem fs;
 
@@ -112,6 +114,8 @@ class Hardware : public SBTHardware
     SBTProcess *default_process;
     uint8_t port61;
     uint16_t keycode;
+    int js_x, js_y;
+    bool js_button;
 
     void exit(uint8_t code);
     void writeSpeakerTimestamp(uint32_t timestamp);

@@ -6,6 +6,11 @@
 import sbt86
 
 
+# Approximate frame rate to run at during normal gameplay.
+# Not based on any real measurements (yet?) just by feel.
+FRAME_RATE_DELAY = 1000 // 12
+
+
 def patch(b):
     """Patches that should be applied to all binaries that have the Robot
        Odyssey game engine. (TUT, GAME, LAB)
@@ -77,16 +82,15 @@ def patch(b):
     # and unnecessary for us. Replace it with a call to
     # consoleBlitToScreen(), and read directly from the game's backbuffer.
 
-    b.decl("static bool noBlit = false;")
+    b.decl('static bool noBlit = false;')
     b.patchAndHook(b.findCode(':803e____01 7503 e95a05 c43e____'
                               'bb2800 a1____ 8cda 8ed8 be0020 33 c0'),
                    'ret', '''
         if (!noBlit) {
-            const unsigned normal_frame_rate = 12;
             hw->outputFrame(gStack, proc->hardware->memSeg(proc->hardware->peek16(r.ds, 0x3AD5)));
-            hw->outputDelay(1000 / normal_frame_rate);
+            hw->outputDelay(%d);
         }
-    ''')
+    ''' % FRAME_RATE_DELAY)
 
     # Avoid calling the blitter during initialization. Normally the
     # game clears the screen during initialization, but for us this is
@@ -283,3 +287,18 @@ def patchLoadSave(b):
             strcpy((char*)s.ds + 0x%04x, filename);
         ''' % (saveFilenameAddr, saveFilenameAddr, loadFilenameAddr))
 
+
+def patchJoystick(b):
+    # This game uses cycle timing to poll the joystick; we could emulate that
+    # using the global clock, but it's easier and more efficient to replace this
+    # with a direct call to a polling hook.
+
+    # Find the poller itself. It returns X and Y cycle counts in bx and cx,
+    # but button status gets AND'ed together during polling and stored in
+    # a variable that we need to find the address of.
+
+    poller = b.findCode(':8b16____ bb0000 b90000 c606____ff eeec2006')
+    buttons = b.peek16(poller.add(12))
+    b.patchAndHook(poller, 'ret',
+        'hw->pollJoystick(r.bx, r.cx, hw->memSeg(r.ds)[%d]);'
+        % buttons)

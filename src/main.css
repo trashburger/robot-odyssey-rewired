@@ -17,15 +17,15 @@ button {
     color: #999;
 }
 
-div.cga {
+#joystick_zone {
     width: 100%;
-    padding: 10px 0 0 0;
+    padding: 10px 0 200px 0;
     text-align: center;
 }
 
-canvas.cga {
-    width: 644px;
-    height: 505px;
+#framebuffer {
+    width: 667px;
+    height: 500px;
 }
 
 #savefile_input {

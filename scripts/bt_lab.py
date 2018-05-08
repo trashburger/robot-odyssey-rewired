@@ -13,6 +13,7 @@ basedir = sys.argv[1]
 b = sbt86.DOSBinary(os.path.join(basedir, 'lab.exe'))
 
 bt_common.patch(b)
+bt_common.patchJoystick(b)
 bt_common.patchChips(b)
 bt_common.patchLoadSave(b)
 
