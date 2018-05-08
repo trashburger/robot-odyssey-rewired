@@ -3,36 +3,21 @@ import downloadjs from 'downloadjs';
 import nipplejs from 'nipplejs';
 import './main.css';
 
-const asm = engine();
-console.log("Loading wasm");
-
-// For console debugging later
-window.ROEngine = asm;
-
-const exec = asm.cwrap('exec', 'number', ['string', 'string'])
-
-function keycode(str, scancode)
-{
-    asm._pressKey((str || '\0').charCodeAt(0), scancode);
-}
-
 const fbCanvas = document.getElementById('framebuffer');
 const fbContext = fbCanvas.getContext('2d');
 const fbImage = fbContext.createImageData(320, 200);
 
-asm.onRenderFrame = (rgbData) => {
-    fbImage.data.set(rgbData);
-    fbContext.putImageData(fbImage, 1, 1);
-};
+function fbCanvasStatusMessage(text)
+{
+    // Blank canvas, including a 1-pixel black border for consistent edge blending
+    fbContext.fillStyle = '#000';
+    fbContext.fillRect(0, 0, 322, 202);
 
-// Blank canvas, including a 1-pixel black border for consistent edge blending
-fbContext.fillStyle = '#000';
-fbContext.fillRect(0, 0, 322, 202);
-
-// Temporary loading message
-fbContext.fillStyle = '#555';
-fbContext.font = '18px sans-serif';
-fbContext.fillText('Loading', 40, 20);
+    // Subtle text in the corner
+    fbContext.fillStyle = '#555';
+    fbContext.font = '18px sans-serif';
+    fbContext.fillText(text, 10, 20);
+}
 
 // Canvas resize handler
 const resize = () => {
@@ -60,6 +45,29 @@ const joystick = nipplejs.create({
 document.getElementById('joystick_hide').addEventListener('click', (e) => {
     document.getElementById('joystick').style.display = 'none';
 });
+
+var asm = null;
+fbCanvasStatusMessage("Loading");
+try {
+    asm = engine();
+    // For console debugging later
+    window.ROEngine = asm;
+} catch (e) {
+    fbCanvasStatusMessage("Fail. " + e);
+    throw e;
+}
+
+const exec = asm.cwrap('exec', 'number', ['string', 'string'])
+
+asm.onRenderFrame = (rgbData) => {
+    fbImage.data.set(rgbData);
+    fbContext.putImageData(fbImage, 1, 1);
+};
+
+function keycode(str, scancode)
+{
+    asm._pressKey((str || '\0').charCodeAt(0), scancode);
+}
 
 function controlCode(key)
 {
@@ -104,15 +112,13 @@ function worldIdFromSaveData(bytes)
 function chipNameFromSaveData(bytes)
 {
     if (bytes.length == 1333) {
-        const nameField = bytes.slice(0x40A, 0x41C);
-        console.log(nameField);
         var name = '';
+        const nameField = bytes.slice(0x40A, 0x41C);
         for (let byte of nameField) {
-            if (byte >= 0x20 && byte <= 0x7F) {
-                name += String.fromCharCode(byte);
-            } else {
+            if (byte < 0x20 || byte > 0x7F) {
                 break;
             }
+            name += String.fromCharCode(byte);
         }
         return name.trim() || "untitled";
     }
@@ -238,3 +244,4 @@ asm.then(() =>
 
     asm._start();
 });
+
