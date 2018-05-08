@@ -77,7 +77,7 @@ for call_site in [
 
     b.patchAndHook(call_site, 'ret',
         'hw->outputFrame(gStack, hw->memSeg(0xB800));'
-        'hw->outputDelay(%d * 4);'
+        'hw->outputDelay(%d);'
         'proc->continueFrom(r, &sub_%X);' % (
             bt_common.FRAME_RATE_DELAY, continue_at.linear))
     b.patch(continue_at, 'call 0x%04x' % input_poll_func.offset, length=2)

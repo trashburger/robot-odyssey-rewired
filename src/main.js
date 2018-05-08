@@ -16,6 +16,40 @@ function keycode(str, scancode)
     asm._pressKey((str || '\0').charCodeAt(0), scancode);
 }
 
+const fbCanvas = document.getElementById('framebuffer');
+const fbContext = fbCanvas.getContext('2d');
+const fbImage = fbContext.createImageData(320, 200);
+
+// Blank canvas, including a 1-pixel black border for consistent edge blending
+fbContext.fillStyle = '#000';
+fbContext.fillRect(0, 0, 322, 202);
+
+// Temporary loading message
+fbContext.fillStyle = '#555';
+fbContext.font = '18px sans-serif';
+fbContext.fillText('Loading', 40, 20);
+
+// Canvas resize handler
+const resize = () => {
+    const aspect = 4/3.0;
+    const max_w = 960;
+    const w = Math.min(Math.min(max_w, window.innerWidth),
+        aspect * window.innerHeight)|0;
+    const h = (w / aspect)|0;
+    fbCanvas.style.width = w + 'px';
+    fbCanvas.style.height = h + 'px';
+};
+window.addEventListener('resize', resize);
+resize();
+
+// Joystick is created immediately, but callbacks aren't hooked up until the engine loads
+const joystick = nipplejs.create({
+    zone: document.getElementById('joystick_xy'),
+    mode: 'static',
+    position: { left: '50%', top: '50%' }
+});
+
+
 function onKeydown(e)
 {
     if (e.code == "ArrowUp" && e.shiftKey == false) keycode(0, 0x48);
@@ -29,6 +63,8 @@ function onKeydown(e)
     else if (e.code == "Enter") keycode('\x0D', 0x1C);
     else if (e.code == "Escape") keycode('\x1b', 0x01);
     else if (e.key.length == 1) keycode(e.key.toUpperCase(), 0);
+    else return;
+    e.preventDefault();
 }
 
 function refocus(e)
@@ -59,14 +95,6 @@ function filenameForSaveData(bytes)
 
 asm.then(() =>
 {
-    const fbCanvas = document.getElementById('framebuffer');
-    const fbContext = fbCanvas.getContext('2d');
-    const fbImage = fbContext.createImageData(320, 200);
-
-    // Blank canvas, including a 1-pixel black border for consistent edge blending
-    fbContext.fillStyle = '#000000';
-    fbContext.fillRect(0, 0, 322, 202);
-
     document.body.addEventListener('keydown', onKeydown);
 
     asm.onRenderFrame = (rgbData) => {
@@ -78,19 +106,34 @@ asm.then(() =>
         downloadjs(saveData, filenameForSaveData(saveData), 'application/octet-stream');
     };
 
-    const joystick = nipplejs.create({
-        zone: document.getElementById('joystick_zone'),
-        maxNumberOfNipples: 1,
-    });
     joystick.on('move', (e, data) => {
         const scale = 4.0;
         const x = scale * data.force * Math.cos(data.angle.radian);
         const y = scale * data.force * Math.sin(data.angle.radian);
-        asm._setJoystick(x, -y, 0);
+        asm._setJoystick(x, -y, false);
     });
     joystick.on('end', (e) => {
-        asm._setJoystick(0, 0, 0);
+        asm._setJoystick(0, 0, false);
     });
+
+    for (let button of document.getElementsByClassName('joystick_btn')) {
+        button.addEventListener('mousedown', (e) => {
+            asm._setJoystick(0, 0, true);
+            refocus(e);
+        });
+        button.addEventListener('mouseup', (e) => {
+            asm._setJoystick(0, 0, false);
+            refocus(e);
+        });
+        button.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            asm._setJoystick(0, 0, true);
+        });
+        button.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            asm._setJoystick(0, 0, false);
+        });
+    }
 
     for (let button of document.getElementsByClassName('exec_btn')) {
         button.addEventListener('click', (e) => {
@@ -118,14 +161,6 @@ asm.then(() =>
         });
     }
 
-    document.getElementById('ram_snapshot_btn').addEventListener('click', (e) => {
-        const ptr = asm._memPointer();
-        const size = asm._memSize();
-        const ram = asm.HEAPU8.subarray(ptr, ptr+size);
-        downloadjs(ram, 'ram-snapshot.bin', 'application/octet-stream');
-        refocus(e);
-    });
-
     document.getElementById('savefile_btn').addEventListener('click', (e) => {
         document.getElementById('savefile_input').click();
         refocus(e);
@@ -150,6 +185,13 @@ asm.then(() =>
         } else {
             exec("game.exe", "99");
         }
+    };
+
+    asm.downloadRAMSnapshot = (filename) => {
+        const ptr = asm._memPointer();
+        const size = asm._memSize();
+        const ram = asm.HEAPU8.subarray(ptr, ptr+size);
+        downloadjs(ram, filename || 'ram-snapshot.bin', 'application/octet-stream');
     };
 
     asm._start();

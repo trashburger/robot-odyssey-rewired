@@ -5,20 +5,16 @@
     <title>Robot Odyssey Rewired</title>
   </head>
   <body>
-    <div id="joystick_zone">
+    <div id="frame">
       <canvas id="framebuffer" width="322" height="202"></canvas>
     </div>
+    <div id="joystick">
+      <div id="joystick_xy"></div>
+      <button class="joystick_btn">Button</button>        
+    </div>
+
     <h4>work in progress...</h4>
     <p>Keys:
-      <button class="keyboard_btn" data-scancode="0x4B">&larr;</button>
-      <button class="keyboard_btn" data-scancode="0x4D">&rarr;</button>
-      <button class="keyboard_btn" data-scancode="0x48">&uarr;</button>
-      <button class="keyboard_btn" data-scancode="0x50">&darr;</button>
-      <button class="keyboard_btn" data-ascii="4" data-scancode="0x4B">&lArr;</button>
-      <button class="keyboard_btn" data-ascii="6" data-scancode="0x4D">&rArr;</button>
-      <button class="keyboard_btn" data-ascii="8" data-scancode="0x48">&uArr;</button>
-      <button class="keyboard_btn" data-ascii="2" data-scancode="0x50">&dArr;</button>
-      <br/>
       <button class="keyboard_btn" data-ascii=" ">Space</button>
       <button class="keyboard_btn" data-ascii="&#x0D" data-scancode="0x1C">Enter</button>
       <button class="keyboard_btn" data-ascii="R">R</button>
@@ -30,6 +26,14 @@
       <button class="keyboard_btn" data-ascii="O">O</button>
       <button class="keyboard_btn" data-ascii="?">?</button>
       <button class="keyboard_btn" data-ascii="&#x1B" data-scancode="0x01">ESC</button>
+      <button class="keyboard_btn" data-scancode="0x4B">&larr;</button>
+      <button class="keyboard_btn" data-scancode="0x4D">&rarr;</button>
+      <button class="keyboard_btn" data-scancode="0x48">&uarr;</button>
+      <button class="keyboard_btn" data-scancode="0x50">&darr;</button>
+      <button class="keyboard_btn" data-ascii="4" data-scancode="0x4B">&lArr;</button>
+      <button class="keyboard_btn" data-ascii="6" data-scancode="0x4D">&rArr;</button>
+      <button class="keyboard_btn" data-ascii="8" data-scancode="0x48">&uArr;</button>
+      <button class="keyboard_btn" data-ascii="2" data-scancode="0x50">&dArr;</button>
     </p>
     <p>Go directly to:
       <button id="savefile_btn">Load File</button>
@@ -47,10 +51,6 @@
       <button class="setspeed_btn" data-speed="1.0">Normal</button>
       <button class="setspeed_btn" data-speed="2.0">2x</button>
       <button class="setspeed_btn" data-speed="10">10x</button>
-    </p>
-    <p>Dev:
-      <button id="ram_snapshot_btn">RAM Snapshot</button>
-      <button class="exec_btn" data-program="menu2.exe" data-args="&#x17">End</button>
     </p>
     <script src="./main.js"></script>
   </body>
