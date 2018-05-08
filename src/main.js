@@ -214,9 +214,10 @@ asm.then(() =>
         asm._setSaveFileSize(bytes.length);
         asm.HEAPU8.set(bytes, asm._saveFilePointer());
 
-        if (worldIdFromSaveData(bytes) == LAB_WORLD) {
+        const world = worldIdFromSaveData(bytes);
+        if (world == LAB_WORLD) {
             exec("lab.exe", "99");
-        } else {
+        } else if (world !== null) {
             exec("game.exe", "99");
         }
     };
