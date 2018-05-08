@@ -39,6 +39,14 @@ button {
     background: #111;
 }
 
+#joystick_hide {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    color: rgba(255,255,255,0.5);
+    z-index: 5;
+}
+
 .joystick_btn {
     position: absolute;
     width: 50%;

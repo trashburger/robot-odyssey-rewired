@@ -56,6 +56,11 @@ const joystick = nipplejs.create({
     position: { left: '50%', top: '50%' }
 });
 
+// Make it easy to hide the joystick on desktop
+document.getElementById('joystick_hide').addEventListener('click', (e) => {
+    document.getElementById('joystick').style.display = 'none';
+});
+
 function onKeydown(e)
 {
     if (e.code == "ArrowUp" && e.shiftKey == false) keycode(0, 0x48);
@@ -86,17 +91,44 @@ function worldIdFromSaveData(bytes)
     if (bytes.length == 24389) {
         return bytes[bytes.length - 1];
     }
+    return null;
+}
+
+function chipNameFromSaveData(bytes)
+{
+    if (bytes.length == 1333) {
+        const nameField = bytes.slice(0x40A, 0x41C);
+        console.log(nameField);
+        var name = '';
+        for (let byte of nameField) {
+            if (byte >= 0x20 && byte <= 0x7F) {
+                name += String.fromCharCode(byte);
+            } else {
+                break;
+            }
+        }
+        return name.trim() || "untitled";
+    }
+    return null;
 }
 
 function filenameForSaveData(bytes)
 {
     const world = worldIdFromSaveData(bytes);
+    const chip = chipNameFromSaveData(bytes);
     const now = new Date();
-    if (world == LAB_WORLD) {
-        return "robotodyssey-lab-" + now.toISOString() + ".lsv";
-    } else {
-        return "robotodyssey-world" + (world+1) + "-" + now.toISOString() + ".gsv";
+
+    if (world !== null) {
+        if (world == LAB_WORLD) {
+            return "robotodyssey-lab-" + now.toISOString() + ".lsv";
+        } else {
+            return "robotodyssey-world" + (world+1) + "-" + now.toISOString() + ".gsv";
+        }
     }
+    if (chip !== null) {
+        return "robotodyssey-chip-" + chip + "-" + now.toISOString() + ".csv";
+    }
+    return "robotodyssey-" + now.toISOString() + ".bin";
 }
 
 asm.onSaveFileWrite = (saveData) => {
