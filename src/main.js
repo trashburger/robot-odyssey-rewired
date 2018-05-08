@@ -68,7 +68,6 @@ function controlCode(key)
 
 function onKeydown(e)
 {
-    console.log(e);
     if (e.code == "ArrowUp" && e.shiftKey == false) keycode(0, 0x48);
     else if (e.code == "ArrowUp" && e.shiftKey == true) keycode('8', 0x48);
     else if (e.code == "ArrowDown" && e.shiftKey == false) keycode(0, 0x50);

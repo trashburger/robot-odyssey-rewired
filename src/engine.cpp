@@ -86,11 +86,8 @@ extern "C" void EMSCRIPTEN_KEEPALIVE setSaveFileSize(uint32_t size)
 extern "C" void EMSCRIPTEN_KEEPALIVE setCheatsEnabled(bool enable)
 {
 	// Set a byte in JOYFILE to enable cheats. Game must restart to take effect.
+	// This enables the CTRL-E key (via ASCII \x05) as a toggle to walk through walls in the game.
+	// It disables collision detection with walls, but does not disable sentries. It's possible
+	// to use this to cheat past most but not all puzzles in the game for debug purposes.
 	hw.fs.joyfile.setCheatsEnabled(enable);
-}
-
-extern "C" void EMSCRIPTEN_KEEPALIVE cheatToggleCollisions()
-{
-	// CTRL-E, this is a hidden cheat that's enabled only when a byte in JOYFILE is set.
-	hw.pressKey(5, 0);
 }
