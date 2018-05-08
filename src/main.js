@@ -61,8 +61,14 @@ document.getElementById('joystick_hide').addEventListener('click', (e) => {
     document.getElementById('joystick').style.display = 'none';
 });
 
+function controlCode(key)
+{
+    return String.fromCharCode(key.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0) + 1)
+}
+
 function onKeydown(e)
 {
+    console.log(e);
     if (e.code == "ArrowUp" && e.shiftKey == false) keycode(0, 0x48);
     else if (e.code == "ArrowUp" && e.shiftKey == true) keycode('8', 0x48);
     else if (e.code == "ArrowDown" && e.shiftKey == false) keycode(0, 0x50);
@@ -71,9 +77,11 @@ function onKeydown(e)
     else if (e.code == "ArrowLeft" && e.shiftKey == true) keycode('4', 0x4B);
     else if (e.code == "ArrowRight" && e.shiftKey == false) keycode(0, 0x4D);
     else if (e.code == "ArrowRight" && e.shiftKey == true) keycode('6', 0x4D);
-    else if (e.code == "Enter") keycode('\x0D', 0x1C);
-    else if (e.code == "Escape") keycode('\x1b', 0x01);
-    else if (e.key.length == 1) keycode(e.key.toUpperCase(), 0);
+    else if (e.code == "Backspace" && !e.ctrlKey && !e.altKey && !e.metaKey) keycode('\x08', 0);
+    else if (e.code == "Enter" && !e.ctrlKey && !e.altKey && !e.metaKey) keycode('\x0D', 0x1C);
+    else if (e.code == "Escape" && !e.ctrlKey && !e.altKey && !e.metaKey) keycode('\x1b', 0x01);
+    else if (e.key.length == 1 && !e.ctrlKey && !e.altKey && !e.metaKey) keycode(e.key.toUpperCase(), 0);
+    else if (e.key.length == 1 && e.ctrlKey && !e.altKey && !e.metaKey) keycode(controlCode(e.key), 0);
     else return;
     e.preventDefault();
 }
@@ -144,28 +152,28 @@ asm.then(() =>
         const scale = 8.0;
         const x = scale * data.force * Math.cos(data.angle.radian);
         const y = scale * data.force * Math.sin(data.angle.radian);
-        asm._setJoystick(x, -y, false);
+        asm._setJoystickAxes(x, -y);
     });
     joystick.on('end', (e) => {
-        asm._setJoystick(0, 0, false);
+        asm._setJoystickAxes(0, 0);
     });
 
     for (let button of document.getElementsByClassName('joystick_btn')) {
         button.addEventListener('mousedown', (e) => {
-            asm._setJoystick(0, 0, true);
+            asm._setJoystickButton(true);
             refocus(e);
         });
         button.addEventListener('mouseup', (e) => {
-            asm._setJoystick(0, 0, false);
+            asm._setJoystickButton(false);
             refocus(e);
         });
         button.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            asm._setJoystick(0, 0, true);
+            asm._setJoystickButton(true);
         });
         button.addEventListener('touchend', (e) => {
             e.preventDefault();
-            asm._setJoystick(0, 0, false);
+            asm._setJoystickButton(false);
         });
     }
 

@@ -79,7 +79,8 @@ class Hardware : public SBTHardware
 
     void clearOutputQueue();
     void pressKey(uint8_t ascii, uint8_t scancode = 0);
-    void setJoystick(int x, int y, bool button);
+    void setJoystickAxes(int x, int y);
+    void setJoystickButton(bool button);
     uint32_t run(uint32_t max_delay_per_step = 100);
     void registerProcess(SBTProcess *p, bool is_default = false);
 

@@ -181,7 +181,8 @@ Hardware::Hardware()
     process = 0;
     memset(mem, 0, MEM_SIZE);
 
-    setJoystick(0, 0, false);
+    setJoystickAxes(0, 0);
+    setJoystickButton(false);
 
     port61 = 0;
 
@@ -462,10 +463,14 @@ void Hardware::pressKey(uint8_t ascii, uint8_t scancode)
     keycode = (scancode << 8) | ascii;
 }
 
-void Hardware::setJoystick(int x, int y, bool button)
+void Hardware::setJoystickAxes(int x, int y)
 {
     js_x = x;
     js_y = y;
+}
+
+void Hardware::setJoystickButton(bool button)
+{
     js_button = button;
 }
 
