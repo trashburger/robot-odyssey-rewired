@@ -51,7 +51,8 @@ resize();
 const joystick = nipplejs.create({
     zone: document.getElementById('joystick_xy'),
     mode: 'static',
-    size: '180',
+    size: '140',
+    threshold: 0.001,
     position: { left: '50%', top: '50%' }
 });
 
@@ -108,7 +109,7 @@ asm.then(() =>
     document.body.addEventListener('keydown', onKeydown);
 
     joystick.on('move', (e, data) => {
-        const scale = 4.0;
+        const scale = 8.0;
         const x = scale * data.force * Math.cos(data.angle.radian);
         const y = scale * data.force * Math.sin(data.angle.radian);
         asm._setJoystick(x, -y, false);
