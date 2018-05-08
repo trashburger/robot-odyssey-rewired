@@ -32,6 +32,8 @@
 #include "hardware.h"
 #include "fspack.h"
 
+static const bool verbose_filesystem_info = false;
+
 
 DOSFilesystem::DOSFilesystem()
 {
@@ -48,7 +50,9 @@ int DOSFilesystem::open(const char *name)
     int fd = allocateFD();
     const FileInfo *file;
 
-    printf("FILE, opening '%s'\n", name);
+    if (verbose_filesystem_info) {
+        printf("FILE, opening '%s'\n", name);
+    }
 
     if (!strcmp(name, SBT_SAVE_FILE_NAME)) {
         /*
@@ -91,7 +95,9 @@ int DOSFilesystem::create(const char *name)
     int fd = allocateFD();
     const FileInfo *file;
 
-    printf("FILE, creating '%s'\n", name);
+    if (verbose_filesystem_info) {
+        printf("FILE, creating '%s'\n", name);
+    }
 
     if (!strcmp(name, SBT_SAVE_FILE_NAME)) {
 
@@ -135,7 +141,9 @@ uint16_t DOSFilesystem::read(uint16_t fd, void *buffer, uint16_t length)
     uint32_t offset = fileOffsets[fd];
     uint16_t actual_length = std::min<unsigned>(length, file->data_size - offset);
 
-    printf("FILE, read %d(%d) bytes at %d\n", length, actual_length, offset);
+    if (verbose_filesystem_info) {
+        printf("FILE, read %d(%d) bytes at %d\n", length, actual_length, offset);
+    }
     memcpy(buffer, file->data + offset, actual_length);
 
     fileOffsets[fd] += actual_length;
@@ -153,7 +161,9 @@ uint16_t DOSFilesystem::write(uint16_t fd, const void *buffer, uint16_t length)
     uint32_t offset = fileOffsets[fd];
     uint16_t actual_length = std::min<unsigned>(length, sizeof save.buffer - offset);
 
-    printf("FILE, write %d(%d) bytes at %d\n", length, actual_length, offset);
+    if (verbose_filesystem_info) {
+        printf("FILE, write %d(%d) bytes at %d\n", length, actual_length, offset);
+    }
     memcpy(save.buffer + offset, buffer, actual_length);
 
     fileOffsets[fd] += actual_length;
@@ -229,7 +239,9 @@ void Hardware::pollJoystick(uint16_t &x, uint16_t &y, uint8_t &status)
 
 void Hardware::exec(const char *program, const char *args)
 {
-    printf("EXEC, '%s' '%s'\n", program, args);
+    if (verbose_filesystem_info) {
+        printf("EXEC, '%s' '%s'\n", program, args);
+    }
     for (std::vector<SBTProcess*>::iterator i = process_vec.begin(); i != process_vec.end(); i++) {
         const char *filename = (*i)->getFilename();
         if (!strcasecmp(program, filename)) {
@@ -244,7 +256,9 @@ void Hardware::exec(const char *program, const char *args)
 
 void Hardware::exit(uint8_t code)
 {
-    printf("EXIT, code %d\n", code);
+    if (verbose_filesystem_info) {
+        printf("EXIT, code %d\n", code);
+    }
     SBTProcess *exiting_process = process;
     process = default_process;
     process->reg.ax = code;
@@ -432,15 +446,19 @@ SBTRegs Hardware::interrupt21(SBTRegs reg, SBTStack *stack)
     case 0x3F:                /* Read File */
         reg.ax = fs.read(reg.bx, memSeg(reg.ds) + reg.dx, reg.cx);
         reg.clearCF();
-        printf("FILE, reading %d bytes into %04x:%04x ", reg.ax, reg.ds, reg.dx);
-        small_hexdump_and_newline(memSeg(reg.ds) + reg.dx, reg.ax);
+        if (verbose_filesystem_info) {
+            printf("FILE, reading %d bytes into %04x:%04x ", reg.ax, reg.ds, reg.dx);
+            small_hexdump_and_newline(memSeg(reg.ds) + reg.dx, reg.ax);
+        }
         break;
 
     case 0x40:                /* Write file */
         reg.ax = fs.write(reg.bx, memSeg(reg.ds) + reg.dx, reg.cx);
         reg.clearCF();
-        printf("FILE, writing %d bytes from %04x:%04x ", reg.ax, reg.ds, reg.dx);
-        small_hexdump_and_newline(memSeg(reg.ds) + reg.dx, reg.ax);
+        if (verbose_filesystem_info) {
+            printf("FILE, writing %d bytes from %04x:%04x ", reg.ax, reg.ds, reg.dx);
+            small_hexdump_and_newline(memSeg(reg.ds) + reg.dx, reg.ax);
+        }
         break;
 
     case 0x4A:                /* Reserve memory */
