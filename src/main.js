@@ -1,4 +1,4 @@
-import engine from "./engine.cpp";
+import wasmEngineFactory from "./engine.cpp";
 import downloadjs from 'downloadjs';
 import nipplejs from 'nipplejs';
 import './main.css';
@@ -7,14 +7,13 @@ const fbCanvas = document.getElementById('framebuffer');
 const fbContext = fbCanvas.getContext('2d');
 const fbImage = fbContext.createImageData(320, 200);
 
-function fbCanvasStatusMessage(text)
+function fbCanvasStatusMessage(text, color)
 {
     // Blank canvas, including a 1-pixel black border for consistent edge blending
     fbContext.fillStyle = '#000';
     fbContext.fillRect(0, 0, 322, 202);
 
-    // Subtle text in the corner
-    fbContext.fillStyle = '#555';
+    fbContext.fillStyle = color;
     fbContext.font = '18px sans-serif';
     fbContext.fillText(text, 10, 20);
 }
@@ -47,13 +46,13 @@ document.getElementById('joystick_hide').addEventListener('click', (e) => {
 });
 
 var asm = null;
-fbCanvasStatusMessage("Loading");
+fbCanvasStatusMessage("Loading", '#555');
 try {
-    asm = engine();
+    asm = wasmEngineFactory();
     // For console debugging later
     window.ROEngine = asm;
 } catch (e) {
-    fbCanvasStatusMessage("Fail. " + e);
+    fbCanvasStatusMessage("Fail. No WebAssembly?", '#ddd');
     throw e;
 }
 
