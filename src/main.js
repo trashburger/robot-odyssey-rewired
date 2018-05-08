@@ -20,6 +20,11 @@ const fbCanvas = document.getElementById('framebuffer');
 const fbContext = fbCanvas.getContext('2d');
 const fbImage = fbContext.createImageData(320, 200);
 
+asm.onRenderFrame = (rgbData) => {
+    fbImage.data.set(rgbData);
+    fbContext.putImageData(fbImage, 1, 1);
+};
+
 // Blank canvas, including a 1-pixel black border for consistent edge blending
 fbContext.fillStyle = '#000';
 fbContext.fillRect(0, 0, 322, 202);
@@ -46,9 +51,9 @@ resize();
 const joystick = nipplejs.create({
     zone: document.getElementById('joystick_xy'),
     mode: 'static',
+    size: '180',
     position: { left: '50%', top: '50%' }
 });
-
 
 function onKeydown(e)
 {
@@ -93,18 +98,14 @@ function filenameForSaveData(bytes)
     }
 }
 
+asm.onSaveFileWrite = (saveData) => {
+    downloadjs(saveData, filenameForSaveData(saveData), 'application/octet-stream');
+};
+
+
 asm.then(() =>
 {
     document.body.addEventListener('keydown', onKeydown);
-
-    asm.onRenderFrame = (rgbData) => {
-        fbImage.data.set(rgbData);
-        fbContext.putImageData(fbImage, 1, 1);
-    };
-
-    asm.onSaveFileWrite = (saveData) => {
-        downloadjs(saveData, filenameForSaveData(saveData), 'application/octet-stream');
-    };
 
     joystick.on('move', (e, data) => {
         const scale = 4.0;
