@@ -22,7 +22,6 @@ button {
 
 #frame {
     width: 100%;
-    padding: 10px 0 0 0;
     text-align: center;
 }
 
@@ -64,3 +63,4 @@ button {
 #savefile_input {
     display: none;
 }
+
