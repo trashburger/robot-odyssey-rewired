@@ -42,69 +42,73 @@ OutputQueue::OutputQueue()
     rgb_palette[3] = 0xffffffff;
 }
 
-OutputQueue::~OutputQueue()
-{
-    clear();
-}
-
 void OutputQueue::clear()
 {
-    while (!output_queue.empty()) {
-        OutputItem item = output_queue.front();
-        output_queue.pop_front();
-        if (item.otype == OUT_FRAME) {
-            delete item.u.framebuffer;
-        }
-    }
-    output_queue_frame_count = 0;
-    output_queue_delay_remaining = 0;
+    items.clear();
+    frames.clear();
+    delay_remaining = 0;
 }
 
 void OutputQueue::pushFrame(SBTStack *stack, uint8_t *framebuffer)
 {
-    if (output_queue_frame_count > 500) {
+    if (frames.full() || items.full()) {
         stack->trace();
         assert(0 && "Frame queue is too deep! Infinite loop likely.");
+        return;
     }
 
     OutputItem item;
     item.otype = OUT_FRAME;
-    item.u.framebuffer = new CGAFramebuffer;
-    memcpy(item.u.framebuffer, framebuffer, sizeof *item.u.framebuffer);
-    output_queue.push_back(item);
-    output_queue_frame_count++;
+    items.push_back(item);
+
+    frames.push_back(*(CGAFramebuffer*) framebuffer);
 }
 
 void OutputQueue::pushDelay(uint32_t millis)
 {
-    OutputItem item;
-    item.otype = OUT_DELAY;
-    item.u.delay = millis;
-    output_queue.push_back(item);
+    if (!items.full()) {
+        OutputItem item;
+        item.otype = OUT_DELAY;
+        item.u.delay = millis;
+        items.push_back(item);
+    }
 }
 
 void OutputQueue::pushSpeakerTimestamp(uint32_t timestamp)
 {
+    if (items.full()) {
+        assert(0 && "Speaker queue is too deep! Infinite loop likely.");
+        return;
+    }
+
     OutputItem item;
     item.otype = OUT_SPEAKER_TIMESTAMP;
     item.u.timestamp = timestamp;
-    output_queue.push_back(item);
+    items.push_back(item);
 }
 
-void OutputQueue::renderFrame(uint8_t *framebuffer)
+void OutputQueue::renderFrame()
 {
+    assert(!frames.empty());
+    CGAFramebuffer &frame = frames.front();
+
+    // Expand CGA color to RGBA
     for (unsigned plane = 0; plane < 2; plane++) {
         for (unsigned y=0; y < SCREEN_HEIGHT/2; y++) {
             for (unsigned x=0; x < SCREEN_WIDTH; x++) {
                 unsigned byte = 0x2000*plane + (x + SCREEN_WIDTH*y)/4;
                 unsigned bit = 3 - (x % 4);
-                unsigned color = 0x3 & (framebuffer[byte] >> (bit * 2));
+                unsigned color = 0x3 & (frame.bytes[byte] >> (bit * 2));
                 uint32_t rgb = rgb_palette[color];
                 rgb_pixels[x + (y*2+plane)*SCREEN_WIDTH] = rgb;
             }
         }
     }
 
+    // Free the ring buffer slot we were using
+    frames.pop_front();
+
+    // Synchronously ask Javascript to do something with this array
     EM_ASM_({
         Module.onRenderFrame(HEAPU8.subarray($0, $0 + 320*200*4))
     }, rgb_pixels);
@@ -115,37 +119,36 @@ uint32_t OutputQueue::run()
     // Generate output until the queue is empty (returning zero) or
     // a delay (returning a nonzero number of milliseconds)
 
-    static const uint32_t max_delay_per_step = 100;
-
     while (true) {
-        if (output_queue_delay_remaining > 0) {
-            uint32_t delay = std::min(output_queue_delay_remaining, max_delay_per_step);
-            output_queue_delay_remaining -= delay;
+        // Split up large delays
+        static const uint32_t max_delay_per_step = 100;
+        if (delay_remaining > 0) {
+            uint32_t delay = std::min(delay_remaining, max_delay_per_step);
+            delay_remaining -= delay;
             return delay;
+        }
 
-        } else if (output_queue.empty()) {
+        // No more delay.. now we need more output, make sure the queue has items
+        if (items.empty()) {
             return 0;
+        }
 
-        } else {
-            OutputItem item = output_queue.front();
-            output_queue.pop_front();
+        OutputItem item = items.front();
+        items.pop_front();
 
-            switch (item.otype) {
+        switch (item.otype) {
 
-                case OUT_FRAME:
-                    renderFrame(item.u.framebuffer->bytes);
-                    output_queue_frame_count--;
-                    delete item.u.framebuffer;
-                    break;
+            case OUT_FRAME:
+                renderFrame();
+                break;
 
-                case OUT_DELAY:
-                    output_queue_delay_remaining += item.u.delay;
-                    break;
+            case OUT_DELAY:
+                delay_remaining += item.u.delay;
+                break;
 
-                case OUT_SPEAKER_TIMESTAMP:
-                    // fprintf(stderr, "TODO, sound at %d\n", item.u.timestamp);
-                    break;
-            }
+            case OUT_SPEAKER_TIMESTAMP:
+                // fprintf(stderr, "TODO, sound at %d\n", item.u.timestamp);
+                break;
         }
     }
 }
