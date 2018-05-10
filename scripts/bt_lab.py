@@ -37,7 +37,7 @@ for call_site in [
     continue_at = call_site.add(1)
     subroutine = b.jumpTarget(call_site)
     b.patchAndHook(call_site, 'ret',
-    	'hw->outputDelay(20);'
+    	'hw->output.pushDelay(20);'
 		'proc->continueFrom(r, &sub_%X);' % continue_at.linear)
     b.patch(continue_at, 'call 0x%04x' % subroutine.offset, length=2)
     b.exportSub(continue_at)

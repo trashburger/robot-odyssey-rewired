@@ -77,8 +77,8 @@ for call_site in [
     # Go slower than default, that's too fast here.
 
     b.patchAndHook(call_site, 'ret',
-        'hw->outputFrame(gStack, proc->memSeg(0xB800));'
-        'hw->outputDelay(%d * 2.5);'
+        'hw->output.pushFrame(gStack, proc->memSeg(0xB800));'
+        'hw->output.pushDelay(%d * 2.5);'
         'proc->continueFrom(r, &sub_%X);' % (
             bt_common.FRAME_RATE_DELAY, continue_at.linear))
     b.patch(continue_at, 'call 0x%04x' % input_poll_func.offset, length=2)
@@ -104,8 +104,8 @@ for (call_site, delay) in [
     continue_at = call_site.add(3)
 
     b.patchAndHook(call_site, 'ret',
-        'hw->outputFrame(gStack, proc->memSeg(0xB800));'
-        'hw->outputDelay(%d);'
+        'hw->output.pushFrame(gStack, proc->memSeg(0xB800));'
+        'hw->output.pushDelay(%d);'
         'proc->continueFrom(r, &sub_%X);' % (delay, continue_at.linear))    
     b.exportSub(continue_at)
     b.hook(continue_at, 'hw->clearKeyboardBuffer();')
@@ -151,11 +151,11 @@ for call_site in [
     b.exportSub(continue_at)
     b.exportSub(target)
     b.patchAndHook(call_site, 'ret',
-        'hw->outputFrame(gStack, proc->memSeg(0xB800));'
+        'hw->output.pushFrame(gStack, proc->memSeg(0xB800));'
         'uint32_t clockref = gClock;'
         'sub_%X();'
         'uint32_t elapsed = gClock - clockref;'
-        'hw->outputDelay(elapsed / (Hardware::CLOCK_HZ / 1000));'
+        'hw->output.pushDelay(elapsed / (Hardware::CLOCK_HZ / 1000));'
         'proc->continueFrom(r, &sub_%X);' % (
             target.linear, continue_at.linear))
 

@@ -24,7 +24,6 @@
  *    OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <emscripten.h>
 #include <algorithm>
 #include <string.h>
 #include <stdio.h>
@@ -36,7 +35,6 @@ static const bool verbose_process_info = false;
 
 Hardware::Hardware()
 {
-    clearOutputQueue();
     process = 0;
     memset(mem, 0, MEM_SIZE);
 
@@ -44,29 +42,6 @@ Hardware::Hardware()
     setJoystickButton(false);
 
     port61 = 0;
-
-    rgb_palette[0] = 0xff000000;
-    rgb_palette[1] = 0xffffff55;
-    rgb_palette[2] = 0xffff55ff;
-    rgb_palette[3] = 0xffffffff;
-}
-
-Hardware::~Hardware()
-{
-    clearOutputQueue();
-}
-
-void Hardware::clearOutputQueue()
-{
-    while (!output_queue.empty()) {
-        OutputItem item = output_queue.front();
-        output_queue.pop_front();
-        if (item.otype == OUT_FRAME) {
-            delete item.u.framebuffer;
-        }
-    }
-    output_queue_frame_count = 0;
-    output_queue_delay_remaining = 0;
 }
 
 void Hardware::clearKeyboardBuffer()
@@ -129,45 +104,18 @@ void Hardware::registerProcess(SBTProcess *p, bool is_default)
     }
 }
 
-uint32_t Hardware::run(uint32_t max_delay_per_step)
+uint32_t Hardware::run()
 {
-    // Generate output until we hit the next delay, and run() when the output queue is empty.
-    // Returns the number of milliseconds to wait until the next call.
-
     while (true) {
-        if (output_queue_delay_remaining > 0) {
-            uint32_t delay = std::min(output_queue_delay_remaining, max_delay_per_step);
-            output_queue_delay_remaining -= delay;
+        uint32_t delay = output.run();
+        if (delay) {
             return delay;
-
-        } else if (output_queue.empty()) {
-            assert(process);
-            process->run();
-
-        } else {
-            OutputItem item = output_queue.front();
-            output_queue.pop_front();
-
-            switch (item.otype) {
-
-                case OUT_FRAME:
-                    renderFrame(item.u.framebuffer->bytes);
-                    output_queue_frame_count--;
-                    delete item.u.framebuffer;
-                    break;
-
-                case OUT_DELAY:
-                    output_queue_delay_remaining += item.u.delay;
-                    break;
-
-                case OUT_SPEAKER_TIMESTAMP:
-                    // fprintf(stderr, "TODO, sound at %d\n", item.u.timestamp);
-                    break;
-            }
         }
+
+        assert(process);
+        process->run();
     }
 }
-
 
 uint8_t Hardware::in(uint16_t port, uint32_t timestamp)
 {
@@ -198,7 +146,7 @@ void Hardware::out(uint16_t port, uint8_t value, uint32_t timestamp)
             /*
              * PC speaker state toggled. Store a timestamp.
              */
-            writeSpeakerTimestamp(timestamp);
+            output.pushSpeakerTimestamp(timestamp);
         }
 
         port61 = value;
@@ -346,54 +294,4 @@ void Hardware::setJoystickButton(bool button)
 {
     js_button_held = button;
     js_button_pressed = js_button_pressed || button;
-}
-
-void Hardware::outputFrame(SBTStack *stack, uint8_t *framebuffer)
-{
-    if (output_queue_frame_count > 500) {
-        stack->trace();
-        assert(0 && "Frame queue is too deep! Infinite loop likely.");
-    }
-
-    OutputItem item;
-    item.otype = OUT_FRAME;
-    item.u.framebuffer = new CGAFramebuffer;
-    memcpy(item.u.framebuffer, framebuffer, sizeof *item.u.framebuffer);
-    output_queue.push_back(item);
-    output_queue_frame_count++;
-}
-
-void Hardware::outputDelay(uint32_t millis)
-{
-    OutputItem item;
-    item.otype = OUT_DELAY;
-    item.u.delay = millis;
-    output_queue.push_back(item);
-}
-
-void Hardware::writeSpeakerTimestamp(uint32_t timestamp)
-{
-    OutputItem item;
-    item.otype = OUT_SPEAKER_TIMESTAMP;
-    item.u.timestamp = timestamp;
-    output_queue.push_back(item);
-}
-
-void Hardware::renderFrame(uint8_t *framebuffer)
-{
-    for (unsigned plane = 0; plane < 2; plane++) {
-        for (unsigned y=0; y < SCREEN_HEIGHT/2; y++) {
-            for (unsigned x=0; x < SCREEN_WIDTH; x++) {
-                unsigned byte = 0x2000*plane + (x + SCREEN_WIDTH*y)/4;
-                unsigned bit = 3 - (x % 4);
-                unsigned color = 0x3 & (framebuffer[byte] >> (bit * 2));
-                uint32_t rgb = rgb_palette[color];
-                rgb_pixels[x + (y*2+plane)*SCREEN_WIDTH] = rgb;
-            }
-        }
-    }
-
-    EM_ASM_({
-        Module.onRenderFrame(HEAPU8.subarray($0, $0 + 320*200*4))
-    }, rgb_pixels);
 }
