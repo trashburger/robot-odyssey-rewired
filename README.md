@@ -43,6 +43,7 @@ To do
 
 - input
   - keyboard event queueing
+  - latching joystick button input
   - nicer touch controls
   - controls help
 
@@ -51,9 +52,10 @@ To do
   - home screen icon, favicon
 
 - enhancements
-  - touch/mouse controls for schematic editing
+  - generalized touch/mouse controls?
+    - servo moves player to cursor without violating game logic
+    - zoomed detail loupe for soldering
+    - context sensitive soldering actions
+  - context sensitive keyboard controls
   - built-in chip decompiler
   - enhanced graphics modes
-  - input UI / mobile experience
-    - player-follows-finger?
-    - zoomed detail loupe for soldering?
