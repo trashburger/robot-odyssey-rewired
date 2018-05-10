@@ -592,8 +592,14 @@ class Instruction:
             elif isinstance(arg, Addr16):
                 # Far branch
                 self.labels = (arg,)
-
         self.nextAddrs += self.labels
+
+        # If this was a branch instruction, assume near (16-bit) by default.
+        # Newer versions of nasm leave the explicit width annotation off these addrs.
+        if self.nextAddrs:
+            for a in self.args:
+                if a.width is None:
+                    a.width = 2  # Near ptr
 
     def _findUnknownWidth(self):
         """Figure out an operand width that wasn't explicitly specified.
