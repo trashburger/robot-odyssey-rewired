@@ -116,7 +116,7 @@ class Hardware : public SBTHardware
     uint8_t port61;
     uint16_t keycode;
     int js_x, js_y;
-    bool js_button;
+    bool js_button_pressed, js_button_held;
 
     void exit(uint8_t code);
     void writeSpeakerTimestamp(uint32_t timestamp);

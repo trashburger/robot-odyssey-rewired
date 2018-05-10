@@ -227,12 +227,18 @@ void Hardware::clearKeyboardBuffer()
 
 void Hardware::pollJoystick(uint16_t &x, uint16_t &y, uint8_t &status)
 {
+    // Button presses must not be missed if they end before the next poll.
+    // Clear the button press latch here.
+
+    bool button = js_button_held || js_button_pressed;
+    js_button_pressed = false;
+
     // Port 0x201 style status byte: Low 4 bits are timed based
     // on an RC circuit in each axis. Upper 4 bits are buttons,
     // active low. The byte includes data for two joysticks, and
     // we only emulate one.
 
-    status = 0xFC ^ (js_button ? 0x10 : 0);
+    status = 0xFC ^ (button ? 0x10 : 0);
     x = std::max(0, std::min((int)fs.joyfile.x_center * 2, js_x + fs.joyfile.x_center));
     y = std::max(0, std::min((int)fs.joyfile.y_center * 2, js_y + fs.joyfile.y_center));
 }
@@ -489,7 +495,8 @@ void Hardware::setJoystickAxes(int x, int y)
 
 void Hardware::setJoystickButton(bool button)
 {
-    js_button = button;
+    js_button_held = button;
+    js_button_pressed = js_button_pressed || button;
 }
 
 void Hardware::outputFrame(SBTStack *stack, uint8_t *framebuffer)
