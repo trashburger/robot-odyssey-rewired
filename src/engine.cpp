@@ -46,7 +46,7 @@ extern "C" void EMSCRIPTEN_KEEPALIVE start()
 
 extern "C" void EMSCRIPTEN_KEEPALIVE exec(const char *process, const char *arg)
 {
-	hw.clearOutputQueue();
+	hw.output.clear();
 	hw.exec(process, arg);
 	loop();
 }
@@ -63,7 +63,7 @@ extern "C" void EMSCRIPTEN_KEEPALIVE pressKey(uint8_t ascii, uint8_t scancode)
     hw.pressKey(ascii, scancode);
 
 	// Skip cutscenes
-	hw.clearOutputQueue();
+	hw.output.clear();
 }
 
 extern "C" void EMSCRIPTEN_KEEPALIVE setJoystickAxes(int x, int y)

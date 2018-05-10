@@ -17,7 +17,6 @@ class Hardware
     static const uint32_t MEM_SIZE = 256 * 1024;
     uint8_t mem[MEM_SIZE];
 
-    void clearOutputQueue();
     void pressKey(uint8_t ascii, uint8_t scancode = 0);
     void setJoystickAxes(int x, int y);
     void setJoystickButton(bool button);
