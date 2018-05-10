@@ -87,7 +87,7 @@ def patch(b):
                               'bb2800 a1____ 8cda 8ed8 be0020 33 c0'),
                    'ret', '''
         if (!noBlit) {
-            hw->outputFrame(gStack, proc->hardware->memSeg(proc->hardware->peek16(r.ds, 0x3AD5)));
+            hw->outputFrame(gStack, proc->memSeg(proc->peek16(r.ds, 0x3AD5)));
             hw->outputDelay(%d);
         }
     ''' % FRAME_RATE_DELAY)
@@ -193,7 +193,7 @@ def patchFramebufferTrace(b, interval=200, delay=8):
             hit++;
             if (hit == %d) {
                 hit = 0;
-                hw->outputFrame(gStack, hw->memSeg(0xB800));
+                hw->outputFrame(gStack, proc->memSeg(0xB800));
                 hw->outputDelay(%d);
             }
         }
@@ -300,5 +300,5 @@ def patchJoystick(b):
     poller = b.findCode(':8b16____ bb0000 b90000 c606____ff eeec2006')
     buttons = b.peek16(poller.add(12))
     b.patchAndHook(poller, 'ret',
-        'hw->pollJoystick(r.bx, r.cx, hw->memSeg(r.ds)[%d]);'
+        'hw->pollJoystick(r.bx, r.cx, proc->memSeg(r.ds)[%d]);'
         % buttons)

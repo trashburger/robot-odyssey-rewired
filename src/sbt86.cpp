@@ -30,6 +30,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "sbt86.h"
+#include "hardware.h"
 
 static const bool full_stack_trace = false;
 static const uint32_t total_calls_threshold = 100000;
@@ -77,8 +78,8 @@ void SBTProcess::exec(const char *cmdLine)
     reg.cs = getEntryCS();
     continue_func = getEntry();
 
-    uint8_t *end_of_mem = hardware->mem + SBTHardware::MEM_SIZE;
-    uint8_t *data_segment = hardware->memSeg(reg.ds);
+    uint8_t *end_of_mem = hardware->mem + Hardware::MEM_SIZE;
+    uint8_t *data_segment = memSeg(reg.ds);
 
     // Clear low memory including the BIOS data area
     memset(hardware->mem, 0, 0x600);
@@ -95,7 +96,7 @@ void SBTProcess::exec(const char *cmdLine)
      * the EXE, and copy our command line to it.
      */
     reg.es = reg.ds - 0x10;
-    uint8_t *psp = hardware->memSeg(reg.es);
+    uint8_t *psp = memSeg(reg.es);
     memset(psp, 0, 0x80);
     psp[0x80] = strlen(cmdLine);
     memset(&psp[0x81], 0x0D, 0x7f);
@@ -108,7 +109,7 @@ void SBTProcess::exec(const char *cmdLine)
 
 void SBTProcess::run(void)
 {
-    assert(hardware != NULL && "SBTHardware must be defined\nbefore running a process");
+    assert(hardware != NULL && "Hardware environment must be defined before running a process");
 
     SBTStack stack;
     loadCache(&stack);
@@ -152,32 +153,42 @@ void SBTProcess::failedDynamicBranch(uint16_t cs, uint16_t ip, uint32_t value)
     assert(0 && "Failed dynamic branch");
 }
 
-uint8_t *SBTHardware::memSeg(uint16_t seg)
+uint8_t *SBTProcess::memSeg(uint16_t seg)
 {
+    /*
+     * The highest normal segment we can support.  Any segments over
+     * MAX_SEGMENT get remapped to MAX_SEGMENT. This serves two
+     * purposes:
+     *
+     *   1. It makes reads from the BIOS harmless.
+     *   2. It puts the CGA framebuffer somewhere useful.
+     */
+    static const uint32_t MAX_SEGMENT = (Hardware::MEM_SIZE - 0x10000) >> 4;
+
     if (seg > MAX_SEGMENT) {
         seg = MAX_SEGMENT;
     }
-    return mem + (((uint32_t)seg) << 4);
+    return hardware->mem + (((uint32_t)seg) << 4);
 }
 
-uint8_t SBTHardware::peek8(uint16_t seg, uint16_t off)
+uint8_t SBTProcess::peek8(uint16_t seg, uint16_t off)
 {
     return memSeg(seg)[off];
 }
 
-void SBTHardware::poke8(uint16_t seg, uint16_t off, uint8_t value)
+void SBTProcess::poke8(uint16_t seg, uint16_t off, uint8_t value)
 {
     memSeg(seg)[off] = value;
 }
 
-int16_t SBTHardware::peek16(uint16_t seg, uint16_t off)
+int16_t SBTProcess::peek16(uint16_t seg, uint16_t off)
 {
-    return SBTSegmentCache::read16(memSeg(seg) + off);
+    return read16(memSeg(seg) + off);
 }
 
-void SBTHardware::poke16(uint16_t seg, uint16_t off, uint16_t value)
+void SBTProcess::poke16(uint16_t seg, uint16_t off, uint16_t value)
 {
-    SBTSegmentCache::write16(memSeg(seg) + off, value);
+    write16(memSeg(seg) + off, value);
 }
 
 SBTStack::SBTStack()

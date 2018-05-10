@@ -41,7 +41,7 @@ ROWorld::ROWorld() {
 }
 
 ROWorld *ROWorld::fromProcess(SBTProcess *proc) {
-    return (ROWorld*) (proc->hardware->memSeg(proc->reg.ds) +
+    return (ROWorld*) (proc->memSeg(proc->reg.ds) +
                        proc->getAddress(SBTADDR_WORLD_DATA));
 }
 
@@ -142,19 +142,19 @@ void ROWorld::setRobotXY(ROObjectId obj, int x, int y) {
 
 
 ROCircuit *ROCircuit::fromProcess(SBTProcess *proc) {
-    return (ROCircuit*) (proc->hardware->memSeg(proc->reg.ds) +
+    return (ROCircuit*) (proc->memSeg(proc->reg.ds) +
                        proc->getAddress(SBTADDR_CIRCUIT_DATA));
 }
 
 
 RORobot *RORobot::fromProcess(SBTProcess *proc) {
-    return (RORobot*) (proc->hardware->memSeg(proc->reg.ds) +
+    return (RORobot*) (proc->memSeg(proc->reg.ds) +
                        proc->getAddress(SBTADDR_ROBOT_DATA_MAIN));
 }
 
 
 RORobotGrabber *RORobotGrabber::fromProcess(SBTProcess *proc) {
-    return (RORobotGrabber*) (proc->hardware->memSeg(proc->reg.ds) +
+    return (RORobotGrabber*) (proc->memSeg(proc->reg.ds) +
                               proc->getAddress(SBTADDR_ROBOT_DATA_GRABBER));
 }
 

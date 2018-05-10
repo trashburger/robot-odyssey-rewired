@@ -3,47 +3,7 @@
 #include <vector>
 #include <list>
 #include "sbt86.h"
-#include "roData.h"
-#include "fspack.h"
-
-SBT_DECL_PROCESS(PlayEXE);
-SBT_DECL_PROCESS(MenuEXE);
-SBT_DECL_PROCESS(Menu2EXE);
-SBT_DECL_PROCESS(LabEXE);
-SBT_DECL_PROCESS(GameEXE);
-SBT_DECL_PROCESS(TutorialEXE);
-SBT_DECL_PROCESS(RendererEXE);
-
-
-class DOSFilesystem
-{
-public:
-    DOSFilesystem();
-    void reset();
-
-    int open(const char *name);
-    int create(const char *name);
-    void close(uint16_t fd);
-    uint16_t read(uint16_t fd, void *buffer, uint16_t length);
-    uint16_t write(uint16_t fd, const void *buffer, uint16_t length);
-
-    ROJoyfile joyfile;
-
-    struct {
-        uint32_t size;
-        bool writeMode;
-        uint8_t buffer[0x10000];
-    } save;
-
-private:
-    uint16_t allocateFD();
-
-    static const unsigned MAX_OPEN_FILES = 16;
-    const FileInfo* openFiles[MAX_OPEN_FILES];
-    uint32_t fileOffsets[MAX_OPEN_FILES];
-    FileInfo saveFileInfo;
-    FileInfo joyFileInfo;
-};
+#include "filesystem.h"
 
 
 struct CGAFramebuffer
@@ -71,11 +31,16 @@ struct OutputItem
 };
 
 
-class Hardware : public SBTHardware
+class Hardware
 {
  public:
     Hardware();
     ~Hardware();
+
+    static const int CLOCK_HZ = 4770000;
+
+    static const uint32_t MEM_SIZE = 256 * 1024;
+    uint8_t mem[MEM_SIZE];
 
     void clearOutputQueue();
     void pressKey(uint8_t ascii, uint8_t scancode = 0);

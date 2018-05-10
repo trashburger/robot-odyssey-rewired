@@ -24,7 +24,7 @@ def write_header(cpp):
     cpp.write('// Automatically generated filesystem data\n\n'
               '#include <string.h>\n'
               '#include <stdint.h>\n'
-              '#include "fspack.h"\n\n')
+              '#include "filesystem.h"\n\n')
 
 
 def write_file_data(cpp, name, data):

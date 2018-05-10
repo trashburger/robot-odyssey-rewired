@@ -48,7 +48,7 @@ b.patch('019E:0178', 'jmp 0x1A6')
 # screen before the actual cutscene starts.
 b.hook('019E:016C', 'enable_framebuffer_trace = false;')
 b.hook('019E:0178', 'enable_framebuffer_trace = true;'
-                    'memset(hw->memSeg(0xB800), 0, 0x4000);')
+                    'memset(proc->memSeg(0xB800), 0, 0x4000);')
 
 # Remove the new/old game menu and disk swap before Innovation Lab
 # As above, we'll handle game loading using an external UI.
@@ -77,7 +77,7 @@ for call_site in [
     # Go slower than default, that's too fast here.
 
     b.patchAndHook(call_site, 'ret',
-        'hw->outputFrame(gStack, hw->memSeg(0xB800));'
+        'hw->outputFrame(gStack, proc->memSeg(0xB800));'
         'hw->outputDelay(%d * 2.5);'
         'proc->continueFrom(r, &sub_%X);' % (
             bt_common.FRAME_RATE_DELAY, continue_at.linear))
@@ -104,7 +104,7 @@ for (call_site, delay) in [
     continue_at = call_site.add(3)
 
     b.patchAndHook(call_site, 'ret',
-        'hw->outputFrame(gStack, hw->memSeg(0xB800));'
+        'hw->outputFrame(gStack, proc->memSeg(0xB800));'
         'hw->outputDelay(%d);'
         'proc->continueFrom(r, &sub_%X);' % (delay, continue_at.linear))    
     b.exportSub(continue_at)
@@ -151,11 +151,11 @@ for call_site in [
     b.exportSub(continue_at)
     b.exportSub(target)
     b.patchAndHook(call_site, 'ret',
-        'hw->outputFrame(gStack, hw->memSeg(0xB800));'
+        'hw->outputFrame(gStack, proc->memSeg(0xB800));'
         'uint32_t clockref = gClock;'
         'sub_%X();'
         'uint32_t elapsed = gClock - clockref;'
-        'hw->outputDelay(elapsed / (SBTHardware::CLOCK_HZ / 1000));'
+        'hw->outputDelay(elapsed / (Hardware::CLOCK_HZ / 1000));'
         'proc->continueFrom(r, &sub_%X);' % (
             target.linear, continue_at.linear))
 

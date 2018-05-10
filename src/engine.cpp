@@ -1,4 +1,4 @@
-//parcel: -Oz -I. sbt86.cpp hardware.cpp roData.cpp ../build/fspack.cpp ../build/bt_lab.cpp ../build/bt_menu.cpp ../build/bt_menu2.cpp ../build/bt_game.cpp ../build/bt_tutorial.cpp ../build/bt_play.cpp
+//parcel: -Oz -I. sbt86.cpp hardware.cpp roData.cpp filesystem.cpp ../build/fspack.cpp ../build/bt_lab.cpp ../build/bt_menu.cpp ../build/bt_menu2.cpp ../build/bt_game.cpp ../build/bt_tutorial.cpp ../build/bt_play.cpp
 
 #include <stdint.h>
 #include <emscripten.h>
@@ -8,6 +8,24 @@
 static Hardware hw;
 static float delay_multiplier = 1.0f;
 
+SBT_DECL_PROCESS(PlayEXE);
+static PlayEXE play_exe(&hw);
+
+SBT_DECL_PROCESS(MenuEXE);
+static MenuEXE menu_exe(&hw);
+
+SBT_DECL_PROCESS(Menu2EXE);
+static Menu2EXE menu2_exe(&hw);
+
+SBT_DECL_PROCESS(LabEXE);
+static LabEXE lab_exe(&hw);
+
+SBT_DECL_PROCESS(GameEXE);
+static GameEXE game_exe(&hw);
+
+SBT_DECL_PROCESS(TutorialEXE);
+static TutorialEXE tut_exe(&hw);
+
 static void loop()
 {
     uint32_t millis = hw.run();
@@ -16,12 +34,12 @@ static void loop()
 
 extern "C" void EMSCRIPTEN_KEEPALIVE start()
 {
-    hw.registerProcess(new PlayEXE(&hw), true);
-    hw.registerProcess(new MenuEXE(&hw));
-    hw.registerProcess(new Menu2EXE(&hw));
-    hw.registerProcess(new GameEXE(&hw));
-    hw.registerProcess(new LabEXE(&hw));
-    hw.registerProcess(new TutorialEXE(&hw));
+    hw.registerProcess(&play_exe, true);
+    hw.registerProcess(&menu_exe);
+    hw.registerProcess(&menu2_exe);
+    hw.registerProcess(&lab_exe);
+    hw.registerProcess(&game_exe);
+    hw.registerProcess(&tut_exe);
 
     emscripten_set_main_loop(loop, 0, false);
 }

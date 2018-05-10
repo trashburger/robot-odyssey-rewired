@@ -283,9 +283,9 @@ class Indirect:
                 return mem
         elif self.width == 2:
             if mode == 'w':
-                return "W16(&%s," % mem
+                return "write16(&%s," % mem
             else:
-                return "R16(&%s)" % mem
+                return "read16(&%s)" % mem
         else:
             raise InternalError("Unsupported memory access width")
 
@@ -1589,14 +1589,9 @@ class DOSBinary(BinaryImage):
 #include <stdint.h>
 #include <stdio.h>
 #include "sbt86.h"
+#include "hardware.h"
 
 SBT_DECL_PROCESS(%(className)s);
-
-/*
- * Shorter names for static functions
- */
-#define W16 SBTSegmentCache::write16
-#define R16 SBTSegmentCache::read16
 
 /*
  * Local cache of registers and process pointer.
@@ -1605,7 +1600,7 @@ static SBTRegs r;
 static SBTSegmentCache s;
 static SBTProcess *proc;
 static SBTStack *gStack;
-static SBTHardware *hw;
+static Hardware *hw;
 static uint32_t gClock;
 
 static uint8_t dataImage[] = {
