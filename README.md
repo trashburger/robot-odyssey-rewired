@@ -28,12 +28,13 @@ Build Instructions
 To do
 -----
 
+- Needs play testing
+
 - cutscenes
   - intro cutscene timing and sound are somewhat off
   - end-game is broken
   - Final cutscene still needs patching and testing
-
-- Needs play testing
+  - State of "PLAY.EXE" won't always be correct when returning from a subprocess, consider rewriting play.exe entirely
 
 - load/save
   - package thumbnails plus game data into PNG/JPEG/GIF for mobile+social
