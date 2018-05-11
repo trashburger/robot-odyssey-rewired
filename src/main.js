@@ -63,27 +63,43 @@ asm.onRenderFrame = (rgbData) => {
     fbContext.putImageData(fbImage, 1, 1);
 };
 
-asm.onRenderSound = (pcmData, rate) => {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
+asm.audioSetup = () => {
+    // Called via an event callback; necessary to unlock audio on iOS.
 
     if (asm.audioContext === undefined) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
         asm.audioContext = new AudioContext();
+        if (!asm.audioContext) {
+            return false;
+        }
     }
 
+    if (asm.audioContext.state == 'suspended') {
+        asm.audioContext.resume();
+        if (asm.audioContext.state == 'suspended') {
+            return false;
+        }
+    }
+
+    return true;
+};
+
+asm.onRenderSound = (pcmData, rate) => {
     // TO DO: Volume control
     const volume = 0.1;
 
-    const buffer = asm.audioContext.createBuffer(1, pcmData.length, rate);
-    const channelData = buffer.getChannelData(0);
+    if (volume > 0.0 && asm.audioSetup()) {
+        const buffer = asm.audioContext.createBuffer(1, pcmData.length, rate);
+        const channelData = buffer.getChannelData(0);
+        for (var i = 0; i < pcmData.length; i++) {
+            channelData[i] = pcmData[i] * volume;
+        }
 
-    for (var i = 0; i < pcmData.length; i++) {
-        channelData[i] = pcmData[i] * volume;
+        const source = asm.audioContext.createBufferSource();
+        source.buffer = buffer;
+        source.connect(asm.audioContext.destination);
+        source.start();
     }
-
-    const source = asm.audioContext.createBufferSource();
-    source.buffer = buffer;
-    source.connect(asm.audioContext.destination);
-    source.start();
 };
 
 function keycode(ascii, scancode)
@@ -183,27 +199,33 @@ asm.then(() =>
         const x = scale * data.force * Math.cos(data.angle.radian);
         const y = scale * data.force * Math.sin(data.angle.radian);
         asm._setJoystickAxes(x, -y);
+        asm.audioSetup();
     });
     joystick.on('end', (e) => {
         asm._setJoystickAxes(0, 0);
+        asm.audioSetup();
     });
 
     for (let button of document.getElementsByClassName('joystick_btn')) {
         button.addEventListener('mousedown', (e) => {
             asm._setJoystickButton(true);
             refocus(e);
-        });
+            asm.audioSetup();
+       });
         button.addEventListener('mouseup', (e) => {
             asm._setJoystickButton(false);
             refocus(e);
+            asm.audioSetup();
         });
         button.addEventListener('touchstart', (e) => {
             e.preventDefault();
             asm._setJoystickButton(true);
+            asm.audioSetup();
         });
         button.addEventListener('touchend', (e) => {
             e.preventDefault();
             asm._setJoystickButton(false);
+            asm.audioSetup();
         });
     }
 
@@ -211,6 +233,7 @@ asm.then(() =>
         button.addEventListener('click', (e) => {
             exec(button.dataset.program, button.dataset.args);
             refocus(e);
+            asm.audioSetup();
         });
     }
 
@@ -218,11 +241,14 @@ asm.then(() =>
         const key = () => keycode(button.dataset.ascii, parseInt(button.dataset.scancode, 0));
         button.addEventListener('click', (e) => {
             key();
+            asm.audioSetup();
             refocus(e);
         });
         button.addEventListener('touchend', (e) => {
             e.preventDefault();
             key();
+            asm.audioSetup();
+            refocus(e);
         });
     }
 
@@ -236,6 +262,7 @@ asm.then(() =>
     document.getElementById('savefile_btn').addEventListener('click', (e) => {
         document.getElementById('savefile_input').click();
         refocus(e);
+        asm.audioSetup();
     });
 
     document.getElementById('savefile_input').addEventListener('change', (e) => {
