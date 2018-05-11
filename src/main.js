@@ -1,7 +1,6 @@
-import wasmEngineFactory from "./engine.cpp";
+import wasmEngineFactory from "../build/engine.js";
 import downloadjs from 'downloadjs';
 import nipplejs from 'nipplejs';
-import './main.css';
 
 const fbCanvas = document.getElementById('framebuffer');
 const fbContext = fbCanvas.getContext('2d');

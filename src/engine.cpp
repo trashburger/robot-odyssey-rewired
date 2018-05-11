@@ -1,5 +1,3 @@
-//parcel: -std=c++11 -Oz -I. sbt86.cpp hardware.cpp roData.cpp filesystem.cpp output.cpp ../build/fspack.cpp ../build/bt_lab.cpp ../build/bt_menu.cpp ../build/bt_menu2.cpp ../build/bt_game.cpp ../build/bt_tutorial.cpp ../build/bt_play.cpp
-
 #include <stdint.h>
 #include <emscripten.h>
 #include <algorithm>
