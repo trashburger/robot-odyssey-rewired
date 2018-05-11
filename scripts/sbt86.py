@@ -333,7 +333,7 @@ class Trace:
         self.fire = fire
 
     def codegen(self):
-        return ("static inline int %s_probe(%s) {\n%s\n}\n"
+        return ("static SBT_INLINE int %s_probe(%s) {\n%s\n}\n"
                 "static void %s_fire(%s) {\n%s\n}\n") % (
             self.name, self._args, self.probe,
             self.name, self._args, self.fire)
