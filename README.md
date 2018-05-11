@@ -28,9 +28,12 @@ Build Instructions
 To do
 -----
 
-- end-game is broken
+- cutscenes
+  - intro cutscene timing and sound are somewhat off
+  - end-game is broken
   - Final cutscene still needs patching and testing
-  - Needs play testing
+
+- Needs play testing
 
 - load/save
   - package thumbnails plus game data into PNG/JPEG/GIF for mobile+social
@@ -38,17 +41,15 @@ To do
   - picker for chip load
 
 - output
-  - sound
   - nicer video scaling
 
 - input
   - keyboard event queueing
-  - latching joystick button input
   - nicer touch controls
   - controls help
 
 - offline support
-  - manifest file
+  - service workers? how does this even work nowadays.
   - home screen icon, favicon
 
 - enhancements
