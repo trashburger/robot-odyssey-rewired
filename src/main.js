@@ -86,9 +86,12 @@ asm.onRenderSound = (pcmData, rate) => {
     source.start();
 };
 
-function keycode(str, scancode)
+function keycode(ascii, scancode)
 {
-    asm._pressKey((str || '\0').charCodeAt(0), scancode);
+    if (typeof(ascii) != typeof(0)) {
+        ascii = ascii.length == 1 ? ascii.charCodeAt(0) : parseInt(ascii, 0);
+    }
+    asm._pressKey(ascii, scancode);
 }
 
 function controlCode(key)
