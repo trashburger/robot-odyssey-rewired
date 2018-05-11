@@ -1626,16 +1626,12 @@ const char *%(className)s::getFilename() {
     return "%(fileName)s";
 }
 
-void %(className)s::loadCache(SBTStack *stack) {
+void %(className)s::loadEnvironment(SBTStack *stack, SBTRegs reg) {
+    gStack = stack;
     r = reg;
     proc = this;
-    gStack = stack;
     hw = hardware;
     s.load(proc, r);
-}
-
-void %(className)s::saveCache() {
-    reg = r;
 }
 
 %(subDecls)s
@@ -1645,8 +1641,13 @@ void %(className)s::saveCache() {
 
 %(subCode)s
 
-SBTProcess::continue_func_t %(className)s::getEntry() {
-    return &sub_%(entryLinear)X;
+SBTProcess::continue_func_t %(className)s::getFunction(SBTAddressId id) {
+    switch (id) {
+%(getFunctionCode)s
+
+    default:
+        return 0;
+    }
 }
 
 uint16_t %(className)s::getAddress(SBTAddressId id) {
@@ -1654,10 +1655,11 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
 %(getAddrCode)s
 
     default:
-        assert(0 && "Bad SBTAddressId");
+        assert(0 && "SBTAddressId invalid for getAddress");
         return 0;
     }
 }
+
 """
 
     relocSegment = None
@@ -1680,7 +1682,8 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
         self._decls = ''
         self._dynBranches = {}
         self._publishedAddresses = {}
-        self._exportedSubs = []
+        self._publishedFunctions = {}
+        self._markedSubs = []
 
         (signature, bytesInLastPage, numPages, numRelocations,
          headerParagraphs, minMemParagraphs, maxMemParagraphs,
@@ -1709,6 +1712,9 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
 
         self.staticData = BinaryData(self.image._data, Addr16(self.relocSegment, 0))
 
+        # Publish the entry point and start analysis there
+        self.publishSubroutine('SBTADDR_ENTRY_FUNC', self.entryPoint)
+
     def decl(self, code):
         """Add code to the declarations in the generated C file.
            This is useful if patches require global variables or
@@ -1721,6 +1727,18 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
         if enum in self._publishedAddresses:
             raise Exception("Already published %s" % enum)
         self._publishedAddresses[enum] = addr
+
+    def publishSubroutine(self, enum, addr):
+        """Mark a subroutine for analysis and export it via getFunction()"""
+        if enum in self._publishedFunctions:
+            raise Exception("Already published %s" % enum)
+        self.markSubroutine(addr)
+        self._publishedFunctions[enum] = addr.linear
+
+    def markSubroutine(self, address):
+        """Before analysis, mark an extra address to be considered as a subroutine entry point"""
+        if address not in self._markedSubs:
+            self._markedSubs.append(address)
 
     def patch(self, addr, code, length=0):
         """Manually stick a line of assembly into the iCache,
@@ -1811,11 +1829,6 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
         self._traces.append(Trace("trace%d" % len(self._traces),
                                   mode, probe, fire))
 
-    def exportSub(self, address):
-        """Before analysis, mark an extra address to be considered as a subroutine entry point"""
-        if address not in self._exportedSubs:
-            self._exportedSubs.append(address)
-
     def analyze(self, verbose=False):
         """Analyze the whole program. This breaks it up into
           subroutines, and analyzes each routine.
@@ -1824,8 +1837,7 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
         log("Analyzing %s..." % self.filename)
 
         self.subroutines = {}
-        stack = [ self.entryPoint ]
-        stack.extend(self._exportedSubs)
+        stack = list(self._markedSubs)
 
         while stack:
            ptr = stack.pop()
@@ -1935,6 +1947,9 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
 
         vars['getAddrCode'] = '\n'.join(['case %s: return 0x%04x;' % i
                                          for i in self._publishedAddresses.items()])
+
+        vars['getFunctionCode'] = '\n'.join(['case %s: return &sub_%X;' % i 
+                                             for i in self._publishedFunctions.items()])
 
         return self._skel % vars
 

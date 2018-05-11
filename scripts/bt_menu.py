@@ -87,7 +87,7 @@ for call_site in [
         'proc->continueFrom(r, &sub_%X);' % (
             bt_common.FRAME_RATE_DELAY, continue_at.linear))
     b.patch(continue_at, 'call 0x%04x' % input_poll_func.offset, length=2)
-    b.exportSub(continue_at)
+    b.markSubroutine(continue_at)
 
 # The menu uses wallclock time for some delays.
 # A save function is called before drawing the screen, to store a seconds timestamp.
@@ -112,7 +112,7 @@ for (call_site, delay) in [
         'hw->output.pushFrame(gStack, proc->memSeg(0xB800));'
         'hw->output.pushDelay(%d);'
         'proc->continueFrom(r, &sub_%X);' % (delay, continue_at.linear))    
-    b.exportSub(continue_at)
+    b.markSubroutine(continue_at)
     b.hook(continue_at, 'hw->clearKeyboardBuffer();')
 
 # The cutscenes use a function I'm calling show_sfx_interruptible, which
@@ -155,8 +155,8 @@ for call_site in [
     target = b.jumpTarget(call_site)
     assert target.linear == show_sfx_interruptible.linear
     continue_at = call_site.add(3)
-    b.exportSub(continue_at)
-    b.exportSub(target)
+    b.markSubroutine(continue_at)
+    b.markSubroutine(target)
     b.patchAndHook(call_site, 'ret',
         'hw->output.pushFrame(gStack, proc->memSeg(0xB800));'
         'hw->output.pushDelay(50);'

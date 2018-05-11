@@ -52,7 +52,7 @@ for call_site in [
     	'hw->output.pushDelay(20);'
 		'proc->continueFrom(r, &sub_%X);' % continue_at.linear)
     b.patch(continue_at, 'call 0x%04x' % subroutine.offset, length=2)
-    b.exportSub(continue_at)
+    b.markSubroutine(continue_at)
 
 # Break control flow in the transporter animation loop,
 # it's too long to store in the output queue.
@@ -70,7 +70,7 @@ for call_site in [
     assert subroutine.linear == video_blit_frame.linear
     b.patchAndHook(call_site, 'ret', 'proc->continueFrom(r, &sub_%X);' % continue_at.linear)
     b.patch(continue_at, 'call 0x%04x' % subroutine.offset, length=2)
-    b.exportSub(continue_at)
+    b.markSubroutine(continue_at)
 
 # Skip the disk prompts after the transporter animation
 b.patch('0E3B:691C', 'jmp 0x692D')   # Sewer -> Subway

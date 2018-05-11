@@ -73,6 +73,14 @@ extern "C" void EMSCRIPTEN_KEEPALIVE setJoystickButton(bool button)
 	hw.setJoystickButton(button);
 }
 
+extern "C" void EMSCRIPTEN_KEEPALIVE saveGame()
+{
+	if (hw.process->hasFunction(SBTADDR_SAVE_GAME_FUNC)) {
+		hw.process->call(SBTADDR_SAVE_GAME_FUNC, hw.process->reg);
+	}
+}
+
+
 extern "C" uint8_t* EMSCRIPTEN_KEEPALIVE memPointer()
 {
 	return hw.mem;

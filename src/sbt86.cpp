@@ -76,7 +76,7 @@ void SBTProcess::exec(const char *cmdLine)
     // Beginning of EXE image, after relocation
     reg.ds = getRelocSegment();
     reg.cs = getEntryCS();
-    continue_func = getEntry();
+    continue_func = getFunction(SBTADDR_ENTRY_FUNC);
 
     uint8_t *end_of_mem = hardware->mem + Hardware::MEM_SIZE;
     uint8_t *data_segment = memSeg(reg.ds);
@@ -112,7 +112,7 @@ void SBTProcess::run(void)
     assert(hardware != NULL && "Hardware environment must be defined before running a process");
 
     SBTStack stack;
-    loadCache(&stack);
+    loadEnvironment(&stack, reg);
 
     if (!setjmp(jmp_yield)) {
         continue_func();
@@ -120,6 +120,26 @@ void SBTProcess::run(void)
         // Continuation function returned; back to the default func.
         continue_func = default_func;
         reg = default_reg;
+    }
+}
+
+bool SBTProcess::hasFunction(SBTAddressId id)
+{
+    return getFunction(id) != 0;
+}
+
+void SBTProcess::call(SBTAddressId id, SBTRegs call_regs)
+{
+    assert(hardware != NULL && "Hardware environment must be defined before running a process");
+
+    continue_func_t fn = getFunction(id);
+    assert(fn);
+
+    SBTStack stack;
+    loadEnvironment(&stack, call_regs);
+
+    if (!setjmp(jmp_yield)) {
+        fn();
     }
 }
 

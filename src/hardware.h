@@ -40,10 +40,10 @@ class Hardware
 
     DOSFilesystem fs;
     OutputQueue output;
+    SBTProcess *process;
 
  protected:
     std::vector<SBTProcess*> process_vec;
-    SBTProcess *process;
     SBTProcess *default_process;
     uint8_t port61;
     uint16_t keycode;

@@ -33,6 +33,6 @@ for call_site in [
   		'const char *argv = (const char*) (proc->memSeg(r.ds) + r.bx);'
         'hw->exec(argv, argv+strlen(argv)+1);'
         'proc->continueFrom(r, &sub_%X);' % continue_at.linear)
-    b.exportSub(continue_at)
+    b.markSubroutine(continue_at)
 
 b.writeCodeToFile(os.path.join(basedir, 'bt_play.cpp'), 'PlayEXE')

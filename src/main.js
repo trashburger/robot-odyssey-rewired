@@ -58,6 +58,10 @@ try {
 
 const exec = asm.cwrap('exec', 'number', ['string', 'string'])
 
+asm.onSaveFileWrite = (saveData) => {
+    downloadjs(saveData, filenameForSaveData(saveData), 'application/octet-stream');
+};
+
 asm.onRenderFrame = (rgbData) => {
     fbImage.data.set(rgbData);
     fbContext.putImageData(fbImage, 1, 1);
@@ -184,10 +188,6 @@ function filenameForSaveData(bytes)
     }
     return "robotodyssey-" + now.toISOString() + ".bin";
 }
-
-asm.onSaveFileWrite = (saveData) => {
-    downloadjs(saveData, filenameForSaveData(saveData), 'application/octet-stream');
-};
 
 
 asm.then(() =>

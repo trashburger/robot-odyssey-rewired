@@ -28,7 +28,7 @@ def patch(b):
         loopEntry = b.jumpTarget(loopJumpAddr)
         b.patchAndHook(loopJumpAddr, 'ret',
             'proc->continueFrom(r, &sub_%X, true);' % loopEntry.linear)
-        b.exportSub(loopEntry)
+        b.markSubroutine(loopEntry)
 
     # Don't bother zeroing video memory, we already clear all of RAM.
 
@@ -275,6 +275,8 @@ def patchLoadSave(b):
     # return a pointer to the file name.
     #
     # So, return success, and set a static name of 'savefile'.
+    #
+    # This is called early-on within the actual save function (below)
 
     b.decl("#include <string.h>")
     for addr in b.findCodeMultiple(':e8____ f8 e8____ c706________ 803e____00'
@@ -286,6 +288,17 @@ def patchLoadSave(b):
             strcpy((char*)s.ds + 0x%04x, filename);
             strcpy((char*)s.ds + 0x%04x, filename);
         ''' % (saveFilenameAddr, saveFilenameAddr, loadFilenameAddr))
+
+    # Find the code for the menu that asks you to press "S" to save.
+    # Specifically, we're locating the comparison for that "S" and patching
+    # the basic block that leads to the actual save routine. Break the inlining
+    # there and turn save into a separate subroutine, and export it.
+
+    jumpToSave = b.findCode('e8____ 3c1b 7409 3c53 7408 3c0d 75f1 c3 e9____ b205 :e9____')
+    saveFunc = b.jumpTarget(jumpToSave)
+    b.publishSubroutine('SBTADDR_SAVE_GAME_FUNC', saveFunc)
+    b.patch(jumpToSave, 'call 0x%x' % saveFunc.offset, length=1)
+    b.patch(jumpToSave.add(1), 'ret')
 
 
 def patchJoystick(b):

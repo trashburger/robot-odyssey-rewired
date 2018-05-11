@@ -40,7 +40,7 @@ for call_site in [
     	'hw->output.pushDelay(20);'
 		'proc->continueFrom(r, &sub_%X);' % continue_at.linear)
     b.patch(continue_at, 'call 0x%04x' % subroutine.offset, length=2)
-    b.exportSub(continue_at)
+    b.markSubroutine(continue_at)
 
 # Inline the single-caller chip data editor so we can insert continuations
 # within the editor's help screen without losing control flow in the outer editor.
