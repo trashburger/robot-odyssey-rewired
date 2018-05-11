@@ -52,7 +52,7 @@ void OutputQueue::clear()
 void OutputQueue::skipDelay()
 {   
     delay_remaining = 0;
-    while (items.front().otype == OUT_DELAY) {
+    while (!items.empty() && items.front().otype == OUT_DELAY) {
         items.pop_front();
     }
 }
