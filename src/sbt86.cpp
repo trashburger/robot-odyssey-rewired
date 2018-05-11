@@ -160,10 +160,15 @@ uint8_t *SBTProcess::memSeg(uint16_t seg)
      * MAX_SEGMENT get remapped to MAX_SEGMENT. This serves two
      * purposes:
      *
-     *   1. It makes reads from the BIOS harmless.
-     *   2. It puts the CGA framebuffer somewhere useful.
+     *   1. Out of range memory accesses are dumped somewhere safe.
+     *   2. It puts the CGA framebuffer in range of the emulated memory.
+     *
+     * Padding is set to 0x20000 to give us room for two full 16-bit additions,
+     * allowing 16-bit offsets to buffers with 16-bit sizes without further checks.
      */
-    static const uint32_t MAX_SEGMENT = (Hardware::MEM_SIZE - 0x10000) >> 4;
+
+    static const uint32_t SEGMENT_PADDING = 0x20000;
+    static const uint32_t MAX_SEGMENT = (Hardware::MEM_SIZE - SEGMENT_PADDING) >> 4;
 
     if (seg > MAX_SEGMENT) {
         seg = MAX_SEGMENT;
