@@ -61,9 +61,6 @@ extern "C" void EMSCRIPTEN_KEEPALIVE setSpeed(float speed)
 extern "C" void EMSCRIPTEN_KEEPALIVE pressKey(uint8_t ascii, uint8_t scancode) 
 {
     hw.pressKey(ascii, scancode);
-
-	// Skip cutscenes
-	hw.output.clear();
 }
 
 extern "C" void EMSCRIPTEN_KEEPALIVE setJoystickAxes(int x, int y)
@@ -84,6 +81,11 @@ extern "C" uint8_t* EMSCRIPTEN_KEEPALIVE memPointer()
 extern "C" uint32_t EMSCRIPTEN_KEEPALIVE memSize()
 {
 	return Hardware::MEM_SIZE;
+}
+
+extern "C" uint8_t* EMSCRIPTEN_KEEPALIVE joyFilePointer()
+{
+	return (uint8_t*) &hw.fs.joyfile;
 }
 
 extern "C" uint8_t* EMSCRIPTEN_KEEPALIVE saveFilePointer()

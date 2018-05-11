@@ -63,6 +63,29 @@ asm.onRenderFrame = (rgbData) => {
     fbContext.putImageData(fbImage, 1, 1);
 };
 
+asm.onRenderSound = (pcmData, rate) => {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+
+    if (asm.audioContext === undefined) {
+        asm.audioContext = new AudioContext();
+    }
+
+    // TO DO: Volume control
+    const volume = 0.1;
+
+    const buffer = asm.audioContext.createBuffer(1, pcmData.length, rate);
+    const channelData = buffer.getChannelData(0);
+
+    for (var i = 0; i < pcmData.length; i++) {
+        channelData[i] = pcmData[i] * volume;
+    }
+
+    const source = asm.audioContext.createBufferSource();
+    source.buffer = buffer;
+    source.connect(asm.audioContext.destination);
+    source.start();
+};
+
 function keycode(str, scancode)
 {
     asm._pressKey((str || '\0').charCodeAt(0), scancode);

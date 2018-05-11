@@ -21,6 +21,11 @@ bt_common.patchJoystick(b)
 bt_common.patchFramebufferTrace(b)
 b.hook(b.entryPoint, 'enable_framebuffer_trace = true;')
 
+# To keep timing accurate even between the individual sound portions of a cutscene,
+# let's keep the cycle timer running at all times rather than just inside subs
+# that directly touch the audio hardware.
+sbt86.Subroutine.clockEnable = True
+
 # Dynamic branch for cutscene sound effects
 b.patchDynamicBranch('019E:0778', [
     sbt86.Addr16(str='019E:0788'), 
@@ -97,7 +102,7 @@ b.patch(b.findCode(':b42c cd21 ________ c3'), 'ret')
 for (call_site, delay) in [
     ('019E:010F', 4000),
     ('019E:0118', 4000),
-    ('019E:01BD', 1000),
+    ('019E:01BD', 500),
     ('019E:01DB', 250),
 ]:
     call_site = sbt86.Addr16(str=call_site)
@@ -113,6 +118,8 @@ for (call_site, delay) in [
 # The cutscenes use a function I'm calling show_sfx_interruptible, which
 # polls for keyboard input while playing a buffer of sound effects.
 # Wrap each call site with some code that inserts a delay and breaks control flow.
+# (Each invocation would include a joystick and DOS input poll, which takes
+# some time)
 show_sfx_interruptible = sbt86.Addr16(str='019E:0748')
 for call_site in [
     '019E:01C6',
@@ -152,10 +159,8 @@ for call_site in [
     b.exportSub(target)
     b.patchAndHook(call_site, 'ret',
         'hw->output.pushFrame(gStack, proc->memSeg(0xB800));'
-        'uint32_t clockref = gClock;'
+        'hw->output.pushDelay(50);'
         'sub_%X();'
-        'uint32_t elapsed = gClock - clockref;'
-        'hw->output.pushDelay(elapsed / (Hardware::CLOCK_HZ / 1000));'
         'proc->continueFrom(r, &sub_%X);' % (
             target.linear, continue_at.linear))
 

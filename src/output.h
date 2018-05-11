@@ -27,13 +27,13 @@ struct OutputItem
     } u;
 };
 
-
 class OutputQueue
 {
  public:
     OutputQueue();
 
     void clear();
+    void skipDelay();
     uint32_t run();
 
     void pushFrame(SBTStack *stack, uint8_t *framebuffer);
@@ -42,8 +42,17 @@ class OutputQueue
 
     static const unsigned SCREEN_WIDTH = 320;
     static const unsigned SCREEN_HEIGHT = 200;
+
     uint32_t rgb_pixels[SCREEN_WIDTH * SCREEN_HEIGHT];
     uint32_t rgb_palette[4];
+
+    static const int CPU_CLOCK_HZ = 4770000;
+    static const unsigned CPU_CLOCKS_PER_SAMPLE = 200;
+    static const unsigned AUDIO_HZ = CPU_CLOCK_HZ / CPU_CLOCKS_PER_SAMPLE;
+    static const unsigned AUDIO_BUFFER_SECONDS = 10;
+    static const unsigned AUDIO_BUFFER_SAMPLES = AUDIO_HZ * AUDIO_BUFFER_SECONDS;
+
+    int8_t pcm_samples[AUDIO_BUFFER_SAMPLES];
 
     static const unsigned MAX_BUFFERED_FRAMES = 256;
     static const unsigned MAX_BUFFERED_EVENTS = 16384;
@@ -54,4 +63,5 @@ class OutputQueue
     uint32_t delay_remaining;
 
     void renderFrame();
+    uint32_t renderSoundEffect(uint32_t first_timestamp);
 };

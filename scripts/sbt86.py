@@ -350,8 +350,7 @@ def _genCycleTable():
        clock for.
 
        This is based on the information from:
-          http://umcs.maine.edu/~cmeadow/courses/cos335/
-          80x86-Integer-Instruction-Set-Clocks.pdf
+          http://umcs.maine.edu/~cmeadow/courses/cos335/80x86-Integer-Instruction-Set-Clocks.pdf
        """
 
     table = {
@@ -402,6 +401,7 @@ def _genCycleTable():
 
         ('jmp', Literal): 15,
         ('loop', Literal): 17,
+        ('call', Register): 20,
         ('call', Literal): 23,
         ('ret',): 20,
 

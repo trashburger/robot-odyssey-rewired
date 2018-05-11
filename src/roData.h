@@ -587,6 +587,11 @@ class ROJoyfile {
     uint8_t cheat_control;
     static const uint8_t CHEATS_ENABLED = 0x5e;
 
+    // Not sure what this is (joyfile+A), its use in GAME.EXE triggers
+    // a delay somewhere in the Street world's main loop, and MENU.EXE
+    // chooses different sound routines depending on whether this is 
+    // under 0x200, between 0x200 and 0x500, or over 0x500. Sound volume?
+    // Hardware related? Debug related?
     uint16_t debug_control;
     static const uint16_t DEBUG_NORMAL = 0x238;
     static const uint16_t DEBUG_DELAY_IN_STREET_LOOP_AT_C1FD = 0x500;

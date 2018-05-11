@@ -282,6 +282,7 @@ SBTRegs Hardware::interrupt21(SBTRegs reg, SBTStack *stack)
 void Hardware::pressKey(uint8_t ascii, uint8_t scancode)
 {
     keycode = (scancode << 8) | ascii;
+    output.skipDelay();
 }
 
 void Hardware::setJoystickAxes(int x, int y)
@@ -294,4 +295,7 @@ void Hardware::setJoystickButton(bool button)
 {
     js_button_held = button;
     js_button_pressed = js_button_pressed || button;
+    if (button) {
+        output.skipDelay();
+    }
 }
