@@ -1,13 +1,13 @@
 PYTHON      := python3
 EMCC        := emcc
 
-EMCCFLAGS := -I src -std=c++11 -Oz
+EMCCFLAGS := -I src -std=c++11 -Oz --bind
 
 EMCCSETTINGS := \
 	-s WASM=1 \
 	-s MODULARIZE=1 \
 	-s NO_FILESYSTEM=1 \
-	-s "EXTRA_EXPORTED_RUNTIME_METHODS=['ccall','cwrap']"
+	-s USE_ZLIB=1
 
 OBJS := \
 	build/engine.bc \
@@ -37,11 +37,11 @@ serve: all
 .PHONY: all clean dist serve
 
 dist/index.html: src/index.html
-	mkdir -p dist/
+	@mkdir -p dist/
 	cp $< $@
 
 dist/main.css: src/main.css
-	mkdir -p dist/
+	@mkdir -p dist/
 	cp $< $@
 
 dist/bundle.js: build/engine.js src/*.js
@@ -52,7 +52,7 @@ build/engine.js: $(OBJS)
 	cp build/engine.wasm dist/engine.wasm
 
 build/%.bc: src/%.cpp
-	mkdir -p build/
+	@mkdir -p build/
 	$(EMCC) $(EMCCFLAGS) -c -o $@ $<
 
 build/%.bc: build/%.cpp
@@ -66,6 +66,6 @@ build/fspack.cpp: scripts/fs-packer.py build/original
 
 # Pseudo-target to clean up and extract original Robot Odyssey data
 build/original:
-	mkdir -p build/
+	@mkdir -p build/
 	$(PYTHON) scripts/check-originals.py original build
-	touch $@
+	@touch $@

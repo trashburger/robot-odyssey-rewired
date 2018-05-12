@@ -55,8 +55,6 @@ try {
     throw e;
 }
 
-const exec = asm.cwrap('exec', 'number', ['string', 'string'])
-
 asm.onSaveFileWrite = (saveData) => {
     downloadjs(saveData, filenameForSaveData(saveData), 'application/octet-stream');
 };
@@ -110,7 +108,7 @@ function keycode(ascii, scancode)
     if (typeof(ascii) != typeof(0)) {
         ascii = ascii.length == 1 ? ascii.charCodeAt(0) : parseInt(ascii, 0);
     }
-    asm._pressKey(ascii, scancode);
+    asm.pressKey(ascii, scancode);
 }
 
 function controlCode(key)
@@ -197,40 +195,40 @@ asm.then(() =>
         const scale = 8.0;
         const x = scale * data.force * Math.cos(data.angle.radian);
         const y = scale * data.force * Math.sin(data.angle.radian);
-        asm._setJoystickAxes(x, -y);
+        asm.setJoystickAxes(x, -y);
         asm.audioSetup();
     });
     joystick.on('end', (e) => {
-        asm._setJoystickAxes(0, 0);
+        asm.setJoystickAxes(0, 0);
         asm.audioSetup();
     });
 
     for (let button of document.getElementsByClassName('joystick_btn')) {
         button.addEventListener('mousedown', (e) => {
-            asm._setJoystickButton(true);
+            asm.setJoystickButton(true);
             refocus(e);
             asm.audioSetup();
        });
         button.addEventListener('mouseup', (e) => {
-            asm._setJoystickButton(false);
+            asm.setJoystickButton(false);
             refocus(e);
             asm.audioSetup();
         });
         button.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            asm._setJoystickButton(true);
+            asm.setJoystickButton(true);
             asm.audioSetup();
         });
         button.addEventListener('touchend', (e) => {
             e.preventDefault();
-            asm._setJoystickButton(false);
+            asm.setJoystickButton(false);
             asm.audioSetup();
         });
     }
 
     for (let button of document.getElementsByClassName('exec_btn')) {
         button.addEventListener('click', (e) => {
-            exec(button.dataset.program, button.dataset.args);
+            asm.exec(button.dataset.program, button.dataset.args);
             refocus(e);
             asm.audioSetup();
         });
@@ -253,7 +251,7 @@ asm.then(() =>
 
     for (let button of document.getElementsByClassName('setspeed_btn')) {
         button.addEventListener('click', (e) => {
-            asm._setSpeed(parseFloat(button.dataset.speed));
+            asm.setSpeed(parseFloat(button.dataset.speed));
             refocus(e);
         });
     }
@@ -275,24 +273,19 @@ asm.then(() =>
 
     asm.loadSaveFile = (array) => {
         const bytes = new Uint8Array(array);
-        asm._setSaveFileSize(bytes.length);
-        asm.HEAPU8.set(bytes, asm._saveFilePointer());
+        asm.setSaveFileSize(bytes.length);
+        asm.getSaveFile().set(bytes);
 
         const world = worldIdFromSaveData(bytes);
         if (world == LAB_WORLD) {
-            exec("lab.exe", "99");
+            asm.exec("lab.exe", "99");
         } else if (world !== null) {
-            exec("game.exe", "99");
+            asm.exec("game.exe", "99");
         }
     };
 
     asm.downloadRAMSnapshot = (filename) => {
-        const ptr = asm._memPointer();
-        const size = asm._memSize();
-        const ram = asm.HEAPU8.subarray(ptr, ptr+size);
-        downloadjs(ram, filename || 'ram-snapshot.bin', 'application/octet-stream');
+        downloadjs(asm.getMemory(), filename || 'ram-snapshot.bin', 'application/octet-stream');
     };
-
-    asm._start();
 });
 

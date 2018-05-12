@@ -32,7 +32,8 @@
 #include "roData.h"
 
 
-ROWorld::ROWorld() {
+ROWorld::ROWorld()
+{
     memset(this, 0, sizeof *this);
     memset(objects.nextInRoom, RO_OBJ_NONE, sizeof objects.nextInRoom);
     memset(objects.room, RO_ROOM_NONE, sizeof objects.room);
@@ -40,32 +41,38 @@ ROWorld::ROWorld() {
     memset(text.room, RO_ROOM_NONE, sizeof text.room);
 }
 
-ROWorld *ROWorld::fromProcess(SBTProcess *proc) {
+ROWorld *ROWorld::fromProcess(SBTProcess *proc)
+{
     return (ROWorld*) (proc->memSeg(proc->reg.ds) +
                        proc->getAddress(SBTADDR_WORLD_DATA));
 }
 
-RORoomId ROWorld::getObjectRoom(ROObjectId obj) {
+RORoomId ROWorld::getObjectRoom(ROObjectId obj)
+{
     return (RORoomId) objects.room[obj];
 }
 
-void ROWorld::getObjectXY(ROObjectId obj, int &x, int &y) {
+void ROWorld::getObjectXY(ROObjectId obj, int &x, int &y)
+{
     x = objects.x[obj];
     y = objects.y[obj];
 }
 
-void ROWorld::setObjectRoom(ROObjectId obj, RORoomId room) {
+void ROWorld::setObjectRoom(ROObjectId obj, RORoomId room)
+{
     removeObjectFromRoom(obj, getObjectRoom(obj));
     objects.room[obj] = room;
     addObjectToRoom(obj, room);
 }
 
-void ROWorld::setObjectXY(ROObjectId obj, int x, int y) {
+void ROWorld::setObjectXY(ROObjectId obj, int x, int y)
+{
     objects.x[obj] = x;
     objects.y[obj] = y;
 }
 
-void ROWorld::removeObjectFromRoom(ROObjectId obj, RORoomId room) {
+void ROWorld::removeObjectFromRoom(ROObjectId obj, RORoomId room)
+{
     /*
      * Remove an object from a room's linked list.  If 'room' is
      * RO_ROOM_NONE or the object isn't found, has no effect.
@@ -100,7 +107,8 @@ void ROWorld::removeObjectFromRoom(ROObjectId obj, RORoomId room) {
     }
 }
 
-void ROWorld::addObjectToRoom(ROObjectId obj, RORoomId room) {
+void ROWorld::addObjectToRoom(ROObjectId obj, RORoomId room)
+{
     /*
      * Add an object to a room's linked list.
      * If 'room' is RO_ROOM_NONE, has no effect.
@@ -114,7 +122,8 @@ void ROWorld::addObjectToRoom(ROObjectId obj, RORoomId room) {
     rooms.objectListHead[room] = obj;
 }
 
-void ROWorld::setRobotRoom(ROObjectId obj, RORoomId room) {
+void ROWorld::setRobotRoom(ROObjectId obj, RORoomId room)
+{
     /*
      * Robots come in two halves. Set both of them to the same room.
      */
@@ -126,7 +135,8 @@ void ROWorld::setRobotRoom(ROObjectId obj, RORoomId room) {
     setObjectRoom(right, room);
 }
 
-void ROWorld::setRobotXY(ROObjectId obj, int x, int y) {
+void ROWorld::setRobotXY(ROObjectId obj, int x, int y)
+{
     /*
      * Robots come in two halves. Set the left one to the given
      * position, and the right one needs to be 5 pixels away from the
@@ -141,25 +151,29 @@ void ROWorld::setRobotXY(ROObjectId obj, int x, int y) {
 }
 
 
-ROCircuit *ROCircuit::fromProcess(SBTProcess *proc) {
+ROCircuit *ROCircuit::fromProcess(SBTProcess *proc)
+{
     return (ROCircuit*) (proc->memSeg(proc->reg.ds) +
                        proc->getAddress(SBTADDR_CIRCUIT_DATA));
 }
 
 
-RORobot *RORobot::fromProcess(SBTProcess *proc) {
+RORobot *RORobot::fromProcess(SBTProcess *proc)
+{
     return (RORobot*) (proc->memSeg(proc->reg.ds) +
                        proc->getAddress(SBTADDR_ROBOT_DATA_MAIN));
 }
 
 
-RORobotGrabber *RORobotGrabber::fromProcess(SBTProcess *proc) {
+RORobotGrabber *RORobotGrabber::fromProcess(SBTProcess *proc)
+{
     return (RORobotGrabber*) (proc->memSeg(proc->reg.ds) +
                               proc->getAddress(SBTADDR_ROBOT_DATA_GRABBER));
 }
 
 
-const char *ROSavedGame::getWorldName() {
+const char *ROSavedGame::getWorldName()
+{
     switch (worldId) {
     case RO_WORLD_SEWER:   return "City Sewer";
     case RO_WORLD_SUBWAY:  return "The Subway";
@@ -172,7 +186,8 @@ const char *ROSavedGame::getWorldName() {
 }
 
 
-ROData::ROData(SBTProcess *proc) {
+ROData::ROData(SBTProcess *proc)
+{
     world = ROWorld::fromProcess(proc);
     circuit = ROCircuit::fromProcess(proc);
     robots.state = RORobot::fromProcess(proc);
@@ -201,7 +216,8 @@ ROData::ROData(SBTProcess *proc) {
     robots.batteryAcc = (RORobotBatteryAcc*) (endOfTable + 1);
 }
 
-void ROData::copyFrom(ROData *source) {
+void ROData::copyFrom(ROData *source)
+{
     /*
      * Copy all world data from another process.
      */
