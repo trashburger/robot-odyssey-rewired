@@ -1,36 +1,7 @@
-/* -*- Mode: C++; c-basic-offset: 4 -*-
- *
- * Accessor functions for Robot Odyssey's in-memory data.
- *
- * Copyright (c) 2009-2018 Micah Elizabeth Scott <micah@scanlime.org>
- *
- *    Permission is hereby granted, free of charge, to any person
- *    obtaining a copy of this software and associated documentation
- *    files (the "Software"), to deal in the Software without
- *    restriction, including without limitation the rights to use,
- *    copy, modify, merge, publish, distribute, sublicense, and/or sell
- *    copies of the Software, and to permit persons to whom the
- *    Software is furnished to do so, subject to the following
- *    conditions:
- *
- *    The above copyright notice and this permission notice shall be
- *    included in all copies or substantial portions of the Software.
- *
- *    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- *    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
- *    OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- *    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
- *    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
- *    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- *    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- *    OTHER DEALINGS IN THE SOFTWARE.
- */
-
 #include <assert.h>
 #include <string.h>
 #include <vector>
 #include "roData.h"
-
 
 ROWorld::ROWorld()
 {
@@ -150,13 +121,11 @@ void ROWorld::setRobotXY(ROObjectId obj, int x, int y)
     setObjectXY(right, x + 5, y);
 }
 
-
 ROCircuit *ROCircuit::fromProcess(SBTProcess *proc)
 {
     return (ROCircuit*) (proc->memSeg(proc->reg.ds) +
                        proc->getAddress(SBTADDR_CIRCUIT_DATA));
 }
-
 
 RORobot *RORobot::fromProcess(SBTProcess *proc)
 {
@@ -164,13 +133,11 @@ RORobot *RORobot::fromProcess(SBTProcess *proc)
                        proc->getAddress(SBTADDR_ROBOT_DATA_MAIN));
 }
 
-
 RORobotGrabber *RORobotGrabber::fromProcess(SBTProcess *proc)
 {
     return (RORobotGrabber*) (proc->memSeg(proc->reg.ds) +
                               proc->getAddress(SBTADDR_ROBOT_DATA_GRABBER));
 }
-
 
 const char *ROSavedGame::getWorldName()
 {
@@ -184,7 +151,6 @@ const char *ROSavedGame::getWorldName()
     default:               return "(Unknown)";
     }
 }
-
 
 ROData::ROData(SBTProcess *proc)
 {
@@ -261,7 +227,6 @@ void ROData::copyFrom(ROData *source)
                &source->world->sprites[RO_SPR_GAME_GRABBER_LEFT], sizeof(ROSprite));
     }
 }
-
 
 ROJoyfile::ROJoyfile()
 {

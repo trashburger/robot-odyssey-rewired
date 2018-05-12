@@ -6,7 +6,6 @@
 #include "filesystem.h"
 #include "output.h"
 
-
 class Hardware
 {
  public:

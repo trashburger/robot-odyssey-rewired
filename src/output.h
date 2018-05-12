@@ -5,7 +5,6 @@
 #include "circular_buffer.h"
 #include "sbt86.h"
 
-
 struct CGAFramebuffer
 {
     uint8_t bytes[0x4000];

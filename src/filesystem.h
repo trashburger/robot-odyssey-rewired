@@ -1,7 +1,6 @@
 #pragma once
 #include "roData.h"
 
-
 struct FileInfo {
     const char *name;
     const uint8_t *data;
@@ -9,7 +8,6 @@ struct FileInfo {
 
     static const FileInfo* lookup(const char* name);
 };
-
 
 class DOSFilesystem
 {
