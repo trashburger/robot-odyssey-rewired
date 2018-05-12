@@ -15,6 +15,7 @@ Dependencies
 - emscripten
 - nasm (with ndisasm)
 - node (with npm)
+- make
 
 
 Build Instructions
@@ -22,8 +23,9 @@ Build Instructions
 
 - Place original game files in the "original" directory
 - npm install
-- npm run build
+- make
 
+The built web site will be in `dist`, or start a development server with `make serve`
 
 To do
 -----
