@@ -3,7 +3,7 @@
 #include <vector>
 #include "roData.h"
 
-ROWorld::ROWorld()
+void ROWorld::clear()
 {
     memset(this, 0, sizeof *this);
     memset(objects.nextInRoom, RO_OBJ_NONE, sizeof objects.nextInRoom);

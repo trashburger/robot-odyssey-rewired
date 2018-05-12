@@ -26,7 +26,10 @@ public:
     struct {
         uint32_t size;
         bool writeMode;
-        uint8_t buffer[0x10000];
+        union {
+            uint8_t buffer[0x10000];
+            ROSavedGame game;
+        };
     } save;
 
 private:

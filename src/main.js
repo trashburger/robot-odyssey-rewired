@@ -273,10 +273,10 @@ asm.then(() =>
 
     asm.loadSaveFile = (array) => {
         const bytes = new Uint8Array(array);
-        asm.setSaveFileSize(bytes.length);
-        asm.getSaveFile().set(bytes);
-
         const world = worldIdFromSaveData(bytes);
+
+        asm.setSaveFile(bytes);
+
         if (world == LAB_WORLD) {
             asm.exec("lab.exe", "99");
         } else if (world !== null) {

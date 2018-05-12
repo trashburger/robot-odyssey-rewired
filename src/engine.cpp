@@ -3,10 +3,12 @@
 #include <emscripten/bind.h>
 #include <algorithm>
 #include "hardware.h"
+#include "tinySave.h"
 
 using namespace emscripten;
 
 static Hardware hw;
+static TinySave tinySave;
 static float delay_multiplier = 1.0f;
 
 SBT_DECL_PROCESS(PlayEXE);
@@ -76,11 +78,13 @@ static void setJoystickButton(bool button)
 	hw.setJoystickButton(button);
 }
 
-static void saveGame()
+static bool saveGame()
 {
 	if (hw.process->hasFunction(SBTADDR_SAVE_GAME_FUNC)) {
 		hw.process->call(SBTADDR_SAVE_GAME_FUNC, hw.process->reg);
+		return true;
 	}
+	return false;
 }
 
 static val getMemory() {
@@ -95,9 +99,42 @@ static val getSaveFile() {
 	return val(typed_memory_view(hw.fs.save.size, hw.fs.save.buffer));
 }
 
-static void setSaveFileSize(uint32_t size)
+static void setSaveFile(val buffer)
 {
+	uint32_t size = buffer["length"].as<uint32_t>();
+	if (size >= sizeof hw.fs.save.buffer) {
+		EM_ASM(throw "Save file too large";);
+		return;
+	}
+
 	hw.fs.save.size = size;
+	uintptr_t addr = (uintptr_t) hw.fs.save.buffer;
+	val view = val::global("Uint8Array").new_(val::module_property("buffer"), addr, size);
+	view.call<void>("set", buffer);
+}
+
+static val packSaveFile()
+{
+	tinySave.compress(&hw.fs.save.game);
+	return val(typed_memory_view(tinySave.size, tinySave.buffer));
+}
+
+static void unpackSaveFile(val buffer)
+{
+	uint32_t size = buffer["length"].as<uint32_t>();
+	if (size >= sizeof tinySave.buffer) {
+		EM_ASM(throw "Compressed save file too large";);
+		return;
+	}
+
+	tinySave.size = size;
+	uintptr_t addr = (uintptr_t) tinySave.buffer;
+	val view = val::global("Uint8Array").new_(val::module_property("buffer"), addr, size);
+	view.call<void>("set", buffer);
+
+	if (!tinySave.decompress(&hw.fs.save.game)) {
+		EM_ASM(throw "Failed to decompress save file";);		
+	}
 }
 
 static void setCheatsEnabled(bool enable)
@@ -120,6 +157,8 @@ EMSCRIPTEN_BINDINGS(engine)
     function("getMemory", &getMemory);
     function("getJoyFile", &getJoyFile);
     function("getSaveFile", &getSaveFile);
-    function("setSaveFileSize", &setSaveFileSize);
+    function("setSaveFile", &setSaveFile);
     function("setCheatsEnabled", &setCheatsEnabled);
+    function("packSaveFile", &packSaveFile);
+    function("unpackSaveFile", &unpackSaveFile);
 }

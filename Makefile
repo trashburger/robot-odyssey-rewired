@@ -14,6 +14,7 @@ OBJS := \
 	build/sbt86.bc \
 	build/hardware.bc \
 	build/roData.bc \
+	build/tinySave.bc \
 	build/filesystem.bc \
 	build/output.bc \
 	build/fspack.bc \
