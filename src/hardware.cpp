@@ -4,7 +4,7 @@
 #include "sbt86.h"
 #include "hardware.h"
 
-static const bool verbose_process_info = true;
+static const bool verbose_process_info = false;
 
 Hardware::Hardware()
 {

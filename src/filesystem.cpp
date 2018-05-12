@@ -5,7 +5,7 @@
 #include "sbt86.h"
 #include "filesystem.h"
 
-static const bool verbose_filesystem_info = true;
+static const bool verbose_filesystem_info = false;
 
 DOSFilesystem::DOSFilesystem()
 {
