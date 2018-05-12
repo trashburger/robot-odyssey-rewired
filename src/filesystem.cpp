@@ -5,10 +5,17 @@
 #include "sbt86.h"
 #include "filesystem.h"
 
-static const bool verbose_filesystem_info = false;
+static const bool verbose_filesystem_info = true;
 
 DOSFilesystem::DOSFilesystem()
 {
+    memset(&config, 0, sizeof config);
+    memset(&save, 0, sizeof save);
+
+    config.file.data = (uint8_t*) &config.joyfile;
+    config.file.size = sizeof config.joyfile;
+    save.file.data = save.buffer;
+
     reset();
 }
 
@@ -31,19 +38,15 @@ int DOSFilesystem::open(const char *name)
          * Save file
          */
 
-        saveFileInfo.data = save.buffer;
-        saveFileInfo.data_size = save.size;
-        save.writeMode = false;
-        file = &saveFileInfo;
+        save.openForWrite = false;
+        file = &save.file;
 
     } else if (!strcmp(name, SBT_JOYFILE)) {
         /*
          * Joystick/configuration file
          */
 
-        joyFileInfo.data = (const uint8_t*) &joyfile;
-        joyFileInfo.data_size = sizeof joyfile;
-        file = &joyFileInfo;
+        file = &config.file;
 
     } else {
         /*
@@ -73,11 +76,9 @@ int DOSFilesystem::create(const char *name)
 
     if (!strcmp(name, SBT_SAVE_FILE_NAME)) {
 
-        saveFileInfo.data = save.buffer;
-        saveFileInfo.data_size = 0;
-        save.size = 0;
-        save.writeMode = true;
-        file = &saveFileInfo;
+        save.file.size = 0;
+        save.openForWrite = true;
+        file = &save.file;
 
     } else {
         fprintf(stderr, "FILE, failed to open '%s' for writing\n", name);
@@ -94,10 +95,8 @@ void DOSFilesystem::close(uint16_t fd)
     assert(fd < MAX_OPEN_FILES && "Closing an invalid file descriptor");
     assert(openFiles[fd] && "Closing a file which is not open");
 
-    if (openFiles[fd] == &saveFileInfo && save.writeMode) {
-        EM_ASM_({
-            Module.onSaveFileWrite(HEAPU8.subarray($0, $0 + $1));
-        }, save.buffer, save.size);
+    if (openFiles[fd] == &save.file && save.openForWrite) {
+        EM_ASM( Module.onSaveFileWrite(); );
     }
 
     openFiles[fd] = 0;
@@ -111,7 +110,7 @@ uint16_t DOSFilesystem::read(uint16_t fd, void *buffer, uint16_t length)
     assert(file && "Reading a file which is not open");
 
     uint32_t offset = fileOffsets[fd];
-    uint16_t actual_length = std::min<unsigned>(length, file->data_size - offset);
+    uint16_t actual_length = std::min<unsigned>(length, file->size - offset);
 
     if (verbose_filesystem_info) {
         printf("FILE, read %d(%d) bytes at %d\n", length, actual_length, offset);
@@ -128,9 +127,9 @@ uint16_t DOSFilesystem::write(uint16_t fd, const void *buffer, uint16_t length)
 
     assert(fd < MAX_OPEN_FILES && "Writing an invalid file descriptor");
     assert(file && "Writing a file which is not open");
-    assert(file == &saveFileInfo && "Writing a file that isn't the saved game file");
+    assert(file == &save.file && "Writing a file that isn't the saved game file");
 
-    uint32_t offset = fileOffsets[fd];
+    uint32_t offset = std::min<unsigned>(sizeof save.buffer, fileOffsets[fd]);
     uint16_t actual_length = std::min<unsigned>(length, sizeof save.buffer - offset);
 
     if (verbose_filesystem_info) {
@@ -138,8 +137,8 @@ uint16_t DOSFilesystem::write(uint16_t fd, const void *buffer, uint16_t length)
     }
     memcpy(save.buffer + offset, buffer, actual_length);
 
-    fileOffsets[fd] += actual_length;
-    save.size = fileOffsets[fd];
+    fileOffsets[fd] = offset + actual_length;
+    save.file.size = fileOffsets[fd];
     return actual_length;
 }
 

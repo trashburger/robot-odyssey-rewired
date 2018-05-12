@@ -55,8 +55,12 @@ try {
     throw e;
 }
 
-asm.onSaveFileWrite = (saveData) => {
+asm.onSaveFileWrite = () => {
+    const saveData = asm.getSaveFile();
     downloadjs(saveData, filenameForSaveData(saveData), 'application/octet-stream');
+
+    // work in progress
+    console.log(asm.packSaveFile());
 };
 
 asm.onRenderFrame = (rgbData) => {
@@ -264,7 +268,7 @@ asm.then(() =>
 
     document.getElementById('savefile_input').addEventListener('change', (e) => {
         const files = e.target.files;
-        if (files.length == 1 && files[0].size <= 0x10000) {
+        if (files.length == 1 && files[0].size <= asm.MAX_FILESIZE) {
             const reader = new FileReader();
             reader.onload = (e) => asm.loadSaveFile(reader.result);
             reader.readAsArrayBuffer(files[0]);

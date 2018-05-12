@@ -476,9 +476,15 @@ class RORobotBatteryAcc {
  * Data for compiled chips. The format is described in detail by:
  * http://scanwidget.livejournal.com/38373.html
  */
-typedef uint8_t ROChipBytecode[1024];
-typedef uint8_t ROChipPins[8];
+struct ROChipBytecode
+{
+    uint8_t bytes[1024];
+};
 
+struct ROChipPins
+{
+    uint8_t pins[8];
+};
 
 /*
  * The on-disk file format for a saved game. These are the .GSV/.LSV
@@ -489,7 +495,8 @@ typedef uint8_t ROChipPins[8];
  * Warning: This is only correct for GAME.EXE and LAB.EXE. The tutorial
  *          uses a slightly different circuit format.
  */
-class ROSavedGame {
+class ROSavedGame
+{
 public:
     ROWorld world;                    // Length: 0x3500
     union {
@@ -513,7 +520,8 @@ public:
 /*
  * Top level class for all data we know how to poke at in a Robot Odyssey binary.
  */
-class ROData {
+class ROData
+{
  public:
     ROData(SBTProcess *proc);
 
@@ -534,7 +542,8 @@ class ROData {
 /*
  * Saved joystick (and other) configuration data, the 16-byte joyfile.dat
  */
-class ROJoyfile {
+class ROJoyfile
+{
  public:
     ROJoyfile();
 

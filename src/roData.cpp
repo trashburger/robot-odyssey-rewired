@@ -3,6 +3,7 @@
 #include <vector>
 #include "roData.h"
 
+
 void ROWorld::clear()
 {
     memset(this, 0, sizeof *this);
@@ -142,13 +143,13 @@ RORobotGrabber *RORobotGrabber::fromProcess(SBTProcess *proc)
 const char *ROSavedGame::getWorldName()
 {
     switch (worldId) {
-    case RO_WORLD_SEWER:   return "City Sewer";
-    case RO_WORLD_SUBWAY:  return "The Subway";
-    case RO_WORLD_TOWN:    return "Streets of Robotropolis";
-    case RO_WORLD_COMP:    return "Master Computer Center";
-    case RO_WORLD_STREET:  return "The Skyways";
-    case RO_WORLD_LAB:     return "Saved Lab";
-    default:               return "(Unknown)";
+        case RO_WORLD_SEWER:   return "City Sewer";
+        case RO_WORLD_SUBWAY:  return "The Subway";
+        case RO_WORLD_TOWN:    return "Streets of Robotropolis";
+        case RO_WORLD_COMP:    return "Master Computer Center";
+        case RO_WORLD_STREET:  return "The Skyways";
+        case RO_WORLD_LAB:     return "Saved Lab";
+        default:               return "(Unknown)";
     }
 }
 

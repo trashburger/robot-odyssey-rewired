@@ -4,7 +4,7 @@
 #include "sbt86.h"
 #include "hardware.h"
 
-static const bool verbose_process_info = false;
+static const bool verbose_process_info = true;
 
 Hardware::Hardware()
 {
@@ -35,9 +35,10 @@ void Hardware::pollJoystick(uint16_t &x, uint16_t &y, uint8_t &status)
     // active low. The byte includes data for two joysticks, and
     // we only emulate one.
 
+    ROJoyfile &joyfile = fs.config.joyfile;
     status = 0xFC ^ (button ? 0x10 : 0);
-    x = std::max(0, std::min((int)fs.joyfile.x_center * 2, js_x + fs.joyfile.x_center));
-    y = std::max(0, std::min((int)fs.joyfile.y_center * 2, js_y + fs.joyfile.y_center));
+    x = std::max(0, std::min((int)joyfile.x_center * 2, js_x + joyfile.x_center));
+    y = std::max(0, std::min((int)joyfile.y_center * 2, js_y + joyfile.y_center));
 }
 
 void Hardware::exec(const char *program, const char *args)

@@ -51,16 +51,16 @@ int main()
 
 static void exec(const std::string &process, const std::string &arg)
 {
-	hw.output.clear();
-	hw.exec(process.c_str(), arg.c_str());
-	loop();
+    hw.output.clear();
+    hw.exec(process.c_str(), arg.c_str());
+    loop();
 }
 
 static void setSpeed(float speed)
 {
-	if (speed > 0.0f) {
-		delay_multiplier = 1.0 / speed;
-	}
+    if (speed > 0.0f) {
+        delay_multiplier = 1.0 / speed;
+    }
 }
 
 static void pressKey(uint8_t ascii, uint8_t scancode) 
@@ -70,84 +70,96 @@ static void pressKey(uint8_t ascii, uint8_t scancode)
 
 static void setJoystickAxes(int x, int y)
 {
-	hw.setJoystickAxes(x, y);
+    hw.setJoystickAxes(x, y);
 }
 
 static void setJoystickButton(bool button)
 {
-	hw.setJoystickButton(button);
+    hw.setJoystickButton(button);
 }
 
 static bool saveGame()
 {
-	if (hw.process->hasFunction(SBTADDR_SAVE_GAME_FUNC)) {
-		hw.process->call(SBTADDR_SAVE_GAME_FUNC, hw.process->reg);
-		return true;
-	}
-	return false;
+    if (hw.process->hasFunction(SBTADDR_SAVE_GAME_FUNC)) {
+        hw.process->call(SBTADDR_SAVE_GAME_FUNC, hw.process->reg);
+        return true;
+    }
+    return false;
+}
+
+static val getFile(const FileInfo& file)
+{
+    return val(typed_memory_view(file.size, file.data));
 }
 
 static val getMemory() {
-	return val(typed_memory_view(Hardware::MEM_SIZE, hw.mem));
+    return val(typed_memory_view(Hardware::MEM_SIZE, hw.mem));
 }
 
 static val getJoyFile() {
-	return val(typed_memory_view(sizeof hw.fs.joyfile, (uint8_t*) &hw.fs.joyfile));
+    return getFile(hw.fs.config.file);
 }
 
 static val getSaveFile() {
-	return val(typed_memory_view(hw.fs.save.size, hw.fs.save.buffer));
+    return getFile(hw.fs.save.file);
 }
 
 static void setSaveFile(val buffer)
 {
-	uint32_t size = buffer["length"].as<uint32_t>();
-	if (size >= sizeof hw.fs.save.buffer) {
-		EM_ASM(throw "Save file too large";);
-		return;
-	}
+    uint32_t size = buffer["length"].as<uint32_t>();
+    if (size >= sizeof hw.fs.save.buffer) {
+        EM_ASM(throw "Save file too large";);
+        return;
+    }
 
-	hw.fs.save.size = size;
-	uintptr_t addr = (uintptr_t) hw.fs.save.buffer;
-	val view = val::global("Uint8Array").new_(val::module_property("buffer"), addr, size);
-	view.call<void>("set", buffer);
+    hw.fs.save.file.size = size;
+    uintptr_t addr = (uintptr_t) hw.fs.save.buffer;
+    val view = val::global("Uint8Array").new_(val::module_property("buffer"), addr, size);
+    view.call<void>("set", buffer);
 }
 
 static val packSaveFile()
 {
-	tinySave.compress(&hw.fs.save.game);
-	return val(typed_memory_view(tinySave.size, tinySave.buffer));
+    tinySave.compress(hw.fs.save.file);
+    return val(typed_memory_view(tinySave.size, tinySave.buffer));
 }
 
 static void unpackSaveFile(val buffer)
 {
-	uint32_t size = buffer["length"].as<uint32_t>();
-	if (size >= sizeof tinySave.buffer) {
-		EM_ASM(throw "Compressed save file too large";);
-		return;
-	}
+    uint32_t size = buffer["length"].as<uint32_t>();
+    if (size >= sizeof tinySave.buffer) {
+        EM_ASM(throw "Compressed save file too large";);
+        return;
+    }
 
-	tinySave.size = size;
-	uintptr_t addr = (uintptr_t) tinySave.buffer;
-	val view = val::global("Uint8Array").new_(val::module_property("buffer"), addr, size);
-	view.call<void>("set", buffer);
+    tinySave.size = size;
+    uintptr_t addr = (uintptr_t) tinySave.buffer;
+    val view = val::global("Uint8Array").new_(val::module_property("buffer"), addr, size);
+    view.call<void>("set", buffer);
 
-	if (!tinySave.decompress(&hw.fs.save.game)) {
-		EM_ASM(throw "Failed to decompress save file";);		
-	}
+    if (!tinySave.decompress(hw.fs.save.file)) {
+        EM_ASM(throw "Failed to decompress save file";);        
+    }
 }
 
 static void setCheatsEnabled(bool enable)
 {
-	// Set a byte in JOYFILE to enable cheats. Game must restart to take effect.
-	// This enables the CTRL-E key (via ASCII \x05) as a toggle to walk through walls in the game.
-	// It disables collision detection with walls, but does not disable sentries. It's possible
-	// to use this to cheat past most but not all puzzles in the game for debug purposes.
-	hw.fs.joyfile.setCheatsEnabled(enable);
+    // Set a byte in JOYFILE to enable cheats. Game must restart to take effect.
+    // This enables the CTRL-E key (via ASCII \x05) as a toggle to walk through walls in the game.
+    // It disables collision detection with walls, but does not disable sentries. It's possible
+    // to use this to cheat past most but not all puzzles in the game for debug purposes.
+    hw.fs.config.joyfile.setCheatsEnabled(enable);
 }
 
 EMSCRIPTEN_BINDINGS(engine)
 {
+    constant("MAX_FILESIZE", (unsigned) DOSFilesystem::MAX_FILESIZE);
+    constant("MEM_SIZE", (unsigned) Hardware::MEM_SIZE);
+    constant("CPU_CLOCK_HZ", (unsigned) OutputQueue::CPU_CLOCK_HZ);
+    constant("AUDIO_HZ", (unsigned) OutputQueue::AUDIO_HZ);
+    constant("SCREEN_WIDTH", (unsigned) OutputQueue::SCREEN_WIDTH);
+    constant("SCREEN_HEIGHT", (unsigned) OutputQueue::SCREEN_HEIGHT);
+
     function("exec", &exec);
     function("setSpeed", &setSpeed);
     function("pressKey", &pressKey);

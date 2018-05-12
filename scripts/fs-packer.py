@@ -30,7 +30,7 @@ def write_header(cpp):
 def write_file_data(cpp, name, data):
     cpp.write('\nstatic const uint8_t %s_bytes[] = {\n%s\n};\n' % (
         varname_for_file(name), to_hex(data)));
-    cpp.write('\nstatic struct FileInfo %s = {\n\t"%s", %s_bytes, %d\n};\n' % (
+    cpp.write('\nstruct FileInfo %s = {\n\t"%s", %s_bytes, %d\n};\n' % (
         varname_for_file(name), name, varname_for_file(name), len(data)));
 
 
