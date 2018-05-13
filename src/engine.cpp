@@ -37,6 +37,10 @@ static void loop()
 
 int main()
 {
+    // Note that it's easy for Javascript to call other functions before main(),
+    // for example when loading a game as soon as the engine loads. So this isn't
+    // used for initialization, just for setting up the main loop.
+
     emscripten_set_main_loop(loop, 0, false);
     return 0;
 }
@@ -45,7 +49,6 @@ static void exec(const std::string &process, const std::string &arg)
 {
     hw.output.clear();
     hw.exec(process.c_str(), arg.c_str());
-    loop();
 }
 
 static void setSpeed(float speed)
@@ -84,19 +87,10 @@ static bool loadGame()
 {
     // If the buffer contains a loadable game, loads it and returns true.
     if (hw.fs.save.isGame()) {
-        ROSavedGame& game = hw.fs.save.asGame();
-        switch (game.worldId) {
-            case RO_WORLD_SEWER:
-            case RO_WORLD_SUBWAY:
-            case RO_WORLD_TOWN:
-            case RO_WORLD_COMP:
-            case RO_WORLD_STREET:
-                exec("game.exe", "99");
-                return true;
-
-            case RO_WORLD_LAB:
-                exec("lab.exe", "99");
-                return true;
+        const char *process = hw.fs.save.asGame().getProcessName();
+        if (process) {
+            exec(process, "99");
+            return true;
         }
     }
     return false;
@@ -107,15 +101,24 @@ static val getFile(const FileInfo& file)
     return val(typed_memory_view(file.size, file.data));
 }
 
-static val getMemory() {
+static val getMemory()
+{
     return val(typed_memory_view(Hardware::MEM_SIZE, hw.mem));
 }
 
-static val getJoyFile() {
+static val getCompressionDictionary()
+{
+    const std::vector<uint8_t>& dict = tinySave.getCompressionDictionary();
+    return val(typed_memory_view(dict.size(), &dict[0]));
+}
+
+static val getJoyFile()
+{
     return getFile(hw.fs.config.file);
 }
 
-static val getSaveFile() {
+static val getSaveFile()
+{
     return getFile(hw.fs.save.file);
 }
 
@@ -185,6 +188,7 @@ EMSCRIPTEN_BINDINGS(engine)
     function("saveGame", &saveGame);
     function("loadGame", &loadGame);
     function("getMemory", &getMemory);
+    function("getCompressionDictionary", &getCompressionDictionary);
     function("getJoyFile", &getJoyFile);
     function("getSaveFile", &getSaveFile);
     function("setSaveFile", &setSaveFile);

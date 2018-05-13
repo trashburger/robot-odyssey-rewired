@@ -296,9 +296,13 @@ asm.then(() =>
         downloadjs(asm.getMemory(), filename || 'ram-snapshot.bin', 'application/octet-stream');
     };
 
+    asm.downloadCompressionDictionary = (filename) =>
+    {
+        downloadjs(asm.getCompressionDictionary(), filename || 'dictionary.bin', 'application/octet-stream');
+    };
+
     var last_set_window_hash = null;
     const autosave_delay = 500;
-
     asm.EXPERIMENTAL_AUTOSAVE_ENABLED = false;
 
     asm.autoSave = () =>
@@ -321,7 +325,7 @@ asm.then(() =>
                     const str = base64.encode(packed);
                     last_set_window_hash = str;
                     window.location.hash = str;
-                    console.log(`Packed save, ${packed.length} bytes before base64, ${str.length} after.`);
+                    console.log(`Packed save, ${str.length} bytes.`);
                 };
                 asm.saveGame();
             } finally {

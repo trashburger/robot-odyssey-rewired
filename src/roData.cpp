@@ -153,6 +153,22 @@ const char *ROSavedGame::getWorldName()
     }
 }
 
+const char *ROSavedGame::getProcessName()
+{
+    switch (worldId) {
+        case RO_WORLD_SEWER:
+        case RO_WORLD_SUBWAY:
+        case RO_WORLD_TOWN:
+        case RO_WORLD_COMP:
+        case RO_WORLD_STREET:
+            return "game.exe";
+
+        case RO_WORLD_LAB:
+            return "lab.exe";
+    }
+    return 0;
+}
+
 ROData::ROData(SBTProcess *proc)
 {
     world = ROWorld::fromProcess(proc);

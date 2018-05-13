@@ -1,89 +1,131 @@
 #include <string.h>
 #include <stdint.h>
+#include <stdio.h>
+
+#define ZSTD_STATIC_LINKING_ONLY
 #include <zstd.h>
+
 #include "tinySave.h"
 
+// Compression level is a CPU and memory vs space tradeoff.
+// This can be changed without breaking format compatibility.
+static const int compress_level = 20;
 
-static void initWorldFromFiles(ROSavedGame *game, FileInfo *wor, FileInfo *cir = 0, FileInfo *wld = 0)
+TinySave::TinySave()
+    : size(0), cctx(0), dctx(0), cdict(0), ddict(0)
+{}
+
+TinySave::~TinySave()
 {
-
-}
-
-static void initChipFromFiles(ROSavedGame *game, uint8_t slot, FileInfo *chp, FileInfo *pin)
-{
-    assert(chp && chp->size <= sizeof game->chipBytecode[slot]);
-    assert(pin && pin->size == sizeof game->chipPins[slot]);
-    
-}
-
-static void initReferenceGameWorld(ROSavedGame *game, FileInfo *wld = 0)
-{
-    extern FileInfo file_sewer_wor;
-    extern FileInfo file_sewer_cir;
-    extern FileInfo file_countton_chp;
-    extern FileInfo file_countton_pin;
-    extern FileInfo file_wallhug_chp;
-    extern FileInfo file_wallhug_pin;
-
-    // All games start at the sewer with count-to-n and wallhugger chips
-    // loaded, then we build on that. If other chips are loaded instead,
-    // we'll have to rely on gzip compressing them or finding them in the
-    // pre-shared dictionary. If chips haven't been reloaded, the packed game
-    // size will be smallest.
-
-    initWorldFromFiles(game, &file_sewer_wor, &file_sewer_cir, wld);
-    initChipFromFiles(game, 0, &file_countton_chp, &file_countton_pin);
-    initChipFromFiles(game, 1, &file_wallhug_chp, &file_wallhug_pin);
-}
-
-static void initReferenceWorld(ROSavedGame *game, uint8_t worldId)
-{
-    extern FileInfo file_lab_wor;
-    extern FileInfo file_comp_wld;
-    extern FileInfo file_street_wld;
-    extern FileInfo file_subway_wld;
-    extern FileInfo file_town_wld;
-
-    memset(game, 0, sizeof *game);
-
-    switch (worldId) {
-
-        case RO_WORLD_SEWER:
-            initReferenceGameWorld(game, 0);
-            break;
-
-        case RO_WORLD_SUBWAY:
-            initReferenceGameWorld(game, &file_subway_wld);
-            break;
-
-        case RO_WORLD_TOWN:
-            initReferenceGameWorld(game, &file_town_wld);
-            break;
-
-        case RO_WORLD_COMP:
-            initReferenceGameWorld(game, &file_comp_wld);
-            break;
-
-        case RO_WORLD_STREET:
-            initReferenceGameWorld(game, &file_street_wld);
-            break;
-
-        case RO_WORLD_LAB:
-            initWorldFromFiles(game, &file_lab_wor);
-            break;
+    if (cdict) {
+        ZSTD_freeCDict(cdict);
+    }
+    if (ddict) {
+        ZSTD_freeDDict(ddict);
+    }
+    if (cctx) {
+        ZSTD_freeCCtx(cctx);
+    }
+    if (dctx) {
+        ZSTD_freeDCtx(dctx);
     }
 }
 
-
 void TinySave::compress(const FileInfo& src)
 {
-    size_t result = ZSTD_compress(buffer, sizeof buffer, src.data, src.size, 15);
+    if (dict.empty()) {
+        initDictionary();
+    }
+    if (!cctx) {
+        cctx = ZSTD_createCCtx();
+    }
+    if (!cdict) {
+        cdict = ZSTD_createCDict(&dict[0], dict.size(), compress_level);
+    }
+
+    ZSTD_frameParameters fParams = {};
+    fParams.contentSizeFlag = 0;
+    fParams.checksumFlag = 1;
+    fParams.noDictIDFlag = 1;
+
+    size_t result = ZSTD_compress_usingCDict_advanced(cctx, buffer, sizeof buffer,
+            src.data, src.size, cdict, fParams);
+
     size = ZSTD_isError(result) ? 0 : result;
 }
 
 bool TinySave::decompress(FileInfo& dest)
 {
-    size_t result = ZSTD_decompress((uint8_t*) dest.data, DOSFilesystem::MAX_FILESIZE, buffer, size);
+    if (dict.empty()) {
+        initDictionary();
+    }
+    if (!dctx) {
+        dctx = ZSTD_createDCtx();
+    }
+    if (!ddict) {
+        ddict = ZSTD_createDDict(&dict[0], dict.size());
+    }
+
+    size_t result = ZSTD_decompress_usingDDict(dctx, (uint8_t*) dest.data,
+        DOSFilesystem::MAX_FILESIZE, buffer, size, ddict);
+
     dest.size = ZSTD_isError(result) ? 0 : result;
     return !ZSTD_isError(result);
+}
+
+const std::vector<uint8_t>& TinySave::getCompressionDictionary()
+{
+    if (dict.empty()) {
+        initDictionary();
+    }
+    return dict;
+}
+
+static void addFileToDict(std::vector<uint8_t> &dict, const FileInfo &file)
+{
+    // Trim trailing zeroes
+    uint32_t size = file.size;
+    while (size && file.data[size - 1] == 0) size--;
+
+    // Append to dict
+    dict.insert(dict.end(), file.data, file.data + size);
+}
+
+void TinySave::initDictionary()
+{
+    // The contents of the dictionary must not change at all,
+    // or we break savegame compatibility completely!
+
+    dict.clear();
+
+    // Built-in loadable chips
+    extern FileInfo file_4bitcntr_csv;  addFileToDict(dict, file_4bitcntr_csv);
+    extern FileInfo file_stereo_csv;    addFileToDict(dict, file_stereo_csv);
+    extern FileInfo file_rsflop_csv;    addFileToDict(dict, file_rsflop_csv);
+    extern FileInfo file_oneshot_csv;   addFileToDict(dict, file_oneshot_csv);
+    extern FileInfo file_countton_csv;  addFileToDict(dict, file_countton_csv);
+    extern FileInfo file_adder_csv;     addFileToDict(dict, file_adder_csv);
+    extern FileInfo file_clock_csv;     addFileToDict(dict, file_clock_csv);
+    extern FileInfo file_delay_csv;     addFileToDict(dict, file_delay_csv);
+    extern FileInfo file_bus_csv;       addFileToDict(dict, file_bus_csv);
+    extern FileInfo file_wallhug_csv;   addFileToDict(dict, file_wallhug_csv);
+
+    // World overlays for the game
+    extern FileInfo file_street_wld;    addFileToDict(dict, file_street_wld);
+    extern FileInfo file_subway_wld;    addFileToDict(dict, file_subway_wld);
+    extern FileInfo file_town_wld;      addFileToDict(dict, file_town_wld);
+    extern FileInfo file_comp_wld;      addFileToDict(dict, file_comp_wld);
+
+    // Chips used in initial game world
+    extern FileInfo file_countton_chp;  addFileToDict(dict, file_countton_chp);
+    extern FileInfo file_wallhug_chp;   addFileToDict(dict, file_wallhug_chp);
+    extern FileInfo file_countton_pin;  addFileToDict(dict, file_countton_pin);
+    extern FileInfo file_wallhug_pin;   addFileToDict(dict, file_wallhug_pin);
+
+    // Initial world for the lab
+    extern FileInfo file_lab_wor;       addFileToDict(dict, file_lab_wor);
+
+    // Initial world for the game
+    extern FileInfo file_sewer_wor;     addFileToDict(dict, file_sewer_wor);
+    extern FileInfo file_sewer_cir;     addFileToDict(dict, file_sewer_cir);
 }

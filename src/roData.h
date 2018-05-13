@@ -514,6 +514,7 @@ public:
     uint8_t worldId;
 
     const char *getWorldName();
+    const char *getProcessName();
 };
 
 
