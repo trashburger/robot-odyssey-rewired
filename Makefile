@@ -1,7 +1,7 @@
 PYTHON      := python3
 EMCC        := emcc
 
-EMCCFLAGS := -I src -std=c++11 -Oz --bind
+EMCCFLAGS := -I src -I library -std=c++11 -Oz --bind
 
 EMCCSETTINGS := \
 	-s WASM=1 \
