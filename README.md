@@ -11,17 +11,19 @@ This repository contains open source modifications which can be applied to the o
 Dependencies
 ------------
 
+- make
+- git
+- nasm
+- node
 - python3
 - emscripten
-- nasm (with ndisasm)
-- node (with npm)
-- make
 
 
 Build Instructions
 ------------------
 
 - Place original game files in the "original" directory
+- git submodule update --init --recursive
 - npm install
 - make
 

@@ -1,13 +1,16 @@
 PYTHON      := python3
-EMCC        := emcc
+CC          := emcc
 
-EMCCFLAGS := -I src -I library -std=c++11 -Oz --bind
+CCFLAGS := \
+	-std=c++11 -Oz --bind \
+	-I src \
+	-I library/circular_buffer/include \
+	-I library/zstd/lib
 
-EMCCSETTINGS := \
+CCSETTINGS := \
 	-s WASM=1 \
 	-s MODULARIZE=1 \
-	-s NO_FILESYSTEM=1 \
-	-s USE_ZLIB=1
+	-s NO_FILESYSTEM=1
 
 OBJS := \
 	build/engine.bc \
@@ -23,7 +26,8 @@ OBJS := \
 	build/bt_menu.bc \
 	build/bt_menu2.bc \
 	build/bt_play.bc \
-	build/bt_tutorial.bc
+	build/bt_tutorial.bc \
+	library/zstd/lib/libzstd.a
 
 all: dist
 
@@ -31,6 +35,7 @@ dist: dist/index.html dist/main.css dist/bundle.js dist/engine.wasm
 
 clean:
 	rm -Rf build/ dist/
+	make -C library/zstd clean
 
 serve: all
 	(cd dist; $(PYTHON) -m http.server)
@@ -49,15 +54,15 @@ dist/bundle.js: build/engine.js src/*.js
 	npx webpack --config ./webpack.config.js
 
 build/engine.js: $(OBJS)
-	$(EMCC) $(EMCCFLAGS) $(EMCCSETTINGS) -o $@ $(OBJS)
+	$(CC) $(CCFLAGS) $(CCSETTINGS) -o $@ $(OBJS)
 	cp build/engine.wasm dist/engine.wasm
 
 build/%.bc: src/%.cpp
 	@mkdir -p build/
-	$(EMCC) $(EMCCFLAGS) -c -o $@ $<
+	$(CC) $(CCFLAGS) -c -o $@ $<
 
 build/%.bc: build/%.cpp
-	$(EMCC) $(EMCCFLAGS) -c -o $@ $<
+	$(CC) $(CCFLAGS) -c -o $@ $<
 
 build/%.cpp: scripts/%.py scripts/sbt86.py build/original
 	$(PYTHON) $< build
@@ -70,3 +75,6 @@ build/original:
 	@mkdir -p build/
 	$(PYTHON) scripts/check-originals.py original build
 	@touch $@
+
+library/zstd/lib/libzstd.a:
+	emmake make -C library/zstd/lib libzstd.a

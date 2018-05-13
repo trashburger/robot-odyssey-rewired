@@ -1,0 +1,6 @@
+[submodule "library/circular_buffer"]
+	path = library/circular_buffer
+	url = https://github.com/JustasMasiulis/circular_buffer
+[submodule "library/zstd"]
+	path = library/zstd
+	url = https://github.com/facebook/zstd

@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <list>
-#include "circular_buffer.h"
+#include <circular_buffer.hpp>
 #include "sbt86.h"
 
 struct CGAFramebuffer
