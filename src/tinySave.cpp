@@ -3,6 +3,7 @@
 #include <zstd.h>
 #include "tinySave.h"
 
+
 static void initWorldFromFiles(ROSavedGame *game, FileInfo *wor, FileInfo *cir = 0, FileInfo *wld = 0)
 {
 
@@ -76,13 +77,13 @@ static void initReferenceWorld(ROSavedGame *game, uint8_t worldId)
 
 void TinySave::compress(const FileInfo& src)
 {
-    unpacked.size = src.size;
-    memcpy(unpacked.buffer, src.data, src.size);
-
-    size = ZSTD_compress(buffer, sizeof buffer, unpacked.buffer, unpacked.size, 18);
+    size_t result = ZSTD_compress(buffer, sizeof buffer, src.data, src.size, 15);
+    size = ZSTD_isError(result) ? 0 : result;
 }
 
 bool TinySave::decompress(FileInfo& dest)
 {
-    return false;
+    size_t result = ZSTD_decompress((uint8_t*) dest.data, DOSFilesystem::MAX_FILESIZE, buffer, size);
+    dest.size = ZSTD_isError(result) ? 0 : result;
+    return !ZSTD_isError(result);
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <zstd.h>
 #include "filesystem.h"
 
 
@@ -11,13 +12,4 @@ public:
 
     void compress(const FileInfo& src);
     bool decompress(FileInfo& dest);
-
-private:
-    struct {
-        uint32_t size;
-        union {
-            uint8_t buffer[DOSFilesystem::MAX_FILESIZE];
-            ROSavedGame game;
-        };
-    } unpacked;
 };

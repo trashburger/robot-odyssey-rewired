@@ -33,6 +33,14 @@ public:
         FileInfo file;
         bool openForWrite;
         uint8_t buffer[MAX_FILESIZE];
+
+        inline bool isGame() {
+            return file.size == sizeof(ROSavedGame);
+        }
+
+        inline ROSavedGame& asGame() {
+            return *reinterpret_cast<ROSavedGame*>(buffer);
+        }
     } save;
 
 private:

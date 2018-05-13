@@ -13,6 +13,10 @@ basedir = sys.argv[1]
 # PLAY.EXE stays resident while the other game binaries run, put it lower in memory.
 b = sbt86.DOSBinary(os.path.join(basedir, 'play.exe'), relocSegment=0x70)
 
+# This is marked as a default place to return control on exit
+assert b.isDefault == False
+b.isDefault = True
+
 # Break control flow every time we would be exec()'ing another EXE file.
 # This is a wrapper that handles changing disks if necessary. BX is a pointer
 # to a nul-terminated list of nul-terminated strings, forming the argv[].

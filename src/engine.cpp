@@ -37,15 +37,7 @@ static void loop()
 
 int main()
 {
-    hw.registerProcess(&play_exe, true);
-    hw.registerProcess(&menu_exe);
-    hw.registerProcess(&menu2_exe);
-    hw.registerProcess(&lab_exe);
-    hw.registerProcess(&game_exe);
-    hw.registerProcess(&tut_exe);
-
     emscripten_set_main_loop(loop, 0, false);
-
     return 0;
 }
 
@@ -80,9 +72,32 @@ static void setJoystickButton(bool button)
 
 static bool saveGame()
 {
+    // If we can save the game here, saves it to the buffer and returns true.
     if (hw.process && hw.process->isWaitingInMainLoop() && hw.process->hasFunction(SBTADDR_SAVE_GAME_FUNC)) {
         hw.process->call(SBTADDR_SAVE_GAME_FUNC, hw.process->reg);
         return true;
+    }
+    return false;
+}
+
+static bool loadGame()
+{
+    // If the buffer contains a loadable game, loads it and returns true.
+    if (hw.fs.save.isGame()) {
+        ROSavedGame& game = hw.fs.save.asGame();
+        switch (game.worldId) {
+            case RO_WORLD_SEWER:
+            case RO_WORLD_SUBWAY:
+            case RO_WORLD_TOWN:
+            case RO_WORLD_COMP:
+            case RO_WORLD_STREET:
+                exec("game.exe", "99");
+                return true;
+
+            case RO_WORLD_LAB:
+                exec("lab.exe", "99");
+                return true;
+        }
     }
     return false;
 }
@@ -113,9 +128,11 @@ static void setSaveFile(val buffer)
     }
 
     hw.fs.save.file.size = size;
-    uintptr_t addr = (uintptr_t) hw.fs.save.buffer;
-    val view = val::global("Uint8Array").new_(val::module_property("buffer"), addr, size);
-    view.call<void>("set", buffer);
+    if (size > 0) {
+        uintptr_t addr = (uintptr_t) hw.fs.save.buffer;
+        val view = val::global("Uint8Array").new_(val::module_property("buffer"), addr, size);
+        view.call<void>("set", buffer);
+    }
 }
 
 static val packSaveFile()
@@ -124,22 +141,22 @@ static val packSaveFile()
     return val(typed_memory_view(tinySave.size, tinySave.buffer));
 }
 
-static void unpackSaveFile(val buffer)
+static bool unpackSaveFile(val buffer)
 {
     uint32_t size = buffer["length"].as<uint32_t>();
     if (size >= sizeof tinySave.buffer) {
         EM_ASM(throw "Compressed save file too large";);
-        return;
+        return false;
     }
 
     tinySave.size = size;
-    uintptr_t addr = (uintptr_t) tinySave.buffer;
-    val view = val::global("Uint8Array").new_(val::module_property("buffer"), addr, size);
-    view.call<void>("set", buffer);
-
-    if (!tinySave.decompress(hw.fs.save.file)) {
-        EM_ASM(throw "Failed to decompress save file";);        
+    if (size > 0) {
+        uintptr_t addr = (uintptr_t) tinySave.buffer;
+        val view = val::global("Uint8Array").new_(val::module_property("buffer"), addr, size);
+        view.call<void>("set", buffer);
     }
+
+    return tinySave.decompress(hw.fs.save.file);
 }
 
 static void setCheatsEnabled(bool enable)
@@ -166,6 +183,7 @@ EMSCRIPTEN_BINDINGS(engine)
     function("setJoystickAxes", &setJoystickAxes);
     function("setJoystickButton", &setJoystickButton);
     function("saveGame", &saveGame);
+    function("loadGame", &loadGame);
     function("getMemory", &getMemory);
     function("getJoyFile", &getJoyFile);
     function("getSaveFile", &getSaveFile);

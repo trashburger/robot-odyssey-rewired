@@ -1593,6 +1593,12 @@ class DOSBinary(BinaryImage):
 
 SBT_DECL_PROCESS(%(className)s);
 
+%(className)s::%(className)s(Hardware *hardware)
+{
+    this->hardware = hardware;
+    hardware->registerProcess(this, %(isDefault)d);
+}
+
 /*
  * Local cache of registers and process pointer.
  */
@@ -1662,6 +1668,7 @@ uint16_t %(className)s::getAddress(SBTAddressId id) {
 
 """
 
+    isDefault = False
     relocSegment = None
     subroutines = None
 

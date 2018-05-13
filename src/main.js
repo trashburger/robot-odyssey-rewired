@@ -111,6 +111,7 @@ function keycode(ascii, scancode)
         ascii = ascii.length == 1 ? ascii.charCodeAt(0) : parseInt(ascii, 0);
     }
     asm.pressKey(ascii, scancode);
+    asm.autoSave();
 }
 
 function controlCode(key)
@@ -188,25 +189,6 @@ function filenameForSaveData(bytes)
     return "robotodyssey-" + now.toISOString() + ".bin";
 }
 
-asm.autosave = () =>
-{
-    console.log("EXPERIMENTAL autosave!");
-
-    const saved_callback = asm.onSaveFileWrite;
-    try {
-        asm.onSaveFileWrite = () => {
-            const packed = asm.packSaveFile();
-            const str = base64.encode(packed);
-            window.location.hash = str;
-            console.log(`Packed save, ${packed.length} bytes before base64, ${str.length} after.`);
-        };
-        asm.saveGame();
-    } finally {
-        asm.onSaveFileWrite = saved_callback;
-        setTimeout(asm.autosave, 2000);
-    }
-};
-
 asm.then(() =>
 {
     document.body.addEventListener('keydown', onKeydown);
@@ -217,10 +199,12 @@ asm.then(() =>
         const y = scale * data.force * Math.sin(data.angle.radian);
         asm.setJoystickAxes(x, -y);
         asm.audioSetup();
+        asm.autoSave();
     });
     joystick.on('end', (e) => {
         asm.setJoystickAxes(0, 0);
         asm.audioSetup();
+        asm.autoSave();
     });
 
     for (let button of document.getElementsByClassName('joystick_btn')) {
@@ -228,21 +212,25 @@ asm.then(() =>
             asm.setJoystickButton(true);
             refocus(e);
             asm.audioSetup();
+            asm.autoSave();
        });
         button.addEventListener('mouseup', (e) => {
             asm.setJoystickButton(false);
             refocus(e);
             asm.audioSetup();
+            asm.autoSave();
         });
         button.addEventListener('touchstart', (e) => {
             e.preventDefault();
             asm.setJoystickButton(true);
             asm.audioSetup();
+            asm.autoSave();
         });
         button.addEventListener('touchend', (e) => {
             e.preventDefault();
             asm.setJoystickButton(false);
             asm.audioSetup();
+            asm.autoSave();
         });
     }
 
@@ -251,6 +239,7 @@ asm.then(() =>
             asm.exec(button.dataset.program, button.dataset.args);
             refocus(e);
             asm.audioSetup();
+            asm.autoSave();
         });
     }
 
@@ -259,12 +248,14 @@ asm.then(() =>
         button.addEventListener('click', (e) => {
             key();
             asm.audioSetup();
+            asm.autoSave();
             refocus(e);
         });
         button.addEventListener('touchend', (e) => {
             e.preventDefault();
             key();
             asm.audioSetup();
+            asm.autoSave();
             refocus(e);
         });
     }
@@ -291,21 +282,75 @@ asm.then(() =>
         }
     });
 
-    asm.loadSaveFile = (array) => {
+    asm.loadSaveFile = (array) =>
+    {
         const bytes = new Uint8Array(array);
         const world = worldIdFromSaveData(bytes);
 
         asm.setSaveFile(bytes);
+        asm.loadGame();
+    };
 
-        if (world == LAB_WORLD) {
-            asm.exec("lab.exe", "99");
-        } else if (world !== null) {
-            asm.exec("game.exe", "99");
+    asm.downloadRAMSnapshot = (filename) =>
+    {
+        downloadjs(asm.getMemory(), filename || 'ram-snapshot.bin', 'application/octet-stream');
+    };
+
+    var last_set_window_hash = null;
+    const autosave_delay = 500;
+
+    asm.EXPERIMENTAL_AUTOSAVE_ENABLED = false;
+
+    asm.autoSave = () =>
+    {
+        if (!asm.EXPERIMENTAL_AUTOSAVE_ENABLED) {
+            return;
+        }
+
+        if (asm.autoSaveTimer) {
+            clearTimeout(asm.autoSaveTimer);
+        }
+
+        asm.autoSaveTimer = setTimeout(() => {
+            console.log("EXPERIMENTAL autosave!");
+
+            const saved_callback = asm.onSaveFileWrite;
+            try {
+                asm.onSaveFileWrite = () => {
+                    const packed = asm.packSaveFile();
+                    const str = base64.encode(packed);
+                    last_set_window_hash = str;
+                    window.location.hash = str;
+                    console.log(`Packed save, ${packed.length} bytes before base64, ${str.length} after.`);
+                };
+                asm.saveGame();
+            } finally {
+                asm.onSaveFileWrite = saved_callback;
+            }
+        }, autosave_delay);
+    };
+
+    asm.onHashChange = () =>
+    {
+        const hash = window.location.hash;
+        if (hash && hash[0] == "#") {
+            var s = hash.slice(1);
+            if (s != last_set_window_hash) {
+                const packed = new Uint8Array(base64.decode(s));
+                if (asm.unpackSaveFile(packed)) {
+                    if (asm.loadGame()) {
+                        console.log("Loading packed saved game");
+                    } else {
+                        console.warn("FAILED to load packed saved game");
+                    }
+                } else {
+                    console.warn("FAILED to unpack saved game");
+                }
+            }
         }
     };
 
-    asm.downloadRAMSnapshot = (filename) => {
-        downloadjs(asm.getMemory(), filename || 'ram-snapshot.bin', 'application/octet-stream');
-    };
+    window.addEventListener('hashchange', asm.onHashChange);
+    asm.onHashChange();
 });
 

@@ -330,35 +330,21 @@ class SBTSegmentCache
 };
 
 
-/*
-* Static utilities for 16-bit reads and writes
-*/
 static SBT_INLINE uint16_t read16(uint8_t *ptr) {
     return ptr[0] | (ptr[1] << 8);
 }
+
 static SBT_INLINE void write16(uint8_t *ptr, uint16_t x) {
     ptr[0] = (uint8_t) x;
     ptr[1] = x >> 8;
 }
 
 
-/*
- * SBT_DECL_PROCESS --
- *
- *    A macro to declare a process subclass created by SBT86.
- *    This is basically the replacement for a header files for
- *    these classes.
- */
-
 #define SBT_DECL_PROCESS(name)                                       \
     class name : public SBTProcess                                   \
     {                                                                \
     public:                                                          \
-        name(Hardware *hardware,                                     \
-             const char *cmdLine = "") {                             \
-            this->hardware = hardware;                               \
-            exec(cmdLine);                                           \
-        }                                                            \
+        name(Hardware *hardware);                                    \
     protected:                                                       \
         virtual void loadEnvironment(SBTStack *stack, SBTRegs reg);  \
         virtual uint8_t *getData();                                  \
@@ -369,4 +355,4 @@ static SBT_INLINE void write16(uint8_t *ptr, uint16_t x) {
     public:                                                          \
         virtual uint16_t getAddress(SBTAddressId id);                \
         virtual const char *getFilename();                           \
-    }
+    };
