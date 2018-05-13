@@ -80,7 +80,7 @@ static void setJoystickButton(bool button)
 
 static bool saveGame()
 {
-    if (hw.process->hasFunction(SBTADDR_SAVE_GAME_FUNC)) {
+    if (hw.process && hw.process->isWaitingInMainLoop() && hw.process->hasFunction(SBTADDR_SAVE_GAME_FUNC)) {
         hw.process->call(SBTADDR_SAVE_GAME_FUNC, hw.process->reg);
         return true;
     }

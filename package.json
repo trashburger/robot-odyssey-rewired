@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/scanlime/robot-odyssey-rewired#readme",
   "dependencies": {
+    "base64-arraybuffer": "^0.1.5",
     "downloadjs": "^1.4.7",
     "nipplejs": "^0.6.8"
   },

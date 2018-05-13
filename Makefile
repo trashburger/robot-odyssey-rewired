@@ -1,16 +1,17 @@
 PYTHON      := python3
 CC          := emcc
 
-CCFLAGS := \
-	-std=c++11 -Oz --bind \
-	-I src \
-	-I library/circular_buffer/include \
-	-I library/zstd/lib
+CCFLAGS := -std=c++11 -Oz --bind
 
-CCSETTINGS := \
+WASMFLAGS := \
 	-s WASM=1 \
 	-s MODULARIZE=1 \
 	-s NO_FILESYSTEM=1
+
+INCLUDES := \
+	-I src \
+	-I library/circular_buffer/include \
+	-I library/zstd/lib
 
 OBJS := \
 	build/engine.bc \
@@ -29,12 +30,18 @@ OBJS := \
 	build/bt_tutorial.bc \
 	library/zstd/lib/libzstd.a
 
+DISTFILES := \
+	dist/index.html \
+	dist/main.css \
+	dist/bundle.js \
+	dist/engine.wasm
+
 all: dist
 
-dist: dist/index.html dist/main.css dist/bundle.js dist/engine.wasm
+dist: $(DISTFILES)
 
 clean:
-	rm -Rf build/ dist/
+	rm -Rf build/ dist/ .cache/
 	make -C library/zstd clean
 
 serve: all
@@ -42,30 +49,35 @@ serve: all
 
 .PHONY: all clean dist serve
 
-dist/index.html: src/index.html
+# Static files
+dist/%: src/%
 	@mkdir -p dist/
 	cp $< $@
 
-dist/main.css: src/main.css
-	@mkdir -p dist/
-	cp $< $@
-
+# Javascript build with webpack
 dist/bundle.js: build/engine.js src/*.js
 	npx webpack --config ./webpack.config.js
 
+# WASM build from bitcode
 build/engine.js: $(OBJS)
-	$(CC) $(CCFLAGS) $(CCSETTINGS) -o $@ $(OBJS)
-	cp build/engine.wasm dist/engine.wasm
+	$(CC) $(CCFLAGS) $(WASMFLAGS) -o $@ $(OBJS)
+	cp build/engine.wasm dist/
 
+# Build normal C++ code to LLVM bitcode
 build/%.bc: src/%.cpp
 	@mkdir -p build/
-	$(CC) $(CCFLAGS) -c -o $@ $<
+	$(CC) $(CCFLAGS) $(INCLUDES) -c -o $@ $<
 
+# Build generated C++ code to LLVM bitcode
 build/%.bc: build/%.cpp
-	$(CC) $(CCFLAGS) -c -o $@ $<
+	$(CC) $(CCFLAGS) $(INCLUDES) -c -o $@ $<
 
+# Generate C++ code from 8086 EXEs by running Python translation scripts
 build/%.cpp: scripts/%.py scripts/sbt86.py build/original
 	$(PYTHON) $< build
+
+# Tell gmake not to delete the intermediate .cpp files we generate
+.PRECIOUS: build/%.cpp
 
 build/fspack.cpp: scripts/fs-packer.py build/original
 	$(PYTHON) $< build/fs $@
@@ -76,5 +88,6 @@ build/original:
 	$(PYTHON) scripts/check-originals.py original build
 	@touch $@
 
+# Compile libzstd from source to LLVM bitcode
 library/zstd/lib/libzstd.a:
 	emmake make -C library/zstd/lib libzstd.a

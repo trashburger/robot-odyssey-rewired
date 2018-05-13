@@ -94,6 +94,11 @@ void SBTProcess::run(void)
     }
 }
 
+bool SBTProcess::isWaitingInMainLoop()
+{
+    return continue_func == default_func && continue_func != getFunction(SBTADDR_ENTRY_FUNC);
+}
+
 bool SBTProcess::hasFunction(SBTAddressId id)
 {
     return getFunction(id) != 0;

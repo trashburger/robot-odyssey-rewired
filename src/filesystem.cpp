@@ -9,11 +9,11 @@ static const bool verbose_filesystem_info = false;
 
 DOSFilesystem::DOSFilesystem()
 {
-    memset(&config, 0, sizeof config);
-    memset(&save, 0, sizeof save);
-
+    // ROJoyfile constructor sets up a default configuration
     config.file.data = (uint8_t*) &config.joyfile;
     config.file.size = sizeof config.joyfile;
+
+    memset(&save, 0, sizeof save);
     save.file.data = save.buffer;
 
     reset();

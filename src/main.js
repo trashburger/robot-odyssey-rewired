@@ -1,6 +1,7 @@
 import wasmEngineFactory from "../build/engine.js";
 import downloadjs from 'downloadjs';
 import nipplejs from 'nipplejs';
+import base64 from 'base64-arraybuffer';
 
 const fbCanvas = document.getElementById('framebuffer');
 const fbContext = fbCanvas.getContext('2d');
@@ -58,9 +59,6 @@ try {
 asm.onSaveFileWrite = () => {
     const saveData = asm.getSaveFile();
     downloadjs(saveData, filenameForSaveData(saveData), 'application/octet-stream');
-
-    // work in progress
-    console.log(asm.packSaveFile());
 };
 
 asm.onRenderFrame = (rgbData) => {
@@ -190,6 +188,24 @@ function filenameForSaveData(bytes)
     return "robotodyssey-" + now.toISOString() + ".bin";
 }
 
+asm.autosave = () =>
+{
+    console.log("EXPERIMENTAL autosave!");
+
+    const saved_callback = asm.onSaveFileWrite;
+    try {
+        asm.onSaveFileWrite = () => {
+            const packed = asm.packSaveFile();
+            const str = base64.encode(packed);
+            window.location.hash = str;
+            console.log(`Packed save, ${packed.length} bytes before base64, ${str.length} after.`);
+        };
+        asm.saveGame();
+    } finally {
+        asm.onSaveFileWrite = saved_callback;
+        setTimeout(asm.autosave, 2000);
+    }
+};
 
 asm.then(() =>
 {

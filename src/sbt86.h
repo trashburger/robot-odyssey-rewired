@@ -246,6 +246,12 @@ class SBTProcess
     void continueFrom(SBTRegs regs, continue_func_t fn, bool default_entry = false);
 
     /*
+     * Is the process at a continuation point marked as
+     * default_entry which is *not* its original entry point?
+     */
+    bool isWaitingInMainLoop();
+
+    /*
      * Return a pointer to an emulated memory segment. Only 64K of
      * memory past the returned pointer is guaranteed to be valid.  If
      * the address is out of range, returns NULL.
