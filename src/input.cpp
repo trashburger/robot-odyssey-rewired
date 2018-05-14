@@ -22,9 +22,9 @@ void InputBuffer::clear()
     js_button_held = false;
 }
 
-bool InputBuffer::checkForQueuedInput()
+bool InputBuffer::checkForInputBacklog()
 {
-    return !key_buffer.empty() || !mouse_buffer.empty();
+    return key_buffer.size() > 1;
 }
 
 void InputBuffer::pressKey(uint8_t ascii, uint8_t scancode)
@@ -56,8 +56,13 @@ void InputBuffer::setMouseTracking(int x, int y)
         evt.x = x;
         evt.y = y;
 
-    } else if (!mouse_buffer.full()) {
+    } else {
         // Make a new position event
+
+        if (mouse_buffer.full()) {
+            // If the buffer overflows, assume something is wrong/stuck. Clear it.
+            mouse_buffer.clear();
+        }
 
         MouseEvent evt = { EVT_POS, x, y };
         mouse_buffer.push_back(evt);

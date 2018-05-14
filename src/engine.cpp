@@ -18,22 +18,19 @@ SBT_STATIC_PROCESS(&hw, GameEXE);
 SBT_STATIC_PROCESS(&hw, TutorialEXE);
 
 static float delay_multiplier = 1.0f;
-static float queued_input_delay_multiplier = 0.3f;
 
 static void loop()
 {
     // Runs until the next queued delay
     uint32_t millis = hw.run();
 
-    // Speed modifiers
-    millis *= delay_multiplier;
-
-    // Speed up when input is waiting
-    if (hw.input.checkForQueuedInput()) {
-        millis *= queued_input_delay_multiplier;
+    if (hw.input.checkForInputBacklog()) {
+        // Speed up for keyboard input backlog
+        emscripten_set_main_loop_timing(EM_TIMING_RAF, 1);
+    } else {
+        // Millisecond-based timing, with optional modifier
+        emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, millis * delay_multiplier);
     }
-
-    emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, millis * delay_multiplier);
 }
 
 int main()

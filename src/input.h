@@ -20,13 +20,13 @@ class InputBuffer
 
     void clear();
 
-    bool checkForQueuedInput();
+    bool checkForInputBacklog();
     uint16_t checkForKey();
     uint16_t getKey();
     void pollJoystick(ROWorld *world, uint16_t &x, uint16_t &y, uint8_t &status);
 
  protected:
-    static const unsigned KEY_BUFFER_SIZE = 8;
+    static const unsigned KEY_BUFFER_SIZE = 16;
     static const unsigned MOUSE_BUFFER_SIZE = 8;
 
     enum MouseEventType {
