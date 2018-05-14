@@ -192,7 +192,7 @@ export function initInputAfterEngineLoads(engine)
 
     for (let button of document.getElementsByClassName('keyboard_btn')) {
         button.addEventListener('click', (e) => {
-            keycode(button.dataset.ascii, parseInt(button.dataset.scancode, 0));
+            keycode(button.dataset.ascii || '0x00', parseInt(button.dataset.scancode || '0', 0));
             engine.endMouseTracking();
             engine.autoSave();
             audioContextSetup();
