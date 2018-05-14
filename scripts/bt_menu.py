@@ -113,7 +113,7 @@ for (call_site, delay) in [
         'hw->output.pushDelay(%d);'
         'proc->continueFrom(r, &sub_%X);' % (delay, continue_at.linear))    
     b.markSubroutine(continue_at)
-    b.hook(continue_at, 'hw->clearKeyboardBuffer();')
+    b.hook(continue_at, 'hw->clearInputBuffer();')
 
 # The cutscenes use a function I'm calling show_sfx_interruptible, which
 # polls for keyboard input while playing a buffer of sound effects.
