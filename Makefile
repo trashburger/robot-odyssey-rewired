@@ -3,6 +3,8 @@ CC          := emcc
 
 CCFLAGS := -std=c++11 -Oz --bind
 
+ZSTD_OPTS := ZSTD_LEGACY_SUPPORT=0 CFLAGS=-Oz
+
 WASMFLAGS := \
 	-s WASM=1 \
 	-s MODULARIZE=1 \
@@ -74,21 +76,21 @@ build/%.bc: build/%.cpp
 	$(CC) $(CCFLAGS) $(INCLUDES) -c -o $@ $<
 
 # Generate C++ code from 8086 EXEs by running Python translation scripts
-build/%.cpp: scripts/%.py scripts/sbt86.py build/original
+build/%.cpp: src/%.py src/sbt86.py build/original
 	$(PYTHON) $< build
 
 # Tell gmake not to delete the intermediate .cpp files we generate
 .PRECIOUS: build/%.cpp
 
-build/fspack.cpp: scripts/fs-packer.py build/original
+build/fspack.cpp: src/fs-packer.py build/original
 	$(PYTHON) $< build/fs $@
 
 # Pseudo-target to clean up and extract original Robot Odyssey data
 build/original:
 	@mkdir -p build/
-	$(PYTHON) scripts/check-originals.py original build
+	$(PYTHON) src/check-originals.py original build
 	@touch $@
 
 # Compile libzstd from source to LLVM bitcode
 library/zstd/lib/libzstd.a:
-	emmake make -C library/zstd/lib libzstd.a
+	emmake make -C library/zstd/lib $(ZSTD_OPTS) libzstd.a
