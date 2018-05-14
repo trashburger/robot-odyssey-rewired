@@ -303,21 +303,14 @@ asm.then(() =>
 
     var last_set_window_hash = null;
     const autosave_delay = 500;
-    asm.EXPERIMENTAL_AUTOSAVE_ENABLED = false;
 
     asm.autoSave = () =>
     {
-        if (!asm.EXPERIMENTAL_AUTOSAVE_ENABLED) {
-            return;
-        }
-
         if (asm.autoSaveTimer) {
             clearTimeout(asm.autoSaveTimer);
         }
 
         asm.autoSaveTimer = setTimeout(() => {
-            console.log("EXPERIMENTAL autosave!");
-
             const saved_callback = asm.onSaveFileWrite;
             try {
                 asm.onSaveFileWrite = () => {
@@ -325,7 +318,7 @@ asm.then(() =>
                     const str = base64.encode(packed);
                     last_set_window_hash = str;
                     window.location.hash = str;
-                    console.log(`Packed save, ${str.length} bytes.`);
+                    console.log(`autoSave, ${str.length} bytes`);
                 };
                 asm.saveGame();
             } finally {
