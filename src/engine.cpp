@@ -11,23 +11,12 @@ static Hardware hw;
 static TinySave tinySave;
 static float delay_multiplier = 1.0f;
 
-SBT_DECL_PROCESS(PlayEXE);
-static PlayEXE play_exe(&hw);
-
-SBT_DECL_PROCESS(MenuEXE);
-static MenuEXE menu_exe(&hw);
-
-SBT_DECL_PROCESS(Menu2EXE);
-static Menu2EXE menu2_exe(&hw);
-
-SBT_DECL_PROCESS(LabEXE);
-static LabEXE lab_exe(&hw);
-
-SBT_DECL_PROCESS(GameEXE);
-static GameEXE game_exe(&hw);
-
-SBT_DECL_PROCESS(TutorialEXE);
-static TutorialEXE tut_exe(&hw);
+SBT_STATIC_PROCESS(&hw, PlayEXE);
+SBT_STATIC_PROCESS(&hw, MenuEXE);
+SBT_STATIC_PROCESS(&hw, Menu2EXE);
+SBT_STATIC_PROCESS(&hw, LabEXE);
+SBT_STATIC_PROCESS(&hw, GameEXE);
+SBT_STATIC_PROCESS(&hw, TutorialEXE);
 
 static void loop()
 {
@@ -58,7 +47,7 @@ static void setSpeed(float speed)
     }
 }
 
-static void pressKey(uint8_t ascii, uint8_t scancode) 
+static void pressKey(uint8_t ascii, uint8_t scancode)
 {
     hw.pressKey(ascii, scancode);
 }

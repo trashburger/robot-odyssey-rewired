@@ -339,20 +339,24 @@ static SBT_INLINE void write16(uint8_t *ptr, uint16_t x) {
     ptr[1] = x >> 8;
 }
 
-
-#define SBT_DECL_PROCESS(name)                                       \
-    class name : public SBTProcess                                   \
-    {                                                                \
+#define SBT_DECL_PROCESS(name) \
+    class name : public SBTProcess \
+    { \
+    public: \
+        name(Hardware *hardware); \
+    protected: \
+        virtual void loadEnvironment(SBTStack *stack, SBTRegs reg); \
+        virtual uint8_t *getData(); \
+        virtual uint32_t getDataLen(); \
+        virtual uint16_t getRelocSegment(); \
+        virtual uint16_t getEntryCS(); \
+        virtual continue_func_t getFunction(SBTAddressId id); \
     public:                                                          \
-        name(Hardware *hardware);                                    \
-    protected:                                                       \
-        virtual void loadEnvironment(SBTStack *stack, SBTRegs reg);  \
-        virtual uint8_t *getData();                                  \
-        virtual uint32_t getDataLen();                               \
-        virtual uint16_t getRelocSegment();                          \
-        virtual uint16_t getEntryCS();                               \
-        virtual continue_func_t getFunction(SBTAddressId id);        \
-    public:                                                          \
-        virtual uint16_t getAddress(SBTAddressId id);                \
-        virtual const char *getFilename();                           \
+        virtual uint16_t getAddress(SBTAddressId id); \
+        virtual const char *getFilename(); \
     };
+
+#define SBT_STATIC_PROCESS(h, name) \
+    SBT_DECL_PROCESS(name); \
+    static name name##_inst(h);
+
