@@ -313,5 +313,6 @@ def patchJoystick(b):
     poller = b.findCode(':8b16____ bb0000 b90000 c606____ff eeec2006')
     buttons = b.peek16(poller.add(12))
     b.patchAndHook(poller, 'ret',
-        'hw->pollJoystick(r.bx, r.cx, proc->memSeg(r.ds)[%d]);'
+        'hw->input.pollJoystick(ROWorld::fromProcess(proc), '
+            'r.bx, r.cx, proc->memSeg(r.ds)[%d]);'
         % buttons)

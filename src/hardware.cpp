@@ -8,80 +8,9 @@ static const bool verbose_process_info = false;
 
 Hardware::Hardware()
 {
-    process = 0;
     memset(mem, 0, MEM_SIZE);
-
-    setJoystickAxes(0, 0);
-    setJoystickButton(false);
-    endMouseTracking();
-
+    process = 0;
     port61 = 0;
-}
-
-void Hardware::clearInputBuffer()
-{
-    keycode = 0;
-    js_button_held = false;
-    js_button_pressed = false;
-}
-
-void Hardware::pollJoystick(uint16_t &x, uint16_t &y, uint8_t &status)
-{
-    ROJoyfile &joyfile = fs.config.joyfile;
-
-    // Optional mouse tracking will use the joystick input to move the player
-    // to a chosen cursor location, without violating game collision detection.
-
-    if (mouse_tracking) {
-        ROWorld *world = ROWorld::fromProcess(process);
-        if (world) {
-            int x, y;
-            world->getObjectXY(RO_OBJ_PLAYER, x, y);
-
-            const int minimum_speed = 3;
-            const int maximum_speed = 127;
-            const float gain = 0.5;
-            const bool mouse_debug = false;
-
-            int xdiff = mouse_x - x;
-            int ydiff = -(mouse_y - y);
-
-            if (xdiff > 0) {
-                js_x = std::min<int>(maximum_speed, minimum_speed + gain * (xdiff - 1));
-            } else if (xdiff < 0) {
-                js_x = -std::min<int>(maximum_speed, minimum_speed - gain * (xdiff + 1));
-            } else {
-                js_x = 0;
-            }
-
-            if (ydiff > 0) {
-                js_y = std::min<int>(maximum_speed, minimum_speed + gain * (ydiff - 1));
-            } else if (ydiff < 0) {
-                js_y = -std::min<int>(maximum_speed, minimum_speed - gain * (ydiff + 1));
-            } else {
-                js_y = 0;
-            }
-
-            if (mouse_debug) {
-                printf("xd=%d yd=%d js=%d,%d\n", xdiff, ydiff, js_x, js_y);
-            }
-        }
-    }
-
-    // Button presses must not be missed if they end before the next poll.
-    // Clear the button press latch here.
-
-    bool button = js_button_held || js_button_pressed;
-    js_button_pressed = false;
-
-    // Port 0x201 style status byte: Low 4 bits are timed based
-    // on an RC circuit in each axis. Upper 4 bits are buttons,
-    // active low. The byte includes data for two joysticks, and
-    // we only emulate one.
-
-    status = 0xFC ^ (button ? 0x10 : 0);
-    x = std::max(0, std::min((int)joyfile.x_center * 2, js_x + joyfile.x_center));
-    y = std::max(0, std::min((int)joyfile.y_center * 2, js_y + joyfile.y_center));
 }
 
 void Hardware::exec(const char *program, const char *args)
@@ -94,7 +23,7 @@ void Hardware::exec(const char *program, const char *args)
         if (!strcasecmp(program, filename)) {
             process = *i;
             fs.reset();
-            clearInputBuffer();
+            input.clear();
             process->exec(args);
             return;
         }
@@ -161,12 +90,8 @@ void Hardware::out(uint16_t port, uint8_t value, uint32_t timestamp)
 
     case 0x61:    /* PC speaker gate */
         if ((value ^ port61) & 2) {
-            /*
-             * PC speaker state toggled. Store a timestamp.
-             */
             output.pushSpeakerTimestamp(timestamp);
         }
-
         port61 = value;
         break;
 
@@ -194,17 +119,13 @@ SBTRegs Hardware::interrupt16(SBTRegs reg, SBTStack *stack)
     switch (reg.ah) {
 
     case 0x00:                /* Get keystroke */
-        reg.ax = keycode;
-        keycode = 0;
+        reg.ax = input.getKey();
+        reg.setZF(reg.ax == 0);
         break;
 
     case 0x01:                /* Check for keystroke */
-        if (keycode) {
-            reg.clearZF();
-            reg.ax = keycode;
-        } else {
-            reg.setZF();
-        }
+        reg.ax = input.checkForKey();
+        reg.setZF(reg.ax == 0);
         break;
 
     default:
@@ -239,13 +160,9 @@ SBTRegs Hardware::interrupt21(SBTRegs reg, SBTStack *stack)
 
     case 0x06:                /* Direct console input/output (Only input supported) */
         if (reg.dl == 0xFF) {
-            reg.al = (uint8_t) keycode;
-            if (keycode) {
-                reg.clearZF();
-            } else {
-                reg.setZF();
-            }
-            keycode = 0;
+            uint16_t key = input.getKey();
+            reg.al = (uint8_t) key;
+            reg.setZF(key == 0);
         }
         break;
 
@@ -296,44 +213,4 @@ SBTRegs Hardware::interrupt21(SBTRegs reg, SBTStack *stack)
         assert(0 && "Unimplemented DOS Int21");
     }
     return reg;
-}
-
-void Hardware::pressKey(uint8_t ascii, uint8_t scancode)
-{
-    keycode = (scancode << 8) | ascii;
-    output.skipDelay();
-}
-
-void Hardware::setJoystickAxes(int x, int y)
-{
-    js_x = x;
-    js_y = y;
-}
-
-void Hardware::setJoystickButton(bool button)
-{
-    js_button_held = button;
-    js_button_pressed = js_button_pressed || button;
-    if (button) {
-        output.skipDelay();
-    }
-}
-
-void Hardware::setMouseTracking(int x, int y)
-{
-    mouse_x = x;
-    mouse_y = y;
-    mouse_tracking = true;
-}
-
-void Hardware::setMouseButton(bool button)
-{
-    // fix me; mouse queueing
-    setJoystickButton(button);
-}
-
-void Hardware::endMouseTracking()
-{
-    mouse_tracking = false;
-    setJoystickAxes(0, 0);
 }

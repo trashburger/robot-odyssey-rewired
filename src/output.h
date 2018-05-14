@@ -36,7 +36,7 @@ class OutputQueue
     uint32_t run();
 
     void pushFrame(SBTStack *stack, uint8_t *framebuffer);
-    void pushDelay(uint32_t millis);    
+    void pushDelay(uint32_t millis);
     void pushSpeakerTimestamp(uint32_t timestamp);
 
     static const unsigned SCREEN_WIDTH = 320;

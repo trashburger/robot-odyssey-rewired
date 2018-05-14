@@ -9,7 +9,6 @@ using namespace emscripten;
 
 static Hardware hw;
 static TinySave tinySave;
-static float delay_multiplier = 1.0f;
 
 SBT_STATIC_PROCESS(&hw, PlayEXE);
 SBT_STATIC_PROCESS(&hw, MenuEXE);
@@ -18,9 +17,22 @@ SBT_STATIC_PROCESS(&hw, LabEXE);
 SBT_STATIC_PROCESS(&hw, GameEXE);
 SBT_STATIC_PROCESS(&hw, TutorialEXE);
 
+static float delay_multiplier = 1.0f;
+static float queued_input_delay_multiplier = 0.3f;
+
 static void loop()
 {
+    // Runs until the next queued delay
     uint32_t millis = hw.run();
+
+    // Speed modifiers
+    millis *= delay_multiplier;
+
+    // Speed up when input is waiting
+    if (hw.input.checkForQueuedInput()) {
+        millis *= queued_input_delay_multiplier;
+    }
+
     emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, millis * delay_multiplier);
 }
 
@@ -49,32 +61,39 @@ static void setSpeed(float speed)
 
 static void pressKey(uint8_t ascii, uint8_t scancode)
 {
-    hw.pressKey(ascii, scancode);
+    hw.output.skipDelay();
+    hw.input.pressKey(ascii, scancode);
 }
 
 static void setJoystickAxes(int x, int y)
 {
-    hw.setJoystickAxes(x, y);
+    hw.input.setJoystickAxes(x, y);
 }
 
 static void setJoystickButton(bool button)
 {
-    hw.setJoystickButton(button);
+    if (button) {
+        hw.output.skipDelay();
+    }
+    hw.input.setJoystickButton(button);
 }
 
 static void setMouseTracking(int x, int y)
 {
-    hw.setMouseTracking(x, y);
+    hw.input.setMouseTracking(x, y);
 }
 
 static void setMouseButton(bool button)
 {
-    hw.setMouseButton(button);
+    if (button) {
+        hw.output.skipDelay();
+    }
+    hw.input.setMouseButton(button);
 }
 
 static void endMouseTracking()
 {
-    hw.endMouseTracking();
+    hw.input.endMouseTracking();
 }
 
 static bool saveGame()

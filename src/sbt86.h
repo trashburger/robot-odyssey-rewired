@@ -116,17 +116,28 @@ class SBTRegs
     SBT_INLINE void clearZF() {
         uresult |= 1;
     }
+    SBT_INLINE void setZF(bool f) {
+        if (f) setZF(); else clearZF();
+    }
+
     SBT_INLINE void setOF() {
         sresult = 0x8000;
     }
     SBT_INLINE void clearOF() {
         sresult = 0;
     }
+    SBT_INLINE void setOF(bool f) {
+        if (f) setOF(); else clearOF();
+    }
+
     SBT_INLINE void setCF() {
         uresult |= 0x10000;
     }
     SBT_INLINE void clearCF() {
         uresult &= 0xFFFF;
+    }
+    SBT_INLINE void setCF(bool f) {
+        if (f) setCF(); else clearCF();
     }
 
     SBT_INLINE uint32_t saveCF() {

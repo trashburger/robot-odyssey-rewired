@@ -263,9 +263,9 @@ ROJoyfile::ROJoyfile()
 
     // Enable joystick support with generic values
     joystick_enabled = true;
-    x_center = y_center = 0x80;
-    xplus_divisor = yplus_divisor = 1;
-    xminus_divisor = yminus_divisor = 1;
+    x_center = y_center = DEFAULT_JOYSTICK_CENTER;
+    xplus_divisor = yplus_divisor = DEFAULT_JOYSTICK_DIVISOR;
+    xminus_divisor = yminus_divisor = DEFAULT_JOYSTICK_DIVISOR;
 }
 
 void ROJoyfile::setCheatsEnabled(bool enable)

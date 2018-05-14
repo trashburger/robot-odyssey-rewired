@@ -5,18 +5,12 @@
 #include "sbt86.h"
 #include "filesystem.h"
 #include "output.h"
+#include "input.h"
 
 class Hardware
 {
  public:
     Hardware();
-
-    void pressKey(uint8_t ascii, uint8_t scancode = 0);
-    void setJoystickAxes(int x, int y);
-    void setJoystickButton(bool button);
-    void setMouseTracking(int x, int y);
-    void setMouseButton(bool button);
-    void endMouseTracking();
 
     uint32_t run();
     void registerProcess(SBTProcess *p, bool is_default = false);
@@ -29,14 +23,13 @@ class Hardware
     SBTRegs interrupt21(SBTRegs reg, SBTStack *stack);
 
     void exec(const char *program, const char *args);
-    void clearInputBuffer();
-    void pollJoystick(uint16_t &x, uint16_t &y, uint8_t &status);
 
     static const uint32_t MEM_SIZE = 256 * 1024;
     uint8_t mem[MEM_SIZE];
 
     DOSFilesystem fs;
     OutputQueue output;
+    InputBuffer input;
     SBTProcess *process;
 
  protected:

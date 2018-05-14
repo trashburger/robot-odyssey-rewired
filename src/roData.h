@@ -558,17 +558,20 @@ class ROJoyfile
 
     uint8_t x_center;
     uint8_t y_center;
+    static const uint8_t DEFAULT_JOYSTICK_CENTER = 0x80;
+
     uint8_t xplus_divisor;
     uint8_t yplus_divisor;
     uint8_t xminus_divisor;
     uint8_t yminus_divisor;
+    static const uint8_t DEFAULT_JOYSTICK_DIVISOR = 0x01;
 
     uint8_t cheat_control;
     static const uint8_t CHEATS_ENABLED = 0x5e;
 
     // Not sure what this is (joyfile+A), its use in GAME.EXE triggers
     // a delay somewhere in the Street world's main loop, and MENU.EXE
-    // chooses different sound routines depending on whether this is 
+    // chooses different sound routines depending on whether this is
     // under 0x200, between 0x200 and 0x500, or over 0x500. Sound volume?
     // Hardware related? Debug related?
     uint16_t debug_control;

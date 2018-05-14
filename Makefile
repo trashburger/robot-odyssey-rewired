@@ -17,6 +17,7 @@ OBJS := \
 	build/engine.bc \
 	build/sbt86.bc \
 	build/hardware.bc \
+	build/input.bc \
 	build/roData.bc \
 	build/tinySave.bc \
 	build/filesystem.bc \
