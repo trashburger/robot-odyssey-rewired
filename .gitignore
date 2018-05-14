@@ -16,7 +16,3 @@
 /.cache/
 /node_modules/
 
-ro-engine/build/
-ro-engine/target
-**/*.rs.bk
-
