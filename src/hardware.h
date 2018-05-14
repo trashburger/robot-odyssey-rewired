@@ -17,6 +17,9 @@ class Hardware
     void pressKey(uint8_t ascii, uint8_t scancode = 0);
     void setJoystickAxes(int x, int y);
     void setJoystickButton(bool button);
+    void setMouseTracking(int x, int y);
+    void endMouseTracking();
+
     uint32_t run();
     void registerProcess(SBTProcess *p, bool is_default = false);
 
@@ -48,6 +51,8 @@ class Hardware
     uint16_t keycode;
     int js_x, js_y;
     bool js_button_pressed, js_button_held;
+    bool mouse_tracking;
+    int mouse_x, mouse_y;
 
     void exit(uint8_t code);
 };

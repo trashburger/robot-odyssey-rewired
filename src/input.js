@@ -8,12 +8,6 @@ function controlCode(key)
     return String.fromCharCode(key.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0) + 1)
 }
 
-function refocus(e)
-{
-    e.target.blur();
-    document.body.focus();
-}
-
 export function initInputEarly()
 {
     // Joystick is created immediately, but callbacks aren't hooked up until the engine loads
@@ -33,12 +27,54 @@ export function initInputEarly()
 
 export function initInputAfterEngineLoads(engine)
 {
+    const fbCanvas = document.getElementById('framebuffer');
+
+    const game_width = engine.SCREEN_WIDTH / 2;
+    const game_height = engine.SCREEN_HEIGHT - 8;
+
+    fbCanvas.addEventListener('mousemove', function (e)
+    {
+        const canvasRect = fbCanvas.getBoundingClientRect();
+        const x = e.clientX - canvasRect.x;
+        const y = e.clientY - canvasRect.y;
+        engine.setMouseTracking(x * game_width / canvasRect.width,
+            game_height - y * game_height / canvasRect.height);
+    });
+
+    fbCanvas.addEventListener('mousedown', function (e)
+    {
+        if (e.button == 0) {
+            e.preventDefault();
+            engine.setJoystickButton(true);
+            audioContextSetup();
+        }
+    });
+
+    fbCanvas.addEventListener('mouseup', function (e)
+    {
+        engine.setJoystickButton(false);
+        engine.autoSave();
+        audioContextSetup();
+    });
+
+    fbCanvas.addEventListener('mouseout', function (e)
+    {
+        engine.endMouseTracking();
+    });
+
+    function refocus(e)
+    {
+        e.target.blur();
+        fbCanvas.focus();
+    }
+
     function keycode(ascii, scancode)
     {
         if (typeof(ascii) != typeof(0)) {
             ascii = ascii.length == 1 ? ascii.charCodeAt(0) : parseInt(ascii, 0);
         }
         engine.pressKey(ascii, scancode);
+        engine.endMouseTracking();
         engine.autoSave();
         audioContextSetup();
     }
@@ -65,9 +101,10 @@ export function initInputAfterEngineLoads(engine)
     joystick.on('move', function (e, data)
     {
         const scale = 8.0;
-        const limit = 127;
-        const x = Math.max(-limit, Math.min(limit, scale * data.force * Math.cos(data.angle.radian)));
-        const y = Math.max(-limit, Math.min(limit, scale * data.force * Math.sin(data.angle.radian)));
+        const force = Math.min(10, Math.pow(data.force, 2));
+        const x = scale * force * Math.cos(data.angle.radian);
+        const y = scale * force * Math.sin(data.angle.radian);
+        engine.endMouseTracking();
         engine.setJoystickAxes(x, -y);
     });
 
@@ -116,6 +153,7 @@ export function initInputAfterEngineLoads(engine)
     for (let button of document.getElementsByClassName('keyboard_btn')) {
         button.addEventListener('click', (e) => {
             keycode(button.dataset.ascii, parseInt(button.dataset.scancode, 0));
+            engine.endMouseTracking();
             engine.autoSave();
             audioContextSetup();
             refocus(e);

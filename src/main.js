@@ -4,7 +4,7 @@ import { filenameForSaveData } from "./roData.js"
 import { initGraphics } from "./graphics.js"
 import { initSound } from "./sound.js"
 import { initInputEarly, initInputAfterEngineLoads } from "./input.js"
-import { initAutoSave } from "./autosave.js"
+import { initAutoSave } from "./autoSave.js"
 import { initFiles } from "./files.js"
 
 try {

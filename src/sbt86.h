@@ -265,7 +265,7 @@ class SBTProcess
 
     void failedDynamicBranch(uint16_t cs, uint16_t ip, uint32_t value);
 
-    virtual uint16_t getAddress(SBTAddressId id) = 0;
+    virtual int getAddress(SBTAddressId id) = 0;
     virtual const char *getFilename() = 0;
 
     SBTRegs reg;
@@ -352,7 +352,7 @@ static SBT_INLINE void write16(uint8_t *ptr, uint16_t x) {
         virtual uint16_t getEntryCS(); \
         virtual continue_func_t getFunction(SBTAddressId id); \
     public:                                                          \
-        virtual uint16_t getAddress(SBTAddressId id); \
+        virtual int getAddress(SBTAddressId id); \
         virtual const char *getFilename(); \
     };
 

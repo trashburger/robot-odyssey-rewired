@@ -13,6 +13,7 @@ Hardware::Hardware()
 
     setJoystickAxes(0, 0);
     setJoystickButton(false);
+    endMouseTracking();
 
     port61 = 0;
 }
@@ -26,6 +27,47 @@ void Hardware::clearInputBuffer()
 
 void Hardware::pollJoystick(uint16_t &x, uint16_t &y, uint8_t &status)
 {
+    ROJoyfile &joyfile = fs.config.joyfile;
+
+    // Optional mouse tracking will use the joystick input to move the player
+    // to a chosen cursor location, without violating game collision detection.
+
+    if (mouse_tracking) {
+        ROWorld *world = ROWorld::fromProcess(process);
+        if (world) {
+            int x, y;
+            world->getObjectXY(RO_OBJ_PLAYER, x, y);
+
+            const int minimum_speed = 3;
+            const int maximum_speed = 127;
+            const float gain = 0.5;
+            const bool mouse_debug = false;
+
+            int xdiff = mouse_x - x;
+            int ydiff = -(mouse_y - y);
+
+            if (xdiff > 0) {
+                js_x = std::min<int>(maximum_speed, minimum_speed + gain * (xdiff - 1));
+            } else if (xdiff < 0) {
+                js_x = -std::min<int>(maximum_speed, minimum_speed - gain * (xdiff + 1));
+            } else {
+                js_x = 0;
+            }
+
+            if (ydiff > 0) {
+                js_y = std::min<int>(maximum_speed, minimum_speed + gain * (ydiff - 1));
+            } else if (ydiff < 0) {
+                js_y = -std::min<int>(maximum_speed, minimum_speed - gain * (ydiff + 1));
+            } else {
+                js_y = 0;
+            }
+
+            if (mouse_debug) {
+                printf("xd=%d yd=%d js=%d,%d\n", xdiff, ydiff, js_x, js_y);
+            }
+        }
+    }
+
     // Button presses must not be missed if they end before the next poll.
     // Clear the button press latch here.
 
@@ -37,7 +79,6 @@ void Hardware::pollJoystick(uint16_t &x, uint16_t &y, uint8_t &status)
     // active low. The byte includes data for two joysticks, and
     // we only emulate one.
 
-    ROJoyfile &joyfile = fs.config.joyfile;
     status = 0xFC ^ (button ? 0x10 : 0);
     x = std::max(0, std::min((int)joyfile.x_center * 2, js_x + joyfile.x_center));
     y = std::max(0, std::min((int)joyfile.y_center * 2, js_y + joyfile.y_center));
@@ -276,4 +317,17 @@ void Hardware::setJoystickButton(bool button)
     if (button) {
         output.skipDelay();
     }
+}
+
+void Hardware::setMouseTracking(int x, int y)
+{
+    mouse_x = x;
+    mouse_y = y;
+    mouse_tracking = true;
+}
+
+void Hardware::endMouseTracking()
+{
+    mouse_tracking = false;
+    setJoystickAxes(0, 0);
 }

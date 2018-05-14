@@ -15,8 +15,8 @@ void ROWorld::clear()
 
 ROWorld *ROWorld::fromProcess(SBTProcess *proc)
 {
-    return (ROWorld*) (proc->memSeg(proc->reg.ds) +
-                       proc->getAddress(SBTADDR_WORLD_DATA));
+    int addr = proc->getAddress(SBTADDR_WORLD_DATA);
+    return addr < 0 ? 0 : reinterpret_cast<ROWorld*>(proc->memSeg(proc->reg.ds) + addr);
 }
 
 RORoomId ROWorld::getObjectRoom(ROObjectId obj)
@@ -124,20 +124,20 @@ void ROWorld::setRobotXY(ROObjectId obj, int x, int y)
 
 ROCircuit *ROCircuit::fromProcess(SBTProcess *proc)
 {
-    return (ROCircuit*) (proc->memSeg(proc->reg.ds) +
-                       proc->getAddress(SBTADDR_CIRCUIT_DATA));
+    int addr = proc->getAddress(SBTADDR_CIRCUIT_DATA);
+    return addr < 0 ? 0 : reinterpret_cast<ROCircuit*>(proc->memSeg(proc->reg.ds) + addr);
 }
 
 RORobot *RORobot::fromProcess(SBTProcess *proc)
 {
-    return (RORobot*) (proc->memSeg(proc->reg.ds) +
-                       proc->getAddress(SBTADDR_ROBOT_DATA_MAIN));
+    int addr = proc->getAddress(SBTADDR_ROBOT_DATA_MAIN);
+    return addr < 0 ? 0 : reinterpret_cast<RORobot*>(proc->memSeg(proc->reg.ds) + addr);
 }
 
 RORobotGrabber *RORobotGrabber::fromProcess(SBTProcess *proc)
 {
-    return (RORobotGrabber*) (proc->memSeg(proc->reg.ds) +
-                              proc->getAddress(SBTADDR_ROBOT_DATA_GRABBER));
+    int addr = proc->getAddress(SBTADDR_ROBOT_DATA_GRABBER);
+    return addr < 0 ? 0 : reinterpret_cast<RORobotGrabber*>(proc->memSeg(proc->reg.ds) + addr);
 }
 
 const char *ROSavedGame::getWorldName()
@@ -169,12 +169,16 @@ const char *ROSavedGame::getProcessName()
     return 0;
 }
 
-ROData::ROData(SBTProcess *proc)
+bool ROData::fromProcess(SBTProcess *proc)
 {
     world = ROWorld::fromProcess(proc);
     circuit = ROCircuit::fromProcess(proc);
     robots.state = RORobot::fromProcess(proc);
     robots.grabbers = RORobotGrabber::fromProcess(proc);
+
+    if (!world || !circuit || !robots.state || !robots.grabbers) {
+        return false;
+    }
 
     /*
      * We can infer the number of robots by looking at the
@@ -197,6 +201,8 @@ ROData::ROData(SBTProcess *proc)
      */
 
     robots.batteryAcc = (RORobotBatteryAcc*) (endOfTable + 1);
+
+    return true;
 }
 
 void ROData::copyFrom(ROData *source)

@@ -524,7 +524,7 @@ public:
 class ROData
 {
  public:
-    ROData(SBTProcess *proc);
+    bool fromProcess(SBTProcess *proc);
 
     ROWorld *world;
     ROCircuit *circuit;

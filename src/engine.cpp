@@ -62,6 +62,16 @@ static void setJoystickButton(bool button)
     hw.setJoystickButton(button);
 }
 
+static void setMouseTracking(int x, int y)
+{
+    hw.setMouseTracking(x, y);
+}
+
+static void endMouseTracking()
+{
+    hw.endMouseTracking();
+}
+
 static bool saveGame()
 {
     // If we can save the game here, saves it to the buffer and returns true.
@@ -162,6 +172,8 @@ static void setCheatsEnabled(bool enable)
 
 EMSCRIPTEN_BINDINGS(engine)
 {
+    register_vector<int>("VectorInt");
+
     constant("MAX_FILESIZE", (unsigned) DOSFilesystem::MAX_FILESIZE);
     constant("MEM_SIZE", (unsigned) Hardware::MEM_SIZE);
     constant("CPU_CLOCK_HZ", (unsigned) OutputQueue::CPU_CLOCK_HZ);
@@ -174,6 +186,8 @@ EMSCRIPTEN_BINDINGS(engine)
     function("pressKey", &pressKey);
     function("setJoystickAxes", &setJoystickAxes);
     function("setJoystickButton", &setJoystickButton);
+    function("setMouseTracking", &setMouseTracking);
+    function("endMouseTracking", &endMouseTracking);
     function("saveGame", &saveGame);
     function("loadGame", &loadGame);
     function("getMemory", &getMemory);

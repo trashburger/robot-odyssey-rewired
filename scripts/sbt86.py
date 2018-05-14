@@ -1612,34 +1612,6 @@ static uint32_t gClock;
 static uint8_t dataImage[] = {
 %(dataImage)s};
 
-uint8_t *%(className)s::getData() {
-    return dataImage;
-}
-
-uint32_t %(className)s::getDataLen() {
-    return sizeof(dataImage);
-}
-
-uint16_t %(className)s::getRelocSegment() {
-    return 0x%(relocSegment)04x;
-}
-
-uint16_t %(className)s::getEntryCS() {
-    return 0x%(entryCS)04x;
-}
-
-const char *%(className)s::getFilename() {
-    return "%(fileName)s";
-}
-
-void %(className)s::loadEnvironment(SBTStack *stack, SBTRegs reg) {
-    gStack = stack;
-    r = reg;
-    proc = this;
-    hw = hardware;
-    s.load(proc, r);
-}
-
 %(subDecls)s
 
 %(_decls)s
@@ -1647,22 +1619,53 @@ void %(className)s::loadEnvironment(SBTStack *stack, SBTRegs reg) {
 
 %(subCode)s
 
-SBTProcess::continue_func_t %(className)s::getFunction(SBTAddressId id) {
+uint8_t *%(className)s::getData()
+{
+    return dataImage;
+}
+
+uint32_t %(className)s::getDataLen()
+{
+    return sizeof(dataImage);
+}
+
+uint16_t %(className)s::getRelocSegment()
+{
+    return 0x%(relocSegment)04x;
+}
+
+uint16_t %(className)s::getEntryCS()
+{
+    return 0x%(entryCS)04x;
+}
+
+const char *%(className)s::getFilename()
+{
+    return "%(fileName)s";
+}
+
+void %(className)s::loadEnvironment(SBTStack *stack, SBTRegs reg)
+{
+    gStack = stack;
+    r = reg;
+    proc = this;
+    hw = hardware;
+    s.load(proc, r);
+}
+
+SBTProcess::continue_func_t %(className)s::getFunction(SBTAddressId id)
+{
     switch (id) {
 %(getFunctionCode)s
-
-    default:
-        return 0;
+    default: return 0;
     }
 }
 
-uint16_t %(className)s::getAddress(SBTAddressId id) {
+int %(className)s::getAddress(SBTAddressId id)
+{
     switch (id) {
 %(getAddrCode)s
-
-    default:
-        assert(0 && "SBTAddressId invalid for getAddress");
-        return 0;
+    default: return -1;
     }
 }
 
