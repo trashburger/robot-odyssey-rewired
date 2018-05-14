@@ -41,7 +41,7 @@ To do
   - State of "PLAY.EXE" won't always be correct when returning from a subprocess, consider rewriting play.exe entirely
 
 - load/save
-  - package thumbnails plus game data into PNG/JPEG/GIF for mobile+social
+  - package thumbnails plus game data into PNG/JPEG/GIF for mobile+social?
   - local browser storage
   - picker for chip load
 
@@ -49,7 +49,6 @@ To do
   - nicer video scaling
 
 - input
-  - keyboard event queueing
   - nicer touch controls
   - controls help
 
@@ -58,10 +57,8 @@ To do
   - home screen icon, favicon
 
 - enhancements
-  - generalized touch/mouse controls?
-    - servo moves player to cursor without violating game logic
-    - zoomed detail loupe for soldering
-    - context sensitive soldering actions
+  - zoomed detail loupe for soldering
+  - context sensitive soldering actions
   - context sensitive keyboard controls
   - built-in chip decompiler
   - enhanced graphics modes
