@@ -7,16 +7,9 @@ const fbCanvas = document.getElementById('framebuffer');
 const fbContext = fbCanvas.getContext('2d');
 const fbImage = fbContext.createImageData(320, 200);
 
-function fbCanvasStatusMessage(text, color)
-{
-    // Blank canvas, including a 1-pixel black border for consistent edge blending
-    fbContext.fillStyle = '#000';
-    fbContext.fillRect(0, 0, 322, 202);
-
-    fbContext.fillStyle = color;
-    fbContext.font = '18px sans-serif';
-    fbContext.fillText(text, 10, 20);
-}
+// Blank canvas, including a 1-pixel black border for consistent edge blending
+fbContext.fillStyle = '#000';
+fbContext.fillRect(0, 0, 322, 202);
 
 // Canvas resize handler
 const resize = () => {
@@ -45,16 +38,25 @@ document.getElementById('joystick_hide').addEventListener('click', (e) => {
     document.getElementById('joystick').style.display = 'none';
 });
 
+function engineLoadError(err)
+{
+    document.getElementById("engine_loading").style.display = "none";
+    const el = document.getElementById("engine_error");
+    el.innerText = "Fail.\n\n" + err;
+    el.style.display = "block";
+}
+
 var asm = null;
-fbCanvasStatusMessage("Loading", '#555');
 try {
     asm = wasmEngineFactory();
-    // For console debugging later
-    window.ROEngine = asm;
+    asm.onAbort = engineLoadError;
 } catch (e) {
-    fbCanvasStatusMessage("Fail. No WebAssembly?", '#ddd');
+    engineLoadError(e);
     throw e;
 }
+
+// For console debugging later
+window.ROEngine = asm;
 
 asm.onSaveFileWrite = () => {
     const saveData = asm.getSaveFile();
@@ -141,7 +143,7 @@ function onKeydown(e)
 function refocus(e)
 {
     e.target.blur();
-    document.getElementById('framebuffer').focus();    
+    document.getElementById('framebuffer').focus();
 }
 
 const LAB_WORLD = 30;
@@ -349,5 +351,7 @@ asm.then(() =>
 
     window.addEventListener('hashchange', asm.onHashChange);
     asm.onHashChange();
-});
 
+    // Done loading
+    document.getElementById("engine_loading").style.display = "none";
+}, engineLoadError);
