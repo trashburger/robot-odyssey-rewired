@@ -34,7 +34,7 @@ class Hardware
     SBTRegs interrupt21(SBTRegs reg, SBTStack *stack);
 
     void exec(const char *program, const char *args);
-    void clearKeyboardBuffer();
+    void clearInputBuffer();
     void pollJoystick(uint16_t &x, uint16_t &y, uint8_t &status);
 
     DOSFilesystem fs;

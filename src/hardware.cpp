@@ -17,9 +17,11 @@ Hardware::Hardware()
     port61 = 0;
 }
 
-void Hardware::clearKeyboardBuffer()
+void Hardware::clearInputBuffer()
 {
     keycode = 0;
+    js_button_held = false;
+    js_button_pressed = false;
 }
 
 void Hardware::pollJoystick(uint16_t &x, uint16_t &y, uint8_t &status)
@@ -51,6 +53,7 @@ void Hardware::exec(const char *program, const char *args)
         if (!strcasecmp(program, filename)) {
             process = *i;
             fs.reset();
+            clearInputBuffer();
             process->exec(args);
             return;
         }
@@ -169,13 +172,14 @@ SBTRegs Hardware::interrupt16(SBTRegs reg, SBTStack *stack)
     return reg;
 }
 
-static void set_result_for_fd(SBTRegs &reg, int fd) {
+static void set_result_for_fd(SBTRegs &reg, int fd)
+{
     if (fd < 0) {
         reg.setCF();
     } else {
         reg.ax = fd;
         reg.clearCF();
-    }    
+    }
 }
 
 static void small_hexdump_and_newline(const uint8_t *bytes, uint16_t count)
