@@ -7,19 +7,16 @@ import { initInputEarly, initInputAfterEngineLoads } from "./input.js"
 import { initAutoSave } from "./autosave.js"
 import { initFiles } from "./files.js"
 
-initInputEarly();
-loadingBegin();
-
-var engine = null;
 try {
-
-    engine = engineFactory();
+    const engine = engineFactory();
     window.ROEngine = engine;
-    engine.onAbort = loadingError;
 
     initGraphics(engine);
+    loadingBegin();
+    initInputEarly();
     initSound(engine);
 
+    engine.onAbort = loadingError;
     engine.then(function ()
     {
         initFiles(engine);

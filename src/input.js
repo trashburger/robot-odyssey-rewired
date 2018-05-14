@@ -65,15 +65,15 @@ export function initInputAfterEngineLoads(engine)
     joystick.on('move', function (e, data)
     {
         const scale = 8.0;
-        const x = scale * data.force * Math.cos(data.angle.radian);
-        const y = scale * data.force * Math.sin(data.angle.radian);
+        const limit = 127;
+        const x = Math.max(-limit, Math.min(limit, scale * data.force * Math.cos(data.angle.radian)));
+        const y = Math.max(-limit, Math.min(limit, scale * data.force * Math.sin(data.angle.radian)));
         engine.setJoystickAxes(x, -y);
     });
 
     joystick.on('end', function (e)
     {
         engine.setJoystickAxes(0, 0);
-        engine.audioContextSetup();
         engine.autoSave();
         audioContextSetup();
     });
