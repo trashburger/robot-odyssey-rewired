@@ -11,6 +11,13 @@
 // This can be changed without breaking format compatibility.
 static const int compress_level = 20;
 
+// Versioning the save files, so we can change things later.
+// Currently we only generate or support one version.
+enum SaveVersion {
+    CURRENT_SAVE_VERSION = 0x11,
+};
+
+
 TinySave::TinySave()
     : size(0), cctx(0), dctx(0), cdict(0), ddict(0)
 {}
@@ -48,10 +55,12 @@ void TinySave::compress(const FileInfo& src)
     fParams.checksumFlag = 1;
     fParams.noDictIDFlag = 1;
 
-    size_t result = ZSTD_compress_usingCDict_advanced(cctx, buffer, sizeof buffer,
+    buffer[0] = CURRENT_SAVE_VERSION;
+    size_t result = ZSTD_compress_usingCDict_advanced(
+            cctx, buffer + 1, sizeof buffer - 1,
             src.data, src.size, cdict, fParams);
 
-    size = ZSTD_isError(result) ? 0 : result;
+    size = ZSTD_isError(result) ? 0 : 1 + result;
 }
 
 bool TinySave::decompress(FileInfo& dest)
@@ -65,9 +74,17 @@ bool TinySave::decompress(FileInfo& dest)
     if (!ddict) {
         ddict = ZSTD_createDDict(&dict[0], dict.size());
     }
+    if (size < 1) {
+        // No version header
+        return false;
+    }
+    if (buffer[0] != CURRENT_SAVE_VERSION) {
+        // No other versions supported
+        return false;
+    }
 
     size_t result = ZSTD_decompress_usingDDict(dctx, (uint8_t*) dest.data,
-        DOSFilesystem::MAX_FILESIZE, buffer, size, ddict);
+        DOSFilesystem::MAX_FILESIZE, buffer + 1, size - 1, ddict);
 
     dest.size = ZSTD_isError(result) ? 0 : result;
     return !ZSTD_isError(result);
