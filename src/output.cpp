@@ -24,7 +24,7 @@ void OutputQueue::clear()
 }
 
 void OutputQueue::skipDelay()
-{   
+{
     delay_remaining = 0;
     while (!items.empty() && items.front().otype == OUT_DELAY) {
         items.pop_front();
@@ -123,7 +123,7 @@ uint32_t OutputQueue::renderSoundEffect(uint32_t first_timestamp)
                 break;
             }
             uint32_t timestamp = items.front().u.timestamp;
-            items.pop_front();            
+            items.pop_front();
             clocks_remaining += timestamp - previous_timestamp;
             previous_timestamp = timestamp;
             next_sample = !next_sample;
