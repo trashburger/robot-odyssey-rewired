@@ -50,6 +50,7 @@ var asm = null;
 try {
     asm = wasmEngineFactory();
     asm.onAbort = engineLoadError;
+    document.getElementById("engine_loading").style.display = "block";
 } catch (e) {
     engineLoadError(e);
     throw e;
@@ -354,4 +355,8 @@ asm.then(() =>
 
     // Done loading
     document.getElementById("engine_loading").style.display = "none";
+
+    // Controls visible
+    document.getElementById("controls").className = "controls_visible";
+
 }, engineLoadError);
