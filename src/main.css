@@ -26,7 +26,7 @@ button {
     text-align: center;
 }
 
-#controls {
+.controls_hidden {
     opacity: 0;
 }
 
