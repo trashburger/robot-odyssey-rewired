@@ -9,47 +9,35 @@
 
 // Compression level is a CPU and memory vs space tradeoff.
 // This can be changed without breaking format compatibility.
-static const int compress_level = 20;
+static const int compress_level = 18;
 
-// Versioning the save files, so we can change things later.
-// Currently we only generate or support one version.
+// Versioning the save files, so we can change the compression
+// or otherwise break compatibility later.
 enum SaveVersion {
     CURRENT_SAVE_VERSION = 0x11,
+    // Currently we only generate or support one version.
 };
 
-
 TinySave::TinySave()
-    : size(0), cctx(0), dctx(0), cdict(0), ddict(0)
-{}
+    : size(0)
+{
+    initDictionary();
+    cctx = ZSTD_createCCtx();
+    dctx = ZSTD_createDCtx();
+    cdict = ZSTD_createCDict(&dict[0], dict.size(), compress_level);
+    ddict = ZSTD_createDDict(&dict[0], dict.size());
+}
 
 TinySave::~TinySave()
 {
-    if (cdict) {
-        ZSTD_freeCDict(cdict);
-    }
-    if (ddict) {
-        ZSTD_freeDDict(ddict);
-    }
-    if (cctx) {
-        ZSTD_freeCCtx(cctx);
-    }
-    if (dctx) {
-        ZSTD_freeDCtx(dctx);
-    }
+    ZSTD_freeCDict(cdict);
+    ZSTD_freeDDict(ddict);
+    ZSTD_freeCCtx(cctx);
+    ZSTD_freeDCtx(dctx);
 }
 
 void TinySave::compress(const FileInfo& src)
 {
-    if (dict.empty()) {
-        initDictionary();
-    }
-    if (!cctx) {
-        cctx = ZSTD_createCCtx();
-    }
-    if (!cdict) {
-        cdict = ZSTD_createCDict(&dict[0], dict.size(), compress_level);
-    }
-
     ZSTD_frameParameters fParams = {};
     fParams.contentSizeFlag = 0;
     fParams.checksumFlag = 1;
@@ -65,15 +53,6 @@ void TinySave::compress(const FileInfo& src)
 
 bool TinySave::decompress(FileInfo& dest)
 {
-    if (dict.empty()) {
-        initDictionary();
-    }
-    if (!dctx) {
-        dctx = ZSTD_createDCtx();
-    }
-    if (!ddict) {
-        ddict = ZSTD_createDDict(&dict[0], dict.size());
-    }
     if (size < 1) {
         // No version header
         return false;
@@ -92,9 +71,6 @@ bool TinySave::decompress(FileInfo& dest)
 
 const std::vector<uint8_t>& TinySave::getCompressionDictionary()
 {
-    if (dict.empty()) {
-        initDictionary();
-    }
     return dict;
 }
 
@@ -113,7 +89,7 @@ void TinySave::initDictionary()
     // The contents of the dictionary must not change at all,
     // or we break savegame compatibility completely!
 
-    dict.clear();
+    assert(dict.empty());
 
     // Built-in loadable chips
     extern FileInfo file_4bitcntr_csv;  addFileToDict(dict, file_4bitcntr_csv);
@@ -145,4 +121,6 @@ void TinySave::initDictionary()
     // Initial world for the game
     extern FileInfo file_sewer_wor;     addFileToDict(dict, file_sewer_wor);
     extern FileInfo file_sewer_cir;     addFileToDict(dict, file_sewer_cir);
+
+    assert(dict.size() == 57791);
 }

@@ -20,13 +20,11 @@ public:
     const std::vector<uint8_t>& getCompressionDictionary();
 
 private:
-    // Reusable compression/decompression state
     ZSTD_CCtx *cctx;
     ZSTD_DCtx *dctx;
     ZSTD_CDict *cdict;
     ZSTD_DDict *ddict;
     std::vector<uint8_t> dict;
 
-    // When we need it, build a pre-shared dictionary based on game datafiles
     void initDictionary();
 };
