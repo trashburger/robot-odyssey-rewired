@@ -27,7 +27,7 @@ def patch(b):
     for loopJumpAddr in b.findCodeMultiple('e8____ a0ac05a2____ a0____a2____ e8____ a0____a2____ :e9____'):
         loopEntry = b.jumpTarget(loopJumpAddr)
         b.patchAndHook(loopJumpAddr, 'ret',
-            'proc->continueFrom(r, &sub_%X, true);' % loopEntry.linear)
+            'g.proc->continueFrom(r, &sub_%X, true);' % loopEntry.linear)
         b.markSubroutine(loopEntry)
 
     # Don't bother zeroing video memory, we already clear all of RAM.
@@ -87,8 +87,9 @@ def patch(b):
                               'bb2800 a1____ 8cda 8ed8 be0020 33 c0'),
                    'ret', '''
         if (!noBlit) {
-            hw->output.pushFrame(gStack, proc->memSeg(proc->peek16(r.ds, 0x3AD5)));
-            hw->output.pushDelay(%d);
+            uint8_t *src = g.proc->memSeg(g.proc->peek16(r.ds, 0x3AD5));
+            g.hw->output.pushFrame(g.stack, src);
+            g.hw->output.pushDelay(%d);
         }
     ''' % FRAME_RATE_DELAY)
 
@@ -180,7 +181,7 @@ def patch(b):
     b.publishAddress('SBTADDR_WORLD_DATA', b.peek16(worldPtr))
 
 
-def patchFramebufferTrace(b, interval=200, delay=8):
+def patchFramebufferTrace(b, interval=300, delay=10):
     # Trace the framebuffer to emit frames periodically during animated transitions
     b.decl("#include <stdio.h>")
     b.decl("static bool enable_framebuffer_trace;")
@@ -189,12 +190,11 @@ def patchFramebufferTrace(b, interval=200, delay=8):
     ''', '''
         if (enable_framebuffer_trace) {
             static uint32_t hit = 0;
-
             hit++;
             if (hit == %d) {
                 hit = 0;
-                hw->output.pushFrame(gStack, proc->memSeg(0xB800));
-                hw->output.pushDelay(%d);
+                g.hw->output.pushFrame(g.stack, g.proc->memSeg(0xB800));
+                g.hw->output.pushDelay(%d);
             }
         }
     ''' % (interval, delay))
@@ -229,14 +229,14 @@ def patchChips(b):
     # stack is okay with this usage.
 
     b.hook(b.findCode(':58 a3____ 32f68bfa 8b1e'),
-           'gStack->preSaveRet();')
+           'g.stack->preSaveRet();')
     b.hook(b.findCode('8ac2 e8____ b200 a1____ 50 :c3'),
-           'gStack->postRestoreRet();')
+           'g.stack->postRestoreRet();')
 
     b.hook(b.findCode(':58 a3____ a0____ 0ac0 7417'),
-           'gStack->preSaveRet();')
+           'g.stack->preSaveRet();')
     b.hook(b.findCode('75e9 a1____ 50 :c3'),
-           'gStack->postRestoreRet();')
+           'g.stack->postRestoreRet();')
 
     # These seem to only be in LAB.EXE? Maybe chip burning related?
 
@@ -285,8 +285,8 @@ def patchLoadSave(b):
         b.patchAndHook(addr, 'ret', '''
             static const char *filename = SBT_SAVE_FILE_NAME;
             r.bx = 0x%04x;
-            strcpy((char*)s.ds + 0x%04x, filename);
-            strcpy((char*)s.ds + 0x%04x, filename);
+            strcpy((char*)g.s.ds + 0x%04x, filename);
+            strcpy((char*)g.s.ds + 0x%04x, filename);
         ''' % (saveFilenameAddr, saveFilenameAddr, loadFilenameAddr))
 
     # Find the code for the menu that asks you to press "S" to save.
@@ -313,6 +313,6 @@ def patchJoystick(b):
     poller = b.findCode(':8b16____ bb0000 b90000 c606____ff eeec2006')
     buttons = b.peek16(poller.add(12))
     b.patchAndHook(poller, 'ret',
-        'hw->input.pollJoystick(ROWorld::fromProcess(proc), '
-            'r.bx, r.cx, proc->memSeg(r.ds)[%d]);'
+        'g.hw->input.pollJoystick(ROWorld::fromProcess(g.proc), '
+            'r.bx, r.cx, g.proc->memSeg(r.ds)[%d]);'
         % buttons)

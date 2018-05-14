@@ -31,12 +31,12 @@ for call_site in [
 ]:
     call_site = sbt86.Addr16(str=call_site)
     continue_at = call_site.add(3)
-  
+
     # Redraw the screen and yield on the way out, check input on the way back in
     b.patchAndHook(call_site, 'ret',
-  		'const char *argv = (const char*) (proc->memSeg(r.ds) + r.bx);'
-        'hw->exec(argv, argv+strlen(argv)+1);'
-        'proc->continueFrom(r, &sub_%X);' % continue_at.linear)
+        'const char *argv = (const char*) (g.proc->memSeg(r.ds) + r.bx);'
+        'g.hw->exec(argv, argv+strlen(argv)+1);'
+        'g.proc->continueFrom(r, &sub_%X);' % continue_at.linear)
     b.markSubroutine(continue_at)
 
 b.writeCodeToFile(os.path.join(basedir, 'bt_play.cpp'), 'PlayEXE')

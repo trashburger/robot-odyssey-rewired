@@ -14,21 +14,21 @@ INCLUDES := \
 	-I library/zstd/lib
 
 OBJS := \
-	build/engine.bc \
-	build/sbt86.bc \
-	build/hardware.bc \
-	build/input.bc \
-	build/roData.bc \
-	build/tinySave.bc \
-	build/filesystem.bc \
-	build/output.bc \
-	build/fspack.bc \
 	build/bt_game.bc \
 	build/bt_lab.bc \
 	build/bt_menu.bc \
 	build/bt_menu2.bc \
 	build/bt_play.bc \
 	build/bt_tutorial.bc \
+	build/engine.bc \
+	build/sbt86.bc \
+	build/input.bc \
+	build/roData.bc \
+	build/tinySave.bc \
+	build/filesystem.bc \
+	build/output.bc \
+	build/fspack.bc \
+	build/hardware.bc \
 	library/zstd/lib/libzstd.a
 
 DISTFILES := \

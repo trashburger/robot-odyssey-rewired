@@ -28,8 +28,8 @@ sbt86.Subroutine.clockEnable = True
 
 # Dynamic branch for cutscene sound effects
 b.patchDynamicBranch('019E:0778', [
-    sbt86.Addr16(str='019E:0788'), 
-    sbt86.Addr16(str='019E:07D0'), 
+    sbt86.Addr16(str='019E:0788'),
+    sbt86.Addr16(str='019E:07D0'),
     sbt86.Addr16(str='019E:07AB')
 ])
 
@@ -52,8 +52,8 @@ b.patch('019E:0178', 'jmp 0x1A6')
 # Instead, turn off framebuffer traces so we don't see it, and clear the
 # screen before the actual cutscene starts.
 b.hook('019E:016C', 'enable_framebuffer_trace = false;')
-b.hook('019E:0178', 'enable_framebuffer_trace = true;'
-                    'memset(proc->memSeg(0xB800), 0, 0x4000);')
+b.hook('019E:0178', 'enable_framebuffer_trace = true;\n'
+                    'memset(g.proc->memSeg(0xB800), 0, 0x4000);')
 
 # Remove the new/old game menu and disk swap before Innovation Lab
 # As above, we'll handle game loading using an external UI.
@@ -75,16 +75,16 @@ for call_site in [
     call_site = sbt86.Addr16(str=call_site)
     continue_at = call_site.add(1)
     assert b.jumpTarget(call_site).linear == input_poll_func.linear
-  
+
     # Redraw the screen and yield on the way out, check input on the way back in.
     # Note that the frame rate here can be arbitrarily low if we only care about
     # keyboard navigation, but joystick polling requires a higher frame rate here.
     # Go slower than default, that's too fast here.
 
     b.patchAndHook(call_site, 'ret',
-        'hw->output.pushFrame(gStack, proc->memSeg(0xB800));'
-        'hw->output.pushDelay(%d * 2.5);'
-        'proc->continueFrom(r, &sub_%X);' % (
+        'g.hw->output.pushFrame(g.stack, g.proc->memSeg(0xB800));'
+        'g.hw->output.pushDelay(%d * 2.5);'
+        'g.proc->continueFrom(r, &sub_%X);' % (
             bt_common.FRAME_RATE_DELAY, continue_at.linear))
     b.patch(continue_at, 'call 0x%04x' % input_poll_func.offset, length=2)
     b.markSubroutine(continue_at)
@@ -100,8 +100,8 @@ b.patch(b.findCode(':b42c cd21 ________ c3'), 'ret')
 # Split up the actual delays.
 # Keyboard input will skip the delay, so flush any queued keystrokes after we come back.
 for (call_site, delay) in [
-    ('019E:010F', 4000),
-    ('019E:0118', 4000),
+    ('019E:010F', 3000),
+    ('019E:0118', 3000),
     ('019E:01BD', 500),
     ('019E:01DB', 250),
 ]:
@@ -109,11 +109,11 @@ for (call_site, delay) in [
     continue_at = call_site.add(3)
 
     b.patchAndHook(call_site, 'ret',
-        'hw->output.pushFrame(gStack, proc->memSeg(0xB800));'
-        'hw->output.pushDelay(%d);'
-        'proc->continueFrom(r, &sub_%X);' % (delay, continue_at.linear))    
+        'g.hw->output.pushFrame(g.stack, g.proc->memSeg(0xB800));'
+        'g.hw->output.pushDelay(%d);'
+        'g.proc->continueFrom(r, &sub_%X);' % (delay, continue_at.linear))
     b.markSubroutine(continue_at)
-    b.hook(continue_at, 'hw->input.clear();')
+    b.hook(continue_at, 'g.hw->input.clear();')
 
 # The cutscenes use a function I'm calling show_sfx_interruptible, which
 # polls for keyboard input while playing a buffer of sound effects.
@@ -158,10 +158,10 @@ for call_site in [
     b.markSubroutine(continue_at)
     b.markSubroutine(target)
     b.patchAndHook(call_site, 'ret',
-        'hw->output.pushFrame(gStack, proc->memSeg(0xB800));'
-        'hw->output.pushDelay(50);'
+        'g.hw->output.pushFrame(g.stack, g.proc->memSeg(0xB800));'
+        'g.hw->output.pushDelay(50);'
         'sub_%X();'
-        'proc->continueFrom(r, &sub_%X);' % (
+        'g.proc->continueFrom(r, &sub_%X);' % (
             target.linear, continue_at.linear))
 
 b.writeCodeToFile(os.path.join(basedir, 'bt_menu.cpp'), 'MenuEXE')

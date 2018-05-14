@@ -26,7 +26,7 @@
 #
 # Requires the ndisasm disassembler.
 #
-# Copyright (c) 2009 Micah Elizabeth Scott <micah@scanlime.org>
+# Copyright (c) 2009-2018 Micah Elizabeth Scott <micah@scanlime.org>
 #
 #    Permission is hereby granted, free of charge, to any person
 #    obtaining a copy of this software and associated documentation
@@ -274,7 +274,7 @@ class Indirect:
 
         assert isinstance(self.segment, Register)
         _, offset = self.genAddr()
-        mem = "s.%s[(uint16_t)(%s)]" % (self.segment.name, offset)
+        mem = "g.s.%s[(uint16_t)(%s)]" % (self.segment.name, offset)
 
         if self.width == 1:
             if mode == 'w':
@@ -333,8 +333,11 @@ class Trace:
         self.fire = fire
 
     def codegen(self):
-        return ("static SBT_INLINE int %s_probe(%s) {\n%s\n}\n"
-                "static void %s_fire(%s) {\n%s\n}\n") % (
+        return ('static SBT_INLINE int %s_probe(%s) {\n'
+                '%s\n}\n'
+                'static void %s_fire(%s) {\n'
+                'ProcessLocals& g = gProcessLocals;\n'
+                '%s\n}\n') % (
             self.name, self._args, self.probe,
             self.name, self._args, self.fire)
 
@@ -748,7 +751,7 @@ class Instruction:
             # will be used to index into a table of instruction timings.
 
             sig = (self.op,) + tuple([arg.__class__ for arg in self.args])
-            code += 'gClock+=%d;' % self._cycleTable[sig]
+            code += 'g.clock+=%d;' % self._cycleTable[sig]
 
         return code
 
@@ -773,7 +776,7 @@ class Instruction:
             if (isinstance(operand, Register) and mode == 'w'
                 and operand.name in ('cs', 'es', 'ds', 'ss')):
 
-                code.append("s.load%s(proc, r);" % operand.name.upper())
+                code.append("g.s.load%s(g.proc, r);" % operand.name.upper())
 
             if (isinstance(operand, Indirect) and
                 isinstance(operand.segment, Register) and
@@ -1103,12 +1106,12 @@ class Instruction:
     def codegen_push(self, arg):
         # We currently implement the stack as a totally separate memory
         # area which can hold 16-bit words or native code return addresses.
-        return "gStack->pushw(%s);%s" % (
+        return "g.stack->pushw(%s);%s" % (
             arg.codegen(),
             self._genTraces((arg, 'r')))
 
     def codegen_pop(self, arg):
-        return "%sgStack->popw());%s" % (
+        return "%sg.stack->popw());%s" % (
             arg.codegen('w'),
             self._genTraces((arg, 'w')))
 
@@ -1137,16 +1140,16 @@ class Instruction:
                 ))
 
     def codegen_pushfw(self):
-        return "gStack->pushf(r);"
+        return "g.stack->pushf(r);"
 
     def codegen_pushf(self):
-        return "gStack->pushf(r);"
+        return "g.stack->pushf(r);"
 
     def codegen_popfw(self):
-        return "r = gStack->popf(r);"
+        return "r = g.stack->popf(r);"
 
     def codegen_popf(self):
-        return "r = gStack->popf(r);"
+        return "r = g.stack->popf(r);"
 
     def codegen_nop(self):
         return "/* nop */;"
@@ -1210,7 +1213,7 @@ class Instruction:
 
             # XXX: Only handles near jumps
 
-            return "switch (%s) { %s default: proc->failedDynamicBranch(%s,%s,%s); }" % (
+            return "switch (%s) { %s default: g.proc->failedDynamicBranch(%s,%s,%s); }" % (
                 arg.codegen(),
                 ''.join([ "case 0x%04x: goto %s;" % (addr.offset, addr.label())
                           for addr in self.dynTargets ]),
@@ -1222,8 +1225,10 @@ class Instruction:
             raise Exception("Dynamic jmp at %s must be patched." % self.addr)
 
     def codegen_call(self, arg):
+        call_fmt = "sub_%X();"
+
         if isinstance(arg, Literal) or isinstance(arg, Addr16):
-            return "sub_%X();" % self.nextAddrs[-1].linear
+            return call_fmt % self.nextAddrs[-1].linear
 
         elif self.dynTargets:
             # Generate a dynamic call to any of the targets in
@@ -1233,10 +1238,11 @@ class Instruction:
 
             # XXX: Only handles near calls
 
-            return "switch (%s) { %s default: proc->failedDynamicBranch(%s,%s,%s); }" % (
+            return "switch (%s) { %s default: g.proc->failedDynamicBranch(%s,%s,%s); }" % (
                 arg.codegen(),
-                ''.join([ "case 0x%04x: sub_%X(); break;" % (addr.offset, addr.linear)
-                          for addr in self.dynTargets ]),
+                ''.join([
+                    "case 0x%04x: %s break;" % (addr.offset, call_fmt % addr.linear)
+                    for addr in self.dynTargets ]),
                 self.addr.segment,
                 self.addr.offset,
                 arg.codegen())
@@ -1251,13 +1257,13 @@ class Instruction:
         return self.codegen_ret()
 
     def codegen_int(self, arg):
-        return "r = hw->interrupt%X(r, gStack);" % arg
+        return "r = g.hw->interrupt%X(r, g.stack);" % arg
 
     def codegen_out(self, port, value):
-        return "hw->out(%s,%s,gClock);" % (port.codegen(), value.codegen())
+        return "g.hw->out(%s,%s,g.clock);" % (port.codegen(), value.codegen())
 
     def codegen_in(self, value, port):
-        return "%s = hw->in(%s,gClock);" % (value.codegen(), port.codegen())
+        return "%s = g.hw->in(%s,g.clock);" % (value.codegen(), port.codegen())
 
 
 class BinaryImage:
@@ -1501,11 +1507,13 @@ class Subroutine:
 void
 %(name)s(void)
 {
-  gStack->pushret(0x%(offset)04x);
+  ProcessLocals& g = gProcessLocals;
+  SBTRegs& r = g.r;
+  g.stack->pushret(0x%(offset)04x);
   goto %(label)s;
 %(body)s
 ret:
-  gStack->popret(0x%(offset)04x);
+  g.stack->popret(0x%(offset)04x);
   return;
 }""" % {
     'name': self.name,
@@ -1602,12 +1610,15 @@ SBT_DECL_PROCESS(%(className)s);
 /*
  * Local cache of registers and process pointer.
  */
-static SBTRegs r;
-static SBTSegmentCache s;
-static SBTProcess *proc;
-static SBTStack *gStack;
-static Hardware *hw;
-static uint32_t gClock;
+struct ProcessLocals {
+    SBTRegs r;
+    SBTSegmentCache s;
+    uint32_t clock;
+    SBTProcess *proc;
+    SBTStack *stack;
+    Hardware *hw;
+};
+static ProcessLocals gProcessLocals = {};
 
 static uint8_t dataImage[] = {
 %(dataImage)s};
@@ -1646,11 +1657,12 @@ const char *%(className)s::getFilename()
 
 void %(className)s::loadEnvironment(SBTStack *stack, SBTRegs reg)
 {
-    gStack = stack;
-    r = reg;
-    proc = this;
-    hw = hardware;
-    s.load(proc, r);
+    ProcessLocals& g = gProcessLocals;
+    g.stack = stack;
+    g.r = reg;
+    g.proc = this;
+    g.hw = hardware;
+    g.s.load(g.proc, g.r);
 }
 
 SBTProcess::continue_func_t %(className)s::getFunction(SBTAddressId id)

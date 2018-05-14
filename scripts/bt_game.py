@@ -49,8 +49,8 @@ for call_site in [
     continue_at = call_site.add(1)
     subroutine = b.jumpTarget(call_site)
     b.patchAndHook(call_site, 'ret',
-    	'hw->output.pushDelay(20);'
-		'proc->continueFrom(r, &sub_%X);' % continue_at.linear)
+        'g.hw->output.pushDelay(20);'
+        'g.proc->continueFrom(r, &sub_%X);' % continue_at.linear)
     b.patch(continue_at, 'call 0x%04x' % subroutine.offset, length=2)
     b.markSubroutine(continue_at)
 
@@ -68,7 +68,7 @@ for call_site in [
     continue_at = call_site.add(1)
     subroutine = b.jumpTarget(call_site)
     assert subroutine.linear == video_blit_frame.linear
-    b.patchAndHook(call_site, 'ret', 'proc->continueFrom(r, &sub_%X);' % continue_at.linear)
+    b.patchAndHook(call_site, 'ret', 'g.proc->continueFrom(r, &sub_%X);' % continue_at.linear)
     b.patch(continue_at, 'call 0x%04x' % subroutine.offset, length=2)
     b.markSubroutine(continue_at)
 
@@ -91,6 +91,6 @@ b.patch('0E3B:B5E7', 'jmp 0xA419')   # Exit after camera disk (white)
 # This was always an unfortunate design, since starting the game directly
 # by running GAME.EXE meant that you'd just get a DOS prompt instead of
 # the victory screen. Let's improve on that by exec'ing the end screen directly.
-b.hook('0E3B:2C96', 'hw->exec("menu2.exe", "\\x17");')
+b.hook('0E3B:2C96', 'g.hw->exec("menu2.exe", "\\x17");')
 
 b.writeCodeToFile(os.path.join(basedir, 'bt_game.cpp'), 'GameEXE')

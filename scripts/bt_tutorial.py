@@ -27,8 +27,8 @@ for call_site in [
     continue_at = call_site.add(1)
     subroutine = b.jumpTarget(call_site)
     b.patchAndHook(call_site, 'ret',
-    	'hw->output.pushDelay(20);'
-		'proc->continueFrom(r, &sub_%X);' % continue_at.linear)
+        'g.hw->output.pushDelay(20);'
+        'g.proc->continueFrom(r, &sub_%X);' % continue_at.linear)
     b.patch(continue_at, 'call 0x%04x' % subroutine.offset, length=2)
     b.markSubroutine(continue_at)
 
@@ -38,7 +38,7 @@ for call_site in ['0A8F:54CE']:
     call_site = sbt86.Addr16(str=call_site)
     continue_at = call_site.add(1)
     subroutine = b.jumpTarget(call_site)
-    b.patchAndHook(call_site, 'ret', 'proc->continueFrom(r, &sub_%X);' % continue_at.linear)
+    b.patchAndHook(call_site, 'ret', 'g.proc->continueFrom(r, &sub_%X);' % continue_at.linear)
     b.patch(continue_at, 'call 0x%04x' % subroutine.offset, length=2)
     b.markSubroutine(continue_at)
 

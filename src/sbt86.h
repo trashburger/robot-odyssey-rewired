@@ -170,9 +170,9 @@ class SBTStack
     void pushret(uint16_t offset);
 
     uint16_t popw();
-    SBTRegs popf(SBTRegs reg);    
+    SBTRegs popf(SBTRegs reg);
     void popret(uint16_t offset);
-    
+
     void trace();
 
     void preSaveRet();
