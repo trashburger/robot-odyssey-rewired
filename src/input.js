@@ -33,7 +33,7 @@ export function initInputAfterEngineLoads(engine)
     const canvas_width = fbCanvas.width;
     const canvas_height = fbCanvas.height;
 
-    frame.addEventListener('mousemove', function (e)
+    function mouseLocationForEvent(e)
     {
         const canvasRect = fbCanvas.getBoundingClientRect();
 
@@ -42,10 +42,16 @@ export function initInputAfterEngineLoads(engine)
         const framebufferX = canvasX - 1;
         const framebufferY = canvasY - 1;
 
-        const gameX = framebufferX / 2 - 2;
-        const gameY = 188 - framebufferY;
+        const x = framebufferX / 2 - 2;
+        const y = 188 - framebufferY;
 
-        engine.setMouseTracking(gameX, gameY);
+        return { x, y };
+    }
+
+    frame.addEventListener('mousemove', function (e)
+    {
+        const loc = mouseLocationForEvent(e);
+        engine.setMouseTracking(loc.x, loc.y);
         engine.autoSave();
     });
 
@@ -70,6 +76,30 @@ export function initInputAfterEngineLoads(engine)
     {
         engine.endMouseTracking();
         engine.autoSave();
+    });
+
+    fbCanvas.addEventListener('touchstart', function (e)
+    {
+        const loc = mouseLocationForEvent(e.targetTouches[0]);
+        engine.setMouseTracking(loc.x, loc.y);
+        engine.setMouseButton(true);
+        engine.autoSave();
+        audioContextSetup();
+        e.preventDefault();
+    });
+
+    fbCanvas.addEventListener('touchmove', function (e)
+    {
+        const loc = mouseLocationForEvent(e.targetTouches[0]);
+        engine.setMouseTracking(loc.x, loc.y);
+        e.preventDefault();
+    });
+
+    fbCanvas.addEventListener('touchend', function (e)
+    {
+        engine.setMouseButton(false);
+        engine.autoSave();
+        e.preventDefault();
     });
 
     function refocus(e)
