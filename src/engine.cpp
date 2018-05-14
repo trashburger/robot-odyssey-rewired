@@ -67,6 +67,11 @@ static void setMouseTracking(int x, int y)
     hw.setMouseTracking(x, y);
 }
 
+static void setMouseButton(bool button)
+{
+    hw.setMouseButton(button);
+}
+
 static void endMouseTracking()
 {
     hw.endMouseTracking();
@@ -187,6 +192,7 @@ EMSCRIPTEN_BINDINGS(engine)
     function("setJoystickAxes", &setJoystickAxes);
     function("setJoystickButton", &setJoystickButton);
     function("setMouseTracking", &setMouseTracking);
+    function("setMouseButton", &setMouseButton);
     function("endMouseTracking", &endMouseTracking);
     function("saveGame", &saveGame);
     function("loadGame", &loadGame);

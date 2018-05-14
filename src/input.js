@@ -28,36 +28,43 @@ export function initInputEarly()
 export function initInputAfterEngineLoads(engine)
 {
     const fbCanvas = document.getElementById('framebuffer');
+    const frame = document.getElementById('frame');
 
-    const game_width = engine.SCREEN_WIDTH / 2;
-    const game_height = engine.SCREEN_HEIGHT - 8;
+    const canvas_width = fbCanvas.width;
+    const canvas_height = fbCanvas.height;
 
-    fbCanvas.addEventListener('mousemove', function (e)
+    frame.addEventListener('mousemove', function (e)
     {
         const canvasRect = fbCanvas.getBoundingClientRect();
-        const x = e.clientX - canvasRect.x;
-        const y = e.clientY - canvasRect.y;
-        engine.setMouseTracking(x * game_width / canvasRect.width,
-            game_height - y * game_height / canvasRect.height);
+
+        const canvasX = (e.clientX - canvasRect.x) * canvas_width / canvasRect.width;
+        const canvasY = (e.clientY - canvasRect.y) * canvas_height / canvasRect.height;
+        const framebufferX = canvasX - 1;
+        const framebufferY = canvasY - 1;
+
+        const gameX = framebufferX / 2 - 2;
+        const gameY = 188 - framebufferY;
+
+        engine.setMouseTracking(gameX, gameY);
     });
 
-    fbCanvas.addEventListener('mousedown', function (e)
+    frame.addEventListener('mousedown', function (e)
     {
         if (e.button == 0) {
             e.preventDefault();
-            engine.setJoystickButton(true);
+            engine.setMouseButton(true);
             audioContextSetup();
         }
     });
 
-    fbCanvas.addEventListener('mouseup', function (e)
+    frame.addEventListener('mouseup', function (e)
     {
-        engine.setJoystickButton(false);
+        engine.setMouseButton(false);
         engine.autoSave();
         audioContextSetup();
     });
 
-    fbCanvas.addEventListener('mouseout', function (e)
+    frame.addEventListener('mouseout', function (e)
     {
         engine.endMouseTracking();
     });

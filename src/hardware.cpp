@@ -326,6 +326,12 @@ void Hardware::setMouseTracking(int x, int y)
     mouse_tracking = true;
 }
 
+void Hardware::setMouseButton(bool button)
+{
+    // fix me; mouse queueing
+    setJoystickButton(button);
+}
+
 void Hardware::endMouseTracking()
 {
     mouse_tracking = false;
