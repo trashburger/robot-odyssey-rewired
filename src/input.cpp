@@ -102,9 +102,7 @@ void InputBuffer::pollJoystick(ROWorld *world, uint16_t &x, uint16_t &y, uint8_t
     // Optional mouse tracking will use the joystick input to move the player
     // to a chosen cursor location, without violating game collision detection.
 
-    if (world) {
-        updateMouse(world);
-    }
+    updateMouse(world);
 
     // Button presses must not be missed if they end before the next poll.
     // Clear the button press latch here.
@@ -129,6 +127,7 @@ void InputBuffer::updateMouse(ROWorld *world)
     if (mouse_buffer.empty()) {
         return;
     }
+
     struct MouseEvent &evt = mouse_buffer.front();
     switch (evt.type) {
 
@@ -152,6 +151,14 @@ void InputBuffer::updateMouse(ROWorld *world)
 
 bool InputBuffer::virtualMouseToPosition(ROWorld *world, int x, int y)
 {
+    if (!world) {
+        // This must be some part of the game we don't have sprite data
+        // for, like the main menu. For now, this means position events
+        // resolve immediately and do nothing, but button events work.
+
+        return true;
+    }
+
     const int minimum_speed = 3;
     const int maximum_speed = 127;
     const float gain = 0.5;
