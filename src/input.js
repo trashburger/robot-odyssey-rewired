@@ -46,6 +46,7 @@ export function initInputAfterEngineLoads(engine)
         const gameY = 188 - framebufferY;
 
         engine.setMouseTracking(gameX, gameY);
+        engine.autoSave();
     });
 
     frame.addEventListener('mousedown', function (e)
@@ -53,6 +54,7 @@ export function initInputAfterEngineLoads(engine)
         if (e.button == 0) {
             e.preventDefault();
             engine.setMouseButton(true);
+            engine.autoSave();
             audioContextSetup();
         }
     });
@@ -67,6 +69,7 @@ export function initInputAfterEngineLoads(engine)
     frame.addEventListener('mouseout', function (e)
     {
         engine.endMouseTracking();
+        engine.autoSave();
     });
 
     function refocus(e)
