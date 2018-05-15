@@ -33,6 +33,8 @@ export function initInputAfterEngineLoads(engine)
     const canvas_width = fbCanvas.width;
     const canvas_height = fbCanvas.height;
 
+    var mouse_tracking_unlocked = false;
+
     function mouseLocationForEvent(e)
     {
         const canvasRect = fbCanvas.getBoundingClientRect();
@@ -52,16 +54,26 @@ export function initInputAfterEngineLoads(engine)
 
     frame.addEventListener('mousemove', function (e)
     {
-        const loc = mouseLocationForEvent(e);
-        engine.setMouseTracking(loc.x, loc.y);
-        engine.autoSave();
+        if (mouse_tracking_unlocked) {
+            const loc = mouseLocationForEvent(e);
+            engine.setMouseTracking(loc.x, loc.y);
+            engine.autoSave();
+        }
     });
 
     frame.addEventListener('mousedown', function (e)
     {
         if (e.button == 0) {
             e.preventDefault();
-            engine.setMouseButton(true);
+            if (mouse_tracking_unlocked) {
+                // Already unlocked, this is a click
+                engine.setMouseButton(true);
+            } else {
+                // Unlock tracking and move to this location
+                mouse_tracking_unlocked = true;
+                const loc = mouseLocationForEvent(e);
+                engine.setMouseTracking(loc.x, loc.y);
+            }
             engine.autoSave();
             audioContextSetup();
         }
@@ -76,6 +88,7 @@ export function initInputAfterEngineLoads(engine)
 
     frame.addEventListener('mouseout', function (e)
     {
+        mouse_tracking_unlocked = false;
         engine.endMouseTracking();
         engine.autoSave();
     });
