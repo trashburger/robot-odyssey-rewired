@@ -3,6 +3,8 @@ export function initGraphics(engine)
     const width = 320;
     const height = 200;
     const border = 1;
+
+    const margin = 20;
     const aspect = 4/3.0;
     const max_w = width * 4;
 
@@ -16,8 +18,8 @@ export function initGraphics(engine)
 
     // Canvas resize handler
     const resize = () => {
-        const w_box = window.innerWidth;
-        const h_box = window.innerHeight;
+        const w_box = window.innerWidth - margin;
+        const h_box = window.innerHeight - margin;
         const w = Math.min(Math.min(max_w, w_box), aspect * h_box)|0;
         const h = (w / aspect)|0;
         canvas.style.width = w + 'px';

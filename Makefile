@@ -54,7 +54,7 @@ dist/%: src/%
 	cp $< $@
 
 # Javascript build with webpack
-dist/index.html: build/engine.js src/*.js
+dist/index.html: build/engine.js src/*.js src/*.html src/*.css
 	npx webpack --config ./webpack.config.js
 
 # WASM build from bitcode

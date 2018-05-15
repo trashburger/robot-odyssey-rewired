@@ -14,14 +14,9 @@ export function initInputEarly()
     joystick = nipplejs.create({
         zone: document.getElementById('joystick_xy'),
         mode: 'static',
-        size: '140',
-        threshold: 0.001,
+        size: 100,
+        threshold: 0.01,
         position: { left: '50%', top: '50%' }
-    });
-
-    // Make it easy to hide the joystick on desktop
-    document.getElementById('joystick_hide').addEventListener('click', (e) => {
-        document.getElementById('joystick').style.display = 'none';
     });
 }
 
