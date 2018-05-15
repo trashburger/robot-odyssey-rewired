@@ -69,8 +69,7 @@ export function initInputAfterEngineLoads(engine)
                 // Already unlocked, this is a click
                 engine.setMouseButton(true);
             } else {
-                // Unlock tracking and move to this location
-                mouse_tracking_unlocked = true;
+                // Move to this location, and unlock tracking on mouseup
                 const loc = mouseLocationForEvent(e);
                 engine.setMouseTracking(loc.x, loc.y);
             }
@@ -81,12 +80,21 @@ export function initInputAfterEngineLoads(engine)
 
     frame.addEventListener('mouseup', function (e)
     {
-        engine.setMouseButton(false);
-        engine.autoSave();
-        audioContextSetup();
+        if (e.button == 0) {
+            e.preventDefault();
+            if (mouse_tracking_unlocked) {
+                // Already unlocked
+                engine.setMouseButton(false);
+            } else {
+                // Unlock now; already moved to the location on mousedown
+                mouse_tracking_unlocked = true;
+            }
+            engine.autoSave();
+            audioContextSetup();
+        }
     });
 
-    frame.addEventListener('mouseout', function (e)
+    frame.addEventListener('mouseleave', function (e)
     {
         mouse_tracking_unlocked = false;
         engine.endMouseTracking();
