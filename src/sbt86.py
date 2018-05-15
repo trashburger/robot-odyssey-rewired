@@ -1404,11 +1404,10 @@ class Subroutine:
     # Should this subroutine generate clock cycle counting code?
     clockEnable = False
 
-    def __init__(self, image, entryPoint, hooks=None, staticData=None):
+    def __init__(self, image, entryPoint, hooks=None):
         self.image = image
         self.entryPoint = entryPoint
         self.hooks = hooks or {}
-        self.staticData = staticData or BinaryImage()
         self.name = "sub_%X" % self.entryPoint.linear
 
     def analyze(self, dynBranches=None, verbose=False):
@@ -1762,7 +1761,7 @@ int %(className)s::getAddress(SBTAddressId id)
         if address not in self._markedSubs:
             self._markedSubs.append(address)
 
-    def patch(self, addr, code, length=0):
+    def patch(self, addr, code, length=0, deadCode=True):
         """Manually stick a line of assembly into the iCache,
            in order to replace an instruction we would have loaded
            from the EXE file.
@@ -1775,6 +1774,8 @@ int %(className)s::getAddress(SBTAddressId id)
            instruction to disassemble.
            """
         i = Instruction("%s %s %s" % (addr, ("00" * length) or '-', code))
+        if deadCode:
+            self.markDeadCode(i.addr)
         self.image._iCache[i.addr.linear] = i
 
     def hook(self, addr, code):
@@ -1790,9 +1791,9 @@ int %(className)s::getAddress(SBTAddressId id)
         else:
             self._hooks[linear] = code
 
-    def patchAndHook(self, addr, asmCode, cCode, length=0):
+    def patchAndHook(self, addr, asmCode, cCode, length=0, deadCode=True):
         """This is a shorthand for patching and hooking the same address."""
-        self.patch(addr, asmCode, length)
+        self.patch(addr, asmCode, length, deadCode)
         self.hook(addr, cCode)
 
     def patchDynamicBranch(self, addr, targets):
@@ -1868,7 +1869,7 @@ int %(className)s::getAddress(SBTAddressId id)
                    sys.stderr.write("Subroutine %s already visited\n" % ptr)
                continue
 
-           sub = Subroutine(self.image, ptr, self._hooks, self.staticData)
+           sub = Subroutine(self.image, ptr, self._hooks)
            sub.analyze(self._dynBranches, verbose)
            stack.extend(sub.callsTo.values())
            self.subroutines[ptr.linear] = sub
@@ -1876,6 +1877,12 @@ int %(className)s::getAddress(SBTAddressId id)
         for inst in self.image.fetchedInstructions.values():
             if inst.length and not inst.dynamicLiterals:
                 self.staticData.fill(inst.addr, inst.length)
+
+    def markDeadCode(self, addr):
+        """Recursively disassemble from the given address, marking instructions
+           as code rather than data but throwing away the resulting subroutine.
+           """
+        Subroutine(self.image, addr).analyze(self._dynBranches)
 
     def findCode(self, signature):
         """Find a signature in the binary's code segment.

@@ -25,7 +25,7 @@ b.hook(b.entryPoint, 'enable_framebuffer_trace = true;')
 # Dynamic branch for cutscene sound effects
 b.patchDynamicBranch('019E:068B', [
     sbt86.Addr16(str='019E:069B'),
-    sbt86.Addr16(str='019E:06E3'), 
+    sbt86.Addr16(str='019E:06E3'),
     sbt86.Addr16(str='019E:06BE')
 ])
 
@@ -34,8 +34,7 @@ b.patchDynamicBranch('019E:068B', [
 b.patchDynamicLiteral('019E:0434', length=2)
 b.patchDynamicLiteral('019E:0436', length=2)
 
-# The main menu is a subroutine with a single caller; inline it to make cutting the control flow easier
-b.patch('019E:0108', 'jmp 0x22d')
-b.patch('019E:0267', 'jmp 0x10b')
+# Remove the main menu
+b.patch('019E:0108', 'ret')
 
 b.writeCodeToFile(os.path.join(basedir, 'bt_menu2.cpp'), 'Menu2EXE')
