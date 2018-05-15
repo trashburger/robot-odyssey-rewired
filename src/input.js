@@ -85,11 +85,11 @@ export function initInputAfterEngineLoads(engine)
             if (mouse_tracking_unlocked) {
                 // Already unlocked
                 engine.setMouseButton(false);
+                engine.autoSave();
             } else {
                 // Unlock now; already moved to the location on mousedown
                 mouse_tracking_unlocked = true;
             }
-            engine.autoSave();
             audioContextSetup();
         }
     });
@@ -98,7 +98,6 @@ export function initInputAfterEngineLoads(engine)
     {
         mouse_tracking_unlocked = false;
         engine.endMouseTracking();
-        engine.autoSave();
     });
 
     fbCanvas.addEventListener('touchstart', function (e)
