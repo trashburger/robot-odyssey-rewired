@@ -6,6 +6,7 @@ import { initSound } from "./sound.js"
 import { initInputEarly, initInputAfterEngineLoads } from "./input.js"
 import { initAutoSave } from "./autoSave.js"
 import { initFiles } from "./files.js"
+import './main.css'
 
 try {
     const engine = engineFactory();

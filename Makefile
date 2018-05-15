@@ -35,15 +35,9 @@ OBJS := \
 	build/hardware.bc \
 	library/zstd/lib/libzstd.a
 
-DISTFILES := \
-	dist/index.html \
-	dist/main.css \
-	dist/bundle.js \
-	dist/engine.wasm
-
 all: dist
 
-dist: $(DISTFILES)
+dist: dist/index.html dist/engine.wasm
 
 clean:
 	rm -Rf build/ dist/ .cache/
@@ -60,12 +54,12 @@ dist/%: src/%
 	cp $< $@
 
 # Javascript build with webpack
-dist/bundle.js: build/engine.js src/*.js
+dist/index.html: build/engine.js src/*.js
 	npx webpack --config ./webpack.config.js
 
 # WASM build from bitcode
-build/engine.js: $(OBJS)
-	$(CC) $(CCFLAGS) $(WASMFLAGS) -o $@ $(OBJS)
+build/engine.js dist/engine.wasm: $(OBJS)
+	$(CC) $(CCFLAGS) $(WASMFLAGS) -o build/engine.js $(OBJS)
 	cp build/engine.wasm dist/
 
 # Build normal C++ code to LLVM bitcode
