@@ -1,27 +1,33 @@
 export function initGraphics(engine)
 {
-    const fbCanvas = document.getElementById('framebuffer');
-    const fbContext = fbCanvas.getContext('2d');
-    const fbImage = fbContext.createImageData(320, 200);
+    const width = 320;
+    const height = 200;
+    const border = 1;
+    const aspect = 4/3.0;
+    const max_w = width * 4;
+
+    const canvas = document.getElementById('framebuffer');
+    const context = canvas.getContext('2d');
+    const image = context.createImageData(width, height);
 
     // Blank canvas, including a 1-pixel black border for consistent edge blending
-    fbContext.fillStyle = '#000';
-    fbContext.fillRect(0, 0, 322, 202);
+    context.fillStyle = '#000';
+    context.fillRect(0, 0, width + 2*border, height + 2*border);
 
     // Canvas resize handler
     const resize = () => {
-        const aspect = 4/3.0;
-        const max_w = 960;
-        const w = Math.min(Math.min(max_w, window.innerWidth), aspect * window.innerHeight)|0;
+        const w_box = window.innerWidth;
+        const h_box = window.innerHeight;
+        const w = Math.min(Math.min(max_w, w_box), aspect * h_box)|0;
         const h = (w / aspect)|0;
-        fbCanvas.style.width = w + 'px';
-        fbCanvas.style.height = h + 'px';
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
     };
     window.addEventListener('resize', resize);
     resize();
 
-    engine.onRenderFrame = (rgbData) => {
-        fbImage.data.set(rgbData);
-        fbContext.putImageData(fbImage, 1, 1);
+    engine.onRenderFrame = (rgb) => {
+        image.data.set(rgb);
+        context.putImageData(image, border, border);
     };
 }

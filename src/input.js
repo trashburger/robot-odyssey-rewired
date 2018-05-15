@@ -36,12 +36,14 @@ export function initInputAfterEngineLoads(engine)
     function mouseLocationForEvent(e)
     {
         const canvasRect = fbCanvas.getBoundingClientRect();
+        const border = 1;
 
         const canvasX = (e.clientX - canvasRect.x) * canvas_width / canvasRect.width;
         const canvasY = (e.clientY - canvasRect.y) * canvas_height / canvasRect.height;
-        const framebufferX = canvasX - 1;
-        const framebufferY = canvasY - 1;
+        const framebufferX = canvasX - border;
+        const framebufferY = canvasY - border;
 
+        // Adjust for cursor hotspot and game coordinate system
         const x = framebufferX / 2 - 2;
         const y = 188 - framebufferY;
 
