@@ -59,6 +59,7 @@ dist/index.html: build/engine.js src/*.js
 
 # WASM build from bitcode
 build/engine.js dist/engine.wasm: $(OBJS)
+	@mkdir -p dist/
 	$(CC) $(CCFLAGS) $(WASMFLAGS) -o build/engine.js $(OBJS)
 	cp build/engine.wasm dist/
 
