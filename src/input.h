@@ -26,8 +26,8 @@ class InputBuffer
     void pollJoystick(ROWorld *world, uint16_t &x, uint16_t &y, uint8_t &status);
 
  protected:
-    static const unsigned KEY_BUFFER_SIZE = 16;
-    static const unsigned MOUSE_BUFFER_SIZE = 8;
+    static const unsigned KEY_BUFFER_SIZE = 20;
+    static const unsigned MOUSE_BUFFER_SIZE = 12;
 
     enum MouseEventType {
         EVT_POS,
