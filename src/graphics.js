@@ -18,8 +18,8 @@ export function initGraphics(engine)
 
     // Canvas resize handler
     const resize = () => {
-        const w_box = window.innerWidth - margin;
-        const h_box = window.innerHeight - margin;
+        const w_box = document.documentElement.clientWidth - margin;
+        const h_box = document.documentElement.clientWidth - margin;
         const w = Math.min(Math.min(max_w, w_box), aspect * h_box)|0;
         const h = (w / aspect)|0;
         canvas.style.width = w + 'px';
