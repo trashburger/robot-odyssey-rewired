@@ -751,7 +751,7 @@ class Instruction:
             # will be used to index into a table of instruction timings.
 
             sig = (self.op,) + tuple([arg.__class__ for arg in self.args])
-            code += 'g.clock+=%d;' % self._cycleTable[sig]
+            code = 'g.clock+=%d;%s' % (self._cycleTable[sig], code)
 
         return code
 
