@@ -31,12 +31,11 @@ void Hardware::exec(const char *program, const char *args)
     assert(0 && "Program not found in exec()");
 }
 
-void Hardware::exit(uint8_t code)
+void Hardware::exit(SBTProcess *exiting_process, uint8_t code)
 {
     if (verbose_process_info) {
         printf("EXIT, code %d\n", code);
     }
-    SBTProcess *exiting_process = process;
     process = default_process;
     process->reg.ax = code;
     exiting_process->exit();
@@ -204,7 +203,7 @@ SBTRegs Hardware::interrupt21(SBTRegs reg, SBTStack *stack)
         break;
 
     case 0x4C:                /* Exit with return code */
-        exit(reg.al);
+        exit(process, reg.al);
         break;
 
     default:

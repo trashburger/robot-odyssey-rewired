@@ -21,9 +21,7 @@ bt_common.patchJoystick(b)
 bt_common.patchFramebufferTrace(b)
 b.hook(b.entryPoint, 'enable_framebuffer_trace = true;')
 
-# To keep timing accurate even between the individual sound portions of a cutscene,
-# let's keep the cycle timer running at all times rather than just inside subs
-# that directly touch the audio hardware.
+# Time everything in this EXE, not just sound subroutines
 sbt86.Subroutine.clockEnable = True
 
 # Dynamic branch for cutscene sound effects
@@ -97,13 +95,13 @@ for call_site in [
 # Stub out the function which saves the wallclock time ref
 b.patch(b.findCode(':b42c cd21 ________ c3'), 'ret')
 
-# Split up the actual delays.
+# Split up delays.
 # Keyboard input will skip the delay, so flush any queued keystrokes after we come back.
 for (call_site, delay) in [
-    ('019E:010F', 3000),
-    ('019E:0118', 3000),
-    ('019E:01BD', 500),
-    ('019E:01DB', 250),
+    ('019E:010F', 2000),
+    ('019E:0118', 2800),
+    ('019E:01BD', 800),
+    ('019E:01DB', 1000),
 ]:
     call_site = sbt86.Addr16(str=call_site)
     continue_at = call_site.add(3)

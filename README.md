@@ -34,12 +34,6 @@ To do
 
 - Needs play testing
 
-- cutscenes
-  - intro cutscene timing and sound are somewhat off
-  - end-game is broken
-  - Final cutscene still needs patching and testing
-  - State of "PLAY.EXE" won't always be correct when returning from a subprocess, consider rewriting play.exe entirely
-
 - load/save
   - package thumbnails plus game data into PNG/JPEG/GIF for mobile+social?
   - local browser storage
@@ -51,14 +45,13 @@ To do
 - input
   - nicer touch controls
   - controls help
+  - context sensitive soldering actions
+  - context sensitive keyboard controls
+  - zoomed detail loupe for soldering
 
 - offline support
   - service workers? how does this even work nowadays.
 
 - enhancements
-  - zoomed detail loupe for soldering
-  - context sensitive soldering actions
-  - context sensitive keyboard controls
   - built-in chip decompiler
-  - enhanced graphics modes
-
+  - level editor
