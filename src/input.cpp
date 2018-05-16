@@ -7,7 +7,8 @@
 
 InputBuffer::InputBuffer()
     : savedPlayerX(-1),
-      savedPlayerY(-1)
+      savedPlayerY(-1),
+      savedPlayerRoom(RO_ROOM_NONE)
 {
     clear();
 }
@@ -129,6 +130,17 @@ void InputBuffer::pollJoystick(ROWorld *world, uint16_t &x, uint16_t &y, uint8_t
 
 void InputBuffer::updateMouse(ROWorld *world)
 {
+    // If the player has moved to a different room, clear buffered mouse input
+    if (world) {
+        RORoomId room = world->getObjectRoom(RO_OBJ_PLAYER);
+        if (room != savedPlayerRoom) {
+            js_x = 0;
+            js_y = 0;
+            mouse_buffer.clear();
+        }
+        savedPlayerRoom = room;
+    }
+
     if (mouse_buffer.empty()) {
         return;
     }

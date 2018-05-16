@@ -46,6 +46,7 @@ class InputBuffer
     bool js_button_pressed, js_button_held;
 
     int savedPlayerX, savedPlayerY;
+    RORoomId savedPlayerRoom;
 
     void updateMouse(ROWorld *world);
     bool virtualMouseToPosition(ROWorld *world, int x, int y);
