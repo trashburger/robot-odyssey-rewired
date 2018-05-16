@@ -54,7 +54,6 @@ To do
 
 - offline support
   - service workers? how does this even work nowadays.
-  - home screen icon, favicon
 
 - enhancements
   - zoomed detail loupe for soldering
