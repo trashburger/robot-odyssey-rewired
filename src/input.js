@@ -231,4 +231,20 @@ export function initInputAfterEngineLoads(engine)
             refocus(e);
         });
     }
+
+    for (let button of document.getElementsByClassName('loadgame_btn')) {
+        button.addEventListener('click', (e) => {
+            engine.loadGame();
+            audioContextSetup();
+            refocus(e);
+        });
+    }
+
+    for (let button of document.getElementsByClassName('savegame_btn')) {
+        button.addEventListener('click', (e) => {
+            engine.saveGame();
+            audioContextSetup();
+            refocus(e);
+        });
+    }
 }

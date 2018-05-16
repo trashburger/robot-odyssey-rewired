@@ -42,5 +42,5 @@ class Hardware
     bool mouse_tracking;
     int mouse_x, mouse_y;
 
-    void exit(uint8_t code);
+    void exit(SBTProcess *exiting_process, uint8_t code);
 };

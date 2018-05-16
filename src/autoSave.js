@@ -7,7 +7,19 @@ const autosave_delay = 500;
 
 function doAutoSave(engine)
 {
+    // this is hacky... autosaves have a different
+    // completion action, and they shouldn't clobber
+    // the user's save buffer (it's especially annoying
+    // when loading chips), so I'm saving and restoring
+    // the callback and contents, for now. This could
+    // be improved by using a modified filename for the
+    // autosave, or otherwise asking the engine to use
+    // a different buffer than usual.
+    // fix me!
+
+    const saved_contents = engine.getSaveFile().slice();
     const saved_callback = engine.onSaveFileWrite;
+
     try {
         engine.onSaveFileWrite = function ()
         {
@@ -19,7 +31,9 @@ function doAutoSave(engine)
         }
         engine.saveGame();
     } finally {
+
         engine.onSaveFileWrite = saved_callback;
+        engine.setSaveFile(saved_contents);
     }
 }
 
