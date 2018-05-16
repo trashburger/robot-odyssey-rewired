@@ -28,6 +28,14 @@ export function initInputAfterEngineLoads(engine)
     const canvas_width = fbCanvas.width;
     const canvas_height = fbCanvas.height;
 
+    const game_width = 160;
+    const game_height = 192;
+
+    const hotspot_x = 2;
+    const hotspot_y = 4;
+
+    const doorway_border = 6;
+
     var mouse_tracking_unlocked = false;
 
     function mouseLocationForEvent(e)
@@ -41,8 +49,15 @@ export function initInputAfterEngineLoads(engine)
         const framebufferY = canvasY - border;
 
         // Adjust for cursor hotspot and game coordinate system
-        const x = framebufferX / 2 - 2;
-        const y = 188 - framebufferY;
+        var x = framebufferX / 2 - hotspot_x;
+        var y = game_height - framebufferY - hotspot_y;
+
+        // Make it easier to get through doorways; if the cursor
+        // is near a screen border, push it past the border.
+        if (x <= doorway_border) x = -1;
+        if (x >= game_width - doorway_border) x = game_width+1;
+        if (y <= doorway_border) y = -1;
+        if (y >= game_height - doorway_border) y = game_height+1;
 
         return { x, y };
     }
