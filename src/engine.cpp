@@ -2,6 +2,7 @@
 #include <emscripten.h>
 #include <emscripten/bind.h>
 #include <algorithm>
+#include <vector>
 #include "hardware.h"
 #include "tinySave.h"
 
@@ -191,10 +192,35 @@ static void setCheatsEnabled(bool enable)
     hw.fs.config.joyfile.setCheatsEnabled(enable);
 }
 
+static val getGameMemory()
+{
+    // Get a JS representation of the current ROData, with direct views into memory.
+    // Just for exploration/fun currently.
+
+    ROData d;
+    if (!hw.process || !d.fromProcess(hw.process)) {
+        return val::null();
+    }
+
+    val robots = val::array();
+    for (unsigned i = 0; i < d.robots.count; i++) {
+        val bot = val::object();
+        bot.set("state", val(typed_memory_view(sizeof(RORobot), reinterpret_cast<uint8_t*>(&d.robots.state[i]))));
+        bot.set("grabbers", val(typed_memory_view(sizeof(RORobotGrabber), reinterpret_cast<uint8_t*>(&d.robots.grabbers[i]))));
+        bot.set("batteryAcc", val(typed_memory_view(sizeof(RORobotBatteryAcc), reinterpret_cast<uint8_t*>(&d.robots.batteryAcc[i]))));
+        robots.set(i, bot);
+    }
+
+    val r = val::object();
+    r.set("world", val(typed_memory_view(sizeof(ROWorld), reinterpret_cast<uint8_t*>(d.world))));
+    r.set("circuit", val(typed_memory_view(sizeof(ROCircuit), reinterpret_cast<uint8_t*>(d.circuit))));
+    r.set("robots", robots);
+
+    return r;
+}
+
 EMSCRIPTEN_BINDINGS(engine)
 {
-    register_vector<int>("VectorInt");
-
     constant("MAX_FILESIZE", (unsigned) DOSFilesystem::MAX_FILESIZE);
     constant("MEM_SIZE", (unsigned) Hardware::MEM_SIZE);
     constant("CPU_CLOCK_HZ", (unsigned) OutputQueue::CPU_CLOCK_HZ);
@@ -220,4 +246,5 @@ EMSCRIPTEN_BINDINGS(engine)
     function("setCheatsEnabled", &setCheatsEnabled);
     function("packSaveFile", &packSaveFile);
     function("unpackSaveFile", &unpackSaveFile);
+    function("getGameMemory", &getGameMemory);
 }
