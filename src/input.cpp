@@ -133,7 +133,7 @@ void InputBuffer::updateMouse(ROWorld *world)
     // If the player has moved to a different room, clear buffered mouse input
     if (world) {
         RORoomId room = world->getObjectRoom(RO_OBJ_PLAYER);
-        if (!mouse_buffer().empty && room != savedPlayerRoom) {
+        if (!mouse_buffer.empty() && room != savedPlayerRoom) {
             js_x = 0;
             js_y = 0;
             mouse_buffer.clear();
