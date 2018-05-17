@@ -12,8 +12,6 @@ export function initFiles(engine)
     // Loader for arbitrary saved files
     document.getElementById('savefile_btn').addEventListener('click', (e) => {
         document.getElementById('savefile_input').click();
-        audioContextSetup();
-        refocus(e);
     });
 
     document.getElementById('savefile_input').addEventListener('change', (e) => {
