@@ -271,51 +271,51 @@ typedef uint8_t RORoomTiles[30];
 class ROWorld {
  public:
     struct {
-        uint8_t nextInRoom[0x100];
-        uint8_t spriteId[0x100];
-        uint8_t color[0x100];
-        uint8_t room[0x100];
-        uint8_t x[0x100];
-        uint8_t y[0x100];
+        uint8_t nextInRoom[0x100];          // 0x0000
+        uint8_t spriteId[0x100];            // 0x0100
+        uint8_t color[0x100];               // 0x0200
+        uint8_t room[0x100];                // 0x0300
+        uint8_t x[0x100];                   // 0x0400
+        uint8_t y[0x100];                   // 0x0500
         struct {
-            uint8_t object[0x100];
+            uint8_t object[0x100];          // 0x0600
             struct {
-                uint8_t x[0x100];
-                uint8_t y[0x100];
+                uint8_t x[0x100];           // 0x0700
+                uint8_t y[0x100];           // 0x0800
             } offset;
         } movedBy;
-        uint8_t grabFlag[0x100];
+        uint8_t grabFlag[0x100];            // 0x0900
     } objects;
 
-    ROSprite sprites[64];
+    ROSprite sprites[64];                   // 0x0A00
 
     struct {
-        uint8_t objectListHead[0x40];
-        uint8_t bgColor[0x40];
-        uint8_t fgColor[0x40];
+        uint8_t objectListHead[0x40];       // 0x0E00
+        uint8_t bgColor[0x40];              // 0x0E40
+        uint8_t fgColor[0x40];              // 0x0E80
         struct {
-            uint8_t up[0x40];
-            uint8_t down[0x40];
-            uint8_t right[0x40];
-            uint8_t left[0x40];
+            uint8_t up[0x40];               // 0x0EC0
+            uint8_t down[0x40];             // 0x0F00
+            uint8_t right[0x40];            // 0x0F40
+            uint8_t left[0x40];             // 0x0F80
         } links;
-        uint8_t reserved[0x40];   // Always zero?
-        RORoomTiles tiles[0x40];
+        uint8_t reserved[0x40];             // 0x0FC0   Always zero?
+        RORoomTiles tiles[0x40];            // 0x1000
     } rooms;
 
-    uint8_t unknown[0x100];
+    uint8_t unknown[0x100];                 // 0x1780
 
     struct {
-        uint8_t room[0x80];
-        uint8_t x[0x80];
-        uint8_t y[0x80];
-        uint8_t style[0x80];
-        uint8_t font[0x80];
-        uint8_t color[0x80];
-        uint8_t ptrLow[0x80];
-        uint8_t ptrHigh[0x80];
+        uint8_t room[0x80];                 // 0x1880
+        uint8_t x[0x80];                    // 0x1900
+        uint8_t y[0x80];                    // 0x1980
+        uint8_t style[0x80];                // 0x1A00
+        uint8_t font[0x80];                 // 0x1A80
+        uint8_t color[0x80];                // 0x1B00
+        uint8_t ptrLow[0x80];               // 0x1B80
+        uint8_t ptrHigh[0x80];              // 0x1C00
 
-        uint8_t stringHeap[0x1880];
+        uint8_t stringHeap[0x1880];         // 0x1C80
     } text;
 
     void clear();
@@ -352,37 +352,37 @@ class ROCircuit {
      */
 
     struct {
-        uint8_t unk1[0x100];
+        uint8_t unk1[0x100];            // 0x0000
 
         struct {
-            uint8_t x1[0x100];
-            uint8_t x2[0x100];
-            uint8_t y1[0x100];
-            uint8_t y2[0x100];
+            uint8_t x1[0x100];          // 0x0100
+            uint8_t x2[0x100];          // 0x0200
+            uint8_t y1[0x100];          // 0x0300
+            uint8_t y2[0x100];          // 0x0400
         } wires;
 
-        uint8_t unk2[0x100];
+        uint8_t unk2[0x100];            // 0x0500
 
-        uint8_t unk_byte_1;
-        uint8_t unk_byte_2;
-        uint8_t unk_byte_3;
-        uint8_t unk_byte_4;
-        uint8_t unk_byte_5;
-        uint8_t unk_byte_6;
-        uint8_t unk_byte_7;
-        uint8_t unk_byte_8;
-        uint8_t unk_byte_9;
-        uint8_t unk_byte_10;
-        uint8_t unk_byte_11;
-        uint8_t unk_byte_12;
-        uint8_t unk_byte_13;
-        uint8_t unk_byte_14;
-        uint8_t unk_byte_15;
-        uint8_t remoteControlFlag;
-        uint8_t unk_byte_17;
-        uint8_t unk_byte_18;
-        uint8_t unk_byte_19;
-        uint8_t toolboxIsClosed;
+        uint8_t unk_byte_1;             // 0x0600
+        uint8_t unk_byte_2;             // 0x0601
+        uint8_t unk_byte_3;             // 0x0602
+        uint8_t unk_byte_4;             // 0x0603
+        uint8_t unk_byte_5;             // 0x0604
+        uint8_t unk_byte_6;             // 0x0605
+        uint8_t unk_byte_7;             // 0x0606
+        uint8_t unk_byte_8;             // 0x0607
+        uint8_t unk_byte_9;             // 0x0608
+        uint8_t unk_byte_10;            // 0x0609
+        uint8_t unk_byte_11;            // 0x060A
+        uint8_t unk_byte_12;            // 0x060B
+        uint8_t unk_byte_13;            // 0x060C
+        uint8_t unk_byte_14;            // 0x060D
+        uint8_t unk_byte_15;            // 0x060E
+        uint8_t remoteControlFlag;      // 0x060F
+        uint8_t unk_byte_17;            // 0x0610
+        uint8_t unk_byte_18;            // 0x0611
+        uint8_t unk_byte_19;            // 0x0612
+        uint8_t toolboxIsClosed;        // 0x0613
     };
 
     static ROCircuit *fromProcess(SBTProcess *proc);
