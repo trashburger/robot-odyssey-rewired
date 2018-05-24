@@ -341,6 +341,7 @@ enum ROObjectId {
     RO_OBJ_SHAPE_6                    = 0xFB,
 
     RO_OBJ_ANTENNA                    = 0xFC,
+    RO_OBJ_SPECIAL_CURSOR             = 0xFD,       // Debug? Level editor? What is this?
     RO_OBJ_CURSOR                     = 0xFE,
 
     RO_OBJ_NONE                       = 0xFF,
@@ -565,6 +566,18 @@ class ROWorld {
 
 
 /*
+ * Gate types
+ */
+enum ROGate {
+    RO_GATE_NONE = 0,
+    RO_GATE_AND  = 1,
+    RO_GATE_OR   = 2,
+    RO_GATE_XOR  = 3,
+    RO_GATE_NOT  = 4,
+};
+
+
+/*
  * Robot Odyssey's circuit data. This is in memory at the address
  * SBTADDR_CIRCUIT_DATA, and it is also saved on disk as the .CIR file
  * or as part of a saved game file.
@@ -572,30 +585,58 @@ class ROWorld {
 class ROCircuit {
  public:
     struct {
-        uint8_t unk1[0x100];            // 0x0000
-
+        // Wires attached to normal sprite objects
         struct {
+            uint8_t output_obj[0x100];  // 0x0000   What object does this wire drive?
             uint8_t x1[0x100];          // 0x0100
             uint8_t x2[0x100];          // 0x0200
             uint8_t y1[0x100];          // 0x0300
             uint8_t y2[0x100];          // 0x0400
-        } wires;
+        } obj_wires;
+        
+        // Flip flop state
+        struct {
+            uint8_t state[20];          // 0x0500   One byte per half, 0 or 1
+            uint8_t inputs[20];         // 0x0514   Signal applied to input pins
+        } ff;
 
-        uint8_t unk2[55];               // 0x0500
-        uint8_t unk3[75];               // 0x0537
-        uint8_t unk4[64];               // 0x0582
-        uint8_t unk5[64];               // 0x05c2
-        uint8_t unk6[64];               // 0x0602
-        uint8_t unk7[64];               // 0x0642
-        uint8_t unk8[64];               // 0x0682
+        // Additional wires for nodes
+        struct {
+            uint8_t input_obj[15];      // 0x0528   What object drives this node?
+            uint8_t output2_obj[15];    // 0x0537   Second output for nodes
+            uint8_t x1[15];             // 0x0546
+            uint8_t x2[15];             // 0x0555
+            uint8_t y1[15];             // 0x0564
+            uint8_t y2[15];             // 0x0573
+        } node_wires;
 
-        uint8_t unk9[204];              // 0x06c2
-        uint8_t unkA;                   // 0x078e
-        uint8_t remote_control_state;   // 0x078f
-        uint8_t unkC;                   // 0x0790
-        uint8_t unkD;                   // 0x0791
-        uint8_t unkE;                   // 0x0792
-        uint8_t unkF;                   // 0x0793
+        // Wires attached to small chips
+        struct {
+            uint8_t y1[64];             // 0x0582
+            uint8_t y2[64];             // 0x05c2
+            uint8_t x1[64];             // 0x0602
+            uint8_t x2[64];             // 0x0642
+            uint8_t output_obj[64];     // 0x0682   What object does this wire drive?
+            uint8_t output_pin[64];     // 0x06c2   FF if obj isn't a chip, or 0-7
+        } chip_wires;
+        
+        // Allocating free gates
+        struct {
+            uint8_t gates[105];         // 0x0702   ROGate type, every 3rd slot used
+            uint8_t nodes[15];          // 0x076b
+            uint8_t ff[20];             // 0x077a   By sprite ID, only even slots used
+        } allocation;
+
+        uint8_t special_cursor_obj;     // 0x078e   Normally zero, special: 0xFD, nonzero
+        uint8_t remote_is_on;           // 0x078f
+
+        // Toolbox status
+        struct {
+            uint8_t ff_count;           // 0x0790
+            uint8_t node_count;         // 0x0791
+            uint8_t gate_count;         // 0x0792
+            uint8_t is_closed;          // 0x0793
+        } toolbox;
     };
 
     static ROCircuit *fromProcess(SBTProcess *proc);
