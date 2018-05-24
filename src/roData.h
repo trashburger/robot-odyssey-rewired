@@ -79,7 +79,7 @@ enum ROObjectId {
     RO_OBJ_PROTO_CHIP_TOP_LEFT        = 0x09,
     RO_OBJ_PROTO_CHIP_TOP_RIGHT       = 0x0A,
     RO_OBJ_PROTO_CHIP_BOTTOM_LEFT     = 0x0B,
-    RO_OBJ_PROTO_CHIP_BOTTOM_RIGHT    = 0x0C,    
+    RO_OBJ_PROTO_CHIP_BOTTOM_RIGHT    = 0x0C,
 
     RO_OBJ_PROTO_CHIP_INSIDE_PIN1     = 0x39,   // Top left
     RO_OBJ_PROTO_CHIP_INSIDE_PIN2     = 0x3a,
@@ -593,7 +593,7 @@ class ROCircuit {
             uint8_t y1[0x100];          // 0x0300
             uint8_t y2[0x100];          // 0x0400
         } obj_wires;
-        
+
         // Flip flop state
         struct {
             uint8_t state[20];          // 0x0500   One byte per half, 0 or 1
@@ -619,7 +619,7 @@ class ROCircuit {
             uint8_t output_obj[64];     // 0x0682   What object does this wire drive?
             uint8_t output_pin[64];     // 0x06c2   FF if obj isn't a chip, or 0-7
         } chip_wires;
-        
+
         // Allocating free gates
         struct {
             uint8_t gates[105];         // 0x0702   ROGate type, every 3rd slot used
