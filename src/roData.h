@@ -341,7 +341,7 @@ enum ROObjectId {
     RO_OBJ_SHAPE_6                    = 0xFB,
 
     RO_OBJ_ANTENNA                    = 0xFC,
-    RO_OBJ_SPECIAL_CURSOR             = 0xFD,       // Debug? Level editor? What is this?
+    RO_OBJ_SOLDERING_CURSOR           = 0xFD,
     RO_OBJ_CURSOR                     = 0xFE,
 
     RO_OBJ_NONE                       = 0xFF,
@@ -627,7 +627,7 @@ class ROCircuit {
             uint8_t ff[20];             // 0x077a   By sprite ID, only even slots used
         } allocation;
 
-        uint8_t special_cursor_obj;     // 0x078e   Normally zero, special: 0xFD, nonzero
+        uint8_t saved_cursor_sprite_id; // 0x078e   Normally zero
         uint8_t remote_is_on;           // 0x078f
 
         // Toolbox status
