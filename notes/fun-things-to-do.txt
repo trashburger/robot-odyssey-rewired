@@ -5,8 +5,10 @@ actx = new AudioContext();
 an = new AnalyserNode(actx, { fftSize: 2048, smoothingTimeConstant: 0.5, minDecibels: -100.0, maxDecibels: -10.0 });
 navigator.mediaDevices.getUserMedia({audio: true}).then(function (s) {actx.createMediaStreamSource(s).connect(an)});
 w=ROEngine.getGameMemory().world;
+robots=ROEngine.getGameMemory().robots;
 buf=new Uint8Array(2048);
 function render(c) {
+	for (var r of robots) r.state[24] = 15;
 	an.getByteFrequencyData(buf);
 	c.fillStyle = "rgba(255, 255, 255, 0.8)";
 	var bsize = an.frequencyBinCount / 8;
