@@ -1,3 +1,30 @@
+// Microphone spectrum analyzer input
+
+ROEngine.setSpeed(4.0);
+actx = new AudioContext();
+an = new AnalyserNode(actx, { fftSize: 2048, smoothingTimeConstant: 0.5, minDecibels: -100.0, maxDecibels: -10.0 });
+navigator.mediaDevices.getUserMedia({audio: true}).then(function (s) {actx.createMediaStreamSource(s).connect(an)});
+w=ROEngine.getGameMemory().world;
+buf=new Uint8Array(2048);
+function render(c) {
+	an.getByteFrequencyData(buf);
+	c.fillStyle = "rgba(255, 255, 255, 0.8)";
+	var bsize = an.frequencyBinCount / 8;
+	for (var bin = 0; bin < 8; bin++) {
+		var s = 0;
+		for (var i = bin*bsize; i < (bin+1)*bsize; i++) s += buf[i] * 0.01;
+		c.fillRect(20+bin*4, 180-s, 2, s);
+		w[0x200 + 0x39 + bin] = s > 10 ? 5 : 7;
+	}
+	if (w[0x300] == 12) {
+		c.fillText(render, 20, 30);
+	}
+}
+_onRenderFrame = ROEngine.onRenderFrame;
+ROEngine.onRenderFrame = function(data) { _onRenderFrame(data); render(document.getElementById("framebuffer").getContext("2d")); }
+
+http://localhost:8000/#ESi1L/0EMHUUAMYbXETwsCgIPDyjCcBDk+IlRyxsJM1gjiKILnQUb2HOiCq3AZjQkpUik4PRlRFQpG2y3NWQFMWopKYLtSRUBqIx23/7P23oe2EAQQBFACG33t1QRJWJxWrVckIqtax8EUSgyun0fWEIYpFQQQUhxZIKRycIMMScSIQQ8QEhYDLiArqAL2H4EvK8UMqb3ty2OeecUtM0FAGdjg2P5+PzGfAuDRmsGC8YGmpInUkJiAagY0QZQu/hO6AedPEFle8u8Z5HfkSBnzH938UP+RPPjSKh+W0FJE/Bwf9ffJkPf8LdJW+Y+RLpf9bPoEGKiAyKFyki+8u6u+ZRJl1h/ilCKYfX5dt42HisAG0sBoOp/L+5eb00e//f5Wq1fj3L9ECAub6CCUx0NLo+gPmVFilEpI/RC0qD+AZqzNhdeYzxOebQn5OvHOf1/8+4f//OHyPnTfV1rUr9TnmHihcfXo00Bnu1jY4caba+yVtbiMEArJTZv74BgImowWDIcBQgQEE3IEkAAAjUBnJIIIRxBBjAQCxIQAGKMEigBMYIghAAAUOACSZVoTEFOv07QL06bO+zTapYnkcGf/bPp8ya30RX29IPtsv9IbK5U/edTRS2TpooebWbe60IIM4iXdYqwl6lG+Gkkua2lJ9xSNtWY4j1dgERg3NR2LnMEiLmZPnnGOoDdSORqQI3A+aL9uTosC/sVz2EECSXfCmhfFp3NAbjWGMpj4ekjo9AReHrUFhE2S4TjSAB9/xFo48rmAQ3tSAIgzNfGI892Bs+2bHd5owmzq2KgtDQoQjr+ByrBX+oQqCFgRX9qQgsekx63owQft4eCwPImFt6sS5Bsu7d31jZ1CHlodj0DBv/6no06f2TFwuKU3M=
+
 // MIDI output experiment, musical gates
 
 var midi_send=function(l){}; navigator.requestMIDIAccess({software: true}).then(function (e) {for (let o of e.outputs) { midi_send = function(l) { o[1].send(l) }; return; }});
