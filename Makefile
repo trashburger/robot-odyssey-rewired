@@ -31,6 +31,7 @@ OBJS := \
 	build/tinySave.bc \
 	build/filesystem.bc \
 	build/output.bc \
+	build/draw.bc \
 	build/fspack.bc \
 	build/hardware.bc \
 	library/zstd/lib/libzstd.a

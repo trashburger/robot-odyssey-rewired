@@ -30,6 +30,7 @@ export function initInputAfterEngineLoads(engine)
 
     const game_width = 160;
     const game_height = 192;
+    const cga_zoom = 2;
 
     const hotspot_x = 2;
     const hotspot_y = 4;
@@ -49,8 +50,8 @@ export function initInputAfterEngineLoads(engine)
         const framebufferY = canvasY - border;
 
         // Adjust for cursor hotspot and game coordinate system
-        var x = framebufferX / 2 - hotspot_x;
-        var y = game_height - framebufferY - hotspot_y;
+        var x = framebufferX / cga_zoom / 2 - hotspot_x;
+        var y = game_height - framebufferY / cga_zoom - hotspot_y;
 
         // Make it easier to get through doorways; if the cursor
         // is near a screen border, push it past the border.

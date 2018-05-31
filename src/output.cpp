@@ -9,11 +9,6 @@
 OutputQueue::OutputQueue()
 {
     clear();
-
-    rgb_palette[0] = 0xff000000;
-    rgb_palette[1] = 0xffffff55;
-    rgb_palette[2] = 0xffff55ff;
-    rgb_palette[3] = 0xffffffff;
 }
 
 void OutputQueue::clear()
@@ -31,7 +26,7 @@ void OutputQueue::skipDelay()
     }
 }
 
-void OutputQueue::pushFrame(SBTStack *stack, uint8_t *framebuffer)
+void OutputQueue::pushFrameCGA(SBTStack *stack, uint8_t *framebuffer)
 {
     if (frames.full() || items.full()) {
         stack->trace();
@@ -40,10 +35,26 @@ void OutputQueue::pushFrame(SBTStack *stack, uint8_t *framebuffer)
     }
 
     OutputItem item;
-    item.otype = OUT_FRAME;
+    item.otype = OUT_CGA_FRAME;
     items.push_back(item);
 
     frames.push_back(*(CGAFramebuffer*) framebuffer);
+}
+
+void OutputQueue::pushFrameRGB(SBTStack *stack, uint32_t *framebuffer)
+{
+    if (items.full()) {
+        stack->trace();
+        assert(0 && "Frame queue is too deep! Infinite loop likely.");
+        return;
+    }
+
+    OutputItem item;
+    item.otype = OUT_RGB_FRAME;
+    items.push_back(item);
+
+    // RGB frames aren't queued, there's only one shared buffer.
+    memcpy(rgb_pixels, framebuffer, sizeof rgb_pixels);
 }
 
 void OutputQueue::pushDelay(uint32_t millis)
@@ -69,31 +80,44 @@ void OutputQueue::pushSpeakerTimestamp(uint32_t timestamp)
     items.push_back(item);
 }
 
-void OutputQueue::renderFrame()
+void OutputQueue::dequeueCGAFrame()
 {
     assert(!frames.empty());
     CGAFramebuffer &frame = frames.front();
 
     // Expand CGA color to RGBA
     for (unsigned plane = 0; plane < 2; plane++) {
-        for (unsigned y=0; y < SCREEN_HEIGHT/2; y++) {
-            for (unsigned x=0; x < SCREEN_WIDTH; x++) {
-                unsigned byte = 0x2000*plane + (x + SCREEN_WIDTH*y)/4;
+        for (unsigned y=0; y < CGAFramebuffer::HEIGHT/2; y++) {
+            uint32_t *rgb_line = rgb_pixels + (y*2+plane)*SCREEN_WIDTH*CGAFramebuffer::ZOOM;
+
+            for (unsigned x=0; x < CGAFramebuffer::WIDTH; x++) {
+                unsigned byte = 0x2000*plane + (x + CGAFramebuffer::WIDTH*y)/4;
                 unsigned bit = 3 - (x % 4);
                 unsigned color = 0x3 & (frame.bytes[byte] >> (bit * 2));
-                uint32_t rgb = rgb_palette[color];
-                rgb_pixels[x + (y*2+plane)*SCREEN_WIDTH] = rgb;
+                uint32_t rgb = cga_palette[color];
+
+                // Zoom each CGA pixel
+                for (unsigned zy=0; zy<CGAFramebuffer::ZOOM; zy++) {
+                    for (unsigned zx=0; zx<CGAFramebuffer::ZOOM; zx++) {
+                        rgb_line[zx + zy*SCREEN_WIDTH] = rgb;
+                    }
+                }
+
+                rgb_line += CGAFramebuffer::ZOOM;
             }
         }
     }
 
     // Free the ring buffer slot we were using
     frames.pop_front();
+}
 
+void OutputQueue::renderFrame()
+{
     // Synchronously ask Javascript to do something with this array
     EM_ASM_({
-        Module.onRenderFrame(HEAPU8.subarray($0, $0 + 320*200*4));
-    }, rgb_pixels);
+        Module.onRenderFrame(HEAPU8.subarray($0, $1));
+    }, rgb_pixels, rgb_pixels + (SCREEN_WIDTH * SCREEN_HEIGHT));
 }
 
 uint32_t OutputQueue::renderSoundEffect(uint32_t first_timestamp)
@@ -163,7 +187,12 @@ uint32_t OutputQueue::run()
 
         switch (item.otype) {
 
-            case OUT_FRAME:
+            case OUT_CGA_FRAME:
+                dequeueCGAFrame();
+                renderFrame();
+                break;
+
+            case OUT_RGB_FRAME:
                 renderFrame();
                 break;
 

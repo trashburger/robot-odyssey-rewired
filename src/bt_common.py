@@ -78,38 +78,6 @@ def patch(b):
             b.findCode(':8a16____ 80faff 74ef a0____ 32f6'),
             ])
 
-    # Replace the game's blitter. The normal blit loop is really large,
-    # and unnecessary for us. Replace it with a call to
-    # consoleBlitToScreen(), and read directly from the game's backbuffer.
-
-    b.decl('static bool noBlit = false;')
-    b.patchAndHook(b.findCode(':803e____01 7503 e95a05 c43e____'
-                              'bb2800 a1____ 8cda 8ed8 be0020 33 c0'),
-                   'ret', '''
-        if (!noBlit) {
-            uint8_t *src = g.proc->memSeg(g.proc->peek16(r.ds, 0x3AD5));
-            g.hw->output.pushFrame(g.stack, src);
-            g.hw->output.pushDelay(%d);
-        }
-    ''' % FRAME_RATE_DELAY)
-
-    # Avoid calling the blitter during initialization. Normally the
-    # game clears the screen during initialization, but for us this is
-    # inconvenient- it means if we want to capture the screen after
-    # loading a game, we can't just wait for the first blit. To ensure
-    # that the first blitted frame is a 'real' frame, remove this blit
-    # call.
-    #
-    # Note that we can't just stub out the call, since other parts
-    # of the initialization rely on pointers that are set here.
-
-    b.hook(b.findCode('c3 :e8____ b500 b100 8bf9 8a85ac05 a2____'
-                      'e8____ e8____ c3'),
-           'noBlit = true;')
-    b.hook(b.findCode('c3 e8____: b500 b100 8bf9 8a85ac05 a2____'
-                      'e8____ e8____ c3'),
-           'noBlit = false;')
-
     # Object intersection tests make use of a callback function that tests
     # whether the object is allowed to be picked up. There are at least
     # three different implementations of this function: a stub, a simple
@@ -193,7 +161,7 @@ def patchFramebufferTrace(b, interval=300, delay=10):
             hit++;
             if (hit == %d) {
                 hit = 0;
-                g.hw->output.pushFrame(g.stack, g.proc->memSeg(0xB800));
+                g.hw->output.pushFrameCGA(g.stack, g.proc->memSeg(0xB800));
                 g.hw->output.pushDelay(%d);
             }
         }
@@ -316,3 +284,149 @@ def patchJoystick(b):
         'g.hw->input.pollJoystick(ROWorld::fromProcess(g.proc), '
             'r.bx, r.cx, g.proc->memSeg(r.ds)[%d]);'
         % buttons)
+
+
+def patchVideoBlit(b, code):
+    # Common code for video blit loop replacement, including timing and enable/disable.
+
+    # Replace the game's blitter. The normal blit loop is really large,
+    # and unnecessary for us. Replace it with a call to
+    # consoleBlitToScreen(), and read directly from the game's backbuffer.
+
+    b.decl('static bool noBlit = false;')
+    b.patchAndHook(b.findCode(':803e____01 7503 e95a05 c43e____'
+                              'bb2800 a1____ 8cda 8ed8 be0020 33 c0'),
+                   'ret', '''
+        if (!noBlit) {
+            %s
+            g.hw->output.pushDelay(%d);
+        }
+    ''' % (code, FRAME_RATE_DELAY))
+
+    # Avoid calling the blitter during initialization. Normally the
+    # game clears the screen during initialization, but for us this is
+    # inconvenient- it means if we want to capture the screen after
+    # loading a game, we can't just wait for the first blit. To ensure
+    # that the first blitted frame is a 'real' frame, remove this blit
+    # call.
+    #
+    # Note that we can't just stub out the call, since other parts
+    # of the initialization rely on pointers that are set here.
+
+    b.hook(b.findCode('c3 :e8____ b500 b100 8bf9 8a85ac05 a2____'
+                      'e8____ e8____ c3'),
+           'noBlit = true;')
+    b.hook(b.findCode('c3 e8____: b500 b100 8bf9 8a85ac05 a2____'
+                      'e8____ e8____ c3'),
+           'noBlit = false;')
+
+
+def patchVideoBackbuffer(b):
+    # Replace the game's backbuffer to frontbuffer blit, leave other rendering in place.
+    patchVideoBlit(b, '''
+        uint8_t *src = g.proc->memSeg(g.proc->peek16(r.ds, 0x3AD5));
+        g.hw->output.pushFrameCGA(g.stack, src);
+    ''')
+
+
+def patchVideoHighLevel(b, trace_debug=True):
+    # Replace all rendering, using our own high-depth9 backbuffer.
+    
+    b.decl("#include <stdio.h>")
+
+    # Help us track down writes directly to the backbuffer
+    if trace_debug:
+        b.trace('w', '''
+            return segment == g.proc->peek16(r.ds, 0x3AD5);
+        ''', '''
+            fprintf(stderr, "BACKBUFFER WRITE: %04x:%04x from %04x\\n", segment, offset, ip);
+            g.stack->trace();
+            assert(0 && "Backbuffer write while in high-level video emulation");
+        ''')
+
+    # Low-level sprite (bitmap) rendering
+    video_draw_sprite = b.findCode(':A0____ 3c9a 7203 e9c203 a0____ 3cb1')
+    drawing_arg_x = b.peek16(video_draw_sprite.add(1))
+    drawing_arg_y = drawing_arg_x - 0x4
+    sprite_data_ptr = drawing_arg_x - 0xB
+    string_ptr = drawing_arg_x - 0xE
+    b.patchAndHook(video_draw_sprite, 'ret', '''
+        uint8_t color = r.cl;
+        uint8_t x = g.proc->peek8(r.ds, %d);
+        uint8_t y = g.proc->peek8(r.ds, %d);
+        uint8_t *sprite = g.proc->memSeg(r.ds) + g.proc->peek16(r.ds, %d);
+        g.hw->output.draw.sprite(sprite, x, y, color);
+    ''' % (drawing_arg_x, drawing_arg_y, sprite_data_ptr))
+
+    # Get pointer to the 30-byte room data block from the low-level playfield renderer
+    playfield_data_ptr = b.peek16(b.findCode('e8____ b91e00 8b2e:____ 8bf9 4f d1e7 8bb5'))
+
+    # Hook the slightly higher level renderer that gets 8-bit foreground/background colors
+    video_draw_playfield_with_colors = b.findCode(':'+('8a______ a2____'*8)+'e8____c3')
+    b.patchAndHook(video_draw_playfield_with_colors, 'ret', '''
+        uint8_t bg = r.si;
+        uint8_t fg = r.di;
+        uint8_t *data = g.proc->memSeg(r.ds) + g.proc->peek16(r.ds, %(playfield_data_ptr)d);
+        g.hw->output.draw.playfield(data, fg, bg);
+    ''' % locals())
+
+    # Hook the main text renderer entry point, before branching
+    # to renderers separately for normal and large text based on 'style'.
+    video_draw_text = b.findCode(':a0____ 3c00 7404 3c02 7404 e8____ c3 e8____ c3')
+    
+    # Most text arguments are clustered around 'style' which we have a pointer to from above
+    text_arg_style = b.peek16(video_draw_text.add(1))
+    text_arg_string = text_arg_style - 2
+    text_arg_color = text_arg_style + 1
+    text_arg_x = text_arg_style + 2
+    text_arg_y = text_arg_style + 3
+    text_arg_font = text_arg_style + 4
+
+    # Find the actual font data pointer, from one of the acual low-level font renderer patchers.
+    font_data_ptr = b.peek16(b.findCodeMultiple('b000 8a26____ d1e0 f8 1226____ 8b1e:____ f8 13d8 2e891e', expectedCount=2)[0])
+
+    b.patchAndHook(video_draw_text, 'ret', '''
+        uint8_t *string = g.proc->memSeg(r.ds) + g.proc->peek16(r.ds, %(text_arg_string)d);
+        uint8_t *font_data = g.proc->memSeg(r.ds) + g.proc->peek16(r.ds, %(font_data_ptr)d);
+        uint8_t style = g.proc->peek8(r.ds, %(text_arg_style)d);
+        uint8_t color = g.proc->peek8(r.ds, %(text_arg_color)d);
+        uint8_t font_id = g.proc->peek8(r.ds, %(text_arg_font)d);
+        uint8_t x = g.proc->peek8(r.ds, %(text_arg_x)d);
+        uint8_t y = g.proc->peek8(r.ds, %(text_arg_y)d);
+        g.hw->output.draw.text(string, font_data, x, y, color, font_id, style);
+    ''' % locals())
+
+    # Vertical line drawing
+
+    video_draw_vline = b.findCode(':32FF 8a1e____ e8____ 8bf3 8a1e____ e8____ 8bcb 2bce 7904')
+    drawing_arg_y1 = b.peek16(video_draw_vline.add(0x04))
+    drawing_arg_y2 = b.peek16(video_draw_vline.add(0x0D))
+    drawing_arg_line_color = b.peek16(video_draw_vline.add(0x1F))
+    drawing_arg_x = b.peek16(video_draw_vline.add(0x29))
+
+    b.patchAndHook(video_draw_vline, 'ret', '''
+        uint8_t y1 = g.proc->peek8(r.ds, %(drawing_arg_y1)d);
+        uint8_t y2 = g.proc->peek8(r.ds, %(drawing_arg_y2)d);
+        uint8_t color = g.proc->peek8(r.ds, %(drawing_arg_line_color)d);
+        uint8_t x = g.proc->peek8(r.ds, %(drawing_arg_x)d);
+        g.hw->output.draw.vline(x, y1, y2, color);
+    ''' % locals())
+
+    # Horizontal line drawing
+
+    video_draw_hline = b.findCode(':32FF 8a1e____ e8____ 8bfb 8a1e____ e8____ 8bcb 2bcf 7904')
+    drawing_arg_x1 = b.peek16(video_draw_hline.add(0x04))
+    drawing_arg_x2 = b.peek16(video_draw_hline.add(0x0D))
+    drawing_arg_line_color = b.peek16(video_draw_hline.add(0x1F))
+    drawing_arg_y = b.peek16(video_draw_hline.add(0x2b))
+
+    b.patchAndHook(video_draw_hline, 'ret', '''
+        uint8_t x1 = g.proc->peek8(r.ds, %(drawing_arg_x1)d);
+        uint8_t x2 = g.proc->peek8(r.ds, %(drawing_arg_x2)d);
+        uint8_t color = g.proc->peek8(r.ds, %(drawing_arg_line_color)d);
+        uint8_t y = g.proc->peek8(r.ds, %(drawing_arg_y)d);
+        g.hw->output.draw.hline(x1, x2, y, color);
+    ''' % locals())
+
+    # Blit from backbuffer
+    patchVideoBlit(b, 'g.hw->output.pushFrameRGB(g.stack, g.hw->output.draw.backbuffer);')

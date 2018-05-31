@@ -4,15 +4,12 @@
 #include <list>
 #include <circular_buffer.hpp>
 #include "sbt86.h"
-
-struct CGAFramebuffer
-{
-    uint8_t bytes[0x4000];
-};
+#include "draw.h"
 
 enum OutputType
 {
-    OUT_FRAME,
+    OUT_CGA_FRAME,
+    OUT_RGB_FRAME,
     OUT_SPEAKER_TIMESTAMP,
     OUT_DELAY,
 };
@@ -35,15 +32,17 @@ class OutputQueue
     void skipDelay();
     uint32_t run();
 
-    void pushFrame(SBTStack *stack, uint8_t *framebuffer);
+    void pushFrameCGA(SBTStack *stack, uint8_t *framebuffer);
+    void pushFrameRGB(SBTStack *stack, uint32_t *framebuffer);
     void pushDelay(uint32_t millis);
     void pushSpeakerTimestamp(uint32_t timestamp);
 
-    static const unsigned SCREEN_WIDTH = 320;
-    static const unsigned SCREEN_HEIGHT = 200;
+    static const unsigned SCREEN_WIDTH = CGAFramebuffer::WIDTH * CGAFramebuffer::ZOOM;
+    static const unsigned SCREEN_HEIGHT = CGAFramebuffer::HEIGHT * CGAFramebuffer::ZOOM;
 
     uint32_t rgb_pixels[SCREEN_WIDTH * SCREEN_HEIGHT];
-    uint32_t rgb_palette[4];
+    uint32_t cga_palette[4];
+    RGBDraw draw;
 
     static const int CPU_CLOCK_HZ = 4770000;
     static const unsigned CPU_CLOCKS_PER_SAMPLE = 200;
@@ -61,6 +60,7 @@ class OutputQueue
     jm::circular_buffer<CGAFramebuffer, MAX_BUFFERED_FRAMES> frames;
     uint32_t delay_remaining;
 
+    void dequeueCGAFrame();
     void renderFrame();
     uint32_t renderSoundEffect(uint32_t first_timestamp);
 };

@@ -1,7 +1,7 @@
 import engineFactory from "../build/engine.js"
 import { loadingBegin, loadingError, loadingDone } from "./loading.js"
 import { filenameForSaveData } from "./roData.js"
-import { initGraphics } from "./graphics.js"
+import { initGraphics, initGraphicsAfterEngineLoads } from "./graphics.js"
 import { initSound } from "./sound.js"
 import { initInputEarly, initInputAfterEngineLoads } from "./input.js"
 import { initAutoSave } from "./autoSave.js"
@@ -21,6 +21,7 @@ try {
     engine.then(function ()
     {
         initFiles(engine);
+        initGraphicsAfterEngineLoads(engine);
         loadingDone();
         initInputAfterEngineLoads(engine);
         initAutoSave(engine);

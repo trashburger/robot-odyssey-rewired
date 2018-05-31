@@ -45,7 +45,7 @@ b.patch('019E:0102', 'ret')
 final_loop = sbt86.Addr16(str='019E:0221')
 b.markSubroutine(final_loop)
 b.patchAndHook(final_loop, 'ret',
-   	'g.hw->output.pushFrame(g.stack, g.proc->memSeg(0xB800));'
+   	'g.hw->output.pushFrameCGA(g.stack, g.proc->memSeg(0xB800));'
     'g.hw->output.pushDelay(1000);'
     'g.proc->continueFrom(r, &sub_%X);' % final_loop.linear)
 
@@ -60,7 +60,7 @@ for (call_site, delay) in [
     continue_at = call_site.add(3)
 
     b.patchAndHook(call_site, 'ret',
-        'g.hw->output.pushFrame(g.stack, g.proc->memSeg(0xB800));'
+        'g.hw->output.pushFrameCGA(g.stack, g.proc->memSeg(0xB800));'
         'g.hw->output.pushDelay(%d);'
         'g.proc->continueFrom(r, &sub_%X);' % (delay, continue_at.linear))
     b.markSubroutine(continue_at)
@@ -90,7 +90,7 @@ for call_site in [
     b.markSubroutine(continue_at)
     b.markSubroutine(target)
     b.patchAndHook(call_site, 'ret',
-        'g.hw->output.pushFrame(g.stack, g.proc->memSeg(0xB800));'
+        'g.hw->output.pushFrameCGA(g.stack, g.proc->memSeg(0xB800));'
         'g.hw->output.pushDelay(50);'
         'sub_%X();'
         'g.proc->continueFrom(r, &sub_%X);' % (

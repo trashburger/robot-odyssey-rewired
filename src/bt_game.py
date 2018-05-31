@@ -16,6 +16,7 @@ bt_common.patch(b)
 bt_common.patchJoystick(b)
 bt_common.patchChips(b)
 bt_common.patchLoadSave(b)
+bt_common.patchVideoHighLevel(b)
 
 # Remove modal "Insert disk 1" message on world load failure
 b.patchAndHook('0E3B:2CBE', 'ret', 'assert(0 && "World file load failure");')

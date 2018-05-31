@@ -16,6 +16,7 @@ bt_common.patch(b)
 bt_common.patchJoystick(b)
 bt_common.patchChips(b)
 bt_common.patchLoadSave(b)
+bt_common.patchVideoHighLevel(b)
 
 # Remove modal "Insert disk 1" message on save-file load failure
 b.patch('0D63:5CFB', 'jmp 0x5D14')

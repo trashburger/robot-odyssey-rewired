@@ -219,6 +219,14 @@ static val getGameMemory()
     return r;
 }
 
+static val getColorMemory()
+{
+    val r = val::object();
+    r.set("cga", val(typed_memory_view(sizeof hw.output.cga_palette / sizeof hw.output.cga_palette[0], hw.output.cga_palette)));
+    r.set("patterns", val(typed_memory_view(sizeof hw.output.draw.patterns / sizeof hw.output.draw.patterns[0], hw.output.draw.patterns)));
+    return r;
+}
+
 EMSCRIPTEN_BINDINGS(engine)
 {
     constant("MAX_FILESIZE", (unsigned) DOSFilesystem::MAX_FILESIZE);
@@ -227,6 +235,7 @@ EMSCRIPTEN_BINDINGS(engine)
     constant("AUDIO_HZ", (unsigned) OutputQueue::AUDIO_HZ);
     constant("SCREEN_WIDTH", (unsigned) OutputQueue::SCREEN_WIDTH);
     constant("SCREEN_HEIGHT", (unsigned) OutputQueue::SCREEN_HEIGHT);
+    constant("SCREEN_TILE_SIZE", (unsigned) RGBDraw::SCREEN_TILE_SIZE);
 
     function("exec", &exec);
     function("setSpeed", &setSpeed);
@@ -247,4 +256,5 @@ EMSCRIPTEN_BINDINGS(engine)
     function("packSaveFile", &packSaveFile);
     function("unpackSaveFile", &unpackSaveFile);
     function("getGameMemory", &getGameMemory);
+    function("getColorMemory", &getColorMemory);
 }

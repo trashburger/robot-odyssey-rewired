@@ -334,9 +334,12 @@ class Trace:
 
     def codegen(self):
         return ('static SBT_INLINE int %s_probe(%s) {\n'
+                'ProcessLocals& g = gProcessLocals\n;'
+                'SBTRegs& r = g.r\n;'
                 '%s\n}\n'
                 'static void %s_fire(%s) {\n'
-                'ProcessLocals& g = gProcessLocals;\n'
+                'ProcessLocals& g = gProcessLocals\n;'
+                'SBTRegs& r = g.r\n;'
                 '%s\n}\n') % (
             self.name, self._args, self.probe,
             self.name, self._args, self.fire)
