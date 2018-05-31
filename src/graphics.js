@@ -53,12 +53,32 @@ export function initGraphicsAfterEngineLoads(engine)
         patterns.fill(rgb, slot*PATTERN_SIZE, (slot+1)*PATTERN_SIZE);
     }
 
+    engine.setColorTilesFromImage = function(first_slot, img_src)
+    {
+        const img = document.createElement('img');
+        img.src = img_src;
+
+        return img.decode().then(function() {
+
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0);
+            const idata = ctx.getImageData(0, 0, img.width, img.height);
+            const words = new Uint32Array(idata.data.buffer);
+
+            patterns.subarray(first_slot * PATTERN_SIZE).set(words);
+        });
+    }
+
     engine.setCheckerboardColor = function(slot, rgb1, rgb2, size)
     {
         size = size || 2;
         for (let y = 0; y < SCREEN_TILE_SIZE; y++) {
             for (let x = 0; x < SCREEN_TILE_SIZE; x++) {
-                patterns[slot*PATTERN_SIZE + y*SCREEN_TILE_SIZE + x] = (x^y)&size ? rgb1 : rgb2;
+                patterns[slot*PATTERN_SIZE + y*SCREEN_TILE_SIZE + x] = (x^y)&size ? rgb2 : rgb1;
             }
         }
     }
@@ -68,20 +88,20 @@ export function initGraphicsAfterEngineLoads(engine)
         size = size || 2;
         for (let y = 0; y < SCREEN_TILE_SIZE; y++) {
             for (let x = 0; x < SCREEN_TILE_SIZE; x++) {
-                patterns[slot*PATTERN_SIZE + y*SCREEN_TILE_SIZE + x] = x&size ? rgb1 : rgb2;
+                patterns[slot*PATTERN_SIZE + y*SCREEN_TILE_SIZE + x] = x&size ? rgb2 : rgb1;
             }
         }
     }
 
-    engine.setHGRColors = function(pattern_size)
+    engine.setHGRColors = function(color_table)
     {
         // Original colors available in HGR mode
-        const hgr = [
+        const hgr = color_table || [
             0xff000000,  // Black (0)
             0xfffe3bb9,  // Purple (1)
             0xff00ca40,  // Green (2)
             0xffd8a909,  // Blue (3)
-            0xff2354fc,  // Orange (4)
+            0xff317aed,  // Orange (4)
             0xffffffff,  // White (5)
         ];
 
@@ -90,7 +110,7 @@ export function initGraphicsAfterEngineLoads(engine)
         engine.setEmulatedCGAPalette([
             hgr[0],      // Black (0)
             hgr[3],      // Cyan -> Blue (3)
-            0xff3890e8,  // Magenta -> Orange (custom)
+            hgr[4],      // Magenta -> Orange (4)
             hgr[5],      // White (3)
         ]);
 
@@ -127,10 +147,10 @@ export function initGraphicsAfterEngineLoads(engine)
         engine.setSolidColor(0x15, hgr[0]);
     }
 
-    engine.setCGAColors = function()
+    engine.setCGAColors = function(color_table)
     {
         // Original CGA colors
-        const cga = [
+        const cga = color_table || [
             0xff000000,  // Black (0)
             0xffffff55,  // Cyan (1)
             0xffff55ff,  // Magenta (2)
