@@ -271,7 +271,7 @@ class SBTProcess
 
     uint8_t peek8(uint16_t seg, uint16_t off);
     void poke8(uint16_t seg, uint16_t off, uint8_t value);
-    int16_t peek16(uint16_t seg, uint16_t off);
+    uint16_t peek16(uint16_t seg, uint16_t off);
     void poke16(uint16_t seg, uint16_t off, uint16_t value);
 
     void failedDynamicBranch(uint16_t cs, uint16_t ip, uint32_t value);

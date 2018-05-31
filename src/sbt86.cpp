@@ -182,7 +182,7 @@ void SBTProcess::poke8(uint16_t seg, uint16_t off, uint8_t value)
     memSeg(seg)[off] = value;
 }
 
-int16_t SBTProcess::peek16(uint16_t seg, uint16_t off)
+uint16_t SBTProcess::peek16(uint16_t seg, uint16_t off)
 {
     return read16(memSeg(seg) + off);
 }
