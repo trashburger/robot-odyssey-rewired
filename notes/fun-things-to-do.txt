@@ -1,3 +1,32 @@
+// Microphone spectrum analyzer input
+
+ROEngine.setSpeed(4.0);
+actx = new AudioContext();
+an = new AnalyserNode(actx, { fftSize: 2048, smoothingTimeConstant: 0.5, minDecibels: -100.0, maxDecibels: -10.0 });
+navigator.mediaDevices.getUserMedia({audio: true}).then(function (s) {actx.createMediaStreamSource(s).connect(an)});
+w=ROEngine.getGameMemory().world;
+robots=ROEngine.getGameMemory().robots;
+buf=new Uint8Array(2048);
+function render(c) {
+	for (var r of robots) r.state[24] = 15;
+	an.getByteFrequencyData(buf);
+	c.fillStyle = "rgba(255, 255, 255, 0.8)";
+	var bsize = an.frequencyBinCount / 8;
+	for (var bin = 0; bin < 8; bin++) {
+		var s = 0;
+		for (var i = bin*bsize; i < (bin+1)*bsize; i++) s += buf[i];
+		s = Math.min(150, s *  10.0 / an.frequencyBinCount);
+		if (w[0x300] == 12) {
+			c.fillRect(40+bin*32, 170-s, 16, s);
+		}
+		w[0x200 + 0x39 + bin] = s > 10 ? 5 : 7;
+	}
+}
+_onRenderFrame = ROEngine.onRenderFrame;
+ROEngine.onRenderFrame = function(data) { _onRenderFrame(data); render(document.getElementById("framebuffer").getContext("2d")); }
+
+http://localhost:8000/#ESi1L/0EMPUhAIbyqEigFBYKxDxxykvSYby9QH4Kr8PrMDr8FuPlSGEFqxAXavlAnwKdk0cwdGqCdVYWkRej4JPEuQk+jClXymMZJmFAST+S/X1j+x7CAIkAhABXV1UXegbsYFxyvpgDvwIxL88nKJTTlG5ns0EDR5GRkHI5RMGCBJ0JPCCIjkIMHZuaH3ZyOQMGbjxgAqVxJmFWlcSDczOgBchC0hJZIcfBT4+PUtMSCKOiG6KNDIIERySYQyENz9e75QTYcC1PThVVUlCp5wqksoMHpCOfC0G3IDAInBEKZ3y9nm9WXIvrusJSaCe0NbVpmqYLirTZSo3GAmNhud1uMJu12W7CREmSu6TrbgXhUUQUNCTrWOCXq6lwBW/1U8cMSkS948gdDef88lM5eRQ+iEbp4KzzyS/xI97max7pie/yug/wLJ7qr36YQihJMebrSswMPNcQif8+4qjM4hklxURqLt3jgbzTP32Kdz6GP36JN/E+b/TL7/n/RwAI8y1guBjrH1u/AhkaXg3PiKC4295b5N6ViGymBGricBuWyyHWkEE0TjtF7GCuqKygJ5pEkPj/o7AX9u1DPd3Q0qpxYkn4Mk/gfT/jZQx98nOCvvk/CqfzOVPLWUOnoFPrert5B2lWzjE+o3Z2Ogj98w7+wMe81tf42+d4Dk/0Ef7Dh3jnM42QKP5H4vg8WOkYWVlY72CC74agYeUGCl5wxgf6ZvFnfi/gcw8VLqf3XnVZmj7KKPbXqW91JzHdf98O4JfJTn619vvK2d+1liJjx9LLG7v65fVNewDUm2fq9+SXF+zffmt49+/Wfx8413epmH19qOq0IPHK3q5+0kjSiA4h9+vLywsJkq4uW/tX/48c4eL67bGYDaBa+/ZhQ5oW0aiV0Ui0YTBsYuLBwKSkCoC/qFE9NDQiMwsKgGgEkKhmAAAAOkJBFsRJiIEAwggSEgCQABgBAoQIR2ACIkTYxmIFBP07gO3qQ9tnm6TNCM7JMdFvFsmhvxtViN3NLFAEHg4OATud/tJNcCeDW5DKWJKxyLhW0tA4pVYJJvdlUsn09z0UfGOBiHVKXfISWXKwwvqxAccyhMlOPNWD3EPLmPqJd4scnYfrDFxYhnpYHeWd6cF/8i56QqIOpDBUhjzAcxhiAUgRbLG895kYjh6jvCmBX3KVvMAD+Gown0kxyP8Mfp0TEDUghaFi8MWUFTXELYhRVoUfKgShwUHhoGoUbSDBQr0FlXmw+MW006QXzbwHgxh/Gl4Rif6hSS/uXPxncTNEVablpHvanalMVWuB2E7QwUSpqfJDZwIh67OAXqwlRR+4YsAxUyulrJKHuS6EQbLOi3/l0Qi+vwXkUWzSy4acsCR/Ak/7UJk4NLIIsbMxiXe9p1rt6W4nvZDnGHGhjLh+VIF3qZ/ylchhSC3KAoAcD9+sxCyu/BScKj6IcDC2BYqTHilxAQuJ6yc=
+
 // MIDI output experiment, musical gates
 
 var midi_send=function(l){}; navigator.requestMIDIAccess({software: true}).then(function (e) {for (let o of e.outputs) { midi_send = function(l) { o[1].send(l) }; return; }});
