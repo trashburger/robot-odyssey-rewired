@@ -263,4 +263,13 @@ export function initInputAfterEngineLoads(engine)
             refocus(e);
         });
     }
+
+    for (let button of document.getElementsByClassName('engine_call_btn')) {
+        button.addEventListener('click', (e) => {
+            engine[button.dataset.function]();
+            audioContextSetup();
+            refocus(e);
+        });
+    }
+
 }

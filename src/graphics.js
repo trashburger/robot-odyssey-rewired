@@ -43,43 +43,133 @@ export function initGraphicsAfterEngineLoads(engine)
     const SCREEN_TILE_SIZE = engine.SCREEN_TILE_SIZE;
     const PATTERN_SIZE = SCREEN_TILE_SIZE * SCREEN_TILE_SIZE;
 
-    cga[0] = 0xff000000;
-    cga[1] = 0xffffff55;
-    cga[2] = 0xffff55ff;
-    cga[3] = 0xffffffff;
+    engine.setEmulatedCGAPalette = function(colors)
+    {
+        cga.set(colors);
+    }
 
-    function setSolidColor(slot, rgb) {
+    engine.setSolidColor = function(slot, rgb)
+    {
         patterns.fill(rgb, slot*PATTERN_SIZE, (slot+1)*PATTERN_SIZE);
     }
 
-    function setCheckerboardColor(slot, rgb1, rgb2) {
+    engine.setCheckerboardColor = function(slot, rgb1, rgb2, size)
+    {
+        size = size || 2;
         for (let y = 0; y < SCREEN_TILE_SIZE; y++) {
             for (let x = 0; x < SCREEN_TILE_SIZE; x++) {
-                patterns[slot*PATTERN_SIZE + y*SCREEN_TILE_SIZE + x] = (x^y)&1 ? rgb1 : rgb2;
+                patterns[slot*PATTERN_SIZE + y*SCREEN_TILE_SIZE + x] = (x^y)&size ? rgb1 : rgb2;
             }
         }
     }
 
-    setSolidColor(0x00, 0xff000000);
-    setSolidColor(0x01, 0xff29da00);
-    setSolidColor(0x02, 0xfffc60c0);
-    setSolidColor(0x03, 0xffffffff);
-    setSolidColor(0x04, 0xff000000);
-    setSolidColor(0x05, 0xff147bfa);
-    setSolidColor(0x06, 0xfffdb200);
-    setSolidColor(0x07, 0xffffffff);    
-    setCheckerboardColor(0x08, 0xfffdb200, 0xff000000);
-    setCheckerboardColor(0x09, 0xff147bfa, 0xff000000);
-    setCheckerboardColor(0x0a, 0xfffc60c0, 0xff000000);
-    setCheckerboardColor(0x0b, 0xff29da00, 0xff000000);
-    setCheckerboardColor(0x0c, 0xff147bfa, 0xffffffff);
-    setCheckerboardColor(0x0d, 0xfffdb200, 0xffffffff);
-    setCheckerboardColor(0x0e, 0xff29da00, 0xffffffff);
-    setCheckerboardColor(0x0f, 0xfffc60c0, 0xffffffff);
-    setCheckerboardColor(0x10, 0xffdba6b6, 0xff000000);
-    setCheckerboardColor(0x11, 0xffd5bf90, 0xff000000);
-    setCheckerboardColor(0x12, 0xff8fcbd4, 0xff000000);
-    setCheckerboardColor(0x13, 0xffeca3ca, 0xff000000);
-    setCheckerboardColor(0x14, 0xffe9b5a2, 0xff000000);
-    setSolidColor(0x15, 0xff000000);
+    engine.setStripedColor = function(slot, rgb1, rgb2, size)
+    {
+        size = size || 2;
+        for (let y = 0; y < SCREEN_TILE_SIZE; y++) {
+            for (let x = 0; x < SCREEN_TILE_SIZE; x++) {
+                patterns[slot*PATTERN_SIZE + y*SCREEN_TILE_SIZE + x] = x&size ? rgb1 : rgb2;
+            }
+        }
+    }
+
+    engine.setHGRColors = function(pattern_size)
+    {
+        // Original colors available in HGR mode
+        const hgr = [
+            0xff000000,  // Black (0)
+            0xfffe3bb9,  // Purple (1)
+            0xff00ca40,  // Green (2)
+            0xffd8a909,  // Blue (3)
+            0xff2354fc,  // Orange (4)
+            0xffffffff,  // White (5)
+        ];
+
+        // Chosen colors for the CGA emulation in cutscenes;
+        // compromise between the 4-color look and the HGR palette.
+        engine.setEmulatedCGAPalette([
+            hgr[0],      // Black (0)
+            hgr[3],      // Cyan -> Blue (3)
+            0xff3890e8,  // Magenta -> Orange (custom)
+            hgr[5],      // White (3)
+        ]);
+
+        // Sprite colors for the main game
+        engine.setSolidColor(0x00, hgr[0]);
+        engine.setSolidColor(0x01, hgr[2]);
+        engine.setSolidColor(0x02, hgr[1]);
+        engine.setSolidColor(0x03, hgr[5]);
+        engine.setSolidColor(0x04, hgr[0]);
+        engine.setSolidColor(0x05, hgr[4]);
+        engine.setSolidColor(0x06, hgr[3]);
+        engine.setSolidColor(0x07, hgr[5]);    
+
+        // Playfield color patterns
+        engine.setCheckerboardColor(0x08, hgr[3], hgr[0]);
+        engine.setCheckerboardColor(0x09, hgr[4], hgr[0]);
+        engine.setCheckerboardColor(0x0a, hgr[1], hgr[0]);
+        engine.setCheckerboardColor(0x0b, hgr[2], hgr[0]);
+        engine.setCheckerboardColor(0x0c, hgr[4], hgr[5]);
+        engine.setCheckerboardColor(0x0d, hgr[3], hgr[5]);
+        engine.setCheckerboardColor(0x0e, hgr[2], hgr[5]);
+        engine.setCheckerboardColor(0x0f, hgr[1], hgr[5]);
+
+        // These are basically white on black, but with different
+        // color fringing. Implement these here as desaturated colors
+        // mixed with black on a checkerboard, for now.
+        engine.setCheckerboardColor(0x10, 0xffd4a2e4, hgr[0]);
+        engine.setCheckerboardColor(0x11, 0xffb1daa2, hgr[0]);
+        engine.setCheckerboardColor(0x12, 0xff8fcbd3, hgr[0]);
+        engine.setCheckerboardColor(0x13, 0xfffbc3ba, hgr[0]);
+        engine.setCheckerboardColor(0x14, 0xfffbc3ba, hgr[0]);
+
+        // Unused / blank
+        engine.setSolidColor(0x15, hgr[0]);
+    }
+
+    engine.setCGAColors = function()
+    {
+        // Original CGA colors
+        const cga = [
+            0xff000000,  // Black (0)
+            0xffffff55,  // Cyan (1)
+            0xffff55ff,  // Magenta (2)
+            0xffffffff,  // White (3)
+        ];
+
+        // Emulated colors for CGA menus/cutscenes
+        engine.setEmulatedCGAPalette(cga);
+
+        // Sprite colors for the main game
+        engine.setSolidColor(0x00, cga[0]);
+        engine.setStripedColor(0x01, cga[1], cga[0]);
+        engine.setStripedColor(0x02, cga[1], cga[2]);
+        engine.setStripedColor(0x03, cga[3], cga[3]);
+        engine.setSolidColor(0x04, cga[0]);
+        engine.setStripedColor(0x05, cga[2], cga[0]);
+        engine.setStripedColor(0x06, cga[1], cga[1]);
+        engine.setStripedColor(0x07, cga[3], cga[3]);
+
+        // Playfield colors
+        engine.setStripedColor(0x08, cga[1], cga[3]);
+        engine.setStripedColor(0x09, cga[2], cga[2]);
+        engine.setStripedColor(0x0a, cga[0], cga[2]);
+        engine.setStripedColor(0x0b, cga[1], cga[0]);
+
+        engine.setStripedColor(0x0c, cga[3], cga[1]);
+        engine.setStripedColor(0x0d, cga[2], cga[3]);
+        engine.setStripedColor(0x0e, cga[3], cga[1]);
+        engine.setStripedColor(0x0f, cga[2], cga[1]);
+
+        engine.setStripedColor(0x10, cga[3], cga[0]);
+        engine.setStripedColor(0x11, cga[3], cga[0]);
+        engine.setStripedColor(0x12, cga[3], cga[0]);
+        engine.setStripedColor(0x13, cga[3], cga[0]);
+        engine.setStripedColor(0x14, cga[3], cga[0]);
+
+        // Unused / blank
+        engine.setStripedColor(0x15, cga[0], cga[0]);
+    }
+
+    engine.setHGRColors();
 }

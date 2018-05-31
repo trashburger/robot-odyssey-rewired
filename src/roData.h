@@ -12,6 +12,15 @@ enum ROColor {
 
 
 /*
+ * Text rendering styles
+ */
+enum ROTextStyle {
+    RO_TEXT_NORMAL = 0,
+    RO_TEXT_BIG = 2,
+};
+
+
+/*
  * Object grabFlag states. Can the player grab this object?
  */
 enum ROGrabFlag {

@@ -30,4 +30,5 @@ public:
     void hline(uint8_t x1, uint8_t x2, uint8_t y, uint8_t color);
 
     void pixel_160x192(unsigned x, unsigned y, uint8_t color);
+    void pixel_320x192(unsigned x, unsigned y, uint8_t color);
 };
