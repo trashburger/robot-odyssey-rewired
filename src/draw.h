@@ -29,6 +29,6 @@ public:
     void vline(uint8_t x, uint8_t y1, uint8_t y2, uint8_t color);
     void hline(uint8_t x1, uint8_t x2, uint8_t y, uint8_t color);
 
-    void pixel_160x192(unsigned x, unsigned y, uint8_t color);
-    void pixel_320x192(unsigned x, unsigned y, uint8_t color);
+    void pixel_160x192(unsigned x, unsigned y, uint8_t color, unsigned anchor_x, unsigned anchor_y);
+    void pixel_320x192(unsigned x, unsigned y, uint8_t color, unsigned anchor_x, unsigned anchor_y);
 };
