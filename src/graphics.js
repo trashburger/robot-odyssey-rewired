@@ -12,10 +12,6 @@ export function initGraphics(engine)
     const context = canvas.getContext('2d');
     const image = context.createImageData(width, height);
 
-    // Blank canvas, including a black border for consistent edge blending
-    context.fillStyle = '#000';
-    context.fillRect(0, 0, width + 2*border, height + 2*border);
-
     // Canvas resize handler
     const resize = () => {
         const w_box = document.documentElement.clientWidth - margin;
