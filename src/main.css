@@ -67,6 +67,7 @@ button {
 #framebuffer {
     width: 667px;
     height: 500px;
+    background: #000;
 }
 
 #savefile_input {
