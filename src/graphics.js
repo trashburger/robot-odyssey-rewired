@@ -53,6 +53,7 @@ export function initGraphicsAfterEngineLoads(engine)
     {
         first_slot = first_slot || 0;
         const img = document.createElement('img');
+        img.crossOrigin = "Anonymous";
         img.src = img_src;
 
         return img.decode().then(function() {
