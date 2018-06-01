@@ -97,10 +97,11 @@ void RGBDraw::text(uint8_t *string, uint8_t *font_data, uint8_t x, uint8_t y,
             y -= 9 * zoom;
 
         } else if (c >= 0x20 && c < 0x80) {
-            // Clip off-screen characters entirely.
-            // The original game data has some junk
-            // strings that normally aren't visible;
+            // Clip off-screen characters entirely, and stop advancing
+            // the cursor so we avoid wrap-around.
+            // The original game data has some junk strings that normally aren't visible;
             // see room 0x19 in TUT6.WOR, and room 0x14 in TUT5.WOR
+
             if (x < 160 && y < 192-8) {
                 uint8_t *font = font_start + (c - 0x20);
                 for (unsigned line = 0; line < 8; line++) {
@@ -119,10 +120,10 @@ void RGBDraw::text(uint8_t *string, uint8_t *font_data, uint8_t x, uint8_t y,
                         }
                     }
                 }
-            }
 
-            // Next character cell
-            x += 4 * zoom;
+                // Next character cell
+                x += 4 * zoom;
+            }
         }
 
         string++;
