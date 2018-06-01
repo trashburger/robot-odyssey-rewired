@@ -5,9 +5,8 @@
 
 RGBDraw::RGBDraw()
 {
-    for (unsigned pixel = 0; pixel < SCREEN_WIDTH * SCREEN_HEIGHT; pixel++) {
-        backbuffer[pixel] = 0xff000000;
-    }
+    // Cleared to transparent black
+    memset(backbuffer, 0, sizeof backbuffer);
 }
 
 void RGBDraw::pixel_160x192(unsigned x, unsigned y, uint8_t color, unsigned anchor_x, unsigned anchor_y)
