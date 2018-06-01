@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title><%= htmlWebpackPlugin.options.title %></title>
+  <meta name="description" content="Robot Odyssey is a computer game about digital logic from 1984. This version has been ported from DOS to your browser.">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
   <link rel="preload" href="bundle.js" as="script">
   <link rel="preload" href="/rewired-tileset.png" as="image">
@@ -18,7 +19,7 @@
       <div id="joystick_xy"></div>
       <button class="joystick_btn">BUTTON</button>
     </div>
-    <p>
+    <div class="button_row">
       <button class="keyboard_btn" data-ascii=" " data-scancode="0x39">SPACEBAR</button>
       <button class="keyboard_btn" data-ascii="0x0D" data-scancode="0x1C">ENTER</button>
       <button class="keyboard_btn" data-ascii="0x1B" data-scancode="0x01">ESC</button>
@@ -39,26 +40,26 @@
       <button class="keyboard_btn" data-ascii="6" data-scancode="0x4D">⇢</button>
       <button class="keyboard_btn" data-ascii="8" data-scancode="0x48">⇡</button>
       <button class="keyboard_btn" data-ascii="2" data-scancode="0x50">⇣</button>
-    </p>
-    <p>
+    </div>
+    <div class="button_row">
       <button class="setspeed_btn" data-speed="0.24">&frac14;</button>
       <button class="setspeed_btn" data-speed="0.5">&frac12;</button>
       <button class="setspeed_btn" data-speed="1.0">1x</button>
       <button class="setspeed_btn" data-speed="2.0">2x</button>
       <button class="setspeed_btn" data-speed="10">10x</button>
-    </p>
-    <p>
+    </div>
+    <div class="button_row">
       <button id="savefile_btn">Load file</button>
       <input type="file" id="savefile_input">
       <button class="exec_btn" data-program="play.exe" data-args="">Boot</button>
       <button class="loadgame_btn">Reload</button>
       <button class="savegame_btn">Save game</button>
-    </p>
-    <p>
+    </div>
+    <div class="button_row">
       <button class="color_tileset_btn" data-src="/rewired-tileset.png">Rewired Tileset</button>
       <button class="engine_call_btn" data-function="setHGRColors">Apple (HGR) Colors</button>
       <button class="engine_call_btn" data-function="setCGAColors">PC (CGA) Colors</button>
-    </p>
+    </div>
   </div>
 </body>
 </html>
