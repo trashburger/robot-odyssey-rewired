@@ -5,6 +5,7 @@
   <title><%= htmlWebpackPlugin.options.title %></title>
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
   <link rel="preload" href="bundle.js" as="script">
+  <link rel="preload" href="/rewired-tileset.png" as="image">
 </head>
 <body>
   <div id="frame">
@@ -54,6 +55,7 @@
       <button class="savegame_btn">Save game</button>
     </p>
     <p>
+      <button class="color_tileset_btn" data-src="/rewired-tileset.png">Rewired Tileset</button>
       <button class="engine_call_btn" data-function="setHGRColors">Apple (HGR) Colors</button>
       <button class="engine_call_btn" data-function="setCGAColors">PC (CGA) Colors</button>
     </p>

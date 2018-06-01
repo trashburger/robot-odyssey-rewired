@@ -272,4 +272,12 @@ export function initInputAfterEngineLoads(engine)
         });
     }
 
+    for (let button of document.getElementsByClassName('color_tileset_btn')) {
+        button.addEventListener('click', (e) => {
+            engine.setColorTilesFromImage(button.dataset.src);
+            audioContextSetup();
+            refocus(e);
+        });
+    }
+
 }

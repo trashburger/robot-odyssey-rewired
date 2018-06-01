@@ -17,6 +17,11 @@ INCLUDES := \
 	-I library/circular_buffer/include \
 	-I library/zstd/lib
 
+DISTFILES := \
+	dist/index.html \
+	dist/engine.wasm \
+	dist/rewired-tileset.png
+
 OBJS := \
 	build/bt_game.bc \
 	build/bt_lab.bc \
@@ -38,7 +43,7 @@ OBJS := \
 
 all: dist
 
-dist: dist/index.html dist/engine.wasm
+dist: $(DISTFILES)
 
 clean:
 	rm -Rf build/ dist/ .cache/
