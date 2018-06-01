@@ -53,8 +53,9 @@ export function initGraphicsAfterEngineLoads(engine)
         patterns.fill(rgb, slot*PATTERN_SIZE, (slot+1)*PATTERN_SIZE);
     }
 
-    engine.setColorTilesFromImage = function(first_slot, img_src)
+    engine.setColorTilesFromImage = function(img_src, first_slot)
     {
+        first_slot = first_slot || 0;
         const img = document.createElement('img');
         img.src = img_src;
 
@@ -70,6 +71,30 @@ export function initGraphicsAfterEngineLoads(engine)
             const words = new Uint32Array(idata.data.buffer);
 
             patterns.subarray(first_slot * PATTERN_SIZE).set(words);
+        });
+    }
+
+    engine.saveColorTilesToImage = function(first_slot, num_slots)
+    {
+        const total_patterns = (patterns.length / PATTERN_SIZE) | 0;
+        first_slot = first_slot || 0;
+        num_slots = num_slots || (total_patterns - first_slot);
+        const src_words = patterns.subarray(first_slot * PATTERN_SIZE, (first_slot + num_slots) * PATTERN_SIZE);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = SCREEN_TILE_SIZE;
+        canvas.height = num_slots * SCREEN_TILE_SIZE;
+
+        const ctx = canvas.getContext("2d");
+        const idata = ctx.createImageData(canvas.width, canvas.height);
+        const dest_words = new Uint32Array(idata.data.buffer);
+        dest_words.set(src_words);
+        ctx.putImageData(idata, 0, 0);
+
+        return new Promise(function (resolve, reject) {
+            canvas.toBlob( function (blob) {
+                resolve(blob);
+            });
         });
     }
 

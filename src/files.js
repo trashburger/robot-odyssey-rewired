@@ -38,4 +38,11 @@ export function initFiles(engine)
     {
         downloadjs(engine.getCompressionDictionary(), filename || 'dictionary.bin', 'application/octet-stream');
     };
+
+    engine.downloadColorTileImage = function(first_slot, num_slots)
+    {
+        return engine.saveColorTilesToImage(first_slot, num_slots).then(function (blob) {
+            downloadjs(blob, 'color-tiles.png', 'image/png'); 
+        });
+    }
 }
