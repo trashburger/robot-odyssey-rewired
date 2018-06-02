@@ -43,13 +43,9 @@ To do
   - picker for chip load
   - package thumbnails plus game data into PNG/JPEG/GIF for mobile+social?
 
-- output
-  - nicer video scaling
-
 - input
-  - nicer touch controls
-  - context sensitive keyboard controls with help
-  - context sensitive soldering actions / zooming
+  - context sensitive controls with help
+  - mobile optimized soldering w/ zoom
 
 - offline support
   - service workers?
