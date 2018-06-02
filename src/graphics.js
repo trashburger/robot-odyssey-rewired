@@ -240,9 +240,10 @@ export function initGraphicsAfterEngineLoads(engine)
         engine.setStripedColor(0x87, cga[1], cga[0], 4);
     }
 
-    // Built-in default palette, until the tileset (if any) loads
+    // Built-in default palette, until the tileset (if any) loads.
     engine.setHGRColors();
 
-    // Try to asynchronously load a tileset instead
+    // Try to asynchronously load a tileset instead.
+    // Any missing tiles will still refer to the HGR version.
     engine.setColorTilesFromImage("/rewired-tileset.png");
 }
