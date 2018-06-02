@@ -167,6 +167,23 @@ export function initGraphicsAfterEngineLoads(engine)
 
         // Unused / blank
         engine.setSolidColor(0x15, hgr[0]);
+
+        // When you get hit by an enemy in the "frogger" sections of the Skyway level,
+        // your player flashes to an alternate color. They intentionally index past the
+        // end of the game's sprite palette (normally 16 entries) with entry 0x87,
+        // and on the Apple II version this produces a pattern with two thin lines of
+        // interference color. If the pixels are numbered left to right, an orange band
+        // appears between the 2nd and 3rd, a pink band between the 5th and 6th.
+        for (let y = 0; y < SCREEN_TILE_SIZE; y++) {
+            for (let x = 0; x < SCREEN_TILE_SIZE; x++) {
+                const x16 = (x / (SCREEN_TILE_SIZE / 16))|0;
+                const slot = 0x87;
+                var rgb = 0xff000000;
+                if (x16 >= 3 && x16 <= 4) rgb = 0xff4ba7bf;
+                if (x16 >= 9 && x16 <= 10) rgb = 0xffd481d5;
+                patterns[slot*PATTERN_SIZE + y*SCREEN_TILE_SIZE + x] = rgb;
+            }
+        }
     }
 
     engine.setCGAColors = function(color_table)
@@ -211,6 +228,16 @@ export function initGraphicsAfterEngineLoads(engine)
 
         // Unused / blank
         engine.setStripedColor(0x15, cga[0], cga[0]);
+
+        // When you get hit by an enemy in the "frogger" sections of the Skyway level,
+        // your player flashes to an alternate color. They intentionally index past the
+        // end of the game's sprite palette (normally 16 entries) with entry 0x87,
+        // which on the DOS version of the game produces a byte-aligned double-wide cyan
+        // and black striped pattern. The actual data represented by this color would have
+        // been from the lookup table for scanline addresses in the sprite renderer.
+        // This seems to have perhaps been a porting accident, since the actual color 0x87
+        // matches the one used on Apple II but produces different and arbitrary results.
+        engine.setStripedColor(0x87, cga[1], cga[0], 4);
     }
 
     // Built-in default palette, until the tileset (if any) loads
