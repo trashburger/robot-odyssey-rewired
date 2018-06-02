@@ -141,7 +141,7 @@ export function initGraphicsAfterEngineLoads(engine)
         engine.setSolidColor(0x01, hgr[2]);
         engine.setSolidColor(0x02, hgr[1]);
         engine.setSolidColor(0x03, hgr[5]);
-        engine.setSolidColor(0x04, hgr[0]);
+        engine.setSolidColor(0x04, 0);      // Transparent black
         engine.setSolidColor(0x05, hgr[4]);
         engine.setSolidColor(0x06, hgr[3]);
         engine.setSolidColor(0x07, hgr[5]);    
@@ -168,20 +168,40 @@ export function initGraphicsAfterEngineLoads(engine)
         // Unused / blank
         engine.setSolidColor(0x15, hgr[0]);
 
-        // When you get hit by an enemy in the "frogger" sections of the Skyway level,
-        // your player flashes to an alternate color. They intentionally index past the
-        // end of the game's sprite palette (normally 16 entries) with entry 0x87,
-        // and on the Apple II version this produces a pattern with two thin lines of
-        // interference color. If the pixels are numbered left to right, an orange band
-        // appears between the 2nd and 3rd, a pink band between the 5th and 6th.
-        for (let y = 0; y < SCREEN_TILE_SIZE; y++) {
-            for (let x = 0; x < SCREEN_TILE_SIZE; x++) {
-                const x16 = (x / (SCREEN_TILE_SIZE / 16))|0;
-                const slot = 0x87;
-                var rgb = 0xff000000;
-                if (x16 >= 3 && x16 <= 4) rgb = 0xff4ba7bf;
-                if (x16 >= 9 && x16 <= 10) rgb = 0xffd481d5;
-                patterns[slot*PATTERN_SIZE + y*SCREEN_TILE_SIZE + x] = rgb;
+        // If you index past the end of the game's color tables,
+        // various stripey patterns result based on other values
+        // in memory being interpreted as byte-wide color masks.
+        // We don't reproduce these patterns accurately, but to
+        // reproduce the general effect initialize any otherwise
+        // unused slots with appropriately colored pseudorandom bars.
+        // Any pattern slots we have a specific use for can be overwritten later.
+
+        for (let slot = 0x16; slot < 0x100; slot++) {
+
+            if (slot == 0x87) {
+                // The game actually uses this slot!
+
+                // When you get hit by an enemy in the "frogger" sections of the Skyway level,
+                // your player flashes to an alternate color. They intentionally index past the
+                // end of the game's sprite palette (normally 16 entries) with entry 0x87,
+                // and on the Apple II version this produces a pattern with two thin lines of
+                // interference color. If the pixels are numbered left to right, an orange band
+                // appears between the 2nd and 3rd, a pink band between the 5th and 6th.
+                for (let x = 0; x < SCREEN_TILE_SIZE; x++) {
+                    const x16 = (x / (SCREEN_TILE_SIZE / 16))|0;
+                    var rgb = 0xff000000;
+                    if (x16 >= 3 && x16 <= 4) rgb = 0xff4ba7bf;
+                    if (x16 >= 9 && x16 <= 10) rgb = 0xffd481d5;
+                    for (let y = 0; y < SCREEN_TILE_SIZE; y++) {
+                        patterns[slot*PATTERN_SIZE + y*SCREEN_TILE_SIZE + x] = rgb;
+                    }
+                }
+
+            } else {
+                // Junk binary stripes
+
+                var stripe = (slot % 35) + 1;
+                engine.setStripedColor(slot, hgr[(stripe % 6)|0], hgr[(stripe / 6)|0], slot >> 1);
             }
         }
     }
@@ -204,7 +224,7 @@ export function initGraphicsAfterEngineLoads(engine)
         engine.setStripedColor(0x01, cga[1], cga[0]);
         engine.setStripedColor(0x02, cga[1], cga[2]);
         engine.setStripedColor(0x03, cga[3], cga[3]);
-        engine.setSolidColor(0x04, cga[0]);
+        engine.setSolidColor(0x04, 0);      // Transparent black
         engine.setStripedColor(0x05, cga[2], cga[0]);
         engine.setStripedColor(0x06, cga[1], cga[1]);
         engine.setStripedColor(0x07, cga[3], cga[3]);
@@ -229,21 +249,43 @@ export function initGraphicsAfterEngineLoads(engine)
         // Unused / blank
         engine.setStripedColor(0x15, cga[0], cga[0]);
 
-        // When you get hit by an enemy in the "frogger" sections of the Skyway level,
-        // your player flashes to an alternate color. They intentionally index past the
-        // end of the game's sprite palette (normally 16 entries) with entry 0x87,
-        // which on the DOS version of the game produces a byte-aligned double-wide cyan
-        // and black striped pattern. The actual data represented by this color would have
-        // been from the lookup table for scanline addresses in the sprite renderer.
-        // This seems to have perhaps been a porting accident, since the actual color 0x87
-        // matches the one used on Apple II but produces different and arbitrary results.
-        engine.setStripedColor(0x87, cga[1], cga[0], 4);
+        // If you index past the end of the game's color tables,
+        // various stripey patterns result based on other values
+        // in memory being interpreted as byte-wide color masks.
+        // We don't reproduce these patterns accurately, but to
+        // reproduce the general effect initialize any otherwise
+        // unused slots with appropriately colored pseudorandom bars.
+        // Any pattern slots we have a specific use for can be overwritten later.
+
+        for (let slot = 0x16; slot < 0x100; slot++) {
+
+            if (slot == 0x87) {
+                // The game actually uses this slot!
+
+                // When you get hit by an enemy in the "frogger" sections of the Skyway level,
+                // your player flashes to an alternate color. They intentionally index past the
+                // end of the game's sprite palette (normally 16 entries) with entry 0x87,
+                // which on the DOS version of the game produces a byte-aligned double-wide cyan
+                // and black striped pattern. The actual data represented by this color would have
+                // been from the lookup table for scanline addresses in the sprite renderer.
+                // This seems to have perhaps been a porting accident, since the actual color 0x87
+                // matches the one used on Apple II but produces different and arbitrary results.
+
+                engine.setStripedColor(slot, cga[1], cga[0], 4);
+
+            } else {
+                // Junk binary stripes
+
+                var stripe = (slot % 15) + 1;
+                engine.setStripedColor(slot, cga[stripe & 3], cga[stripe >> 2], slot >> 1);
+            }
+        }
     }
 
     // Built-in default palette, until the tileset (if any) loads.
     engine.setHGRColors();
 
-    // Try to asynchronously load a tileset instead.
+    // Try to asynchronously load a partial custom tileset.
     // Any missing tiles will still refer to the HGR version.
     engine.setColorTilesFromImage("/rewired-tileset.png");
 }
