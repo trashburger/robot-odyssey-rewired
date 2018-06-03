@@ -30,22 +30,11 @@ a {
 
 .active_btn {
     background-color: #444440;
+    border-color: #777;
 }
 
 .keyboard_btn {
     touch-action: none;
-}
-
-button {
-    user-select: none;
-    -webkit-user-select: none;
-    background-color: #222;
-    font: 17px sans-serif;
-    color: #888;
-    border: 1px solid #555;
-    margin: 2px;
-    padding: 8px;
-    flex: 1 0 0;
 }
 
 #frame {
@@ -58,6 +47,18 @@ button {
     width: 100%;
     max-width: 1024px;
     margin: 0 auto;
+}
+
+button {
+    user-select: none;
+    -webkit-user-select: none;
+    background-color: #222;
+    font: 17px sans-serif;
+    color: #888;
+    border: 1px solid #555;
+    margin: 2px;
+    padding: 8px;
+    flex: 1 0 0;
 }
 
 .controls_hidden {
@@ -100,10 +101,6 @@ button {
     height: 500px;
     background: #000;
     touch-action: none;
-}
-
-#savefile_input {
-    display: none;
 }
 
 #engine_loading {

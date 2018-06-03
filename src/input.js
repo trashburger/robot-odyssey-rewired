@@ -287,6 +287,10 @@ export function initInputAfterEngineLoads(engine)
 
     for (let button of document.getElementsByClassName('setspeed_btn')) {
         button.addEventListener('click', (e) => {
+            for (let sibling of button.parentNode.children) {
+                sibling.classList.remove('active_btn');
+            }
+            button.classList.add('active_btn');
             engine.setSpeed(parseFloat(button.dataset.speed));
             audioContextSetup();
             refocus(e);
@@ -309,17 +313,23 @@ export function initInputAfterEngineLoads(engine)
         });
     }
 
-    for (let button of document.getElementsByClassName('engine_call_btn')) {
+    for (let button of document.getElementsByClassName('palette_btn')) {
         button.addEventListener('click', (e) => {
-            engine[button.dataset.function]();
-            audioContextSetup();
-            refocus(e);
-        });
-    }
+            for (let sibling of button.parentNode.children) {
+                sibling.classList.remove('active_btn');
+            }
+            button.classList.add('active_btn');
 
-    for (let button of document.getElementsByClassName('color_tileset_btn')) {
-        button.addEventListener('click', (e) => {
-            engine.setColorTilesFromImage(button.dataset.src);
+            if (button.dataset.name == "hgr") {
+                engine.setHGRColors();
+            } else if (button.dataset.name == "cga") {
+                engine.setCGAColors();
+            }
+
+            if (button.dataset.src) {
+                engine.setColorTilesFromImage(button.dataset.src);
+            }
+
             audioContextSetup();
             refocus(e);
         });
