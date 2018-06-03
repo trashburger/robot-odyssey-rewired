@@ -11,14 +11,16 @@ module.exports = {
     mode: 'production',
     entry: './src/main.js',
     output: {
-        filename: 'bundle.js',
+        filename: '[name].[hash].js',
         path: path.resolve(__dirname, 'dist')
     },
     node: {
         fs: 'empty'
     },
     plugins: [
-        new MiniCssExtractPlugin({}),
+        new MiniCssExtractPlugin({
+            filename: '[name].[hash].css'
+        }),
         new HtmlWebpackPlugin({
             template: './src/main.html',
             title,
