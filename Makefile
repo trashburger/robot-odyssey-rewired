@@ -17,11 +17,12 @@ INCLUDES := \
 	-I library/circular_buffer/include \
 	-I library/zstd/lib
 
+# Built files, not including the Webpack bundle
 DISTFILES := \
-	dist/index.html \
 	dist/engine.wasm \
 	dist/rewired-tileset.png
 
+# C++ modules, including generated code
 OBJS := \
 	build/bt_game.bc \
 	build/bt_lab.bc \
@@ -43,14 +44,14 @@ OBJS := \
 
 all: dist
 
-dist: $(DISTFILES)
+dist: $(DISTFILES) dist/index.html
 
 clean:
 	rm -Rf build/ dist/ .cache/
 	make -C library/zstd clean
 
-serve: all
-	(cd dist; $(PYTHON) -m http.server)
+serve: $(DISTFILES)
+	npx webpack-serve --config ./webpack.config.js --content dist/
 
 .PHONY: all clean dist serve
 
