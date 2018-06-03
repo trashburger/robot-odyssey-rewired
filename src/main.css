@@ -4,6 +4,10 @@ body {
     font: 16px sans-serif;
 }
 
+a {
+    color: #067697;
+}
+
 button {
     background-color: #222;
     font: 18px sans-serif;
@@ -112,4 +116,8 @@ button {
     color: #ddd;
     white-space: pre;
     text-align: left;
+}
+
+#footer {
+    margin: 15px 2px;
 }
