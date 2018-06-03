@@ -44,7 +44,7 @@ button {
     color: #888;
     border: 1px solid #555;
     margin: 2px;
-    padding: 8px 12px;
+    padding: 8px;
     flex: 1 0 0;
 }
 
@@ -72,18 +72,18 @@ button {
 .button_area {
     display: flex;
     flex-wrap: wrap;
-    margin: 0 50px 2px 50px;
+    margin: 0 15px 2px 15px;
 }
 
 #joystick {
     display: flex;
-    margin: 0 50px 4px 50px;
+    margin: 0 15px 4px 15px;
 }
 
 #joystick_xy {
     flex: 1 0 0;
     position: relative;
-    height: 120px;
+    height: 110px;
     background: #111;
 }
 
