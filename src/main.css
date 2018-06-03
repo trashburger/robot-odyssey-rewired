@@ -8,22 +8,16 @@ a {
     color: #067697;
 }
 
-.button_area {
-    display: flex;
-    flex-wrap: wrap;
-    margin: 0 20px 2px 20px;
-}
-
 .keyboard_spacebar {
-    flex: 8 0 0;
+    flex: 4 0 0;
 }
 
 .keyboard_enter {
-    flex: 4 0 0;
+    flex: 2 0 0;
 }
 
 .keyboard_esc {
-    flex: 4 0 0;
+    flex: 2 0 0;
 }
 
 .warning_btn {
@@ -75,9 +69,15 @@ button {
     transition: opacity 1.5s;
 }
 
+.button_area {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 50px 2px 50px;
+}
+
 #joystick {
     display: flex;
-    margin: 0 20px 2px 20px;
+    margin: 0 50px 4px 50px;
 }
 
 #joystick_xy {

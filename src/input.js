@@ -238,7 +238,13 @@ export function initInputAfterEngineLoads(engine)
             e.preventDefault();
             press();
             if (button.dataset.rdelay && button.dataset.rrate) {
+                if (delay !== null) {
+                    clearTimeout(delay);
+                }
                 delay = setTimeout(() => {
+                    if (repeater !== null) {
+                        clearInterval(repeater);
+                    }
                     repeater = setInterval(press, parseInt(button.dataset.rrate));
                 }, parseInt(button.dataset.rdelay));
             }
