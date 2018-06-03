@@ -10,18 +10,20 @@ export function initFiles(engine)
     };
 
     // Loader for arbitrary saved files
-    document.getElementById('savefile_btn').addEventListener('click', (e) => {
-        document.getElementById('savefile_input').click();
-    });
-
-    document.getElementById('savefile_input').addEventListener('change', (e) => {
-        const files = e.target.files;
-        if (files.length == 1 && files[0].size <= engine.MAX_FILESIZE) {
-            const reader = new FileReader();
-            reader.onload = (e) => engine.loadSaveFile(reader.result);
-            reader.readAsArrayBuffer(files[0]);
-        }
-    });
+    for (let button of document.getElementsByClassName('savefile_btn')) {
+        button.addEventListener('click', (e) => {
+            var input = document.createElement('input');
+            input.type = 'file';
+            input.addEventListener('change', (e) => {
+                if (input.files.length == 1 && input.files[0].size <= engine.MAX_FILESIZE) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => engine.loadSaveFile(reader.result);
+                    reader.readAsArrayBuffer(input.files[0]);
+                }
+            });
+            input.click();
+        });
+    }
 
     engine.loadSaveFile = function (array)
     {

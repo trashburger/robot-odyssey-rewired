@@ -43,7 +43,7 @@ Saved chips
 
 There is no separate UI for loading saved chip designs; the way it works now is unintuitive, and a side-effect of how save files are buffered.
 
-1. Click the "Load file" button to load your saved chip into the buffer. This currently must be a different file than what you chose last time, because the picker listens to an onChange event.
+1. Click the "Load file" button to load your saved chip into the buffer.
 2. Pick up the chip in-game
 3. Press "L", on the physical or on-screen keyboard
 4. Nothing will appear to happen, but the chip is now loaded. In the lab, you can press "?" to view the data sheet.
@@ -67,4 +67,4 @@ To do
 - enhancements
   - built-in chip decompiler
   - level editor
-  
+

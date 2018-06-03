@@ -19,10 +19,11 @@
       <div id="joystick_xy"></div>
       <button class="joystick_btn">BUTTON</button>
     </div>
-    <div class="button_row">
-      <button class="keyboard_btn" data-ascii=" " data-scancode="0x39">SPACEBAR</button>
-      <button class="keyboard_btn" data-ascii="0x0D" data-scancode="0x1C">ENTER</button>
-      <button class="keyboard_btn" data-ascii="0x1B" data-scancode="0x01">ESC</button>
+    <div class="button_area">
+      <button class="keyboard_btn keyboard_spacebar" data-ascii=" "
+              data-scancode="0x39" data-rdelay="250" data-rrate="100">SPACEBAR</button>
+      <button class="keyboard_btn keyboard_enter" data-ascii="0x0D" data-scancode="0x1C">ENTER</button>
+      <button class="keyboard_btn keyboard_esc" data-ascii="0x1B" data-scancode="0x01">ESC</button>
       <button class="keyboard_btn" data-ascii="?">?</button>
       <button class="keyboard_btn" data-ascii="R">R</button>
       <button class="keyboard_btn" data-ascii="T">T</button>
@@ -32,37 +33,38 @@
       <button class="keyboard_btn" data-ascii="H">H</button>
       <button class="keyboard_btn" data-ascii="O">O</button>
       <button class="keyboard_btn" data-ascii="L">L</button>
-      <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x4B">←</button>
-      <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x4D">→</button>
-      <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x48">↑</button>
-      <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x50">↓</button>
-      <button class="keyboard_btn" data-ascii="4" data-scancode="0x4B">⇠</button>
-      <button class="keyboard_btn" data-ascii="6" data-scancode="0x4D">⇢</button>
-      <button class="keyboard_btn" data-ascii="8" data-scancode="0x48">⇡</button>
-      <button class="keyboard_btn" data-ascii="2" data-scancode="0x50">⇣</button>
     </div>
-    <div class="button_row">
+    <div class="button_area">
+      <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x4B" data-rdelay="250" data-rrate="80">←</button>
+      <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x50" data-rdelay="250" data-rrate="80">↓</button>
+      <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x48" data-rdelay="250" data-rrate="80">↑</button>
+      <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x4D" data-rdelay="250" data-rrate="80">→</button>
+    </div>
+    <div class="button_area">
+      <button class="keyboard_btn" data-ascii="4" data-scancode="0x4B" data-rdelay="250" data-rrate="40">⇠</button>
+      <button class="keyboard_btn" data-ascii="2" data-scancode="0x50" data-rdelay="250" data-rrate="40">⇣</button>
+      <button class="keyboard_btn" data-ascii="8" data-scancode="0x48" data-rdelay="250" data-rrate="40">⇡</button>
+      <button class="keyboard_btn" data-ascii="6" data-scancode="0x4D" data-rdelay="250" data-rrate="40">⇢</button>
+    </div>
+    <div class="button_area">
       <button class="setspeed_btn" data-speed="0.24">&frac14;</button>
       <button class="setspeed_btn" data-speed="0.5">&frac12;</button>
       <button class="setspeed_btn" data-speed="1.0">1x</button>
       <button class="setspeed_btn" data-speed="2.0">2x</button>
       <button class="setspeed_btn" data-speed="10">10x</button>
     </div>
-    <div class="button_row">
-      <button id="savefile_btn">Load file</button>
-      <input type="file" id="savefile_input">
-      <button class="exec_btn" data-program="play.exe" data-args="">Boot</button>
-      <button class="loadgame_btn">Reload</button>
+    <div class="button_area">
+      <button class="savefile_btn warning_btn">Load file</button>
+      <button class="exec_btn warning_btn" data-program="play.exe" data-args="">Boot</button>
+      <button class="loadgame_btn warning_btn">Reload</button>
       <button class="savegame_btn">Save game</button>
-    </div>
-    <div class="button_row">
       <button class="color_tileset_btn" data-src="/rewired-tileset.png">Rewired Tileset</button>
       <button class="engine_call_btn" data-function="setHGRColors">Apple (HGR) Colors</button>
       <button class="engine_call_btn" data-function="setCGAColors">PC (CGA) Colors</button>
     </div>
-  </div>
-  <div id="footer">
-    <a href="https://github.com/scanlime/robot-odyssey-rewired" target="_blank">open source software</a>
+    <div id="footer">
+      <a href="https://github.com/scanlime/robot-odyssey-rewired" target="_blank">open source software</a>
+    </div>
   </div>
 </body>
 </html>

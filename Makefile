@@ -50,8 +50,10 @@ clean:
 	rm -Rf build/ dist/ .cache/
 	make -C library/zstd clean
 
+# Serve static pre-built wasm plus dynamic (hot-reloading) CSS, JS, and HTML.
 serve: $(DISTFILES)
-	npx webpack-serve --config ./webpack.config.js --content dist/
+	rm -f dist/*.css dist/*.js dist/*.html
+	npx webpack-serve --config ./webpack.config.js --content dist/ --host 0.0.0.0 --port 8000
 
 .PHONY: all clean dist serve
 

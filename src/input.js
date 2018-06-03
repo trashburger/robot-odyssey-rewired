@@ -189,29 +189,28 @@ export function initInputAfterEngineLoads(engine)
     });
 
     for (let button of document.getElementsByClassName('joystick_btn')) {
-        button.addEventListener('mousedown', (e) => {
+
+        const down = (e) => {
+            button.classList.add('active_btn');
+            engine.endMouseTracking();
             engine.setJoystickButton(true);
             audioContextSetup();
-        });
-        button.addEventListener('mouseup', (e) => {
+            refocus(e);
+        };
+
+        const up = (e) => {
+            button.classList.remove('active_btn');
             engine.setJoystickButton(false);
             engine.autoSave();
             audioContextSetup();
             refocus(e);
-        });
-        button.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            engine.setJoystickButton(true);
-            audioContextSetup();
-            refocus(e);
-        });
-        button.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            engine.setJoystickButton(false);
-            engine.autoSave();
-            audioContextSetup();
-            refocus(e);
-        });
+        };
+
+        button.addEventListener('mousedown', down);
+        button.addEventListener('mouseup', up);
+        button.addEventListener('mouseleave', up);
+        button.addEventListener('touchstart', down);
+        button.addEventListener('touchend', up);
     }
 
     for (let button of document.getElementsByClassName('exec_btn')) {
@@ -224,20 +223,46 @@ export function initInputAfterEngineLoads(engine)
     }
 
     for (let button of document.getElementsByClassName('keyboard_btn')) {
-        button.addEventListener('click', (e) => {
+        var delay = null;
+        var repeater = null;
+
+        const press = () => {
+            delay = null;
             keycode(button.dataset.ascii || '0x00', parseInt(button.dataset.scancode || '0', 0));
+        };
+
+        const down = (e) => {
+            button.classList.add('active_btn');
+            press();
+            if (button.dataset.rdelay && button.dataset.rrate) {
+                delay = setTimeout(() => {
+                    repeater = setInterval(press, parseInt(button.dataset.rrate));
+                }, parseInt(button.dataset.rdelay));
+            }
             engine.endMouseTracking();
+            audioContextSetup();
+            refocus(e);
+        };
+
+        const up = (e) => {
+            button.classList.remove('active_btn');
+            if (delay !== null) {
+                clearTimeout(delay);
+            }
+            if (repeater !== null) {
+                clearInterval(repeater);
+                repeater = null;
+            }
             engine.autoSave();
             audioContextSetup();
             refocus(e);
-        });
-        button.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            keycode(button.dataset.ascii, parseInt(button.dataset.scancode, 0));
-            engine.autoSave();
-            audioContextSetup();
-            refocus(e);
-        });
+        };
+
+        button.addEventListener('mousedown', down);
+        button.addEventListener('mouseup', up);
+        button.addEventListener('mouseleave', up);
+        button.addEventListener('touchstart', down);
+        button.addEventListener('touchend', up);
     }
 
     for (let button of document.getElementsByClassName('setspeed_btn')) {
