@@ -6,7 +6,7 @@ export function initGraphics(engine)
 
     const margin = 20;
     const aspect = 4/3.0;
-    const max_w = width * 4;
+    const max_w = width * 2;
 
     const canvas = document.getElementById('framebuffer');
     const context = canvas.getContext('2d');

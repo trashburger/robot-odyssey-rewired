@@ -8,6 +8,16 @@ function controlCode(key)
     return String.fromCharCode(key.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0) + 1)
 }
 
+function addButtonEvents(button, down, up)
+{
+    button.addEventListener('mousedown', down);
+    button.addEventListener('mouseup', up);
+    button.addEventListener('mouseleave', up);
+    button.addEventListener('touchstart', down);
+    button.addEventListener('touchend', up);
+    button.addEventListener('touchcancel', up);
+}
+
 export function initInputEarly()
 {
     // Joystick is created immediately, but callbacks aren't hooked up until the engine loads
@@ -196,31 +206,23 @@ export function initInputAfterEngineLoads(engine)
     });
 
     for (let button of document.getElementsByClassName('joystick_btn')) {
-
-        const down = (e) => {
+         addButtonEvents(button, (e) => {
+            // Down
             button.classList.add('active_btn');
             e.preventDefault();
             engine.endMouseTracking();
             engine.setJoystickButton(true);
             audioContextSetup();
             refocus(e);
-        };
-
-        const up = (e) => {
+        }, (e) => {
+            // Up
             button.classList.remove('active_btn');
             e.preventDefault();
             engine.setJoystickButton(false);
             engine.autoSave();
             audioContextSetup();
             refocus(e);
-        };
-
-        button.addEventListener('mousedown', down);
-        button.addEventListener('mouseup', up);
-        button.addEventListener('mouseleave', up);
-        button.addEventListener('touchstart', down);
-        button.addEventListener('touchend', up);
-        button.addEventListener('touchcancel', up);
+        });
     }
 
     for (let button of document.getElementsByClassName('exec_btn')) {
@@ -246,13 +248,13 @@ export function initInputAfterEngineLoads(engine)
     }
 
     for (let button of document.getElementsByClassName('keyboard_btn')) {
-
         const press = () => {
             delay = null;
             keycode(button.dataset.ascii || '0x00', parseInt(button.dataset.scancode || '0', 0));
         };
 
-        const down = (e) => {
+        addButtonEvents(button, (e) => {
+            // Down
             button.classList.add('active_btn');
             e.preventDefault();
             press();
@@ -266,32 +268,32 @@ export function initInputAfterEngineLoads(engine)
             engine.endMouseTracking();
             audioContextSetup();
             refocus(e);
-        };
-
-        const up = (e) => {
+        }, (e) => {
+            // Up
             button.classList.remove('active_btn');
             e.preventDefault();
             stop_repeat();
             engine.autoSave();
             audioContextSetup();
             refocus(e);
-        };
-
-        button.addEventListener('mousedown', down);
-        button.addEventListener('mouseup', up);
-        button.addEventListener('mouseleave', up);
-        button.addEventListener('touchstart', down);
-        button.addEventListener('touchend', up);
-        button.addEventListener('touchcancel', up);
+        });
     }
 
     for (let button of document.getElementsByClassName('setspeed_btn')) {
-        button.addEventListener('click', (e) => {
+         addButtonEvents(button, (e) => {
+            // Down
             for (let sibling of button.parentNode.children) {
                 sibling.classList.remove('active_btn');
             }
             button.classList.add('active_btn');
+            e.preventDefault();
             engine.setSpeed(parseFloat(button.dataset.speed));
+            engine.endMouseTracking();
+            audioContextSetup();
+            refocus(e);
+        }, (e) => {
+            // Up
+            e.preventDefault();
             audioContextSetup();
             refocus(e);
         });
@@ -314,11 +316,13 @@ export function initInputAfterEngineLoads(engine)
     }
 
     for (let button of document.getElementsByClassName('palette_btn')) {
-        button.addEventListener('click', (e) => {
+        addButtonEvents(button, (e) => {
+            // Down
             for (let sibling of button.parentNode.children) {
                 sibling.classList.remove('active_btn');
             }
             button.classList.add('active_btn');
+            e.preventDefault();
 
             if (button.dataset.name == "hgr") {
                 engine.setHGRColors();
@@ -330,9 +334,14 @@ export function initInputAfterEngineLoads(engine)
                 engine.setColorTilesFromImage(button.dataset.src);
             }
 
+            engine.endMouseTracking();
+            audioContextSetup();
+            refocus(e);
+        }, (e) => {
+            // Up
+            e.preventDefault();
             audioContextSetup();
             refocus(e);
         });
     }
-
 }
