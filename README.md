@@ -3,9 +3,13 @@ Robot Odyssey Rewired
 
 Modernized port of a classic electronics adventure game.
 
-Status: Playable, but needs testing and polishing. See below.
+Status: Playable, could use some UI polish. See below.
 
 This repository contains open source modifications which can be applied to the original game. This project was not created by nor endorsed by the game's original authors. Robot Odyssey is Copyright 1984 The Learning Company. The game itself is NOT part of this repository.
+
+
+Game versions
+-------------
 
 Robot Odyssey was originally released for Apple II, with ports to DOS and Color Computer soon after. This port is for the latest version of the DOS port (1.1), which is similar but not identical to the latest version of the Apple II port (2.0).
 
@@ -33,10 +37,20 @@ Build Instructions
 
 The built web site will be in `dist`, or start a development server with `make serve`
 
+
+Saved chips
+-----------
+
+There is no separate UI for loading saved chip designs; the way it works now is unintuitive, and a side-effect of how save files are buffered.
+
+1. Click the "Load file" button to load your saved chip into the buffer. This currently must be a different file than what you chose last time, because the picker listens to an onChange event.
+2. Pick up the chip in-game
+3. Press "L", on the physical or on-screen keyboard
+4. Nothing will appear to happen, but the chip is now loaded. In the lab, you can press "?" to view the data sheet.
+
+
 To do
 -----
-
-- Needs play testing
 
 - load/save
   - local browser storage
