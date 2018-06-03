@@ -192,6 +192,7 @@ export function initInputAfterEngineLoads(engine)
 
         const down = (e) => {
             button.classList.add('active_btn');
+            e.preventDefault();
             engine.endMouseTracking();
             engine.setJoystickButton(true);
             audioContextSetup();
@@ -200,6 +201,7 @@ export function initInputAfterEngineLoads(engine)
 
         const up = (e) => {
             button.classList.remove('active_btn');
+            e.preventDefault();
             engine.setJoystickButton(false);
             engine.autoSave();
             audioContextSetup();
@@ -233,6 +235,7 @@ export function initInputAfterEngineLoads(engine)
 
         const down = (e) => {
             button.classList.add('active_btn');
+            e.preventDefault();
             press();
             if (button.dataset.rdelay && button.dataset.rrate) {
                 delay = setTimeout(() => {
@@ -246,6 +249,7 @@ export function initInputAfterEngineLoads(engine)
 
         const up = (e) => {
             button.classList.remove('active_btn');
+            e.preventDefault();
             if (delay !== null) {
                 clearTimeout(delay);
             }
