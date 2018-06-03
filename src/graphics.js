@@ -51,23 +51,27 @@ export function initGraphicsAfterEngineLoads(engine)
 
     engine.setColorTilesFromImage = function(img_src, first_slot)
     {
-        first_slot = first_slot || 0;
-        const img = document.createElement('img');
-        img.crossOrigin = "Anonymous";
-        img.src = img_src;
+        return new Promise(function (ok) {
+            first_slot = first_slot || 0;
+            const img = document.createElement('img');
 
-        return img.decode().then(function() {
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
 
-            const canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0);
+                const idata = ctx.getImageData(0, 0, img.width, img.height);
+                const words = new Uint32Array(idata.data.buffer);
 
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0);
-            const idata = ctx.getImageData(0, 0, img.width, img.height);
-            const words = new Uint32Array(idata.data.buffer);
+                patterns.subarray(first_slot * PATTERN_SIZE).set(words);
 
-            patterns.subarray(first_slot * PATTERN_SIZE).set(words);
+                ok();
+            };
+
+            img.crossOrigin = "Anonymous";
+            img.src = img_src;
         });
     }
 
