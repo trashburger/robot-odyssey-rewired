@@ -135,6 +135,13 @@ export function initInputAfterEngineLoads(engine)
         e.preventDefault();
     });
 
+    fbCanvas.addEventListener('touchcancel', function (e)
+    {
+        engine.setMouseButton(false);
+        engine.autoSave();
+        e.preventDefault();
+    });
+
     function refocus(e)
     {
         e.target.blur();
@@ -213,6 +220,7 @@ export function initInputAfterEngineLoads(engine)
         button.addEventListener('mouseleave', up);
         button.addEventListener('touchstart', down);
         button.addEventListener('touchend', up);
+        button.addEventListener('touchcancel', up);
     }
 
     for (let button of document.getElementsByClassName('exec_btn')) {
@@ -224,9 +232,20 @@ export function initInputAfterEngineLoads(engine)
         });
     }
 
+    var delay = null;
+    var repeater = null;
+    const stop_repeat = () => {
+        if (delay !== null) {
+            clearTimeout(delay);
+            delay = null;
+        }
+        if (repeater !== null) {
+            clearInterval(repeater);
+            repeater = null;
+        }
+    }
+
     for (let button of document.getElementsByClassName('keyboard_btn')) {
-        var delay = null;
-        var repeater = null;
 
         const press = () => {
             delay = null;
@@ -237,14 +256,10 @@ export function initInputAfterEngineLoads(engine)
             button.classList.add('active_btn');
             e.preventDefault();
             press();
+            stop_repeat();
             if (button.dataset.rdelay && button.dataset.rrate) {
-                if (delay !== null) {
-                    clearTimeout(delay);
-                }
                 delay = setTimeout(() => {
-                    if (repeater !== null) {
-                        clearInterval(repeater);
-                    }
+                    stop_repeat();
                     repeater = setInterval(press, parseInt(button.dataset.rrate));
                 }, parseInt(button.dataset.rdelay));
             }
@@ -256,13 +271,7 @@ export function initInputAfterEngineLoads(engine)
         const up = (e) => {
             button.classList.remove('active_btn');
             e.preventDefault();
-            if (delay !== null) {
-                clearTimeout(delay);
-            }
-            if (repeater !== null) {
-                clearInterval(repeater);
-                repeater = null;
-            }
+            stop_repeat();
             engine.autoSave();
             audioContextSetup();
             refocus(e);
@@ -273,6 +282,7 @@ export function initInputAfterEngineLoads(engine)
         button.addEventListener('mouseleave', up);
         button.addEventListener('touchstart', down);
         button.addEventListener('touchend', up);
+        button.addEventListener('touchcancel', up);
     }
 
     for (let button of document.getElementsByClassName('setspeed_btn')) {
