@@ -26,6 +26,7 @@ a {
 
 .setspeed_btn {
     background: #223022;
+    touch-action: none;
 }
 
 .active_btn {

@@ -8,16 +8,6 @@ function controlCode(key)
     return String.fromCharCode(key.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0) + 1)
 }
 
-function addButtonEvents(button, down, up)
-{
-    button.addEventListener('mousedown', down);
-    button.addEventListener('mouseup', up);
-    button.addEventListener('mouseleave', up);
-    button.addEventListener('touchstart', down);
-    button.addEventListener('touchend', up);
-    button.addEventListener('touchcancel', up);
-}
-
 export function initInputEarly()
 {
     // Joystick is created immediately, but callbacks aren't hooked up until the engine loads
@@ -152,10 +142,47 @@ export function initInputAfterEngineLoads(engine)
         e.preventDefault();
     });
 
-    function refocus(e)
+    function addButtonEvents(button, down, up, click)
     {
-        e.target.blur();
-        fbCanvas.focus();
+        const down_wrapper = function (e)
+        {
+            engine.endMouseTracking();
+            audioContextSetup();
+            if (!click) {
+                e.preventDefault();
+            }
+            if (down) {
+                down(e);
+            }
+        };
+
+        const up_wrapper = function (e)
+        {
+            if (!click) {
+                e.preventDefault();
+            }
+            if (up) {
+                up(e);
+            }
+            button.blur();
+            fbCanvas.focus();
+        };
+
+        const options = {
+            passive: !!click
+        };
+
+        button.addEventListener('mousedown', down_wrapper, options);
+        button.addEventListener('mouseup', up_wrapper, options);
+        button.addEventListener('mouseleave', up_wrapper, options);
+
+        button.addEventListener('touchstart', down_wrapper, options);
+        button.addEventListener('touchend', up_wrapper, options);
+        button.addEventListener('touchcancel', up_wrapper, options);
+
+        if (click) {
+            button.addEventListener('click', click);
+        }
     }
 
     function keycode(ascii, scancode)
@@ -206,31 +233,24 @@ export function initInputAfterEngineLoads(engine)
     });
 
     for (let button of document.getElementsByClassName('joystick_btn')) {
-         addButtonEvents(button, (e) => {
-            // Down
+        addButtonEvents(button, () => {
             button.classList.add('active_btn');
-            e.preventDefault();
-            engine.endMouseTracking();
             engine.setJoystickButton(true);
-            audioContextSetup();
-            refocus(e);
-        }, (e) => {
-            // Up
+        }, () => {
             button.classList.remove('active_btn');
-            e.preventDefault();
             engine.setJoystickButton(false);
             engine.autoSave();
-            audioContextSetup();
-            refocus(e);
         });
     }
 
     for (let button of document.getElementsByClassName('exec_btn')) {
-        button.addEventListener('click', (e) => {
-            engine.exec(button.dataset.program, button.dataset.args);
+        addButtonEvents(button, () => {
+            button.classList.add('active_btn');
+        }, () => {
+            button.classList.remove('active_btn');
             engine.autoSave();
-            audioContextSetup();
-            refocus(e);
+        }, () => {
+            engine.exec(button.dataset.program, button.dataset.args);
         });
     }
 
@@ -253,10 +273,8 @@ export function initInputAfterEngineLoads(engine)
             keycode(button.dataset.ascii || '0x00', parseInt(button.dataset.scancode || '0', 0));
         };
 
-        addButtonEvents(button, (e) => {
-            // Down
+        addButtonEvents(button, () => {
             button.classList.add('active_btn');
-            e.preventDefault();
             press();
             stop_repeat();
             if (button.dataset.rdelay && button.dataset.rrate) {
@@ -265,64 +283,49 @@ export function initInputAfterEngineLoads(engine)
                     repeater = setInterval(press, parseInt(button.dataset.rrate));
                 }, parseInt(button.dataset.rdelay));
             }
-            engine.endMouseTracking();
-            audioContextSetup();
-            refocus(e);
-        }, (e) => {
-            // Up
+        }, () => {
             button.classList.remove('active_btn');
-            e.preventDefault();
             stop_repeat();
             engine.autoSave();
-            audioContextSetup();
-            refocus(e);
         });
     }
 
     for (let button of document.getElementsByClassName('setspeed_btn')) {
-         addButtonEvents(button, (e) => {
-            // Down
+        addButtonEvents(button, () => {
             for (let sibling of button.parentNode.children) {
                 sibling.classList.remove('active_btn');
             }
             button.classList.add('active_btn');
-            e.preventDefault();
             engine.setSpeed(parseFloat(button.dataset.speed));
-            engine.endMouseTracking();
-            audioContextSetup();
-            refocus(e);
-        }, (e) => {
-            // Up
-            e.preventDefault();
-            audioContextSetup();
-            refocus(e);
         });
     }
 
     for (let button of document.getElementsByClassName('loadgame_btn')) {
-        button.addEventListener('click', (e) => {
+        addButtonEvents(button, () => {
+            button.classList.add('active_btn');
+        }, () => {
+            button.classList.remove('active_btn');
+        }, () => {
             engine.loadGame();
-            audioContextSetup();
-            refocus(e);
         });
     }
 
     for (let button of document.getElementsByClassName('savegame_btn')) {
-        button.addEventListener('click', (e) => {
+        addButtonEvents(button, () => {
+            button.classList.add('active_btn');
+        }, () => {
+            button.classList.remove('active_btn');
+        }, () => {
             engine.saveGame();
-            audioContextSetup();
-            refocus(e);
         });
     }
 
     for (let button of document.getElementsByClassName('palette_btn')) {
         addButtonEvents(button, (e) => {
-            // Down
             for (let sibling of button.parentNode.children) {
                 sibling.classList.remove('active_btn');
             }
             button.classList.add('active_btn');
-            e.preventDefault();
 
             if (button.dataset.name == "hgr") {
                 engine.setHGRColors();
@@ -333,15 +336,6 @@ export function initInputAfterEngineLoads(engine)
             if (button.dataset.src) {
                 engine.setColorTilesFromImage(button.dataset.src);
             }
-
-            engine.endMouseTracking();
-            audioContextSetup();
-            refocus(e);
-        }, (e) => {
-            // Up
-            e.preventDefault();
-            audioContextSetup();
-            refocus(e);
         });
     }
 }
