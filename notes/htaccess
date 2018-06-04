@@ -15,5 +15,5 @@ Header set Cache-Control "max-age=7200,must-revalidate"
 
 # Static resources with versioning
 <filesMatch "\.(jpg|jpeg|png|ico|gif|js|css|wasm)$">
-  Header set Cache-Control "max-age=1209600,public,immutable"
+  Header set Cache-Control: public,max-age=31536000,immutable
 </filesMatch>
