@@ -5,10 +5,10 @@ AddOutputFilterByType DEFLATE text/css
 AddOutputFilterByType DEFLATE application/javascript
 AddOutputFilterByType DEFLATE application/wasm
 
-# Default cache policy, 8 hours
-Header set Cache-Control "max-age=28800, must-revalidate"
+# Default cache policy, 2 hours
+Header set Cache-Control "max-age=7200,must-revalidate"
 
-# Static assets and versioned js/css/wasm
+# Static resources with versioning
 <filesMatch "\.(jpg|jpeg|png|ico|gif|js|css|wasm)$">
-  Header set Cache-Control "max-age=1209600"
+  Header set Cache-Control "max-age=1209600,public,immutable"
 </filesMatch>
