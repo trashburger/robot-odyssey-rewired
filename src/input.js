@@ -39,6 +39,16 @@ export function initInputAfterEngineLoads(engine)
 
     var mouse_tracking_unlocked = false;
 
+    function mouseTrackingEnd()
+    {
+        if (mouse_tracking_unlocked) {
+            // Avoid calling engine.endMouseTracking unless we were using it, since it will
+            // reset the joystick state to the detriment of multitouch support.
+            engine.endMouseTracking();
+        }
+        mouse_tracking_unlocked = false;
+    }
+
     function mouseLocationForEvent(e)
     {
         const canvasRect = fbCanvas.getBoundingClientRect();
@@ -105,11 +115,7 @@ export function initInputAfterEngineLoads(engine)
         }
     });
 
-    frame.addEventListener('mouseleave', function (e)
-    {
-        mouse_tracking_unlocked = false;
-        engine.endMouseTracking();
-    });
+    frame.addEventListener('mouseleave', mouseTrackingEnd);
 
     fbCanvas.addEventListener('touchstart', function (e)
     {
@@ -146,7 +152,7 @@ export function initInputAfterEngineLoads(engine)
     {
         const down_wrapper = function (e)
         {
-            engine.endMouseTracking();
+            mouseTrackingEnd();
             audioContextSetup();
             if (!click) {
                 e.preventDefault();
@@ -190,8 +196,8 @@ export function initInputAfterEngineLoads(engine)
         if (typeof(ascii) != typeof(0)) {
             ascii = ascii.length == 1 ? ascii.charCodeAt(0) : parseInt(ascii, 0);
         }
+        mouseTrackingEnd();
         engine.pressKey(ascii, scancode);
-        engine.endMouseTracking();
         engine.autoSave();
         audioContextSetup();
     }
@@ -221,7 +227,7 @@ export function initInputAfterEngineLoads(engine)
         const force = Math.min(10, Math.pow(data.force, 2));
         const x = scale * force * Math.cos(data.angle.radian);
         const y = scale * force * Math.sin(data.angle.radian);
-        engine.endMouseTracking();
+        mouseTrackingEnd();
         engine.setJoystickAxes(x, -y);
     });
 
