@@ -41,6 +41,12 @@ module.exports = {
         }),
     ],
     module: {
+        defaultRules: [
+            {
+                type: "javascript/auto",
+                resolve: {}
+            },
+        ],
         rules: [
             {
                 test: /\.css$/,
@@ -58,6 +64,13 @@ module.exports = {
             },
             {
                 test: /\.png$/,
+                loader: 'file-loader',
+                options: {
+                    name: '[name]-[hash].[ext]',
+                },
+            },
+            {
+                test: /\.wasm$/,
                 loader: 'file-loader',
                 options: {
                     name: '[name]-[hash].[ext]',

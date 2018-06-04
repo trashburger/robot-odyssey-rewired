@@ -1,4 +1,6 @@
 import engineFactory from "../build/engine.js"
+import engineWasm from "../build/engine.wasm"
+
 import { loadingBegin, loadingError, loadingDone } from "./loading.js"
 import { filenameForSaveData } from "./roData.js"
 import { initGraphics, initGraphicsAfterEngineLoads } from "./graphics.js"
@@ -9,7 +11,15 @@ import { initFiles } from "./files.js"
 import './main.css'
 
 try {
-    const engine = engineFactory();
+    const engine = engineFactory(
+    {
+        locateFile: function () {
+            return engineWasm;
+        },
+
+        onAbort: loadingError,
+    });
+
     window.ROEngine = engine;
 
     initGraphics(engine);
@@ -17,7 +27,6 @@ try {
     initInputEarly();
     initSound(engine);
 
-    engine.onAbort = loadingError;
     engine.then(function ()
     {
         initFiles(engine);

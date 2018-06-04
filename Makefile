@@ -5,8 +5,6 @@ CCFLAGS := -std=c++11 -Oz --bind
 
 ZSTD_OPTS := ZSTD_LEGACY_SUPPORT=0 CFLAGS=-Oz
 
-GIT_HASH := $(shell git rev-parse HEAD)
-
 WASMFLAGS := \
 	-s WASM=1 \
 	-s MODULARIZE=1 \
@@ -39,39 +37,43 @@ OBJS := \
 	build/hardware.bc \
 	library/zstd/lib/libzstd.a
 
+WEBPACK_DEPS := \
+	build/engine.js \
+	src/*.js \
+	src/*.html \
+	src/*.css
+
+CPP_DEPS := \
+	src/*.h
+
 all: dist
 
-dist: dist/index.html
+dist: $(WEBPACK_DEPS)
+	mkdir -p build/
+	mkdir -p dist/
+	npx webpack --config ./webpack.config.js
 
 clean:
 	rm -Rf build/ dist/ .cache/
 	make -C library/zstd clean
 
-# Serve static pre-built wasm plus dynamic (hot-reloading) CSS, JS, and HTML.
-serve: $(DISTFILES)
-	rm -f dist/*.css dist/*.js dist/*.html
-	npx webpack-serve --config ./webpack.config.js --content dist/ --host 0.0.0.0 --port 8000
+serve: $(WEBPACK_DEPS)
+	mkdir -p build/
+	npx webpack-serve --config ./webpack.config.js --host 0.0.0.0 --port 8000
 
 .PHONY: all clean dist serve
 
-# Javascript build with webpack
-dist/index.html: build/engine.js src/*.js src/*.html src/*.css
-	npx webpack --config ./webpack.config.js
-
 # WASM build from bitcode
 build/engine.js: $(OBJS)
-	@mkdir -p dist/
-	$(CC) $(CCFLAGS) $(WASMFLAGS) -o build/engine.$(GIT_HASH).js $(OBJS)
-	mv build/engine.$(GIT_HASH).js build/engine.js
-	mv build/engine.$(GIT_HASH).wasm dist/
+	$(CC) $(CCFLAGS) $(WASMFLAGS) -o build/engine.js $(OBJS)
 
 # Build normal C++ code to LLVM bitcode
-build/%.bc: src/%.cpp
+build/%.bc: src/%.cpp $(CPP_DEPS)
 	@mkdir -p build/
 	$(CC) $(CCFLAGS) $(INCLUDES) -c -o $@ $<
 
 # Build generated C++ code to LLVM bitcode
-build/%.bc: build/%.cpp
+build/%.bc: build/%.cpp $(CPP_DEPS)
 	$(CC) $(CCFLAGS) $(INCLUDES) -c -o $@ $<
 
 # Generate C++ code from 8086 EXEs by running Python translation scripts
