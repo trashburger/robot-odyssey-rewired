@@ -291,5 +291,5 @@ export function initGraphicsAfterEngineLoads(engine)
 
     // Try to asynchronously load a partial custom tileset.
     // Any missing tiles will still refer to the HGR version.
-    engine.setColorTilesFromImage("/rewired-tileset.png");
+    engine.setColorTilesFromImage(require("./rewired-tileset.png"));
 }

@@ -27,7 +27,7 @@ module.exports = {
         }),
         new FaviconsWebpackPlugin({
             logo: './src/scanner-512px.png',
-            prefix: './',
+            prefix: 'icon.[hash].',
             persistentCache: false,
             title,
             background: '#000',
@@ -42,8 +42,17 @@ module.exports = {
     ],
     module: {
         rules: [
-            { test: /\.css$/, use: [ MiniCssExtractPlugin.loader, 'css-loader' ] },
-            { test: /\.png$/, loader: 'file-loader' },
+            {
+                test: /\.css$/,
+                use: [ MiniCssExtractPlugin.loader, 'css-loader' ]
+            },
+            {
+                test: /\.png$/,
+                loader: 'file-loader',
+                options: {
+                    name: '[name]-[hash].[ext]',
+                },
+            }
         ]
     },
     optimization: {

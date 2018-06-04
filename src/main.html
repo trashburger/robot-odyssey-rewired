@@ -5,7 +5,7 @@
   <title><%= htmlWebpackPlugin.options.title %></title>
   <meta name="description" content="Robot Odyssey is a computer game about digital logic from 1984. This version has been ported from DOS to your browser.">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-  <link rel="preload" href="/rewired-tileset.png" as="image" crossOrigin="Anonymous">
+  <link rel="preload" href="<%= require('./rewired-tileset.png') %>" as="image" crossOrigin="Anonymous">
 </head>
 <body>
   <div id="frame">
@@ -59,7 +59,7 @@
       <button class="exec_btn warning_btn" data-program="play.exe" data-args="">Boot</button>
       <button class="loadgame_btn warning_btn">Re-Load</button>
       <button class="savegame_btn">Save Game</button>
-      <button class="palette_btn active_btn" data-src="/rewired-tileset.png">Rewired Tileset</button>
+      <button class="palette_btn active_btn" data-src="<%= require('./rewired-tileset.png') %>">Rewired Tileset</button>
       <button class="palette_btn" data-name="hgr">Apple (HGR) Colors</button>
       <button class="palette_btn" data-name="cga">PC (CGA) Colors</button>
     </div>

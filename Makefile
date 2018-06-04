@@ -5,6 +5,8 @@ CCFLAGS := -std=c++11 -Oz --bind
 
 ZSTD_OPTS := ZSTD_LEGACY_SUPPORT=0 CFLAGS=-Oz
 
+GIT_HASH := $(shell git rev-parse HEAD)
+
 WASMFLAGS := \
 	-s WASM=1 \
 	-s MODULARIZE=1 \
@@ -16,11 +18,6 @@ INCLUDES := \
 	-I src \
 	-I library/circular_buffer/include \
 	-I library/zstd/lib
-
-# Built files, not including the Webpack bundle
-DISTFILES := \
-	dist/engine.wasm \
-	dist/rewired-tileset.png
 
 # C++ modules, including generated code
 OBJS := \
@@ -44,7 +41,7 @@ OBJS := \
 
 all: dist
 
-dist: $(DISTFILES) dist/index.html
+dist: dist/index.html
 
 clean:
 	rm -Rf build/ dist/ .cache/
@@ -57,20 +54,16 @@ serve: $(DISTFILES)
 
 .PHONY: all clean dist serve
 
-# Static files
-dist/%: src/%
-	@mkdir -p dist/
-	cp $< $@
-
 # Javascript build with webpack
 dist/index.html: build/engine.js src/*.js src/*.html src/*.css
 	npx webpack --config ./webpack.config.js
 
 # WASM build from bitcode
-build/engine.js dist/engine.wasm: $(OBJS)
+build/engine.js: $(OBJS)
 	@mkdir -p dist/
-	$(CC) $(CCFLAGS) $(WASMFLAGS) -o build/engine.js $(OBJS)
-	cp build/engine.wasm dist/
+	$(CC) $(CCFLAGS) $(WASMFLAGS) -o build/engine.$(GIT_HASH).js $(OBJS)
+	mv build/engine.$(GIT_HASH).js build/engine.js
+	mv build/engine.$(GIT_HASH).wasm dist/
 
 # Build normal C++ code to LLVM bitcode
 build/%.bc: src/%.cpp
