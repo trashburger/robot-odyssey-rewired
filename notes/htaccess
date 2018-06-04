@@ -5,6 +5,11 @@ AddOutputFilterByType DEFLATE text/css
 AddOutputFilterByType DEFLATE application/javascript
 AddOutputFilterByType DEFLATE application/wasm
 
+# HTTPS everywhere! Also this gives us better caching.
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
 # Default cache policy, 2 hours
 Header set Cache-Control "max-age=7200,must-revalidate"
 
