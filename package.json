@@ -24,6 +24,8 @@
     "nipplejs": "^0.6.8"
   },
   "devDependencies": {
+    "babel-loader": "^7.1.4",
+    "babel-preset-env": "^1.7.0",
     "css-loader": "^0.28.11",
     "favicons-webpack-plugin": "0.0.9",
     "file-loader": "^1.1.11",
