@@ -2,20 +2,23 @@ export function initGraphics(engine)
 {
     const width = 640;
     const height = 400;
+    const visible_height = 384;
     const border = 2;
 
-    const margin = 20;
     const aspect = 4/3.0;
     const max_w = width * 2;
 
     const canvas = document.getElementById('framebuffer');
+    canvas.width = width + border*2;
+    canvas.height = visible_height + border*2;
+
     const context = canvas.getContext('2d');
     const image = context.createImageData(width, height);
 
     // Canvas resize handler
     const resize = () => {
-        const w_box = document.documentElement.clientWidth - margin;
-        const h_box = window.innerHeight - margin;
+        const w_box = document.documentElement.clientWidth;
+        const h_box = window.innerHeight;
         const w = Math.min(Math.min(max_w, w_box), aspect * h_box)|0;
         const h = (w / aspect)|0;
         canvas.style.width = w + 'px';
