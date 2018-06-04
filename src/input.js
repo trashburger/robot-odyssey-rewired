@@ -196,7 +196,6 @@ export function initInputAfterEngineLoads(engine)
         if (typeof(ascii) != typeof(0)) {
             ascii = ascii.length == 1 ? ascii.charCodeAt(0) : parseInt(ascii, 0);
         }
-        mouseTrackingEnd();
         engine.pressKey(ascii, scancode);
         engine.autoSave();
         audioContextSetup();
@@ -204,6 +203,11 @@ export function initInputAfterEngineLoads(engine)
 
     document.body.addEventListener('keydown', function (e)
     {
+        if (e.code.includes("Arrow")) {
+            // Most keys can coexist with mouse tracking, but arrow keys will take over.
+            mouseTrackingEnd();
+        }
+
         if (e.code == "ArrowUp" && e.shiftKey == false) keycode(0, 0x48);
         else if (e.code == "ArrowUp" && e.shiftKey == true) keycode('8', 0x48);
         else if (e.code == "ArrowDown" && e.shiftKey == false) keycode(0, 0x50);
@@ -215,9 +219,19 @@ export function initInputAfterEngineLoads(engine)
         else if (e.code == "Backspace" && !e.ctrlKey && !e.altKey && !e.metaKey) keycode('\x08', 0);
         else if (e.code == "Enter" && !e.ctrlKey && !e.altKey && !e.metaKey) keycode('\x0D', 0x1C);
         else if (e.code == "Escape" && !e.ctrlKey && !e.altKey && !e.metaKey) keycode('\x1b', 0x01);
-        else if (e.key.length == 1 && !e.ctrlKey && !e.altKey && !e.metaKey) keycode(e.key.toUpperCase(), 0);
-        else if (e.key.length == 1 && e.ctrlKey && !e.altKey && !e.metaKey) keycode(controlCode(e.key), 0);
-        else return;
+
+        else if (e.key.length == 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+            // Letter keys
+            keycode(e.key.toUpperCase(), 0);
+        } else if (e.key.length == 1 && e.ctrlKey && !e.altKey && !e.metaKey) {
+            // CTRL keys, useful for sound on-off and for cheats
+            keycode(controlCode(e.key), 0);
+        } else {
+            // Unrecognized special key, let the browser keep it.
+            return;
+        }
+
+        // Eat events for any recognized keys
         e.preventDefault();
     });
 
