@@ -133,17 +133,23 @@ void RGBDraw::text(uint8_t *string, uint8_t *font_data, uint8_t x, uint8_t y,
 void RGBDraw::vline(uint8_t x, uint8_t y1, uint8_t y2, uint8_t color)
 {
     unsigned start = std::min(y1, y2);
-    unsigned count = std::max(y1, y2) + 1 - start; 
-    for (unsigned i = 0; i < count; i++) {
-        pixel_160x192(x, start+i, color, 0, i);
+    unsigned end = std::max(y1, y2);
+    if (end < 192) {
+        unsigned count = end + 1 - start;
+        for (unsigned i = 0; i < count; i++) {
+            pixel_160x192(x, start+i, color, 0, i);
+        }
     }
 }
 
 void RGBDraw::hline(uint8_t x1, uint8_t x2, uint8_t y, uint8_t color)
 {
     unsigned start = std::min(x1, x2);
-    unsigned count = std::max(x1, x2) + 1 - start; 
-    for (unsigned i = 0; i < count; i++) {
-        pixel_160x192(start+i, y, color, i, 0);
+    unsigned end = std::max(x1, x2);
+    if (end < 160) {
+        unsigned count = end + 1 - start;
+        for (unsigned i = 0; i < count; i++) {
+            pixel_160x192(start+i, y, color, i, 0);
+        }
     }
 }
