@@ -10,7 +10,8 @@ WASMFLAGS := \
 	-s MODULARIZE=1 \
 	-s NO_FILESYSTEM=1 \
 	-s ALLOW_MEMORY_GROWTH=0 \
-	-s NO_DYNAMIC_EXECUTION=1
+	-s NO_DYNAMIC_EXECUTION=1 \
+	--emit-symbol-map
 
 INCLUDES := \
 	-I src \
