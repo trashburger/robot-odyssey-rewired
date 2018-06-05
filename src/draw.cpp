@@ -53,6 +53,8 @@ void RGBDraw::sprite(uint8_t *data, uint8_t x, uint8_t y, uint8_t color)
 
 void RGBDraw::playfield(uint8_t *data, uint8_t foreground, uint8_t background)
 {
+    // Profiler notes: About 30% of CPU is spent in this function!
+
     for (unsigned byte_index = 0; byte_index < 30; byte_index++) {
         uint8_t byte = data[byte_index];
         for (unsigned bit_index = 0; bit_index < 8; bit_index++) {
