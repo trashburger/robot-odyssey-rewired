@@ -94,14 +94,44 @@ static void endMouseTracking()
     hw.input.endMouseTracking();
 }
 
-static bool saveGame()
+enum class SaveStatus {
+    OK,
+    NOT_SUPPORTED,
+    BLOCKED,
+};
+
+static SaveStatus saveGame()
 {
-    // If we can save the game here, saves it to the buffer and returns true.
-    if (hw.process && hw.process->isWaitingInMainLoop() && hw.process->hasFunction(SBTADDR_SAVE_GAME_FUNC)) {
-        hw.process->call(SBTADDR_SAVE_GAME_FUNC, hw.process->reg);
-        return true;
+    if (!hw.process) {
+        // Not running at all
+        return SaveStatus::NOT_SUPPORTED;
     }
-    return false;
+
+    if (!hw.process->hasFunction(SBTADDR_SAVE_GAME_FUNC)) {
+        // No save function in this process
+        return SaveStatus::NOT_SUPPORTED;
+    }
+
+    if (!hw.process->isWaitingInMainLoop()) {
+        // Can't safely interrupt the process
+        return SaveStatus::BLOCKED;
+    }
+
+    hw.fs.save.file.size = 0;
+    hw.process->call(SBTADDR_SAVE_GAME_FUNC, hw.process->reg);
+
+    if (!hw.fs.save.isGame()) {
+        // File isn't the right size
+        return SaveStatus::NOT_SUPPORTED;
+    }
+
+    if (!hw.fs.save.asGame().getProcessName()) {
+        // File isn't something we know how to load.
+        // (Tutorial 6 runs in LAB.EXE, which knows how to save, but we can't load those files.)
+        return SaveStatus::NOT_SUPPORTED;
+    }
+
+    return SaveStatus::OK;
 }
 
 static bool loadGame()
@@ -236,6 +266,12 @@ EMSCRIPTEN_BINDINGS(engine)
     constant("SCREEN_WIDTH", (unsigned) OutputQueue::SCREEN_WIDTH);
     constant("SCREEN_HEIGHT", (unsigned) OutputQueue::SCREEN_HEIGHT);
     constant("SCREEN_TILE_SIZE", (unsigned) RGBDraw::SCREEN_TILE_SIZE);
+
+    enum_<SaveStatus>("SaveStatus")
+        .value("OK", SaveStatus::OK)
+        .value("NOT_SUPPORTED", SaveStatus::NOT_SUPPORTED)
+        .value("BLOCKED", SaveStatus::BLOCKED)
+        ;
 
     function("exec", &exec);
     function("setSpeed", &setSpeed);

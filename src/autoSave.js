@@ -4,7 +4,6 @@ var last_set_window_hash = null;
 var autosave_timer = null;
 const autosave_delay = 500;
 
-
 function doAutoSave(engine)
 {
     // this is hacky... autosaves have a different
@@ -19,17 +18,29 @@ function doAutoSave(engine)
 
     const saved_contents = engine.getSaveFile().slice();
     const saved_callback = engine.onSaveFileWrite;
+    engine.onSaveFileWrite = function () {};
 
     try {
-        engine.onSaveFileWrite = function ()
-        {
-            const packed = engine.packSaveFile();
-            const str = base64.encode(packed);
-            last_set_window_hash = str;
-            window.location.hash = str;
-            console.log(`autoSave, ${str.length} bytes`);
+        var hash = '';
+
+        switch (engine.saveGame()) {
+
+            case engine.SaveStatus.OK:
+                hash = base64.encode(engine.packSaveFile());
+                console.log(`autoSave, ${hash.length} bytes`);
+                break;
+
+            case engine.SaveStatus.BLOCKED:
+                return;
+
+            case engine.SaveStatus.NOT_SUPPORTED:
+                hash = '';
+                break;
         }
-        engine.saveGame();
+
+        last_set_window_hash = hash;
+        window.location.hash = hash;
+
     } finally {
 
         engine.onSaveFileWrite = saved_callback;

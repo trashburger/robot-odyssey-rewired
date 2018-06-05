@@ -155,6 +155,7 @@ const char *ROSavedGame::getWorldName()
 
 const char *ROSavedGame::getProcessName()
 {
+    // Which process do we load this world as?
     switch (worldId) {
         case RO_WORLD_SEWER:
         case RO_WORLD_SUBWAY:
