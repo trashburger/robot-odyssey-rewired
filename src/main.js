@@ -1,6 +1,3 @@
-import engineFactory from "../build/engine.js"
-import engineWasm from "../build/engine.wasm"
-
 import { loadingBegin, loadingError, loadingDone } from "./loading.js"
 import { filenameForSaveData } from "./roData.js"
 import { initGraphics, initGraphicsAfterEngineLoads } from "./graphics.js"
@@ -8,13 +5,21 @@ import { initSound } from "./sound.js"
 import { initInputEarly, initInputAfterEngineLoads } from "./input.js"
 import { initAutoSave } from "./autoSave.js"
 import { initFiles } from "./files.js"
+import OfflinePluginRuntime from 'offline-plugin/runtime'
+import EngineFactory from "../build/engine.js"
+import EngineWasm from "../build/engine.wasm"
+
 import './main.css'
 
+// Strong local caching using a Service Worker.
+// This starts prefetching all resources.
+OfflinePluginRuntime.install();
+
 try {
-    const engine = engineFactory(
+    const engine = EngineFactory(
     {
         locateFile: function () {
-            return engineWasm;
+            return EngineWasm;
         },
 
         onAbort: loadingError,

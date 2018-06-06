@@ -13,7 +13,10 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 # Default cache policy, 2 hours
 Header set Cache-Control "max-age=7200,must-revalidate"
 
-# Static resources with versioning
-<filesMatch "\.(jpg|jpeg|png|ico|gif|js|css|wasm)$">
+# Static resources with versioning.
+# Must NOT include index.html or sw.js,
+# currently just avoiding those extensions entirely.
+
+<filesMatch "\.(jpg|jpeg|png|ico|gif|css|wasm)$">
   Header set Cache-Control: public,max-age=31536000,immutable
 </filesMatch>
