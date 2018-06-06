@@ -3,9 +3,10 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
-const FaviconsWebpackPlugin = require('favicons-webpack-plugin')
 const OfflinePlugin = require('offline-plugin');
 const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
+var FaviconsWebpackPlugin = require('favicons-webpack-plugin')
+var WebpackPwaManifest = require('webpack-pwa-manifest')
 
 const title = 'Robot Odyssey Rewired';
 
@@ -36,18 +37,29 @@ module.exports = {
         }),
         new HtmlWebpackInlineSourcePlugin(),
         new FaviconsWebpackPlugin({
-            logo: './src/scanner-512px.png',
+            logo: path.resolve('./src/scanner-512px.png'),
             prefix: 'icon.[hash].',
             persistentCache: false,
             title,
             background: '#000',
             icons: {
+                // No manifest outputs, only favicon and apple
                 favicons: true,
                 appleIcon: true,
                 appleStartup: false,
-                android: true,
-                firefox: true,
+                android: false,
+                firefox: false,
             }
+        }),
+        new WebpackPwaManifest({
+            name: title,
+            background_color: '#000000',
+            icons: [
+                {
+                    src: path.resolve('./src/scanner-512px.png'),
+                    sizes: [32, 96, 128, 192, 256, 384, 512]
+                }
+            ],
         }),
         // Offline plugin should be last
         new OfflinePlugin(),
