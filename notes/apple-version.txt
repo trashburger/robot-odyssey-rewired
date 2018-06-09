@@ -1,0 +1,64 @@
+Memory map, Normal gameplay
+---------------------------
+
+6000	Beginning of World file
+
+
+
+Memory map, Menu
+-----------------
+
+0C60	graphics sub
+0CC8	graphics sub
+0CFA	Code; graphics related
+
+6000	Code
+
+6020	Menu entry?
+
+61F9	Delay
+
+
+
+First stage game boot
+---------------------
+
+Load addrs prior to main menu,
+from breakpoint at disk read sector (C65C .. C6F8)
+
+0800				First stage bootloader
+0869				Loading done, set graphics modes
+
+5100..5FFF			Loaded by first stage using disk ROM read func
+
+5A00..5AFF -> 300	256 bytes copied
+
+5B00..5B77 -> 400   0x78 bytes copied
+5C00.. -> 500
+5C80.. -> 580
+5D00.. -> 600
+5D80.. -> 680
+5E00.. -> 700
+5E80.. -> 780
+
+5D70.. -> 5C0       0x8 bytes copied
+5DF0.. -> 5C8
+5E70.. -> 5D0
+5EF0.. -> 5D8
+5F70.. -> 5E0
+5FF0.. -> 5E8
+
+Exits via 0x5F00 (normal) or 0x5FBB (?)
+
+Note: C0EC == disk read strobe. In first stage, only appears via the disk ROM.
+
+
+Second stage game boot
+----------------------
+
+5F00	Entry
+5F6B	First disk reader in this stage
+
+56FD	Read subroutine?
+57F0    Also read-related?
+ 
