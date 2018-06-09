@@ -24,7 +24,6 @@ OBJS := \
 	build/bt_lab.bc \
 	build/bt_menu.bc \
 	build/bt_menu2.bc \
-	build/bt_play.bc \
 	build/bt_tutorial.bc \
 	build/engine.bc \
 	build/sbt86.bc \
