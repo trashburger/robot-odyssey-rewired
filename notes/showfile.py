@@ -4,17 +4,14 @@
 import os, struct
 from PIL import Image
 
-
-def decode_next_image(file):
+def decode_next_image(file, pixels):
     # 9B: End of frame
     # 1B: 8-bit count, 8-bit value to repeat
     # E4: 16-bit LE count, 8-bit value to repeat
     # E6: 16-bit dest address
     # Other bytes are literal
 
-    pixels = bytearray(320*200)
     ptr = 0
-
     while True:
         count = 1
         byte = file.read(1)
@@ -78,20 +75,33 @@ def decode_next_image(file):
 
 
 def decode_all_images_from_show(filename):
-    number = 0
-    with open(filename, 'rb') as file:
-        while True:
-            first_offset = file.tell()
-            img = decode_next_image(file)
-            file_bytes = file.tell() - first_offset
-            if img:
-                number += 1
-                name = "tmp/%s-%d.png" % (os.path.basename(filename), number)
-                img.save(name, transparency=0, optimize=1)
-                print("%s was %d bytes compressed, %d byte PNG" %
-                    (name, file_bytes, os.stat(name).st_size))
-            else:
-                break
+    for contiguous in (False, True):
+        with open(filename, 'rb') as file:
+
+            number = 0
+            if contiguous:
+                # Opaque black
+                pixels = bytearray(b'\x01' * (320*200))
+
+            while True:
+                if not contiguous:
+                    # Transparent black
+                    pixels = bytearray(b'\x00' * (320*200))
+
+                first_offset = file.tell()
+                img = decode_next_image(file, pixels)
+                file_bytes = file.tell() - first_offset
+
+                if img:
+                    number += 1
+                    name = "tmp/%s-%d%s.png" % (
+                        os.path.basename(filename), number, ('', '-c')[contiguous])
+
+                    img.save(name, transparency=0, optimize=1)
+                    print("%s was %d bytes compressed, %d byte PNG" %
+                        (name, file_bytes, os.stat(name).st_size))
+                else:
+                    break
 
 
 if __name__ == '__main__':
