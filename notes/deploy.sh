@@ -1,8 +1,12 @@
 #!/bin/sh
 set -e
+
 git pull
+git checkout master
 git submodule update --init --recursive
+
 npm install
+
 make clean
 make
 
