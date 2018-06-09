@@ -13,7 +13,7 @@ class Hardware
     Hardware();
 
     uint32_t run();
-    void registerProcess(SBTProcess *p, bool is_default = false);
+    void registerProcess(SBTProcess *p);
 
     uint8_t in(uint16_t port, uint32_t timestamp);
     void out(uint16_t port, uint8_t value, uint32_t timestamp);
@@ -34,7 +34,6 @@ class Hardware
 
  protected:
     std::vector<SBTProcess*> process_vec;
-    SBTProcess *default_process;
     uint8_t port61;
     uint16_t keycode;
     int js_x, js_y;

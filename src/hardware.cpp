@@ -1,3 +1,4 @@
+#include <emscripten.h>
 #include <algorithm>
 #include <string.h>
 #include <stdio.h>
@@ -36,18 +37,18 @@ void Hardware::exit(SBTProcess *exiting_process, uint8_t code)
     if (verbose_process_info) {
         printf("EXIT, code %d\n", code);
     }
-    process = default_process;
-    process->reg.ax = code;
+
+    EM_ASM_({
+        Module.onProcessExit($0);
+    }, code);
+
+    process = 0;
     exiting_process->exit();
 }
 
-void Hardware::registerProcess(SBTProcess *p, bool is_default)
+void Hardware::registerProcess(SBTProcess *p)
 {
     process_vec.push_back(p);
-    if (is_default) {
-        default_process = p;
-        exec(p->getFilename(), "");
-    }
 }
 
 uint32_t Hardware::run()
@@ -58,7 +59,11 @@ uint32_t Hardware::run()
             return delay;
         }
 
-        assert(process);
+        if (!process) {
+            // Default delay while no process is loaded, arbitrarily large.
+            return 1000;
+        }
+
         process->run();
     }
 }
