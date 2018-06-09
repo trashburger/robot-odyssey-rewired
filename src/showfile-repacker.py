@@ -129,17 +129,28 @@ def decode_all_images(showfile):
     return compressed_images
 
 
+def repack_show_without_menu(dest_file, first_cutscene_frame, parts):
+    end_frame = b'\x9B'
+
+    with open(dest_file, 'wb') as file:
+        for i, part in enumerate(parts):
+            if i < first_cutscene_frame:
+                # Menu and disk prompts. Replace with empty frames
+                file.write(end_frame)
+            else:
+                file.write(part)
+
+        print("%s is %d bytes, original file was %d bytes" %
+            (dest_file, file.tell(), sum(len(part) for part in parts)))
+
+
 def main(build):
     show = decode_all_images(os.path.join(build, 'show/show.shw'))
     show2 = decode_all_images(os.path.join(build, 'show/show2.shw'))
     print("Found %d images in show.shw and %d in show2.shw" % (len(show), len(show2)))
 
-    with open(os.path.join(build, 'fs/show.shw'), 'wb') as file:
-        file.write(b''.join(show))
-
-    with open(os.path.join(build, 'fs/show2.shw'), 'wb') as file:
-        file.write(b''.join(show2))
-
+    repack_show_without_menu(os.path.join(build, 'fs/show.shw'), 0x07, show)
+    repack_show_without_menu(os.path.join(build, 'fs/show2.shw'), 0x05, show2)
 
 if __name__ == '__main__':
     main(sys.argv[1])

@@ -4,8 +4,8 @@
 # This is an alternate build of the main menu for Disk 2,
 # and it's also where the final cutscene is stored.
 #
-# Since we don't emulate disk swapping, this file is only used
-# for the final cutscene in this port.
+# Menus and the intro are in Javascript land now, so we only
+# use this binary to run the final cutscene.
 #
 # Micah Elizabeth Scott <micah@scanlime.org>
 #

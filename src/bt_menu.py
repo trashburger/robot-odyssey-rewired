@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 #
 # Patches and hooks for the binary translation of MENU.EXE.
-# This has the main menu, as well as the intro cutscene,
-# and some disk related menus we don't need.
+#
+# Menus and the intro are in Javascript land now, so we only
+# use this binary to run the new-game cutscene.
 #
 # Micah Elizabeth Scott <micah@scanlime.org>
 #
