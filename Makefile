@@ -84,7 +84,9 @@ build/%.cpp: src/%.py src/sbt86.py build/original
 # Tell gmake not to delete the intermediate .cpp files we generate
 .PRECIOUS: build/%.cpp
 
-build/fspack.cpp: src/fs-packer.py build/original
+# Pack all files in the build/fs/* directory, including a subset of
+# the original game files, and the repacked show files.
+build/fspack.cpp: src/fs-packer.py build/original build/fs/show.shw
 	$(PYTHON) $< build/fs $@
 
 # Pseudo-target to clean up and extract original Robot Odyssey data
@@ -92,6 +94,10 @@ build/original:
 	@mkdir -p build/
 	$(PYTHON) src/check-originals.py original build
 	@touch $@
+
+# Re-pack the game's show files, and generate additional outputs based on them
+build/fs/show.shw: build/original src/showfile-repacker.py
+	$(PYTHON) src/showfile-repacker.py build
 
 # Compile libzstd from source to LLVM bitcode
 library/zstd/lib/libzstd.a:

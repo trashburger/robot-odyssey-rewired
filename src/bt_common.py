@@ -6,8 +6,8 @@
 import sbt86
 
 
-# Approximate frame rate to run at during normal gameplay.
-# Not based on any real measurements (yet?) just by feel.
+# Default frame rate. This is somewhat faster and more consistent than the
+# original experience would have been, but it seems to play well.
 FRAME_RATE_DELAY = 1000 // 12
 
 
