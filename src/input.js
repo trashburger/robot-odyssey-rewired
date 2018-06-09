@@ -8,7 +8,7 @@ function controlCode(key)
     return String.fromCharCode(key.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0) + 1)
 }
 
-export function initInputEarly()
+export function init()
 {
     // Joystick is created immediately, but callbacks aren't hooked up until the engine loads
     joystick = nipplejs.create({
@@ -20,7 +20,7 @@ export function initInputEarly()
     });
 }
 
-export function initInputAfterEngineLoads(engine)
+export function engineLoaded(engine)
 {
     const fbCanvas = document.getElementById('framebuffer');
     const frame = document.getElementById('frame');

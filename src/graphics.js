@@ -1,4 +1,4 @@
-export function initGraphics(engine)
+export function init(engine)
 {
     const width = 640;
     const height = 400;
@@ -33,7 +33,7 @@ export function initGraphics(engine)
     };
 }
 
-export function initGraphicsAfterEngineLoads(engine)
+export function engineLoaded(engine)
 {
     const colorMem = engine.getColorMemory();
     const cga = colorMem.cga;

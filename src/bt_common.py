@@ -7,7 +7,8 @@ import sbt86
 
 
 # Default frame rate. This is somewhat faster and more consistent than the
-# original experience would have been, but it seems to play well.
+# original experience would have been, but it seems good for gameplay. Much
+# faster and it's hard to navigate and the puzzles run too quickly.
 FRAME_RATE_DELAY = 1000 // 12
 
 

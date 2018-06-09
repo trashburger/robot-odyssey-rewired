@@ -1606,7 +1606,7 @@ SBT_DECL_PROCESS(%(className)s);
 %(className)s::%(className)s(Hardware *hardware)
 {
     this->hardware = hardware;
-    hardware->registerProcess(this, %(isDefault)d);
+    hardware->registerProcess(this);
 }
 
 /*
@@ -1685,7 +1685,6 @@ int %(className)s::getAddress(SBTAddressId id)
 
 """
 
-    isDefault = False
     relocSegment = None
     subroutines = None
 

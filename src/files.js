@@ -1,7 +1,7 @@
 import downloadjs from 'downloadjs';
 import { filenameForSaveData } from './roData.js';
 
-export function initFiles(engine)
+export function engineLoaded(engine)
 {
     // Default handler for files saved by the game
     engine.onSaveFileWrite = function () {

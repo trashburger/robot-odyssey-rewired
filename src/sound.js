@@ -1,6 +1,6 @@
 var context = null;
 
-export function initSound(engine)
+export function init(engine)
 {
     engine.onRenderSound = function (pcmData, rate) {
         // TO DO: Volume control

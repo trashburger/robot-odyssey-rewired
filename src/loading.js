@@ -1,9 +1,10 @@
-export function loadingBegin()
+
+export function init()
 {
     document.getElementById("engine_loading").style.display = "block";
 }
 
-export function loadingError(err)
+export function error(err)
 {
     document.getElementById("engine_loading").style.display = "none";
     const el = document.getElementById("engine_error");
@@ -21,7 +22,7 @@ export function loadingError(err)
     el.style.display = "block";
 }
 
-export function loadingDone()
+export function engineLoaded()
 {
     document.getElementById("engine_loading").style.display = "none";
     document.getElementById("controls").className = "controls_visible";
