@@ -28,6 +28,10 @@ class OriginalFileCollector:
         '360e983c090c95c99e39a7ebdb9d6649b537d75f': 'menu2.exe',
         '12df28e9c3998714feaa81b99542687fc36f792f': 'play.exe',
 
+        # Show files will be repacked and included
+        '6a0f6f3b102491e6b6c6a42cc48abbcc17249a95': 'show/show2.shw',
+        '40adb729d3e86be25cde6796d87b3d0560e7e239': 'show/show.shw',
+
         # Game data files
         '9a2656381e063e43bf7d1534b5724362e11236d3': 'fs/4bitcntr.csv',
         '751343a72a371ecfafa1c35224bb3bda2831eeb9': 'fs/adder.csv',
@@ -46,8 +50,6 @@ class OriginalFileCollector:
         '932e2e777a257271685e4babb3494717e8034756': 'fs/rsflop.csv',
         '194267d3de8afed93516db5a78b6559b185db0cc': 'fs/sewer.cir',
         '96d0e323e8c065b19303f54a3b87a4bfb9443f2b': 'fs/sewer.wor',
-        '6a0f6f3b102491e6b6c6a42cc48abbcc17249a95': 'fs/show2.shw',
-        '40adb729d3e86be25cde6796d87b3d0560e7e239': 'fs/show.shw',
         '51b8c31c15dbc779c626c24408c68f5931ca7ff8': 'fs/stereo.csv',
         '84d2931d1c3464bf53dae45185dd5f80344b8bfc': 'fs/street.wld',
         'caf4b8c04656bffa767caf7f10819d4585fc9ed3': 'fs/subway.wld',

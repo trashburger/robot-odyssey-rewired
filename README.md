@@ -30,12 +30,20 @@ Dependencies
 Build Instructions
 ------------------
 
+First-time setup:
+
 - Place Robot Odyssey 1.1 for DOS game files in the "original" directory
 - git submodule update --init --recursive
 - npm install
+- pip3 install -r requirements.txt
+
+To build a static site into the `dist` directory:
+
 - make
 
-The built web site will be in `dist`, or start a development server with `make serve`
+To run the development hot-reload server:
+
+- make serve
 
 
 Saved chips
