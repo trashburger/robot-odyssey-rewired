@@ -88,8 +88,10 @@ module.exports = {
             },
             {
                 test: /\.png$/,
-                loader: 'file-loader',
+                loader: 'url-loader',
                 options: {
+                    limit: 8192,
+                    fallback: 'file-loader',
                     name: '[name]-[hash].[ext]',
                 },
             },

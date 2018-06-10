@@ -16,7 +16,6 @@
 }
 
 #frame * {
-    opacity: 0.2;
     touch-action: none;
     position: absolute;
     left: 0;
@@ -30,4 +29,8 @@
     top: -100px;
     border: 100px solid black;
     border-radius: 50%;
+}
+
+#menu_cursor {
+    transition: top 0.3s ease;
 }
