@@ -38,11 +38,16 @@ void Hardware::exit(SBTProcess *exiting_process, uint8_t code)
         printf("EXIT, code %d\n", code);
     }
 
+    // Next state is no process, unless the callback invokes exec(), which it might.
+    process = 0;
+
     EM_ASM_({
-        Module.onProcessExit($0);
+        if (Module.onProcessExit) {
+            Module.onProcessExit($0);
+        }
     }, code);
 
-    process = 0;
+    // Returns from run() immediately via longjmp/throw
     exiting_process->exit();
 }
 
