@@ -7,28 +7,12 @@ export function init(engine)
     const visible_height = 384;
     const border = 2;
 
-    const aspect = 4/3.0;
-    const max_w = width * 2;
-
     const canvas = document.getElementById('framebuffer');
     canvas.width = width + border*2;
     canvas.height = visible_height + border*2;
 
     const context = canvas.getContext('2d');
     const image = context.createImageData(width, height);
-
-    // Frame resize handler
-    const frame = document.getElementById('frame');
-    const resize = () => {
-        const w_box = document.documentElement.clientWidth;
-        const h_box = window.innerHeight;
-        const w = Math.min(Math.min(max_w, w_box), aspect * h_box)|0;
-        const h = (w / aspect)|0;
-        frame.style.width = w + 'px';
-        frame.style.height = h + 'px';
-    };
-    window.addEventListener('resize', resize);
-    resize();
 
     engine.onRenderFrame = (rgb) => {
         image.data.set(rgb);
