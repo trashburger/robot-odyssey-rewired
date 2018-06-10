@@ -1,5 +1,6 @@
 #game_area {
     width: 100%;
+    overflow: hidden;
 }
 
 #game_area > div {
@@ -11,6 +12,7 @@
 
 #frame {
     position: relative;
+    overflow: hidden;
     background: #000;
     padding-bottom: 75%;
     width: 100%;
@@ -19,6 +21,7 @@
 
 #frame * {
     touch-action: none;
+    overflow: hidden;
     position: absolute;
     left: 0;
     top: 0;
