@@ -14,7 +14,6 @@ import './main.css'
 // This starts prefetching all resources.
 OfflinePluginRuntime.install();
 
-
 try {
     const engine = EngineFactory(
     {

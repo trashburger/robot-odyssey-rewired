@@ -5,6 +5,12 @@ body {
     margin: 0;
 }
 
+#main_column {
+    overflow: hidden;
+    margin: 0 auto;
+    max-width: 1200px;
+}
+
 a {
     color: #067697;
 }
