@@ -57,11 +57,16 @@ clean:
 	rm -Rf build/ dist/ .cache/
 	make -C library/zstd clean
 
-serve: $(WEBPACK_DEPS)
+# Hot-reload server
+hotserve: $(WEBPACK_DEPS)
 	mkdir -p build/
 	npx webpack-serve --config ./webpack.config.js --host 0.0.0.0 --port 8000
 
-.PHONY: all clean dist serve
+# Static server
+distserve: dist
+	(cd dist; $(PYTHON) -m http.server)
+
+.PHONY: all clean dist hotserve distserve
 
 # WASM build from bitcode
 build/engine.js: $(OBJS)

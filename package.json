@@ -6,7 +6,8 @@
   "main": "src/main.js",
   "scripts": {
     "build": "make",
-    "serve": "make serve"
+    "hotserve": "make hotserve",
+    "distserve": "make distserve"
   },
   "repository": {
     "type": "git",
