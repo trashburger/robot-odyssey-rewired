@@ -1,10 +1,8 @@
 #game_area {
-    overflow: hidden;
     width: 100%;
 }
 
 #game_area > div {
-    overflow: hidden;
     max-width: 133vh;
     margin: 0 auto;
     width: 100%;
@@ -14,7 +12,6 @@
 #frame {
     position: relative;
     background: #000;
-    overflow: hidden;
     padding-bottom: 75%;
     width: 100%;
     height: 100%;
@@ -31,22 +28,25 @@
 
 #frame .iris {
     display: none;
-    left: -100px;
-    top: -100px;
-    border: 100px solid black;
+    position: unset;
     border-radius: 50%;
 }
 
+#frame .iris > * {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
 #splash_1 {
-    display: none;
 }
 
 #main_menu {
-    display: none;
     transition: top 0.3s ease;
 }
 
 #main_menu_cursor {
-    display: none;
     transition: top 0.3s ease;
 }

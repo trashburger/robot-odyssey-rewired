@@ -8,19 +8,24 @@
 </head>
 <body>
   <div id="main_column">
+
     <div id="game_area">
       <div>
         <div id="frame">
           <canvas id="framebuffer"></canvas>
           <div id="engine_loading"></div>
-          <img id="splash_1" src="<%= require('../build/show/show-00-c.png') %>" />
-          <img id="main_menu" src="<%= require('../build/show/menu.png') %>" />
-          <img id="main_menu_cursor" src="<%= require('../build/show/menu-cursor.png') %>" />
-          <div class="iris"></div>
+          <div class="iris">
+            <img id="splash_1" src="<%= require('../build/show/show-00-c.png') %>" />
+          </div>
+          <div class="iris">
+            <img id="main_menu" src="<%= require('../build/show/menu.png') %>" />
+            <img id="main_menu_cursor" src="<%= require('../build/show/menu-cursor.png') %>" />
+          </div>
           <div id="engine_error"></div>
         </div>
       </div>
     </div>
+
     <div id="controls" class="controls_hidden">
       <div id="joystick">
         <div id="joystick_xy"></div>
@@ -75,6 +80,7 @@
         <a href="https://github.com/scanlime/robot-odyssey-rewired" target="_blank" rel="noopener">open source software</a>
       </div>
     </div>
+
   </div>
 </body>
 </html>
