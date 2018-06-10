@@ -26,11 +26,11 @@ import sys, os, struct, io
 from PIL import Image
 
 PALETTE = [
-    0, 0, 0,    # Transparent
     0, 0, 0,
     0x09, 0xA9, 0xD8,
     0xED, 0x7A, 0x31,
     0xFF, 0xFF, 0xFF,
+    0, 0, 0,    # Transparent
 ]
 
 CGA_SIZE = (320, 200)
@@ -95,12 +95,12 @@ def decompress_image(file, pixels, compressed):
                 pixaddr = (4 * (ptr % 80)) + 320*(2 * (ptr // 80))
 
             if pixaddr <= 63996:
-                # Four pixels per byte, MSB first. Palette entry zero is transparent
-                # for pixels that aren't written, and the next 4 entries represent CGA colors.
-                pixels[pixaddr] = 1 + (3 & (byte >> 6))
-                pixels[pixaddr + 1] = 1 + (3 & (byte >> 4))
-                pixels[pixaddr + 2] = 1 + (3 & (byte >> 2))
-                pixels[pixaddr + 3] = 1 + (3 & byte)
+                # Four pixels per byte, MSB first. Palette entry 4 is transparent
+                # for pixels that aren't written, and the first 4 entries represent CGA colors.
+                pixels[pixaddr] = 3 & (byte >> 6)
+                pixels[pixaddr + 1] = 3 & (byte >> 4)
+                pixels[pixaddr + 2] = 3 & (byte >> 2)
+                pixels[pixaddr + 3] = 3 & byte
 
             ptr += 1
             count -= 1
@@ -111,14 +111,14 @@ def decode_all_images(showfile):
         compressed_images = []
         if composited:
             # Opaque black, before the first frame, then every frame composited together
-            pixels = bytearray(b'\x01' * (320*200))
+            pixels = bytearray(b'\x00' * (320*200))
 
         with open(showfile, 'rb') as file:
             number = 0
             while True:
                 if not composited:
                     # Erase to transparent black before each frame, no compositing
-                    pixels = bytearray(b'\x00' * (320*200))
+                    pixels = bytearray(b'\x04' * (320*200))
 
                 raw = bytearray()
                 im = decompress_image(file, pixels, raw)
@@ -127,7 +127,7 @@ def decode_all_images(showfile):
                 compressed_images.append(raw)
 
                 name = '%s-%02d%s.png' % (os.path.splitext(showfile)[0], number, ('', '-c')[composited])
-                im.save(name, transparency=0, optimize=1)
+                im.save(name, transparency=4, optimize=1)
                 print("%s is %d bytes, from the original %d byte RLE data" % (name, os.stat(name).st_size, len(raw)))
                 number += 1
 
@@ -148,8 +148,23 @@ def main(build):
 
     # Remove frames that we aren't using. No need to replace them with blanks,
     # since the corresponding code will be removed from the player too.
+
     repack_show_without_menu(os.path.join(build, 'fs/show.shw'), show[7:])
     repack_show_without_menu(os.path.join(build, 'fs/show2.shw'), show2[5:])
+
+    # The show.shw file includes in [2] the entire menu plus cursor,
+    # and [3] clears the menu itself leaving only the cursor. We actually want
+    # two separate PNGs, for the menu background and the cursor.
+
+    menu = Image.open(os.path.join(build, 'show/show-02-c.png'))
+    menu_clear = Image.open(os.path.join(build, 'show/show-03.png'))
+    menu_opacity_mask = menu_clear.point(lambda color: color == 4, mode="1")
+    menu.paste(0, None, menu_opacity_mask)
+    menu.save(os.path.join(build, 'show/menu.png'), optimize=1)
+
+    cursor_only = Image.open(os.path.join(build, 'show/show-03-c.png'))
+    cursor_only.save(os.path.join(build, 'show/menu-cursor.png'), transparency=0, optimize=1)
+
 
 if __name__ == '__main__':
     main(sys.argv[1])
