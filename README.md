@@ -30,7 +30,7 @@ Dependencies
 Build Instructions
 ------------------
 
-First-time setup:
+Set up dependencies:
 
 - Place Robot Odyssey 1.1 for DOS game files in the "original" directory
 - git submodule update --init --recursive
