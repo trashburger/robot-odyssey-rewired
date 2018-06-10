@@ -1,3 +1,4 @@
+import './loading.css'
 
 export function init()
 {

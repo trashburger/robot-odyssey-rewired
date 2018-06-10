@@ -1,0 +1,82 @@
+.keyboard_spacebar {
+    flex: 4 0 0;
+}
+
+.keyboard_enter {
+    flex: 2 0 0;
+}
+
+.keyboard_esc {
+    flex: 2 0 0;
+}
+
+.warning_btn {
+    background: #382222;
+}
+
+.setspeed_btn {
+    background: #223022;
+    touch-action: none;
+}
+
+.active_btn {
+    background-color: #444440;
+    border-color: #777;
+}
+
+.keyboard_btn {
+    touch-action: none;
+}
+
+#controls {
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+button {
+    user-select: none;
+    -webkit-user-select: none;
+    background-color: #222;
+    font: 17px sans-serif;
+    color: #888;
+    border: 1px solid #555;
+    margin: 2px;
+    padding: 8px;
+    flex: 1 0 0;
+}
+
+.controls_hidden {
+    opacity: 0;
+}
+
+.controls_visible {
+    opacity: 1;
+    transition: opacity 1.5s;
+}
+
+.button_area {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 50px 2px 50px;
+}
+
+#joystick {
+    display: flex;
+    margin: 6px 50px 10px 50px;
+}
+
+#joystick_xy {
+    flex: 1 0 0;
+    position: relative;
+    height: 110px;
+    background: #111;
+}
+
+.joystick_btn {
+    flex: 1 0 0;
+    touch-action: none;
+    border: none;
+    margin: 0;
+    padding: 4px;
+}

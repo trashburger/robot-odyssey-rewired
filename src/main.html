@@ -7,10 +7,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 </head>
 <body>
-  <div id="frame">
-    <canvas id="framebuffer"></canvas>
-    <div id="engine_loading"></div>
-    <div id="engine_error"></div>
+  <div id="game_area">
+    <div id="frame">
+      <canvas id="framebuffer"></canvas>
+      <img id="intro_1" src="<%= require('../build/show/show-00-c.png') %>" />
+      <div id="engine_loading"></div>
+      <div id="engine_error"></div>
+    </div>
   </div>
   <div id="controls" class="controls_hidden">
     <div id="joystick">
@@ -62,9 +65,9 @@
       <button class="palette_btn" data-name="hgr">Apple (HGR) Colors</button>
       <button class="palette_btn" data-name="cga">PC (CGA) Colors</button>
     </div>
-  </div>
-  <div id="footer">
-    <a href="https://github.com/scanlime/robot-odyssey-rewired" target="_blank" rel="noopener">open source software</a>
+    <div id="footer">
+      <a href="https://github.com/scanlime/robot-odyssey-rewired" target="_blank" rel="noopener">open source software</a>
+    </div>
   </div>
 </body>
 </html>

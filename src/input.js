@@ -1,6 +1,8 @@
 import nipplejs from 'nipplejs';
 import { audioContextSetup } from "./sound.js"
 
+import './input.css'
+
 var joystick = null;
 
 function controlCode(key)
@@ -22,11 +24,11 @@ export function init()
 
 export function engineLoaded(engine)
 {
-    const fbCanvas = document.getElementById('framebuffer');
-    const frame = document.getElementById('frame');
+    const canvas = document.getElementById('framebuffer');
+    const game_area = document.getElementById('game_area');
 
-    const canvas_width = fbCanvas.width;
-    const canvas_height = fbCanvas.height;
+    const canvas_width = canvas.width;
+    const canvas_height = canvas.height;
 
     const game_width = 160;
     const game_height = 192;
@@ -51,7 +53,7 @@ export function engineLoaded(engine)
 
     function mouseLocationForEvent(e)
     {
-        const canvasRect = fbCanvas.getBoundingClientRect();
+        const canvasRect = canvas.getBoundingClientRect();
         const border = 1;
 
         const canvasX = (e.clientX - canvasRect.x) * canvas_width / canvasRect.width;
@@ -73,7 +75,7 @@ export function engineLoaded(engine)
         return { x, y };
     }
 
-    frame.addEventListener('mousemove', function (e)
+    game_area.addEventListener('mousemove', function (e)
     {
         if (mouse_tracking_unlocked) {
             const loc = mouseLocationForEvent(e);
@@ -82,7 +84,7 @@ export function engineLoaded(engine)
         }
     });
 
-    frame.addEventListener('mousedown', function (e)
+    game_area.addEventListener('mousedown', function (e)
     {
         if (e.button == 0) {
             e.preventDefault();
@@ -99,7 +101,7 @@ export function engineLoaded(engine)
         }
     });
 
-    frame.addEventListener('mouseup', function (e)
+    game_area.addEventListener('mouseup', function (e)
     {
         if (e.button == 0) {
             e.preventDefault();
@@ -115,9 +117,9 @@ export function engineLoaded(engine)
         }
     });
 
-    frame.addEventListener('mouseleave', mouseTrackingEnd);
+    game_area.addEventListener('mouseleave', mouseTrackingEnd);
 
-    fbCanvas.addEventListener('touchstart', function (e)
+    canvas.addEventListener('touchstart', function (e)
     {
         const loc = mouseLocationForEvent(e.targetTouches[0]);
         engine.setMouseTracking(loc.x, loc.y);
@@ -127,21 +129,21 @@ export function engineLoaded(engine)
         e.preventDefault();
     });
 
-    fbCanvas.addEventListener('touchmove', function (e)
+    canvas.addEventListener('touchmove', function (e)
     {
         const loc = mouseLocationForEvent(e.targetTouches[0]);
         engine.setMouseTracking(loc.x, loc.y);
         e.preventDefault();
     });
 
-    fbCanvas.addEventListener('touchend', function (e)
+    canvas.addEventListener('touchend', function (e)
     {
         engine.setMouseButton(false);
         engine.autoSave();
         e.preventDefault();
     });
 
-    fbCanvas.addEventListener('touchcancel', function (e)
+    canvas.addEventListener('touchcancel', function (e)
     {
         engine.setMouseButton(false);
         engine.autoSave();
@@ -171,7 +173,7 @@ export function engineLoaded(engine)
                 up(e);
             }
             button.blur();
-            fbCanvas.focus();
+            canvas.focus();
         };
 
         const options = {

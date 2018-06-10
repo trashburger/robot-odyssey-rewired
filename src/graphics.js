@@ -1,3 +1,5 @@
+import './graphics.css'
+
 export function init(engine)
 {
     const width = 640;
@@ -15,14 +17,15 @@ export function init(engine)
     const context = canvas.getContext('2d');
     const image = context.createImageData(width, height);
 
-    // Canvas resize handler
+    // Frame resize handler
+    const frame = document.getElementById('frame');
     const resize = () => {
         const w_box = document.documentElement.clientWidth;
         const h_box = window.innerHeight;
         const w = Math.min(Math.min(max_w, w_box), aspect * h_box)|0;
         const h = (w / aspect)|0;
-        canvas.style.width = w + 'px';
-        canvas.style.height = h + 'px';
+        frame.style.width = w + 'px';
+        frame.style.height = h + 'px';
     };
     window.addEventListener('resize', resize);
     resize();
@@ -151,7 +154,7 @@ export function engineLoaded(engine)
         engine.setSolidColor(0x04, 0);      // Transparent black
         engine.setSolidColor(0x05, hgr[4]);
         engine.setSolidColor(0x06, hgr[3]);
-        engine.setSolidColor(0x07, hgr[5]);    
+        engine.setSolidColor(0x07, hgr[5]);
 
         // Playfield color patterns
         engine.setCheckerboardColor(0x08, hgr[3], hgr[0]);
