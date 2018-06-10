@@ -5,7 +5,8 @@
 # and it's also where the final cutscene is stored.
 #
 # Menus and the intro are in Javascript land now, so we only
-# use this binary to run the final cutscene.
+# use this binary to run the final cutscene from SHOW2.SHW.
+# As a result, let's rename this to "show2.exe" once translated.
 #
 # Micah Elizabeth Scott <micah@scanlime.org>
 #
@@ -17,6 +18,7 @@ import bt_common
 
 basedir = sys.argv[1]
 b = sbt86.DOSBinary(os.path.join(basedir, 'menu2.exe'))
+b.basename = "show2.exe"
 
 bt_common.patchJoystick(b)
 bt_common.patchFramebufferTrace(b)
@@ -37,8 +39,9 @@ b.patchDynamicBranch('019E:068B', [
 b.patchDynamicLiteral('019E:0434', length=2)
 b.patchDynamicLiteral('019E:0436', length=2)
 
-# Remove the unneeded splashscreen and main menu
-b.patch('019E:0102', 'ret')
+# Go directly to the end-game cutscene after we get the SHW file reader setup.
+# This also skips over some code for skipping menu and loading images, as we've removed those.
+b.patch('019E:00F8', 'jmp 0x185')
 
 # At the very end of the final cutscene, we're greeted with an
 # infinite loop. Break that loop with a delay.
@@ -96,4 +99,4 @@ for call_site in [
         'g.proc->continueFrom(r, &sub_%X);' % (
             target.linear, continue_at.linear))
 
-b.writeCodeToFile(os.path.join(basedir, 'bt_menu2.cpp'), 'Menu2EXE')
+b.writeCodeToFile(os.path.join(basedir, 'bt_show2.cpp'), 'Show2EXE')

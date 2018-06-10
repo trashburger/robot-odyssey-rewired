@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 #
-# Patches and hooks for the binary translation of MENU.EXE.
+# Patches and hooks for the binary translation of MENU.EXE,
 #
 # Menus and the intro are in Javascript land now, so we only
-# use this binary to run the new-game cutscene.
+# use this binary to run the new-game cutscene from SHOW.SHW.
+# As a result, let's rename this to "show.exe" once translated.
 #
 # Micah Elizabeth Scott <micah@scanlime.org>
 #
@@ -15,12 +16,16 @@ import bt_common
 
 basedir = sys.argv[1]
 b = sbt86.DOSBinary(os.path.join(basedir, 'menu.exe'))
+b.basename = "show.exe"
 
 b.decl('#include <string.h>')
 
 bt_common.patchJoystick(b)
 bt_common.patchFramebufferTrace(b)
 b.hook(b.entryPoint, 'enable_framebuffer_trace = true;')
+
+# Go directly to the new-game cutscene after we get the SHW file reader setup
+b.patch('019E:00F8', 'jmp 0x1A6')
 
 # Time everything in this EXE, not just sound subroutines
 sbt86.Subroutine.clockEnable = True
@@ -37,58 +42,7 @@ b.patchDynamicBranch('019E:0778', [
 b.patchDynamicLiteral('019E:0517', length=2)
 b.patchDynamicLiteral('019E:0519', length=2)
 
-# The main menu is a subroutine with a single caller;
-# inline it to make cutting the control flow easier. Also disable framebuffer traces
-# while drawing the main menu, so we can draw it faster.
-b.patchAndHook('019E:012A', 'jmp 0x310', 'enable_framebuffer_trace = false;')
-b.patchAndHook('019E:034A', 'jmp 0x12d', 'enable_framebuffer_trace = true;')
-
-# Bypass the wait on the new/old game menu before entering robotropolis.
-b.patch('019E:0178', 'jmp 0x1A6')
-
-# The new/old game prompt itself isn't easy to remove entirely, since
-# it's stored sequentially prior to the cutscene in the cutscene file.
-# Instead, turn off framebuffer traces so we don't see it, and clear the
-# screen before the actual cutscene starts.
-b.hook('019E:016C', 'enable_framebuffer_trace = false;')
-b.hook('019E:0178', 'enable_framebuffer_trace = true;\n'
-                    'memset(g.proc->memSeg(0xB800), 0, 0x4000);')
-
-# Remove the new/old game menu and disk swap before Innovation Lab
-# As above, we'll handle game loading using an external UI.
-b.patch('019E:013e', 'jmp 0x162')
-
-# Remove the "insert disk 2" and corresponding wait when entering the tutorials
-b.patch('019E:018f', 'jmp 0x1A3')
-
-# Remove the "insert disk 2" and the wait when loading the final cutscene
-b.patch('019E:02e5', 'jmp 0x2fe')
-
-# Now break control flow every time we see a call site for the
-# main input polling function at 019E:0428. Though actually, this
-# seems to be down to a single call site now, even though we prepared for multiple.
-input_poll_func = sbt86.Addr16(str='019E:0428')
-for call_site in [
-    '019E:0315',    # Main menu wait (space/enter)
-]:
-    call_site = sbt86.Addr16(str=call_site)
-    continue_at = call_site.add(1)
-    assert b.jumpTarget(call_site).linear == input_poll_func.linear
-
-    # Redraw the screen and yield on the way out, check input on the way back in.
-    # Note that the frame rate here can be arbitrarily low if we only care about
-    # keyboard navigation, but joystick polling requires a higher frame rate here.
-    # Go slower than default, that's too fast here.
-
-    b.patchAndHook(call_site, 'ret',
-        'g.hw->output.pushFrameCGA(g.stack, g.proc->memSeg(0xB800));'
-        'g.hw->output.pushDelay(%d * 2.5);'
-        'g.proc->continueFrom(r, &sub_%X);' % (
-            bt_common.FRAME_RATE_DELAY, continue_at.linear))
-    b.patch(continue_at, 'call 0x%04x' % input_poll_func.offset, length=2)
-    b.markSubroutine(continue_at)
-
-# The menu uses wallclock time for some delays.
+# This binary uses wallclock time for some delays.
 # A save function is called before drawing the screen, to store a seconds timestamp.
 # Then, one of two fixed-duration delay functions are called to wait 4 seconds or 1 second
 # after the timestamp that was saved earlier.
@@ -101,7 +55,7 @@ b.patch(b.findCode(':b42c cd21 ________ c3'), 'ret')
 for (call_site, delay) in [
     ('019E:010F', 2000),
     ('019E:0118', 2800),
-    ('019E:01BD', 800),
+    ('019E:01BD', 1000),
     ('019E:01DB', 1000),
 ]:
     call_site = sbt86.Addr16(str=call_site)
@@ -163,4 +117,4 @@ for call_site in [
         'g.proc->continueFrom(r, &sub_%X);' % (
             target.linear, continue_at.linear))
 
-b.writeCodeToFile(os.path.join(basedir, 'bt_menu.cpp'), 'MenuEXE')
+b.writeCodeToFile(os.path.join(basedir, 'bt_show.cpp'), 'ShowEXE')

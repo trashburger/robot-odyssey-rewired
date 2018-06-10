@@ -11,8 +11,8 @@ using namespace emscripten;
 static Hardware hw;
 static TinySave tinySave;
 
-SBT_STATIC_PROCESS(&hw, MenuEXE);
-SBT_STATIC_PROCESS(&hw, Menu2EXE);
+SBT_STATIC_PROCESS(&hw, ShowEXE);
+SBT_STATIC_PROCESS(&hw, Show2EXE);
 SBT_STATIC_PROCESS(&hw, LabEXE);
 SBT_STATIC_PROCESS(&hw, GameEXE);
 SBT_STATIC_PROCESS(&hw, TutorialEXE);

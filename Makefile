@@ -22,8 +22,8 @@ INCLUDES := \
 OBJS := \
 	build/bt_game.bc \
 	build/bt_lab.bc \
-	build/bt_menu.bc \
-	build/bt_menu2.bc \
+	build/bt_show.bc \
+	build/bt_show2.bc \
 	build/bt_tutorial.bc \
 	build/engine.bc \
 	build/sbt86.bc \

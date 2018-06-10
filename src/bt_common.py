@@ -150,7 +150,7 @@ def patch(b):
     b.publishAddress('SBTADDR_WORLD_DATA', b.peek16(worldPtr))
 
 
-def patchFramebufferTrace(b, interval=300, delay=10):
+def patchFramebufferTrace(b, interval=250, delay=10):
     # Trace the framebuffer to emit frames periodically during animated transitions
     b.decl("#include <stdio.h>")
     b.decl("static bool enable_framebuffer_trace;")

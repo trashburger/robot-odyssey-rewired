@@ -1270,10 +1270,10 @@ class Instruction:
 
 
 class BinaryImage:
-    def __init__(self, filename=None, file=None, offset=0, data=None):
-        if file is None:
-            self.fileName = os.path.basename(filename)
-            file = open(filename, "rb")
+    def __init__(self, filename=None, offset=0, data=None):
+        self.basename = os.path.basename(filename)
+        self.filename = filename
+        file = open(filename, "rb")
 
         if data is None:
             file.seek(offset)
@@ -1284,7 +1284,6 @@ class BinaryImage:
             data = data[offset:]
 
         assert type(data) is bytes
-        self.filename = filename
         self._data = data
         self.loadSegment = 0
         self.parseHeader()
@@ -1654,7 +1653,7 @@ uint16_t %(className)s::getEntryCS()
 
 const char *%(className)s::getFilename()
 {
-    return "%(fileName)s";
+    return "%(basename)s";
 }
 
 void %(className)s::loadEnvironment(SBTStack *stack, SBTRegs reg)
@@ -1688,9 +1687,9 @@ int %(className)s::getAddress(SBTAddressId id)
     relocSegment = None
     subroutines = None
 
-    def __init__(self, filename=None, file=None, offset=0, data=None, relocSegment=0x100):
+    def __init__(self, filename=None, offset=0, data=None, relocSegment=0x100):
         self.relocSegment = relocSegment
-        BinaryImage.__init__(self, filename=filename, file=file, offset=offset, data=data)
+        BinaryImage.__init__(self, filename=filename, offset=offset, data=data)
 
     def loadAddress(self, addr):
         assert addr.offset == 0
@@ -1859,7 +1858,7 @@ int %(className)s::getAddress(SBTAddressId id)
           subroutines, and analyzes each routine.
           """
 
-        log("Analyzing %s..." % self.filename)
+        log("Analyzing %s..." % self.basename)
 
         self.subroutines = {}
         stack = list(self._markedSubs)
@@ -1907,7 +1906,7 @@ int %(className)s::getAddress(SBTAddressId id)
                                       "find %d. Matches: %r" %
                                       (len(addrs), expectedCount, addrs))
         log("Found patch location %r in %s for: %r" % (
-            addrs, self.filename, sig.shortText))
+            addrs, self.basename, sig.shortText))
         return addrs
 
     def findData(self, signature):
@@ -1929,7 +1928,7 @@ int %(className)s::getAddress(SBTAddressId id)
                                       "find %d. Matches: %r" %
                                       (len(addrs), expectedCount, addrs))
         log("Found data address %r in %s for: %r" % (
-            addrs, self.filename, sig.shortText))
+            addrs, self.basename, sig.shortText))
         return addrs
 
     def peek(self, addr, fmt):
@@ -1963,7 +1962,7 @@ int %(className)s::getAddress(SBTAddressId id)
         vars.update(self.__dict__)
 
         log("Code generating %s (%d subroutines)..." % (
-                self.filename, len(self.subroutines.values())))
+                self.basename, len(self.subroutines.values())))
 
         vars['className'] = className
         vars['subCode'] = '\n'.join([s.codegen(traces=self._traces)

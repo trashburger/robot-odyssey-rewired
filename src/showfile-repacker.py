@@ -25,6 +25,17 @@
 import sys, os, struct, io
 from PIL import Image
 
+PALETTE = [
+    0, 0, 0,    # Transparent
+    0, 0, 0,
+    0x09, 0xA9, 0xD8,
+    0xED, 0x7A, 0x31,
+    0xFF, 0xFF, 0xFF,
+]
+
+CGA_SIZE = (320, 200)
+ZOOMED_SIZE = (640, 400)
+
 
 def decompress_image(file, pixels, compressed):
     # Decompress an image, using the provided 8bpp scratch space and
@@ -44,15 +55,9 @@ def decompress_image(file, pixels, compressed):
         if byte == 0x9B:
             # Successful end of image, wrap the 8bpp buffer in a PIL image.
 
-            img = Image.frombuffer('P', (320, 200), pixels, 'raw', 'P', 0, 1)
-            img.putpalette([
-                0, 0, 0,
-                0, 0, 0,
-                0x09, 0xA9, 0xD8,
-                0xED, 0x7A, 0x31,
-                0xFF, 0xFF, 0xFF,
-            ])
-            return img
+            img = Image.frombuffer('P', CGA_SIZE, pixels, 'raw', 'P', 0, 1)
+            img.putpalette(PALETTE)
+            return img.resize(ZOOMED_SIZE)
 
         if ptr >= 0x4000:
             # Ignore anything except 0x9B when past the framebuffer end
@@ -129,19 +134,11 @@ def decode_all_images(showfile):
     return compressed_images
 
 
-def repack_show_without_menu(dest_file, first_cutscene_frame, parts):
-    end_frame = b'\x9B'
-
+def repack_show_without_menu(dest_file, parts):
     with open(dest_file, 'wb') as file:
-        for i, part in enumerate(parts):
-            if i < first_cutscene_frame:
-                # Menu and disk prompts. Replace with empty frames
-                file.write(end_frame)
-            else:
-                file.write(part)
-
-        print("%s is %d bytes, original file was %d bytes" %
-            (dest_file, file.tell(), sum(len(part) for part in parts)))
+        for part in parts:
+            file.write(part)
+        print("%s is %d bytes" % (dest_file, file.tell()))
 
 
 def main(build):
@@ -149,8 +146,10 @@ def main(build):
     show2 = decode_all_images(os.path.join(build, 'show/show2.shw'))
     print("Found %d images in show.shw and %d in show2.shw" % (len(show), len(show2)))
 
-    repack_show_without_menu(os.path.join(build, 'fs/show.shw'), 0x07, show)
-    repack_show_without_menu(os.path.join(build, 'fs/show2.shw'), 0x05, show2)
+    # Remove frames that we aren't using. No need to replace them with blanks,
+    # since the corresponding code will be removed from the player too.
+    repack_show_without_menu(os.path.join(build, 'fs/show.shw'), show[7:])
+    repack_show_without_menu(os.path.join(build, 'fs/show2.shw'), show2[5:])
 
 if __name__ == '__main__':
     main(sys.argv[1])
