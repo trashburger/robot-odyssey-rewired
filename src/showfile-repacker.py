@@ -141,6 +141,15 @@ def repack_show_without_menu(dest_file, parts):
         print("%s is %d bytes" % (dest_file, file.tell()))
 
 
+def image_to_644x388(im):
+    # The native SHW images are in CGA (320x200) and we double them to 640x400,
+    # but the resolution we actually want is 644x388, with a 2-pixel border on each side.
+    bg = im.resize((644,388))
+    bg.paste(0, (0, 0, 644, 388))
+    bg.paste(im.crop((0, 0, 640, 384)), (2, 2))
+    return bg
+
+
 def main(build):
     show = decode_all_images(os.path.join(build, 'show/show.shw'))
     show2 = decode_all_images(os.path.join(build, 'show/show2.shw'))
@@ -152,6 +161,13 @@ def main(build):
     repack_show_without_menu(os.path.join(build, 'fs/show.shw'), show[7:])
     repack_show_without_menu(os.path.join(build, 'fs/show2.shw'), show2[5:])
 
+    # Repack splashscreens in the proper resolution
+
+    splash1 = Image.open(os.path.join(build, 'show/show-00-c.png'))
+    splash2 = Image.open(os.path.join(build, 'show/show-01-c.png'))
+    image_to_644x388(splash1).save(os.path.join(build, 'show/splash1.png'), optimize=1)
+    image_to_644x388(splash2).save(os.path.join(build, 'show/splash2.png'), optimize=1)
+
     # The show.shw file includes in [2] the entire menu plus cursor,
     # and [3] clears the menu itself leaving only the cursor. We actually want
     # two separate PNGs, for the menu background and the cursor.
@@ -160,10 +176,10 @@ def main(build):
     menu_clear = Image.open(os.path.join(build, 'show/show-03.png'))
     menu_opacity_mask = menu_clear.point(lambda color: color == 4, mode="1")
     menu.paste(0, None, menu_opacity_mask)
-    menu.save(os.path.join(build, 'show/menu.png'), optimize=1)
+    image_to_644x388(menu).save(os.path.join(build, 'show/menu.png'), optimize=1)
 
     cursor_only = Image.open(os.path.join(build, 'show/show-03-c.png'))
-    cursor_only.save(os.path.join(build, 'show/menu-cursor.png'), transparency=0, optimize=1)
+    image_to_644x388(cursor_only).save(os.path.join(build, 'show/menu-cursor.png'), transparency=0, optimize=1)
 
 
 if __name__ == '__main__':

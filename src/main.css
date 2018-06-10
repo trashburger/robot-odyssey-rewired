@@ -1,5 +1,6 @@
 * {
     overflow: hidden;
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
@@ -22,3 +23,8 @@ a {
 #footer {
     margin: 12px;
 }
+
+.hidden {
+    display: none;
+}
+

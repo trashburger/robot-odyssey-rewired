@@ -12,16 +12,17 @@
     <div id="game_area">
       <div>
         <div id="frame">
-          <canvas id="framebuffer"></canvas>
-          <div id="engine_loading"></div>
-          <div class="iris">
-            <img id="splash_1" src="<%= require('../build/show/show-00-c.png') %>" />
-          </div>
-          <div class="iris">
-            <img id="main_menu" src="<%= require('../build/show/menu.png') %>" />
+          <img id="splash_1" src="<%= require('../build/show/splash1.png') %>" />
+          <img id="splash_2" src="<%= require('../build/show/splash2.png') %>" />
+          <div id="main_menu">
+            <img src="<%= require('../build/show/menu.png') %>" />
             <img id="main_menu_cursor" src="<%= require('../build/show/menu-cursor.png') %>" />
           </div>
-          <div id="engine_error"></div>
+          <div id="engine" class="hidden">
+            <canvas id="framebuffer"></canvas>
+            <div id="engine_loading"></div>
+            <div id="engine_error"></div>
+          </div>
         </div>
       </div>
     </div>

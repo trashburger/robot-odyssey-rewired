@@ -1,10 +1,5 @@
 import './loading.css'
 
-export function init()
-{
-    document.getElementById("engine_loading").style.display = "block";
-}
-
 export function error(err)
 {
     document.getElementById("engine_loading").style.display = "none";

@@ -1,23 +1,21 @@
 var context = null;
 
-export function init(engine)
+export function onRenderSound(pcmData, rate)
 {
-    engine.onRenderSound = function (pcmData, rate) {
-        // TO DO: Volume control
-        const volume = 0.1;
+    // TO DO: Volume control
+    const volume = 0.1;
 
-        if (volume > 0.0 && audioContextSetup()) {
-            const buffer = context.createBuffer(1, pcmData.length, rate);
-            const channelData = buffer.getChannelData(0);
-            for (var i = 0; i < pcmData.length; i++) {
-                channelData[i] = pcmData[i] * volume;
-            }
-
-            const source = context.createBufferSource();
-            source.buffer = buffer;
-            source.connect(context.destination);
-            source.start();
+    if (volume > 0.0 && audioContextSetup()) {
+        const buffer = context.createBuffer(1, pcmData.length, rate);
+        const channelData = buffer.getChannelData(0);
+        for (var i = 0; i < pcmData.length; i++) {
+            channelData[i] = pcmData[i] * volume;
         }
+
+        const source = context.createBufferSource();
+        source.buffer = buffer;
+        source.connect(context.destination);
+        source.start();
     }
 }
 

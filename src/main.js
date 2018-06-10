@@ -22,14 +22,13 @@ try {
         },
 
         onAbort: Loading.error,
+        onRenderSound: Sound.onRenderSound,
     });
 
     window.ROEngine = engine;
 
-    Loading.init(engine);
     Graphics.init(engine);
     Input.init(engine);
-    Sound.init(engine);
 
     engine.then(function ()
     {
@@ -40,14 +39,6 @@ try {
             Graphics.engineLoaded(engine);
             Input.engineLoaded(engine);
             AutoSave.engineLoaded(engine);
-
-            // TO DO: menu in js. For now, test cutscene -> game
-            engine.exec("show.exe", "");
-            engine.onProcessExit = function () {
-                console.log("finished cutscene");
-                engine.exec("game.exe", "");
-                engine.onProcessExit = null;
-            }
 
         } catch (e) {
             Loading.error(e);
