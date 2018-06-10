@@ -27,11 +27,11 @@
 }
 
 #splash_1 {
-    animation: 1.5s ease 0.0s 1 normal both running iris;
+    animation: 1.5s ease 0.1s 1 normal both running iris;
 }
 
 #splash_2 {
-    animation: 1.5s ease 2.5s 1 normal both running iris;
+    animation: 1.5s ease 2.6s 1 normal both running iris;
 }
 
 #main_menu {
