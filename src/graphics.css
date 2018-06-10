@@ -27,7 +27,7 @@
 }
 
 #splash_1 {
-    animation: 1.5s ease 0.2s 1 normal both running iris;
+    animation: 1.5s ease 0.0s 1 normal both running iris;
 }
 
 #splash_2 {
@@ -43,7 +43,7 @@
         clip-path: circle(0% at center);
     }
     100% {
-        clip-path: circle(100% at center);
+        clip-path: circle(74% at center);
     }
 }
 
