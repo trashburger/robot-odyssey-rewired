@@ -1,5 +1,6 @@
 #engine_loading {
     position: absolute;
+    overflow: visible;
     left: 50%;
     top: 50%;
     margin-left: -80px;
@@ -11,6 +12,7 @@
 #engine_loading:after {
     content: " ";
     display: block;
+    overflow: visible;
     width: 110px;
     height: 110px;
     margin: 1px;

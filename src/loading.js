@@ -18,7 +18,7 @@ export function error(err)
     el.style.display = "block";
 }
 
-export function engineLoaded()
+export function engineLoaded(engine)
 {
     document.getElementById("engine_loading").style.display = "none";
     document.getElementById("controls").className = "controls_visible";

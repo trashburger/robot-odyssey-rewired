@@ -1,87 +1,96 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title><%= htmlWebpackPlugin.options.title %></title>
-  <meta name="description" content="Robot Odyssey is a computer game about digital logic from 1984. You can play it online here!">
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta charset="utf-8">
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <meta name="description" content="Robot Odyssey is a computer game about digital logic from 1984. You can play it online here!">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 </head>
 <body>
-  <div id="main_column">
+<div id="main_column">
 
-    <div id="game_area">
-      <div>
-        <div id="frame">
-          <img id="splash_1" src="<%= require('../build/show/splash1.png') %>" />
-          <img id="splash_2" src="<%= require('../build/show/splash2.png') %>" />
-          <div id="main_menu">
+    <div id="game_area"><div><div id="frame">
+
+        <div id="splash">
+            <img src="<%= require('../build/show/splash1.png') %>" />
+            <img src="<%= require('../build/show/splash2.png') %>" />
+        </div>
+
+        <div id="game_menu">
             <img src="<%= require('../build/show/menu.png') %>" />
-            <img id="main_menu_cursor" src="<%= require('../build/show/menu-cursor.png') %>" />
-          </div>
-          <div id="engine" class="hidden">
+            <img id="game_menu_cursor" src="<%= require('../build/show/menu-cursor.png') %>" />
+        </div>
+
+        <div id="engine_area" class="hidden">
             <canvas id="framebuffer"></canvas>
             <div id="engine_loading"></div>
             <div id="engine_error"></div>
-          </div>
         </div>
-      </div>
-    </div>
+
+    </div></div></div>
 
     <div id="controls" class="controls_hidden">
-      <div id="joystick">
-        <div id="joystick_xy"></div>
-        <button class="joystick_btn">BUTTON</button>
-      </div>
-      <div class="button_area">
-        <button class="keyboard_btn keyboard_spacebar" data-ascii=" "
-                data-scancode="0x39" data-rdelay="250" data-rrate="100">SPACE</button>
-        <button class="keyboard_btn keyboard_enter" data-ascii="0x0D" data-scancode="0x1C">ENTER</button>
-        <button class="keyboard_btn keyboard_esc" data-ascii="0x1B" data-scancode="0x01">ESC</button>
-        <button class="keyboard_btn" data-ascii="?">?</button>
-      </div>
-      <div class="button_area">
-        <button class="keyboard_btn" data-ascii="R">R</button>
-        <button class="keyboard_btn" data-ascii="T">T</button>
-        <button class="keyboard_btn" data-ascii="C">C</button>
-        <button class="keyboard_btn" data-ascii="S">S</button>
-        <button class="keyboard_btn" data-ascii="P">P</button>
-        <button class="keyboard_btn" data-ascii="H">H</button>
-        <button class="keyboard_btn" data-ascii="O">O</button>
-        <button class="keyboard_btn" data-ascii="L">L</button>
-      </div>
-      <div class="button_area">
-        <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x4B" data-rdelay="250" data-rrate="80">←</button>
-        <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x50" data-rdelay="250" data-rrate="80">↓</button>
-        <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x48" data-rdelay="250" data-rrate="80">↑</button>
-        <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x4D" data-rdelay="250" data-rrate="80">→</button>
-      </div>
-      <div class="button_area">
-        <button class="keyboard_btn" data-ascii="4" data-scancode="0x4B" data-rdelay="250" data-rrate="40">⇠</button>
-        <button class="keyboard_btn" data-ascii="2" data-scancode="0x50" data-rdelay="250" data-rrate="40">⇣</button>
-        <button class="keyboard_btn" data-ascii="8" data-scancode="0x48" data-rdelay="250" data-rrate="40">⇡</button>
-        <button class="keyboard_btn" data-ascii="6" data-scancode="0x4D" data-rdelay="250" data-rrate="40">⇢</button>
-      </div>
-      <div class="button_area">
-        <button class="setspeed_btn" data-speed="0.24">&frac14;</button>
-        <button class="setspeed_btn" data-speed="0.5">&frac12;</button>
-        <button class="setspeed_btn active_btn" data-speed="1.0">1x</button>
-        <button class="setspeed_btn" data-speed="2.0">2x</button>
-        <button class="setspeed_btn" data-speed="10">10x</button>
-      </div>
-      <div class="button_area">
-        <button class="savefile_btn warning_btn">Load File</button>
-        <button class="exec_btn warning_btn" data-program="play.exe" data-args="">Boot</button>
-        <button class="loadgame_btn warning_btn">Re-Load</button>
-        <button class="savegame_btn">Save Game</button>
-        <button class="palette_btn active_btn" data-src="<%= require('./rewired-tileset.png') %>">Rewired Tileset</button>
-        <button class="palette_btn" data-name="hgr">Apple (HGR) Colors</button>
-        <button class="palette_btn" data-name="cga">PC (CGA) Colors</button>
-      </div>
-      <div id="footer">
-        <a href="https://github.com/scanlime/robot-odyssey-rewired" target="_blank" rel="noopener">open source software</a>
-      </div>
+
+        <div id="joystick">
+            <div id="joystick_xy"></div>
+            <button class="joystick_btn">BUTTON</button>
+        </div>
+
+        <div class="button_area">
+            <button class="keyboard_btn keyboard_spacebar" data-ascii=" " data-scancode="0x39" data-rdelay="250" data-rrate="100">SPACE</button>
+            <button class="keyboard_btn keyboard_enter" data-ascii="0x0D" data-scancode="0x1C">ENTER</button>
+            <button class="keyboard_btn keyboard_esc" data-ascii="0x1B" data-scancode="0x01">ESC</button>
+            <button class="keyboard_btn" data-ascii="?">?</button>
+        </div>
+
+        <div class="button_area">
+            <button class="keyboard_btn" data-ascii="R">R</button>
+            <button class="keyboard_btn" data-ascii="T">T</button>
+            <button class="keyboard_btn" data-ascii="C">C</button>
+            <button class="keyboard_btn" data-ascii="S">S</button>
+            <button class="keyboard_btn" data-ascii="P">P</button>
+            <button class="keyboard_btn" data-ascii="H">H</button>
+            <button class="keyboard_btn" data-ascii="O">O</button>
+            <button class="keyboard_btn" data-ascii="L">L</button>
+        </div>
+
+        <div class="button_area">
+            <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x4B" data-rdelay="250" data-rrate="80">←</button>
+            <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x50" data-rdelay="250" data-rrate="80">↓</button>
+            <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x48" data-rdelay="250" data-rrate="80">↑</button>
+            <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x4D" data-rdelay="250" data-rrate="80">→</button>
+        </div>
+
+        <div class="button_area">
+            <button class="keyboard_btn" data-ascii="4" data-scancode="0x4B" data-rdelay="250" data-rrate="40">⇠</button>
+            <button class="keyboard_btn" data-ascii="2" data-scancode="0x50" data-rdelay="250" data-rrate="40">⇣</button>
+            <button class="keyboard_btn" data-ascii="8" data-scancode="0x48" data-rdelay="250" data-rrate="40">⇡</button>
+            <button class="keyboard_btn" data-ascii="6" data-scancode="0x4D" data-rdelay="250" data-rrate="40">⇢</button>
+        </div>
+
+        <div class="button_area">
+            <button class="setspeed_btn" data-speed="0.24">&frac14;</button>
+            <button class="setspeed_btn" data-speed="0.5">&frac12;</button>
+            <button class="setspeed_btn active_btn" data-speed="1.0">1x</button>
+            <button class="setspeed_btn" data-speed="2.0">2x</button>
+            <button class="setspeed_btn" data-speed="10">10x</button>
+        </div>
+
+        <div class="button_area">
+            <button class="savefile_btn warning_btn">Load File</button>
+            <button class="exec_btn warning_btn" data-program="play.exe" data-args="">Boot</button>
+            <button class="loadgame_btn warning_btn">Re-Load</button>
+            <button class="savegame_btn">Save Game</button>
+            <button class="palette_btn active_btn" data-src="<%= require('./rewired-tileset.png') %>">Rewired Tileset</button>
+            <button class="palette_btn" data-name="hgr">Apple (HGR) Colors</button>
+            <button class="palette_btn" data-name="cga">PC (CGA) Colors</button>
+        </div>
+
+        <div id="footer">
+            <a href="https://github.com/scanlime/robot-odyssey-rewired" target="_blank" rel="noopener">open source software</a>
+        </div>
     </div>
 
-  </div>
+</div>
 </body>
 </html>

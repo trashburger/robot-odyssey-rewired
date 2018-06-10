@@ -4,6 +4,8 @@ import * as Input from "./input.js"
 import * as AutoSave from "./autoSave.js"
 import * as Files from "./files.js"
 import * as Loading from "./loading.js"
+import * as GameMenu from "./game_menu.js"
+
 import OfflinePluginRuntime from 'offline-plugin/runtime'
 import EngineFactory from "../build/engine.js"
 import EngineWasm from "../build/engine.wasm"
@@ -29,6 +31,7 @@ try {
 
     Graphics.init(engine);
     Input.init(engine);
+    GameMenu.init(engine);
 
     engine.then(function ()
     {
@@ -39,6 +42,7 @@ try {
             Graphics.engineLoaded(engine);
             Input.engineLoaded(engine);
             AutoSave.engineLoaded(engine);
+            GameMenu.engineLoaded(engine);
 
         } catch (e) {
             Loading.error(e);
