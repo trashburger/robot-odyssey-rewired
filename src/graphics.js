@@ -24,6 +24,8 @@ export function init(engine)
     engine.then(function () {
         engineLoaded(engine);
     });
+
+    canvas.focus();
 }
 
 function engineLoaded(engine)

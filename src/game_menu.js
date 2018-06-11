@@ -71,12 +71,12 @@ export function init(engine)
     // General key event handler
     document.body.addEventListener('keydown', function (e) {
         if (!e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey) {
+            e.preventDefault();
 
             if (current_state == States.SPLASH) {
                 setState(States.MENU);
-            }
 
-            if (current_state == States.MENU) {
+            } else if (current_state == States.MENU) {
                 if (e.code == "Enter") {
                     execMenuChoice(engine);
                 } else if (e.code == "Space" || e.code == "ArrowDown") {
@@ -96,16 +96,18 @@ export function init(engine)
         setState(States.EXEC);
     };
 
-    // If anyone tries to call exec() before the engine has loaded, delay until loading finishes.
-    if (!engine.exec) {
-        engine.exec = function () {
-            const exec_args = arguments;
-            setState(States.LOADING);
-            engine.then(function () { engine.exec.apply(engine, exec_args) });
-        }
-    }
-
     setState(States.SPLASH);
+}
+
+export function afterLoading(engine, func)
+{
+    if (engine.calledRun) {
+        // Already loaded
+        func();
+    } else {
+        setState(States.LOADING);
+        engine.then(func);
+    }
 }
 
 function getLastSplashImage()
@@ -138,7 +140,7 @@ export function setState(s)
 
     setVisibility('splash', s == States.SPLASH || s == States.MENU || s == States.EXEC);
     setVisibility('game_menu', s == States.MENU || s == States.EXEC);
-    setVisibility('loading', s == States.LOADING);
+    setVisibility('loading', s == States.LOADING || s == States.EXEC);
     setVisibility('framebuffer', s == States.EXEC);
     setVisibility('error', s == States.ERROR);
 
@@ -149,6 +151,7 @@ export function setState(s)
             if (current_state == States.EXEC) {
                 setVisibility('splash', false);
                 setVisibility('game_menu', false);
+                setVisibility('loading', false);
             }
         }, 2000);
     }
@@ -171,5 +174,8 @@ function setMenuChoice(c)
 
 function execMenuChoice(engine)
 {
-    engine.exec.apply(engine, MENU_CHOICES[current_menu_choice]);
+    const choice = MENU_CHOICES[current_menu_choice];
+    afterLoading(engine, function () {
+        engine.exec.apply(engine, choice);
+    });
 }

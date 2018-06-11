@@ -22,10 +22,10 @@
 }
 
 #game_menu_cursor {
-    transition: top 0.3s ease;
+    transition: top 0.15s ease;
 }
 
-#loading {
+#frame #loading {
     position: absolute;
     overflow: visible;
     left: 50%;
@@ -36,7 +36,7 @@
     height: 120px;
 }
 
-#loading:after {
+#frame #loading:after {
     content: " ";
     display: block;
     overflow: visible;

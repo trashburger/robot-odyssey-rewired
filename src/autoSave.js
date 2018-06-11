@@ -1,3 +1,4 @@
+import * as GameMenu from './game_menu.js';
 import base64 from 'base64-arraybuffer';
 
 var last_set_window_hash = null;
@@ -55,15 +56,17 @@ function checkHashForAutoSave(engine)
         var s = hash.slice(1);
         if (s != last_set_window_hash) {
             const packed = new Uint8Array(base64.decode(s));
-            if (engine.unpackSaveFile(packed)) {
-                if (engine.loadGame()) {
-                    console.log("Loading packed saved game");
+            GameMenu.afterLoading(engine, function () {
+                if (engine.unpackSaveFile(packed)) {
+                    if (engine.loadGame()) {
+                        console.log("Loading packed saved game");
+                    } else {
+                        console.warn("FAILED to load packed saved game");
+                    }
                 } else {
-                    console.warn("FAILED to load packed saved game");
+                    console.warn("FAILED to unpack saved game");
                 }
-            } else {
-                console.warn("FAILED to unpack saved game");
-            }
+            });
         }
     }
 }
@@ -73,6 +76,11 @@ export function init(engine)
     engine.then(function () {
         engineLoaded(engine);
     });
+
+    window.addEventListener('hashchange', function () {
+        checkHashForAutoSave(engine);
+    });
+    checkHashForAutoSave(engine);
 }
 
 function engineLoaded(engine)
@@ -86,10 +94,4 @@ function engineLoaded(engine)
             doAutoSave(engine);
         }, autosave_delay);
     };
-
-    window.addEventListener('hashchange', function () {
-        checkHashForAutoSave(engine);
-    });
-
-    checkHashForAutoSave(engine);
 }
