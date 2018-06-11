@@ -102,27 +102,29 @@ export function pressKey(engine, ascii, scancode)
 
 export function setJoystickAxes(engine, x, y)
 {
-    // Timed movements, according to Y axis.
-    // This installs an interval handler if needed, which stays installed
-    // until we change game_menu states.
+    if (current_state == States.MENU) {
+        // Timed movements, according to Y axis.
+        // This installs an interval handler if needed, which stays installed
+        // until we change game_menu states.
 
-    const interval = 80;
-    const speed = 0.04;
+        const interval = 80;
+        const speed = 0.04;
 
-    menu_joystick_y = y;
-    if (!menu_joystick_interval) {
-        var accumulator = 0;
+        menu_joystick_y = y;
+        if (!menu_joystick_interval) {
+            var accumulator = 0;
 
-        menu_joystick_interval = setInterval(function () {
-            accumulator += menu_joystick_y * speed;
-            if (accumulator > 1) {
-                accumulator = Math.min(accumulator - 1, 1);
-                setMenuChoice(current_menu_choice + 1);
-            } else if (accumulator < -1) {
-                accumulator = Math.max(accumulator + 1, -1);
-                setMenuChoice(current_menu_choice - 1);
-            }
-        }, interval);
+            menu_joystick_interval = setInterval(function () {
+                accumulator += menu_joystick_y * speed;
+                if (accumulator > 1) {
+                    accumulator = Math.min(accumulator - 1, 1);
+                    setMenuChoice(current_menu_choice + 1);
+                } else if (accumulator < -1) {
+                    accumulator = Math.max(accumulator + 1, -1);
+                    setMenuChoice(current_menu_choice - 1);
+                }
+            }, interval);
+        }
     }
 }
 
