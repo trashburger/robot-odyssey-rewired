@@ -13,7 +13,7 @@ function controlCode(key)
     return String.fromCharCode(key.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0) + 1)
 }
 
-export function init()
+export function init(engine)
 {
     // Joystick is created immediately, but callbacks aren't hooked up until the engine loads
     joystick = nipplejs.create({
@@ -23,9 +23,16 @@ export function init()
         threshold: 0.01,
         position: { left: '50%', top: '50%' }
     });
+
+    // Fade in the controls as soon as this Javascript is ready
+    document.getElementById('engine_controls').classList.remove('hidden');
+
+    engine.then(function () {
+        engineLoaded(engine);
+    });
 }
 
-export function engineLoaded(engine)
+function engineLoaded(engine)
 {
     const canvas_width = canvas.width;
     const canvas_height = canvas.height;

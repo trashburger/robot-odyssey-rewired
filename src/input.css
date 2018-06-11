@@ -28,17 +28,13 @@
     touch-action: none;
 }
 
-#controls {
-    display: block;
+#engine_controls {
     width: 100%;
-    max-width: 960px;
-    margin: 0 auto;
     opacity: 1;
     transition: opacity 1.5s;
 }
 
-#controls.hidden {
-    display: block;
+#engine_controls.hidden {
     opacity: 0;
 }
 

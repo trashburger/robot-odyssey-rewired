@@ -15,14 +15,18 @@ export function init(engine)
     const context = canvas.getContext('2d');
     const image = context.createImageData(width, height);
 
-    engine.onRenderFrame = (rgb) => {
+    engine.onRenderFrame = function (rgb) {
         image.data.set(rgb);
         context.putImageData(image, border, border);
         GameMenu.setState(GameMenu.States.EXEC);
     };
+
+    engine.then(function () {
+        engineLoaded(engine);
+    });
 }
 
-export function engineLoaded(engine)
+function engineLoaded(engine)
 {
     const colorMem = engine.getColorMemory();
     const cga = colorMem.cga;

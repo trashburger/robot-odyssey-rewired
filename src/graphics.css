@@ -28,3 +28,12 @@
     width: 100%;
     height: 100%;
 }
+
+#frame .hidden {
+    display: none;
+}
+
+#framebuffer {
+    animation: 1.5s ease 0s 1 normal both running iris;
+    background: #000;
+}

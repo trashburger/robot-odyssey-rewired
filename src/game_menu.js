@@ -1,25 +1,35 @@
 import './game_menu.css'
 
 export const States = {
-	SPLASH: 0,
-	MENU: 1,
-	EXEC: 2,
-	LOADING: 3,
-	ERROR: 4,
+    SPLASH: 0,
+    MENU: 1,
+    EXEC: 2,
+    LOADING: 3,
+    ERROR: 4,
 };
 
-const game_menu = document.getElementById('game_menu');
-const splash = document.getElementById('splash');
+const MENU_CHOICES = [
+    [ "show.exe", "" ],     // Robotropolis (via opening cutscene)
+    [ "lab.exe", "30" ],    // Innovation Lab
+    [ "tut.exe", "21" ],    // Tutorial 1
+    [ "tut.exe", "22" ],    // Tutorial 2
+    [ "tut.exe", "23" ],    // Tutorial 3
+    [ "tut.exe", "24" ],    // Tutorial 4
+    [ "tut.exe", "25" ],    // Tutorial 5
+    [ "tut.exe", "26" ],    // Tutorial 5
+    [ "lab.exe", "27" ],    // Tutorial 7 (via LAB.EXE)
+];
 
-var timer = null;
+const splash = document.getElementById('splash');
+const game_menu_cursor = document.getElementById('game_menu_cursor');
+
 var current_state = States.S_SPLASH;
-var menu_choice = 0;
-var loaded_engine = null;
+var current_menu_choice = 0;
 
 
 export function showError(err)
 {
-	setState(States.S_ERROR);
+    setState(States.S_ERROR);
     const el = document.getElementById("error");
 
     err = err.toString();
@@ -35,100 +45,131 @@ export function showError(err)
     el.style.display = "block";
 }
 
-export function engineLoaded(engine)
-{
-	loaded_engine = engine;
-	if (current_state == States.S_LOADING) {
-		setState(States.S_EXEC);
-	}
-}
-
 export function init(engine)
 {
-	// Event handlers during splashscreen
-	splash.addEventListener('mousedown', function () {
-		setState(States.MENU);
-	});
-	splash.addEventListener('touchstart', function () {
-		setState(States.MENU);
-	});
-	splash.addEventListener('keydown', function (e) {
-		if (!e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey) {
-			setState(States.MENU);
-		}
-	});
+    // Splashscreen pointing events
+    splash.addEventListener('mousedown', function () {
+        if (current_state == States.SPLASH) {
+            setState(States.MENU);
+        }
+    });
+    splash.addEventListener('touchstart', function () {
+        if (current_state == States.SPLASH) {
+            setState(States.MENU);
+        }
+    });
 
-	getLastSplashImage().addEventListener('animationend', function () {
-		setStateWithDelay(States.MENU, 2000);
-	});
+    // Splash animation end
+    getLastSplashImage().addEventListener('animationend', function () {
+        setTimeout(function () {
+            if (current_state == States.SPLASH) {
+                setState(States.MENU);
+            }
+        }, 2000);
+    });
 
-	engine.onProcessExit = function () {
-		setState(States.MENU);
-	};
+    // General key event handler
+    document.body.addEventListener('keydown', function (e) {
+        if (!e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey) {
 
-	engine.onProcessExec = function () {
-		setState(States.EXEC);
-	};
+            if (current_state == States.SPLASH) {
+                setState(States.MENU);
+            }
 
-	setState(States.SPLASH);
+            if (current_state == States.MENU) {
+                if (e.code == "Enter") {
+                    execMenuChoice(engine);
+                } else if (e.code == "Space" || e.code == "ArrowDown") {
+                    setMenuChoice(current_menu_choice + 1);
+                } else if (e.code == "ArrowUp") {
+                    setMenuChoice(current_menu_choice - 1);
+                }
+            }
+        }
+    });
+
+    engine.onProcessExit = function () {
+        setState(States.MENU);
+    };
+
+    engine.onProcessExec = function () {
+        setState(States.EXEC);
+    };
+
+    // If anyone tries to call exec() before the engine has loaded, delay until loading finishes.
+    if (!engine.exec) {
+        engine.exec = function () {
+            const exec_args = arguments;
+            setState(States.LOADING);
+            engine.then(function () { engine.exec.apply(engine, exec_args) });
+        }
+    }
+
+    setState(States.SPLASH);
 }
 
 function getLastSplashImage()
 {
-	var result = null;
-	for (let child of splash.children) {
-		if (child.nodeName == 'IMG') {
-			result = child;
-		}
-	}
-	return result;
+    var result = null;
+    for (let child of splash.children) {
+        if (child.nodeName == 'IMG') {
+            result = child;
+        }
+    }
+    return result;
 }
 
-function setStateWithDelay(s, timeout)
+function setVisibility(element_id, vis)
 {
-	if (timer) {
-		clearTimeout(timer);
-	}
-	timer = setTimeout(function () {
-		setState(s);
-	}, timeout);
-}
-
-function setVisFocus(element_id, vis, focus)
-{
-	const element = document.getElementById(element_id);
-
-	if (vis) {
-		element.classList.remove("hidden");
-	} else {
-		element.classList.add("hidden");
-	}
-
-	if (focus === true) {
-		element.focus();
-	} else if (focus === false) {
-		element.blur();
-	}
+    const element = document.getElementById(element_id);
+    if (vis) {
+        element.classList.remove("hidden");
+    } else {
+        element.classList.add("hidden");
+    }
 }
 
 export function setState(s)
 {
-	if (s === current_state) {
-		return;
-	}
+    if (s == current_state) {
+        return;
+    }
+    current_state = s;
 
-	current_state = s;
-	if (timer) {
-		clearTimeout(timer);
-		timer = null;
-	}
+    setVisibility('splash', s == States.SPLASH || s == States.MENU || s == States.EXEC);
+    setVisibility('game_menu', s == States.MENU || s == States.EXEC);
+    setVisibility('loading', s == States.LOADING);
+    setVisibility('framebuffer', s == States.EXEC);
+    setVisibility('error', s == States.ERROR);
 
-	if (s == States.MENU) {
-		menu_choice = 0;
-	}
+    // Keep the underlying objects visible during EXEC so they stay behind the iris transition;
+    // but eventually hide them, both to reset the animations for later and possibly for performance.
+    if (s == States.EXEC) {
+        setTimeout(function () {
+            if (current_state == States.EXEC) {
+                setVisibility('splash', false);
+                setVisibility('game_menu', false);
+            }
+        }, 2000);
+    }
+}
 
-	setVisFocus('splash', s == States.SPLASH || s == States.MENU, s == States.SPLASH);
-	setVisFocus('game_menu', s == States.MENU, s == States.MENU);
-	setVisFocus('framebuffer', s == States.EXEC, s == States.EXEC);
-	setVisFocus('engine_controls', s == States.EXEC);
+function setMenuChoice(c)
+{
+    c %= MENU_CHOICES.length;
+    while (c < 0) c += MENU_CHOICES.length;
+
+    if (c != current_menu_choice) {
+        current_menu_choice = c;
+    }
+
+    var pixel_top = current_menu_choice * 15;
+    if (current_menu_choice >= 2) pixel_top += 16;
+
+    game_menu_cursor.style.top = (pixel_top * 100 / 192) + '%';
+}
+
+function execMenuChoice(engine)
+{
+    engine.exec.apply(engine, MENU_CHOICES[current_menu_choice]);
 }

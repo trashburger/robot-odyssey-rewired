@@ -92,8 +92,11 @@ b.patch('0E3B:B5E7', 'jmp 0xA419')   # Exit after camera disk (white)
 # This was always an unfortunate design, since starting the game directly
 # by running GAME.EXE meant that you'd just get a DOS prompt instead of
 # the victory screen. Let's improve on that by exec'ing the end screen directly.
+# This is also needed now that we've removed PLAY.EXE and reimplemented the
+# menu itself in Javascript.
+
 b.patchAndHook('0E3B:2C96', 'ret',
-    'g.hw->exec("menu2.exe", "\\x17");'
+    'g.hw->exec("show2.exe");'
     'g.proc->exit();')
 
 b.writeCodeToFile(os.path.join(basedir, 'bt_game.cpp'), 'GameEXE')

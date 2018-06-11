@@ -68,7 +68,14 @@ function checkHashForAutoSave(engine)
     }
 }
 
-export function engineLoaded(engine)
+export function init(engine)
+{
+    engine.then(function () {
+        engineLoaded(engine);
+    });
+}
+
+function engineLoaded(engine)
 {
     engine.autoSave = function ()
     {

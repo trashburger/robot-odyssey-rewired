@@ -16,36 +16,22 @@ import './main.css'
 OfflinePluginRuntime.install();
 
 try {
-    const engine = EngineFactory(
-    {
-        locateFile: function () {
-            return EngineWasm;
-        },
-
+    const engine = EngineFactory({
+        locateFile: function () { return EngineWasm },
         onAbort: GameMenu.showError,
-        onRenderSound: Sound.onRenderSound,
     });
 
     window.ROEngine = engine;
 
     Graphics.init(engine);
+    Sound.init(engine);
     Input.init(engine);
+    Files.init(engine);
     GameMenu.init(engine);
 
-    engine.then(function ()
-    {
-        try {
-
-            Files.engineLoaded(engine);
-            Graphics.engineLoaded(engine);
-            Input.engineLoaded(engine);
-            AutoSave.engineLoaded(engine);
-            GameMenu.engineLoaded(engine);
-
-        } catch (e) {
-            GameMenu.showError(e);
-        }
-    });
+    // Autosave should be last, it may try to launch a saved game
+    // and the other subsystems should be installed by then.
+    AutoSave.init(engine);
 
 } catch (e) {
     GameMenu.showError(e);
