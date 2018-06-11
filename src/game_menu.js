@@ -106,8 +106,8 @@ export function setJoystickAxes(engine, x, y)
     // This installs an interval handler if needed, which stays installed
     // until we change game_menu states.
 
-    const interval = 100;
-    const speed = 1 / 32.0;
+    const interval = 80;
+    const speed = 0.04;
 
     menu_joystick_y = y;
     if (!menu_joystick_interval) {
@@ -175,7 +175,7 @@ export function setState(s)
         splash.classList.add('hidden');
     }
 
-    if (s != States.EXEC) {
+    if (s != States.EXEC && s != States.LOADING) {
         game_menu.classList.remove('fadeout');
     }
 
@@ -187,7 +187,7 @@ export function setState(s)
 
     if (s == States.LOADING) {
         loading.classList.remove('hidden');
-    } else if (s == States.ERROR) {
+    } else if (s != States.EXEC) {
         loading.classList.add('hidden');
     }
 
