@@ -21,6 +21,9 @@ const MENU_CHOICES = [
 ];
 
 const splash = document.getElementById('splash');
+const loading = document.getElementById('loading');
+const framebuffer = document.getElementById('framebuffer');
+const error = document.getElementById('error');
 const game_menu_cursor = document.getElementById('game_menu_cursor');
 
 var current_state = States.S_SPLASH;
@@ -28,22 +31,19 @@ var current_menu_choice = 0;
 var menu_joystick_interval = null;
 var menu_joystick_y = 0;
 
-export function showError(err)
+export function showError(e)
 {
-    setState(States.S_ERROR);
-    const el = document.getElementById("error");
-
-    err = err.toString();
-    if (err.includes("no binaryen method succeeded")) {
+    e = e.toString();
+    if (e.includes("no binaryen method succeeded")) {
         // This is obtuse; we only build for wasm, so really this means the device doesn't support wasm
-        err = "No WebAssembly?\n\nSorry, this browser might not be supported.";
+        e = "No WebAssembly?\n\nSorry, this browser might not be supported.";
     } else {
         // Something else went wrong.
-        err = "Fail.\n\n" + err;
+        e = "Fail.\n\n" + e;
     }
 
-    el.innerText = err;
-    el.style.display = "block";
+    error.innerText = e;
+    setState(States.S_ERROR);
 }
 
 export function init(engine)
@@ -157,16 +157,6 @@ function getLastSplashImage()
     return result;
 }
 
-function setVisibility(element_id, vis)
-{
-    const element = document.getElementById(element_id);
-    if (vis) {
-        element.classList.remove("hidden");
-    } else {
-        element.classList.add("hidden");
-    }
-}
-
 export function setState(s)
 {
     if (s == current_state) {
@@ -179,20 +169,44 @@ export function setState(s)
         menu_joystick_interval = null;
     }
 
-    setVisibility('splash', s == States.SPLASH || s == States.MENU || s == States.EXEC);
-    setVisibility('game_menu', s == States.MENU || s == States.EXEC);
-    setVisibility('loading', s == States.LOADING || s == States.EXEC);
-    setVisibility('framebuffer', s == States.EXEC);
-    setVisibility('error', s == States.ERROR);
+    if (s == States.SPLASH) {
+        splash.classList.remove('hidden');
+    } else if (s == States.ERROR || s == States.LOADING) {
+        splash.classList.add('hidden');
+    }
+
+    if (s == States.MENU) {
+        game_menu.classList.remove('hidden');
+    } else if (s == States.ERROR) {
+        game_menu.classList.add('hidden');
+    }
+
+    if (s == States.LOADING) {
+        loading.classList.remove('hidden');
+    } else if (s == States.ERROR) {
+        loading.classList.add('hidden');
+    }
+
+    if (s == States.EXEC) {
+        framebuffer.classList.remove('hidden');
+    } else {
+        framebuffer.classList.add('hidden');
+    }
+
+    if (s == States.ERROR) {
+        error.classList.remove('hidden');
+    } else {
+        error.classList.add('hidden');
+    }
 
     // Keep the underlying objects visible during EXEC so they stay behind the iris transition;
     // but eventually hide them, both to reset the animations for later and possibly for performance.
     if (s == States.EXEC) {
         setTimeout(function () {
             if (current_state == States.EXEC) {
-                setVisibility('splash', false);
-                setVisibility('game_menu', false);
-                setVisibility('loading', false);
+                splash.classList.add('hidden');
+                game_menu.classList.add('hidden');
+                loading.classList.add('hidden');
             }
         }, 2000);
     }
