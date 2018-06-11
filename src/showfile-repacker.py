@@ -35,7 +35,8 @@ PALETTE = [
 
 CGA_SIZE = (320, 200)
 ZOOMED_SIZE = (640, 400)
-
+PADDED_SIZE = (644, 388)
+MARGIN = 2
 
 def decompress_image(file, pixels, compressed):
     # Decompress an image, using the provided 8bpp scratch space and
@@ -144,11 +145,24 @@ def repack_show_without_menu(dest_file, parts):
 def image_to_644x388(im):
     # The native SHW images are in CGA (320x200) and we double them to 640x400,
     # but the resolution we actually want is 644x388, with a 2-pixel border on each side.
-    bg = im.resize((644,388))
-    bg.paste(0, (0, 0, 644, 388))
-    bg.paste(im.crop((0, 0, 640, 384)), (2, 2))
+    bg = im.resize(PADDED_SIZE)
+    bg.paste(0, (0, 0,) + PADDED_SIZE)
+    bg.paste(im.crop((0, 0, PADDED_SIZE[0] - MARGIN*2, PADDED_SIZE[1] - MARGIN*2)), (MARGIN, MARGIN))
     return bg
 
+def icon_border(im, s=2):
+    # Incoming image has a transparent/black background at index 0. Process
+    # each of these pixels, replacing them with transparent black (4) or leaving
+    # them opaque (0) based on whether there are neighboring pixels of another color.
+
+    w, h = im.size
+    for y in range(h):
+        for x in range(w):
+            if im.getpixel((x,y)) == 0:
+                region = im.crop((x-s, y-s, x+s*2-1, y+s*2-1)).tobytes()
+                if sum(pix & 3 for pix in region) == 0:
+                    im.putpixel((x,y),4)
+    return im
 
 def main(build):
     show = decode_all_images(os.path.join(build, 'show/show.shw'))
@@ -161,7 +175,7 @@ def main(build):
     repack_show_without_menu(os.path.join(build, 'fs/show.shw'), show[7:])
     repack_show_without_menu(os.path.join(build, 'fs/show2.shw'), show2[5:])
 
-    # Repack splashscreens in the proper resolution
+    # Repack splashscreens in the proper resolution, and with a new version number.
 
     splash1 = Image.open(os.path.join(build, 'show/show-00-c.png'))
     splash2 = Image.open(os.path.join(build, 'show/show-01-c.png'))
@@ -178,8 +192,13 @@ def main(build):
     menu.paste(0, None, menu_opacity_mask)
     image_to_644x388(menu).save(os.path.join(build, 'show/menu.png'), optimize=1)
 
-    cursor_only = Image.open(os.path.join(build, 'show/show-03-c.png'))
-    image_to_644x388(cursor_only).save(os.path.join(build, 'show/menu-cursor.png'), transparency=0, optimize=1)
+    cursor_only = image_to_644x388(Image.open(os.path.join(build, 'show/show-03-c.png')))
+    cursor_only.save(os.path.join(build, 'show/menu-cursor.png'), transparency=0, optimize=1)
+
+    # Extract an icon image from the menu cursor
+
+    icon = icon_border(cursor_only.crop((50, 12, 50+76, 12+68))).resize((512, 512))
+    icon.save(os.path.join(build, 'show/icon.png'), transparency=4, optimize=1)
 
 
 if __name__ == '__main__':

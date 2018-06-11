@@ -37,7 +37,7 @@ module.exports = {
         }),
         new HtmlWebpackInlineSourcePlugin(),
         new FaviconsWebpackPlugin({
-            logo: path.resolve('./src/scanner-512px.png'),
+            logo: path.resolve('./build/show/icon.png'),
             prefix: 'icon.[hash].',
             persistentCache: false,
             title,
@@ -56,7 +56,7 @@ module.exports = {
             background_color: '#000000',
             icons: [
                 {
-                    src: path.resolve('./src/scanner-512px.png'),
+                    src: path.resolve('./build/show/icon.png'),
                     sizes: [32, 96, 128, 192, 256, 384, 512]
                 }
             ],
