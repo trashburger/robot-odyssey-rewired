@@ -1,28 +1,76 @@
 import './game_menu.css'
 
+export const States = {
+	// Same order as Z stacking and transitions
+	SPLASH: 0,
+	MENU: 1,
+	EXEC: 2,
+};
+
+const game_menu = document.getElementById('game_menu');
+const splash = document.getElementById('splash');
+const engine_area = document.getElementById('engine_area');
+var timer = null;
+
 export function init(engine)
 {
-	const game_menu = document.getElementById('game_menu');
-	const splash = document.getElementById('splash');
-	const engine_area = document.getElementById('engine_area');
-
-	game_menu.addEventListener('animationend', function () {
-
-		game_menu.classList.add('hidden');
-		splash.classList.add('hidden');
-		engine_area.classList.remove('hidden');
-
-		// temp
-        engine.exec("show.exe", "");
-		engine.onProcessExit = function () {
-			engine.exec("game.exe", "");
-			engine.onProcessExit = null;
-		};
-
+	splash.addEventListener('mousedown', function () {
+		setState(States.MENU);
 	});
+
+	splash.addEventListener('touchstart', function () {
+		setState(States.MENU);
+	});
+
+	getLastSplashImage().addEventListener('animationend', function () {
+		setStateWithDelay(States.MENU, 2000);
+	});
+
+	engine.onProcessExit = function () {
+		setState(States.MENU);
+	};
+
+	setState(States.SPLASH);
 }
 
-export function engineLoaded(engine)
+function getLastSplashImage()
 {
+	var result = null;
+	for (let child of splash.children) {
+		if (child.nodeName == 'IMG') {
+			result = child;
+		}
+	}
+	return result;
+}
 
+function setVisibility(element, visible)
+{
+	if (visible) {
+		element.classList.remove("hidden");
+	} else {
+		element.classList.add("hidden");		
+	}
+}
+
+function setStateWithDelay(s, timeout)
+{
+	if (timer) {
+		clearTimeout(timer);
+	}
+	timer = setTimeout(function () {
+		setState(s);
+	}, timeout);
+}
+
+export function setState(s)
+{
+	if (timer) {
+		clearTimeout(timer);
+		timer = null;
+	}
+
+	setVisibility(splash, s >= States.SPLASH);
+	setVisibility(game_menu, s >= States.MENU);
+	setVisibility(engine_area, s >= States.EXEC);
 }

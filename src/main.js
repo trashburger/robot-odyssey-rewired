@@ -42,7 +42,6 @@ try {
             Graphics.engineLoaded(engine);
             Input.engineLoaded(engine);
             AutoSave.engineLoaded(engine);
-            GameMenu.engineLoaded(engine);
 
         } catch (e) {
             Loading.error(e);

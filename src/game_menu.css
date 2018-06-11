@@ -1,13 +1,13 @@
-#splash > *:nth-child(1) {
+#splash > img:nth-of-type(1) {
     animation: 1.5s ease 0.1s 1 normal both running iris;
 }
 
-#splash > *:nth-child(2) {
-    animation: 1.5s ease 2.6s 1 normal both running iris;
+#splash > img:nth-of-type(2) {
+    animation: 1.5s ease 2.0s 1 normal both running iris;
 }
 
 #game_menu {
-    animation: 1.5s ease 5.0s 1 normal both running iris;
+    animation: 1.5s ease 0s 1 normal both running iris;
 }
 
 @keyframes iris {
