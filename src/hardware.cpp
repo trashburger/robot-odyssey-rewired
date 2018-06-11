@@ -19,6 +19,7 @@ void Hardware::exec(const char *program, const char *args)
     if (verbose_process_info) {
         printf("EXEC, '%s' '%s'\n", program, args);
     }
+
     for (std::vector<SBTProcess*>::iterator i = process_vec.begin(); i != process_vec.end(); i++) {
         const char *filename = (*i)->getFilename();
         if (!strcasecmp(program, filename)) {

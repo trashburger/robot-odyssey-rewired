@@ -38,6 +38,7 @@
 }
 
 #controls.hidden {
+    display: block;
     opacity: 0;
 }
 

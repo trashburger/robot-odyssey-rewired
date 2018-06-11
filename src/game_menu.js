@@ -66,6 +66,10 @@ export function init(engine)
 		setState(States.MENU);
 	};
 
+	engine.onProcessExec = function () {
+		setState(States.EXEC);
+	};
+
 	setState(States.SPLASH);
 }
 
@@ -109,6 +113,10 @@ function setVisFocus(element_id, vis, focus)
 
 export function setState(s)
 {
+	if (s === current_state) {
+		return;
+	}
+
 	current_state = s;
 	if (timer) {
 		clearTimeout(timer);
@@ -123,8 +131,4 @@ export function setState(s)
 	setVisFocus('game_menu', s == States.MENU, s == States.MENU);
 	setVisFocus('framebuffer', s == States.EXEC, s == States.EXEC);
 	setVisFocus('engine_controls', s == States.EXEC);
-
-	if (s == States.EXEC) {
-		loaded_engine.exec("game.exe", "");
-	}
 }

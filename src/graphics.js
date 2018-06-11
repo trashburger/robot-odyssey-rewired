@@ -1,3 +1,4 @@
+import * as GameMenu from './game_menu.js'
 import './graphics.css'
 
 export function init(engine)
@@ -17,6 +18,7 @@ export function init(engine)
     engine.onRenderFrame = (rgb) => {
         image.data.set(rgb);
         context.putImageData(image, border, border);
+        GameMenu.setState(GameMenu.States.EXEC);
     };
 }
 

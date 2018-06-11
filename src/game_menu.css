@@ -10,6 +10,10 @@
     animation: 1.5s ease 0s 1 normal both running iris;
 }
 
+#framebuffer {
+    animation: 1.5s ease 0s 1 normal both running iris;
+}
+
 @keyframes iris {
     0% {
         clip-path: circle(0% at center);

@@ -265,17 +265,6 @@ export function engineLoaded(engine)
         });
     }
 
-    for (let button of document.getElementsByClassName('exec_btn')) {
-        addButtonEvents(button, () => {
-            button.classList.add('active_btn');
-        }, () => {
-            button.classList.remove('active_btn');
-            engine.autoSave();
-        }, () => {
-            engine.exec(button.dataset.program, button.dataset.args);
-        });
-    }
-
     var delay = null;
     var repeater = null;
     const stop_repeat = () => {

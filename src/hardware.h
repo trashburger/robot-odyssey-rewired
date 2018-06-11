@@ -22,7 +22,7 @@ class Hardware
     SBTRegs interrupt16(SBTRegs reg, SBTStack *stack);
     SBTRegs interrupt21(SBTRegs reg, SBTStack *stack);
 
-    void exec(const char *program, const char *args);
+    void exec(const char *program, const char *args = "");
 
     static const uint32_t MEM_SIZE = 256 * 1024;
     uint8_t mem[MEM_SIZE];

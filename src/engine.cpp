@@ -43,7 +43,7 @@ int main()
     return 0;
 }
 
-static void exec(const std::string &process, const std::string &arg)
+static void exec(const std::string &process, const std::string &arg = "")
 {
     hw.output.clear();
     hw.exec(process.c_str(), arg.c_str());

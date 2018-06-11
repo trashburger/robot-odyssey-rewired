@@ -27,6 +27,9 @@ b.hook(b.entryPoint, 'enable_framebuffer_trace = true;')
 # Go directly to the new-game cutscene after we get the SHW file reader setup
 b.patch('019E:00F8', 'jmp 0x1A6')
 
+# Launch the game once this cutscene ends
+b.patchAndHook('019E:04DB', 'ret', 'g.hw->exec("game.exe");')
+
 # Time everything in this EXE, not just sound subroutines
 sbt86.Subroutine.clockEnable = True
 
