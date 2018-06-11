@@ -25,7 +25,8 @@ const game_menu_cursor = document.getElementById('game_menu_cursor');
 
 var current_state = States.S_SPLASH;
 var current_menu_choice = 0;
-
+var menu_joystick_interval = null;
+var menu_joystick_y = 0;
 
 export function showError(err)
 {
@@ -68,26 +69,6 @@ export function init(engine)
         }, 2000);
     });
 
-    // General key event handler
-    document.body.addEventListener('keydown', function (e) {
-        if (!e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey) {
-            e.preventDefault();
-
-            if (current_state == States.SPLASH) {
-                setState(States.MENU);
-
-            } else if (current_state == States.MENU) {
-                if (e.code == "Enter") {
-                    execMenuChoice(engine);
-                } else if (e.code == "Space" || e.code == "ArrowDown") {
-                    setMenuChoice(current_menu_choice + 1);
-                } else if (e.code == "ArrowUp") {
-                    setMenuChoice(current_menu_choice - 1);
-                }
-            }
-        }
-    });
-
     engine.onProcessExit = function () {
         setState(States.MENU);
     };
@@ -97,6 +78,61 @@ export function init(engine)
     };
 
     setState(States.SPLASH);
+}
+
+export function pressKey(engine, ascii, scancode)
+{
+    if (current_state == States.SPLASH) {
+        setState(States.MENU);
+
+    } else if (current_state == States.MENU) {
+
+        if (scancode == 0x50 || ascii == 0x20) {
+            // Down or Space
+            setMenuChoice(current_menu_choice + 1);
+        } else if (scancode == 0x48) {
+            // Up
+            setMenuChoice(current_menu_choice - 1);
+        } else if (ascii == 0x0D) {
+            // Enter
+            execMenuChoice(engine);
+        }
+    }
+}
+
+export function setJoystickAxes(engine, x, y)
+{
+    // Timed movements, according to Y axis.
+    // This installs an interval handler if needed, which stays installed
+    // until we change game_menu states.
+
+    const interval = 100;
+    const speed = 1 / 32.0;
+
+    menu_joystick_y = y;
+    if (!menu_joystick_interval) {
+        var accumulator = 0;
+
+        menu_joystick_interval = setInterval(function () {
+            accumulator += menu_joystick_y * speed;
+            if (accumulator > 1) {
+                accumulator = Math.min(accumulator - 1, 1);
+                setMenuChoice(current_menu_choice + 1);
+            } else if (accumulator < -1) {
+                accumulator = Math.max(accumulator + 1, -1);
+                setMenuChoice(current_menu_choice - 1);
+            }
+        }, interval);
+    }
+}
+
+export function setJoystickButton(engine, b)
+{
+    if (b && current_state == States.SPLASH) {
+        setState(States.MENU);
+    } else if (b && current_state == States.MENU) {
+        execMenuChoice(engine);
+    }
 }
 
 export function afterLoading(engine, func)
@@ -137,6 +173,11 @@ export function setState(s)
         return;
     }
     current_state = s;
+
+    if (menu_joystick_interval) {
+        clearInterval(menu_joystick_interval);
+        menu_joystick_interval = null;
+    }
 
     setVisibility('splash', s == States.SPLASH || s == States.MENU || s == States.EXEC);
     setVisibility('game_menu', s == States.MENU || s == States.EXEC);

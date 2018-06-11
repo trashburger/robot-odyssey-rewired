@@ -1,6 +1,6 @@
 import nipplejs from 'nipplejs';
 import { audioContextSetup } from "./sound.js"
-
+import * as GameMenu from "./game_menu.js"
 import './input.css'
 
 var joystick = null;
@@ -15,6 +15,8 @@ function controlCode(key)
 
 export function init(engine)
 {
+    var mouse_tracking_unlocked = false;
+
     // Joystick is created immediately, but callbacks aren't hooked up until the engine loads
     joystick = nipplejs.create({
         zone: document.getElementById('joystick_xy'),
@@ -27,30 +29,9 @@ export function init(engine)
     // Fade in the controls as soon as this Javascript is ready
     document.getElementById('engine_controls').classList.remove('hidden');
 
-    engine.then(function () {
-        engineLoaded(engine);
-    });
-}
-
-function engineLoaded(engine)
-{
-    const canvas_width = canvas.width;
-    const canvas_height = canvas.height;
-
-    const game_width = 160;
-    const game_height = 192;
-    const cga_zoom = 2;
-
-    const hotspot_x = 2;
-    const hotspot_y = 4;
-
-    const doorway_border = 6;
-
-    var mouse_tracking_unlocked = false;
-
     function mouseTrackingEnd()
     {
-        if (mouse_tracking_unlocked) {
+        if (mouse_tracking_unlocked && engine.calledRun) {
             // Avoid calling engine.endMouseTracking unless we were using it, since it will
             // reset the joystick state to the detriment of multitouch support.
             engine.endMouseTracking();
@@ -60,8 +41,20 @@ function engineLoaded(engine)
 
     function mouseLocationForEvent(e)
     {
+        const canvas_width = canvas.width;
+        const canvas_height = canvas.height;
+
         const canvasRect = canvas.getBoundingClientRect();
-        const border = 1;
+        const border = 2;
+
+        const hotspot_x = 2;
+        const hotspot_y = 4;
+
+        const game_width = 160;
+        const game_height = 192;
+        const cga_zoom = 2;
+
+        const doorway_border = 6;
 
         const canvasX = (e.clientX - canvasRect.x) * canvas_width / canvasRect.width;
         const canvasY = (e.clientY - canvasRect.y) * canvas_height / canvasRect.height;
@@ -84,7 +77,7 @@ function engineLoaded(engine)
 
     game_area.addEventListener('mousemove', function (e)
     {
-        if (mouse_tracking_unlocked) {
+        if (mouse_tracking_unlocked && engine.calledRun) {
             const loc = mouseLocationForEvent(e);
             engine.setMouseTracking(loc.x, loc.y);
             engine.autoSave();
@@ -93,7 +86,7 @@ function engineLoaded(engine)
 
     game_area.addEventListener('mousedown', function (e)
     {
-        if (e.button == 0) {
+        if (e.button == 0 && engine.calledRun) {
             e.preventDefault();
             if (mouse_tracking_unlocked) {
                 // Already unlocked, this is a click
@@ -104,13 +97,13 @@ function engineLoaded(engine)
                 engine.setMouseTracking(loc.x, loc.y);
             }
             engine.autoSave();
-            audioContextSetup();
         }
+        audioContextSetup();
     });
 
     game_area.addEventListener('mouseup', function (e)
     {
-        if (e.button == 0) {
+        if (e.button == 0 && engine.calledRun) {
             e.preventDefault();
             if (mouse_tracking_unlocked) {
                 // Already unlocked
@@ -120,40 +113,48 @@ function engineLoaded(engine)
                 // Unlock now; already moved to the location on mousedown
                 mouse_tracking_unlocked = true;
             }
-            audioContextSetup();
         }
+        audioContextSetup();
     });
 
     game_area.addEventListener('mouseleave', mouseTrackingEnd);
 
     canvas.addEventListener('touchstart', function (e)
     {
-        const loc = mouseLocationForEvent(e.targetTouches[0]);
-        engine.setMouseTracking(loc.x, loc.y);
-        engine.setMouseButton(true);
-        engine.autoSave();
+        if (engine.calledRun) {
+            const loc = mouseLocationForEvent(e.targetTouches[0]);
+            engine.setMouseTracking(loc.x, loc.y);
+            engine.setMouseButton(true);
+            engine.autoSave();
+        }
         audioContextSetup();
         e.preventDefault();
     });
 
     canvas.addEventListener('touchmove', function (e)
     {
-        const loc = mouseLocationForEvent(e.targetTouches[0]);
-        engine.setMouseTracking(loc.x, loc.y);
+        if (engine.calledRun) {
+            const loc = mouseLocationForEvent(e.targetTouches[0]);
+            engine.setMouseTracking(loc.x, loc.y);
+        }
         e.preventDefault();
     });
 
     canvas.addEventListener('touchend', function (e)
     {
-        engine.setMouseButton(false);
-        engine.autoSave();
+        if (engine.calledRun) {
+            engine.setMouseButton(false);
+            engine.autoSave();
+        }
         e.preventDefault();
     });
 
     canvas.addEventListener('touchcancel', function (e)
     {
-        engine.setMouseButton(false);
-        engine.autoSave();
+        if (engine.calledRun) {
+            engine.setMouseButton(false);
+            engine.autoSave();
+        }
         e.preventDefault();
     });
 
@@ -205,9 +206,28 @@ function engineLoaded(engine)
         if (typeof(ascii) != typeof(0)) {
             ascii = ascii.length == 1 ? ascii.charCodeAt(0) : parseInt(ascii, 0);
         }
-        engine.pressKey(ascii, scancode);
-        engine.autoSave();
+        if (engine.calledRun) {
+            engine.pressKey(ascii, scancode);
+            engine.autoSave();
+        }
+        GameMenu.pressKey(engine, ascii, scancode);
         audioContextSetup();
+    }
+
+    function joystickAxes(x, y) {
+        if (engine.calledRun) {
+            engine.setJoystickAxes(x, y);
+            engine.autoSave();
+        }
+        GameMenu.setJoystickAxes(engine, x, y);
+    }
+
+    function joystickButton(b) {
+        if (engine.calledRun) {
+            engine.setJoystickButton(b);
+            engine.autoSave();
+        }
+        GameMenu.setJoystickButton(engine, b);
     }
 
     document.body.addEventListener('keydown', function (e)
@@ -247,28 +267,27 @@ function engineLoaded(engine)
     joystick.on('move', function (e, data)
     {
         const scale = 8.0;
-        const force = Math.min(10, Math.pow(data.force, 2));
-        const x = scale * force * Math.cos(data.angle.radian);
-        const y = scale * force * Math.sin(data.angle.radian);
+        const limit = 127;
+        const x = scale * data.force * Math.cos(data.angle.radian);
+        const y = scale * data.force * Math.sin(data.angle.radian);
         mouseTrackingEnd();
-        engine.setJoystickAxes(x, -y);
+        joystickAxes(Math.min(limit, Math.max(-limit, x)),
+                     Math.min(limit, Math.max(-limit, -y)));
     });
 
     joystick.on('end', function (e)
     {
-        engine.setJoystickAxes(0, 0);
-        engine.autoSave();
+        joystickAxes(0, 0);
         audioContextSetup();
     });
 
     for (let button of document.getElementsByClassName('joystick_btn')) {
         addButtonEvents(button, () => {
             button.classList.add('active_btn');
-            engine.setJoystickButton(true);
+            joystickButton(true);
         }, () => {
             button.classList.remove('active_btn');
-            engine.setJoystickButton(false);
-            engine.autoSave();
+            joystickButton(false);
         });
     }
 
@@ -304,17 +323,18 @@ function engineLoaded(engine)
         }, () => {
             button.classList.remove('active_btn');
             stop_repeat();
-            engine.autoSave();
         });
     }
 
     for (let button of document.getElementsByClassName('setspeed_btn')) {
         addButtonEvents(button, () => {
-            for (let sibling of button.parentNode.children) {
-                sibling.classList.remove('active_btn');
+            if (engine.calledRun) {
+                for (let sibling of button.parentNode.children) {
+                    sibling.classList.remove('active_btn');
+                }
+                button.classList.add('active_btn');
+                engine.setSpeed(parseFloat(button.dataset.speed));
             }
-            button.classList.add('active_btn');
-            engine.setSpeed(parseFloat(button.dataset.speed));
         });
     }
 
@@ -324,7 +344,9 @@ function engineLoaded(engine)
         }, () => {
             button.classList.remove('active_btn');
         }, () => {
-            engine.loadGame();
+            if (engine.calledRun) {
+                engine.loadGame();
+            }
         });
     }
 
@@ -334,7 +356,9 @@ function engineLoaded(engine)
         }, () => {
             button.classList.remove('active_btn');
         }, () => {
-            engine.saveGame();
+            if (engine.calledRun) {
+                engine.saveGame();
+            }
         });
     }
 
@@ -345,15 +369,16 @@ function engineLoaded(engine)
             }
             button.classList.add('active_btn');
 
-            if (button.dataset.name == "hgr") {
-                engine.setHGRColors();
-            } else if (button.dataset.name == "cga") {
-                engine.setCGAColors();
-            }
-
-            if (button.dataset.src) {
-                engine.setColorTilesFromImage(button.dataset.src);
-            }
+            engine.then(function () {
+                if (button.dataset.name == "hgr") {
+                    engine.setHGRColors();
+                } else if (button.dataset.name == "cga") {
+                    engine.setCGAColors();
+                }
+                if (button.dataset.src) {
+                    engine.setColorTilesFromImage(button.dataset.src);
+                }
+            });
         });
     }
 }
