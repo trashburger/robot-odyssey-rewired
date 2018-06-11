@@ -175,10 +175,20 @@ def main(build):
     repack_show_without_menu(os.path.join(build, 'fs/show.shw'), show[7:])
     repack_show_without_menu(os.path.join(build, 'fs/show2.shw'), show2[5:])
 
-    # Repack splashscreens in the proper resolution, and with a new version number.
+    # Get composited splashscreen images as PIL images
 
     splash1 = Image.open(os.path.join(build, 'show/show-00-c.png'))
     splash2 = Image.open(os.path.join(build, 'show/show-01-c.png'))
+
+    # Paste over the original version number with a black rectangle,
+    # since it would be misleading to claim this is that version. We might
+    # replace this with a different version, but so far IMO that would detract
+    # from the original pixel-art look.
+
+    splash2.paste(0, (518, 156, 518+44, 156+14))
+
+    # Save the splashscreens for inclusion in the main HTML file
+
     image_to_644x388(splash1).save(os.path.join(build, 'show/splash1.png'), optimize=1)
     image_to_644x388(splash2).save(os.path.join(build, 'show/splash2.png'), optimize=1)
 
