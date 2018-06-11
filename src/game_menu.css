@@ -8,6 +8,12 @@
 
 #game_menu {
     animation: 1.5s ease 0s 1 normal both running iris;
+    transition: opacity 0.6s;
+    opacity: 1;
+}
+
+#game_menu.fadeout {
+    opacity: 0;
 }
 
 @keyframes iris {
