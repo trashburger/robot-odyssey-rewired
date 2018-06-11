@@ -21,15 +21,13 @@
             <img id="game_menu_cursor" src="<%= require('../build/show/menu-cursor.png') %>" />
         </div>
 
-        <div id="engine_area" class="hidden">
-            <canvas id="framebuffer"></canvas>
-            <div id="engine_loading"></div>
-            <div id="engine_error"></div>
-        </div>
+        <canvas id="framebuffer" class="hidden"></canvas>
+        <div id="loading" class="hidden"></div>
+        <div id="error" class="hidden"></div>
 
     </div></div></div>
 
-    <div id="controls" class="controls_hidden">
+    <div id="engine_controls" class="hidden">
 
         <div id="joystick">
             <div id="joystick_xy"></div>

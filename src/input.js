@@ -5,6 +5,9 @@ import './input.css'
 
 var joystick = null;
 
+const canvas = document.getElementById('framebuffer');
+const game_area = document.getElementById('game_area');
+
 function controlCode(key)
 {
     return String.fromCharCode(key.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0) + 1)
@@ -24,9 +27,6 @@ export function init()
 
 export function engineLoaded(engine)
 {
-    const canvas = document.getElementById('framebuffer');
-    const game_area = document.getElementById('game_area');
-
     const canvas_width = canvas.width;
     const canvas_height = canvas.height;
 

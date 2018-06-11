@@ -3,7 +3,6 @@ import * as Sound from "./sound.js"
 import * as Input from "./input.js"
 import * as AutoSave from "./autoSave.js"
 import * as Files from "./files.js"
-import * as Loading from "./loading.js"
 import * as GameMenu from "./game_menu.js"
 
 import OfflinePluginRuntime from 'offline-plugin/runtime'
@@ -23,7 +22,7 @@ try {
             return EngineWasm;
         },
 
-        onAbort: Loading.error,
+        onAbort: GameMenu.showError,
         onRenderSound: Sound.onRenderSound,
     });
 
@@ -37,17 +36,17 @@ try {
     {
         try {
 
-            Loading.engineLoaded(engine);
             Files.engineLoaded(engine);
             Graphics.engineLoaded(engine);
             Input.engineLoaded(engine);
             AutoSave.engineLoaded(engine);
+            GameMenu.engineLoaded(engine);
 
         } catch (e) {
-            Loading.error(e);
+            GameMenu.showError(e);
         }
     });
 
 } catch (e) {
-    Loading.error(e);
+    GameMenu.showError(e);
 }

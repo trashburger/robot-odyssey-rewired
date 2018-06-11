@@ -29,9 +29,16 @@
 }
 
 #controls {
+    display: block;
     width: 100%;
     max-width: 960px;
     margin: 0 auto;
+    opacity: 1;
+    transition: opacity 1.5s;
+}
+
+#controls.hidden {
+    opacity: 0;
 }
 
 button {
@@ -44,15 +51,6 @@ button {
     margin: 2px;
     padding: 8px;
     flex: 1 0 0;
-}
-
-.controls_hidden {
-    opacity: 0;
-}
-
-.controls_visible {
-    opacity: 1;
-    transition: opacity 1.5s;
 }
 
 .button_area {
