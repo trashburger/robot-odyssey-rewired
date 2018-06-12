@@ -17,7 +17,7 @@ function engineLoaded(engine)
     };
 
     // Loader for arbitrary saved files
-    for (let button of document.getElementsByClassName('savefile_btn')) {
+    for (let button of Array.from(document.getElementsByClassName('savefile_btn'))) {
         button.addEventListener('click', (e) => {
             var input = document.createElement('input');
             input.type = 'file';

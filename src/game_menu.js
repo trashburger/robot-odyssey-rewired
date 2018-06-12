@@ -14,7 +14,7 @@ const framebuffer = document.getElementById('framebuffer');
 const error = document.getElementById('error');
 const game_menu = document.getElementById('game_menu');
 const game_menu_cursor = document.getElementById('game_menu_cursor');
-const choices = game_menu.getElementsByClassName("choice");
+const choices = Array.from(game_menu.getElementsByClassName("choice"));
 
 var current_state = States.S_SPLASH;
 var current_menu_choice = 0;
@@ -154,7 +154,7 @@ export function afterLoading(engine, func)
 function getLastSplashImage()
 {
     var result = null;
-    for (let child of splash.children) {
+    for (let child of Array.from(splash.children)) {
         if (child.nodeName == 'IMG') {
             result = child;
         }
@@ -167,11 +167,21 @@ export function setState(s)
     if (s == current_state) {
         return;
     }
+    if (current_state == States.ERROR) {
+        // Stay stuck in error state
+        return;
+    }
     current_state = s;
 
     if (menu_joystick_interval) {
         clearInterval(menu_joystick_interval);
         menu_joystick_interval = null;
+    }
+
+    if (s == States.ERROR) {
+        error.classList.remove('hidden');
+    } else {
+        error.classList.add('hidden');
     }
 
     if (s == States.SPLASH) {
@@ -200,12 +210,6 @@ export function setState(s)
         framebuffer.classList.remove('hidden');
     } else {
         framebuffer.classList.add('hidden');
-    }
-
-    if (s == States.ERROR) {
-        error.classList.remove('hidden');
-    } else {
-        error.classList.add('hidden');
     }
 }
 

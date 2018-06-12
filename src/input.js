@@ -281,7 +281,7 @@ export function init(engine)
         audioContextSetup();
     });
 
-    for (let button of document.getElementsByClassName('joystick_btn')) {
+    for (let button of Array.from(document.getElementsByClassName('joystick_btn'))) {
         addButtonEvents(button, () => {
             button.classList.add('active_btn');
             joystickButton(true);
@@ -304,7 +304,7 @@ export function init(engine)
         }
     }
 
-    for (let button of document.getElementsByClassName('keyboard_btn')) {
+    for (let button of Array.from(document.getElementsByClassName('keyboard_btn'))) {
         const press = () => {
             delay = null;
             keycode(button.dataset.ascii || '0x00', parseInt(button.dataset.scancode || '0', 0));
@@ -326,7 +326,7 @@ export function init(engine)
         });
     }
 
-    for (let button of document.getElementsByClassName('setspeed_btn')) {
+    for (let button of Array.from(document.getElementsByClassName('setspeed_btn'))) {
         addButtonEvents(button, () => {
             if (engine.calledRun) {
                 for (let sibling of button.parentNode.children) {
@@ -338,7 +338,7 @@ export function init(engine)
         });
     }
 
-    for (let button of document.getElementsByClassName('loadgame_btn')) {
+    for (let button of Array.from(document.getElementsByClassName('loadgame_btn'))) {
         addButtonEvents(button, () => {
             button.classList.add('active_btn');
         }, () => {
@@ -350,7 +350,7 @@ export function init(engine)
         });
     }
 
-    for (let button of document.getElementsByClassName('savegame_btn')) {
+    for (let button of Array.from(document.getElementsByClassName('savegame_btn'))) {
         addButtonEvents(button, () => {
             button.classList.add('active_btn');
         }, () => {
@@ -362,7 +362,7 @@ export function init(engine)
         });
     }
 
-    for (let button of document.getElementsByClassName('palette_btn')) {
+    for (let button of Array.from(document.getElementsByClassName('palette_btn'))) {
         addButtonEvents(button, (e) => {
             for (let sibling of button.parentNode.children) {
                 sibling.classList.remove('active_btn');
