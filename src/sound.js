@@ -1,4 +1,4 @@
-var context = null;
+let context = null;
 
 export function init(engine)
 {
@@ -13,7 +13,7 @@ function onRenderSound(pcmData, rate)
     if (volume > 0.0 && audioContextSetup()) {
         const buffer = context.createBuffer(1, pcmData.length, rate);
         const channelData = buffer.getChannelData(0);
-        for (var i = 0; i < pcmData.length; i++) {
+        for (let i = 0; i < pcmData.length; i++) {
             channelData[i] = pcmData[i] * volume;
         }
 

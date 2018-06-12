@@ -106,7 +106,7 @@ function engineLoaded(engine)
         size = size || 2;
         const pattern = patterns.subarray(slot * PATTERN_SIZE, (slot+1) * PATTERN_SIZE);
         const tile_size = SCREEN_TILE_SIZE;
-        var i = 0;
+        let i = 0;
         for (let y = 0; y < tile_size; y++) {
             for (let x = 0; x < tile_size; x++) {
                 pattern[i++] = ((x^y) & size) ? rgb2 : rgb1;
@@ -119,7 +119,7 @@ function engineLoaded(engine)
         size = size || 2;
         const pattern = patterns.subarray(slot * PATTERN_SIZE, (slot+1) * PATTERN_SIZE);
         const tile_size = SCREEN_TILE_SIZE;
-        var i = 0;
+        let i = 0;
         for (let y = 0; y < tile_size; y++) {
             for (let x = 0; x < tile_size; x++) {
                 pattern[i++] = (x & size) ? rgb2 : rgb1;
@@ -201,7 +201,7 @@ function engineLoaded(engine)
                 // appears between the 2nd and 3rd, a pink band between the 5th and 6th.
                 for (let x = 0; x < SCREEN_TILE_SIZE; x++) {
                     const x16 = (x / (SCREEN_TILE_SIZE / 16))|0;
-                    var rgb = 0xff000000;
+                    let rgb = 0xff000000;
                     if (x16 >= 3 && x16 <= 4) rgb = 0xff4ba7bf;
                     if (x16 >= 9 && x16 <= 10) rgb = 0xffd481d5;
                     for (let y = 0; y < SCREEN_TILE_SIZE; y++) {
@@ -212,7 +212,7 @@ function engineLoaded(engine)
             } else {
                 // Junk binary stripes
 
-                var stripe = (slot % 35) + 1;
+                let stripe = (slot % 35) + 1;
                 engine.setStripedColor(slot, hgr[(stripe % 6)|0], hgr[(stripe / 6)|0], slot >> 1);
             }
         }
@@ -288,7 +288,7 @@ function engineLoaded(engine)
             } else {
                 // Junk binary stripes
 
-                var stripe = (slot % 15) + 1;
+                let stripe = (slot % 15) + 1;
                 engine.setStripedColor(slot, cga[stripe & 3], cga[stripe >> 2], slot >> 1);
             }
         }

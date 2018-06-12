@@ -15,7 +15,7 @@ export function worldIdFromSaveData(bytes)
 export function chipNameFromSaveData(bytes)
 {
     if (bytes.length == 1333) {
-        var name = '';
+        let name = '';
         const nameField = bytes.slice(0x40A, 0x41C);
         for (let byte of nameField) {
             if (byte < 0x20 || byte > 0x7F) {

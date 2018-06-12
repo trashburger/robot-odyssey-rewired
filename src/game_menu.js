@@ -16,10 +16,10 @@ const game_menu = document.getElementById('game_menu');
 const game_menu_cursor = document.getElementById('game_menu_cursor');
 const choices = Array.from(game_menu.getElementsByClassName("choice"));
 
-var current_state = null;
-var current_menu_choice = 0;
-var menu_joystick_interval = null;
-var menu_joystick_y = 0;
+let current_state = null;
+let current_menu_choice = 0;
+let menu_joystick_interval = null;
+let menu_joystick_y = 0;
 
 export function showError(e)
 {
@@ -115,7 +115,7 @@ export function setJoystickAxes(engine, x, y)
 
         menu_joystick_y = y;
         if (!menu_joystick_interval) {
-            var accumulator = 0;
+            let accumulator = 0;
 
             menu_joystick_interval = setInterval(function () {
                 accumulator += menu_joystick_y * speed;
@@ -153,7 +153,7 @@ export function afterLoading(engine, func)
 
 function getLastSplashImage()
 {
-    var result = null;
+    let result = null;
     for (let child of Array.from(splash.children)) {
         if (child.nodeName == 'IMG') {
             result = child;
@@ -225,9 +225,9 @@ function setMenuChoice(c)
     // The cursor's default positioning is aligned with the first choice.
     // Adjust the cursor offset based on the choice position.
 
-    var element = choices[c];
-    var to_percent = 100 / element.offsetParent.offsetHeight;
-    var offset_percent = (element.offsetTop - choices[0].offsetTop) * to_percent;
+    let element = choices[c];
+    let to_percent = 100 / element.offsetParent.offsetHeight;
+    let offset_percent = (element.offsetTop - choices[0].offsetTop) * to_percent;
     game_menu_cursor.style.top = offset_percent + '%';
 }
 

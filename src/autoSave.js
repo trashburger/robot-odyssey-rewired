@@ -1,8 +1,8 @@
 import * as GameMenu from './game_menu.js';
 import base64 from 'base64-arraybuffer';
 
-var last_set_window_hash = null;
-var autosave_timer = null;
+let last_set_window_hash = null;
+let autosave_timer = null;
 const autosave_delay = 500;
 
 function doAutoSave(engine)
@@ -22,7 +22,7 @@ function doAutoSave(engine)
     engine.onSaveFileWrite = function () {};
 
     try {
-        var hash = '';
+        let hash = '';
 
         switch (engine.saveGame()) {
 
@@ -53,7 +53,7 @@ function checkHashForAutoSave(engine)
 {
     const hash = window.location.hash;
     if (hash && hash[0] == "#") {
-        var s = hash.slice(1);
+        let s = hash.slice(1);
         if (s != last_set_window_hash) {
             const packed = new Uint8Array(base64.decode(s));
             GameMenu.afterLoading(engine, function () {
