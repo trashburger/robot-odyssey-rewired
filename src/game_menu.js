@@ -8,23 +8,13 @@ export const States = {
     ERROR: 4,
 };
 
-const MENU_CHOICES = [
-    [ "show.exe", "" ],     // Robotropolis (via opening cutscene)
-    [ "lab.exe", "30" ],    // Innovation Lab
-    [ "tut.exe", "21" ],    // Tutorial 1
-    [ "tut.exe", "22" ],    // Tutorial 2
-    [ "tut.exe", "23" ],    // Tutorial 3
-    [ "tut.exe", "24" ],    // Tutorial 4
-    [ "tut.exe", "25" ],    // Tutorial 5
-    [ "tut.exe", "26" ],    // Tutorial 5
-    [ "lab.exe", "27" ],    // Tutorial 7 (via LAB.EXE)
-];
-
 const splash = document.getElementById('splash');
 const loading = document.getElementById('loading');
 const framebuffer = document.getElementById('framebuffer');
 const error = document.getElementById('error');
+const game_menu = document.getElementById('game_menu');
 const game_menu_cursor = document.getElementById('game_menu_cursor');
+const choices = game_menu.getElementsByClassName("choice");
 
 var current_state = States.S_SPLASH;
 var current_menu_choice = 0;
@@ -69,14 +59,27 @@ export function init(engine)
         }, 2000);
     });
 
+    // Mouse/touch handlers for menu choices
+    for (let i = 0; i < choices.length; i++) {
+        choices[i].addEventListener('click', function () {
+            if (current_state == States.MENU) {
+                setMenuChoice(i);
+                execMenuChoice(engine);
+            }
+        })
+        choices[i].addEventListener('mouseenter', function () {
+            if (current_state == States.MENU) {
+                setMenuChoice(i);
+            }
+        })
+    }
+
+    // Back to the menu when a game binary exits
     engine.onProcessExit = function () {
         setState(States.MENU);
     };
 
-    engine.onProcessExec = function () {
-        setState(States.EXEC);
-    };
-
+    // We're already running the splashscreen via CSS animations
     setState(States.SPLASH);
 }
 
@@ -208,17 +211,20 @@ export function setState(s)
 
 function setMenuChoice(c)
 {
-    c %= MENU_CHOICES.length;
-    while (c < 0) c += MENU_CHOICES.length;
+    c %= choices.length;
+    if (c < 0) c += choices.length;
 
     if (c != current_menu_choice) {
         current_menu_choice = c;
     }
 
-    var pixel_top = current_menu_choice * 15;
-    if (current_menu_choice >= 2) pixel_top += 16;
+    // The cursor's default positioning is aligned with the first choice.
+    // Adjust the cursor offset based on the choice position.
 
-    game_menu_cursor.style.top = (pixel_top * 100 / 192) + '%';
+    var element = choices[c];
+    var to_percent = 100 / element.offsetParent.offsetHeight;
+    var offset_percent = (element.offsetTop - choices[0].offsetTop) * to_percent;
+    game_menu_cursor.style.top = offset_percent + '%';
 }
 
 function execMenuChoice(engine)
@@ -233,8 +239,9 @@ function execMenuChoice(engine)
     splash.classList.add('hidden');
     game_menu.classList.add('fadeout');
 
-    const choice = MENU_CHOICES[current_menu_choice];
+    const args = choices[current_menu_choice].dataset.exec.split(" ");
+
     afterLoading(engine, function () {
-        engine.exec.apply(engine, choice);
+        engine.exec(args[0], args[1] || "");
     });
 }

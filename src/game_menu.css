@@ -16,6 +16,30 @@
     opacity: 0;
 }
 
+#game_menu .stack-1 {
+    display: block;
+    width: 100%;
+    height: 10.309278350515465%;
+}
+
+#game_menu .stack-2 {
+    display: block;
+    width: 100%;
+    height: 8.24742268041237%;
+}
+
+#game_menu .stack-3 {
+    display: block;
+    width: 100%;
+    height: 7.731958762886598%;
+}
+
+#game_menu .stack-4 {
+    display: block;
+    width: 100%;
+    height: 11.34020618556701%;
+}
+
 @keyframes iris {
     0% {
         clip-path: circle(0% at center);
@@ -28,6 +52,7 @@
 }
 
 #game_menu_cursor {
+    pointer-events: none;
     transition: top 0.15s ease;
 }
 

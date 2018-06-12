@@ -150,6 +150,7 @@ def image_to_644x388(im):
     bg.paste(im.crop((0, 0, PADDED_SIZE[0] - MARGIN*2, PADDED_SIZE[1] - MARGIN*2)), (MARGIN, MARGIN))
     return bg
 
+
 def icon_border(im, s=2):
     # Incoming image has a transparent/black background at index 0. Process
     # each of these pixels, replacing them with transparent black (4) or leaving
@@ -163,6 +164,17 @@ def icon_border(im, s=2):
                 if sum(pix & 3 for pix in region) == 0:
                     im.putpixel((x,y),4)
     return im
+
+
+def carve_rows(im, prefix, heights):
+    y = 0
+    w = im.size[0]
+    for i, h in enumerate(heights):
+        im.crop((0, y, w, y+h)).save(prefix + "-%02d.png" % i, optimize=1)
+        y += h
+    assert y == im.size[1]
+    print("Rows carved, heights in percent: %r" % list(h * 100.0 / im.size[1] for h in heights))
+
 
 def main(build):
     show = decode_all_images(os.path.join(build, 'show/show.shw'))
@@ -200,7 +212,10 @@ def main(build):
     menu_clear = Image.open(os.path.join(build, 'show/show-03.png'))
     menu_opacity_mask = menu_clear.point(lambda color: color == 4, mode="1")
     menu.paste(0, None, menu_opacity_mask)
-    image_to_644x388(menu).save(os.path.join(build, 'show/menu.png'), optimize=1)
+    menu = image_to_644x388(menu)
+    carve_rows(menu, os.path.join(build, 'show/menu'), [
+        40, 32, 32, 30, 30, 30, 30, 30, 30, 30, 30, 44
+    ])
 
     cursor_only = image_to_644x388(Image.open(os.path.join(build, 'show/show-03-c.png')))
     cursor_only.save(os.path.join(build, 'show/menu-cursor.png'), transparency=0, optimize=1)

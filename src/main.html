@@ -11,19 +11,30 @@
 
     <div id="game_area"><div><div id="frame">
 
-        <div id="splash">
-            <img src="<%= require('../build/show/splash1.png') %>" />
-            <img src="<%= require('../build/show/splash2.png') %>" />
+        <div id="splash" class="layer">
+            <img alt="The Learning Company presents" class="layer" src="<%= require('../build/show/splash1.png') %>" />
+            <img alt="Robot Odyssey title screen" class="layer" src="<%= require('../build/show/splash2.png') %>" />
         </div>
 
-        <div id="game_menu" class="hidden">
-            <img src="<%= require('../build/show/menu.png') %>" />
-            <img id="game_menu_cursor" src="<%= require('../build/show/menu-cursor.png') %>" />
+        <div id="game_menu" class="layer hidden">
+            <img alt="Robot Odyssey" class="stack-1" src="<%= require('../build/show/menu-00.png') %>" />
+            <img alt="Robotropolis" class="stack-2 choice" data-exec="show.exe" src="<%= require('../build/show/menu-01.png') %>" />
+            <img alt="Innovation Lab" class="stack-2 choice" data-exec="lab.exe 30" src="<%= require('../build/show/menu-02.png') %>" />
+            <img alt="Odyssey Training" class="stack-3" src="<%= require('../build/show/menu-03.png') %>" />
+            <img alt="Robot Anatomy" class="stack-3 choice" data-exec="tut.exe 21" src="<%= require('../build/show/menu-04.png') %>" />
+            <img alt="Robot Wiring" class="stack-3 choice" data-exec="tut.exe 22" src="<%= require('../build/show/menu-05.png') %>" />
+            <img alt="Sensors" class="stack-3 choice" data-exec="tut.exe 23" src="<%= require('../build/show/menu-06.png') %>" />
+            <img alt="The Toolkit" class="stack-3 choice" data-exec="tut.exe 24" src="<%= require('../build/show/menu-07.png') %>" />
+            <img alt="Robot Circuits" class="stack-3 choice" data-exec="tut.exe 25" src="<%= require('../build/show/menu-08.png') %>" />
+            <img alt="Robot Teamwork" class="stack-3 choice" data-exec="tut.exe 26" src="<%= require('../build/show/menu-09.png') %>" />
+            <img alt="Chip Design" class="stack-3 choice" data-exec="lab.exe 27" src="<%= require('../build/show/menu-10.png') %>" />
+            <img alt="Press SPACE to choose - ENTER to go" class="stack-4" src="<%= require('../build/show/menu-11.png') %>" />
+            <img alt="Robot Cursor" id="game_menu_cursor" class="layer" src="<%= require('../build/show/menu-cursor.png') %>" />
         </div>
 
-        <div id="loading" class="hidden"></div>
-        <canvas id="framebuffer" class="hidden"></canvas>
-        <div id="error" class="hidden"></div>
+        <div id="loading" class="layer hidden"></div>
+        <canvas id="framebuffer" class="layer hidden"></canvas>
+        <div id="error" class="layer hidden"></div>
 
     </div></div></div>
 
