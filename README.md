@@ -69,9 +69,6 @@ To do
   - context sensitive controls with help
   - mobile optimized soldering w/ zoom
 
-- offline support
-  - service workers?
-
 - enhancements
   - built-in chip decompiler
   - level editor
