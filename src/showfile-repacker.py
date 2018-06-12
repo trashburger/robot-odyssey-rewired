@@ -206,7 +206,7 @@ def main(build):
 
     # The show.shw file includes in [2] the entire menu plus cursor,
     # and [3] clears the menu itself leaving only the cursor. We actually want
-    # two separate PNGs, for the menu background and the cursor.
+    # separate PNGs, for the menu background (sliced) and the cursor.
 
     menu = Image.open(os.path.join(build, 'show/show-02-c.png'))
     menu_clear = Image.open(os.path.join(build, 'show/show-03.png'))
