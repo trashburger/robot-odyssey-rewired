@@ -49,12 +49,14 @@ export function init(engine)
 
         const hotspot_x = 2;
         const hotspot_y = 4;
+        const sprite_width = 7;
+        const sprite_height = 16;
 
         const game_width = 160;
         const game_height = 192;
         const cga_zoom = 2;
 
-        const doorway_border = 14;
+        const doorway_border = 8;
 
         const canvasX = (e.clientX - canvasRect.x) * canvas_width / canvasRect.width;
         const canvasY = (e.clientY - canvasRect.y) * canvas_height / canvasRect.height;
@@ -68,9 +70,9 @@ export function init(engine)
         // Make it easier to get through doorways; if the cursor
         // is near a screen border, push it past the border.
         if (x <= doorway_border) x = -1;
-        if (x >= game_width - doorway_border) x = game_width+1;
+        if (x >= game_width - sprite_width - doorway_border) x = game_width+1;
         if (y <= doorway_border) y = -1;
-        if (y >= game_height - doorway_border) y = game_height+1;
+        if (y >= game_height - sprite_height - doorway_border) y = game_height+1;
 
         return { x, y };
     }
