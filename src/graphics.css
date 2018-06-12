@@ -33,7 +33,3 @@
     display: none;
 }
 
-#framebuffer {
-    animation: 1.5s ease 0s 1 normal both running iris;
-    background: #000;
-}

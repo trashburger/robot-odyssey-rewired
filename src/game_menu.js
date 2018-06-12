@@ -56,7 +56,7 @@ export function init(engine)
             if (current_state == States.SPLASH) {
                 setState(States.MENU);
             }
-        }, 2000);
+        }, 1000);
     });
 
     // Mouse/touch handlers for menu choices
