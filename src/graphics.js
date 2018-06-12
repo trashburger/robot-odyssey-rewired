@@ -15,6 +15,10 @@ export function init(engine)
     const context = canvas.getContext('2d');
     const image = context.createImageData(width, height);
 
+    // The first putImageData can take a while on Chrome? Do this at init
+    // rather than causing a delay later on when the game is opening.
+    context.putImageData(image, border, border);
+
     engine.onRenderFrame = function (rgb) {
         image.data.set(rgb);
         context.putImageData(image, border, border);
@@ -100,9 +104,12 @@ function engineLoaded(engine)
     engine.setCheckerboardColor = function(slot, rgb1, rgb2, size)
     {
         size = size || 2;
-        for (let y = 0; y < SCREEN_TILE_SIZE; y++) {
-            for (let x = 0; x < SCREEN_TILE_SIZE; x++) {
-                patterns[slot*PATTERN_SIZE + y*SCREEN_TILE_SIZE + x] = (x^y)&size ? rgb2 : rgb1;
+        const pattern = patterns.subarray(slot * PATTERN_SIZE, (slot+1) * PATTERN_SIZE);
+        const tile_size = SCREEN_TILE_SIZE;
+        var i = 0;
+        for (let y = 0; y < tile_size; y++) {
+            for (let x = 0; x < tile_size; x++) {
+                pattern[i++] = ((x^y) & size) ? rgb2 : rgb1;
             }
         }
     }
@@ -110,9 +117,12 @@ function engineLoaded(engine)
     engine.setStripedColor = function(slot, rgb1, rgb2, size)
     {
         size = size || 2;
-        for (let y = 0; y < SCREEN_TILE_SIZE; y++) {
-            for (let x = 0; x < SCREEN_TILE_SIZE; x++) {
-                patterns[slot*PATTERN_SIZE + y*SCREEN_TILE_SIZE + x] = x&size ? rgb2 : rgb1;
+        const pattern = patterns.subarray(slot * PATTERN_SIZE, (slot+1) * PATTERN_SIZE);
+        const tile_size = SCREEN_TILE_SIZE;
+        var i = 0;
+        for (let y = 0; y < tile_size; y++) {
+            for (let x = 0; x < tile_size; x++) {
+                pattern[i++] = (x & size) ? rgb2 : rgb1;
             }
         }
     }
@@ -284,10 +294,14 @@ function engineLoaded(engine)
         }
     }
 
-    // Built-in default palette, until the tileset (if any) loads.
-    engine.setHGRColors();
+    // Palette generation can take some time, and it can wait a tick.
+    setImmediate(function ()
+    {
+        // Built-in default palette, until the tileset (if any) loads.
+        engine.setHGRColors();
 
-    // Try to asynchronously load a partial custom tileset.
-    // Any missing tiles will still refer to the HGR version.
-    engine.setColorTilesFromImage(require("./rewired-tileset.png"));
+        // Try to asynchronously load a partial custom tileset.
+        // Any missing tiles will still refer to the HGR version.
+        engine.setColorTilesFromImage(require("./rewired-tileset.png"));
+    });
 }
