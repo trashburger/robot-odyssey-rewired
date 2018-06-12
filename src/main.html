@@ -8,101 +8,104 @@
 </head>
 <body>
 
-    <div id="game_area">
-    <div class="column_width">
-    <div class="width_sizer">
-    <div id="frame">
+<div id="game_area">
+<div class="column_width">
+<div class="width_sizer">
+<div id="frame">
 
-        <div id="splash" class="layer">
-            <img alt="The Learning Company presents" class="layer" src="<%= require('../build/show/splash1.png') %>" />
-            <img alt="Robot Odyssey title screen" class="layer" src="<%= require('../build/show/splash2.png') %>" />
-        </div>
+    <div id="splash" class="layer">
+        <img alt="The Learning Company presents" class="layer" src="<%= require('../build/show/splash1.png') %>" />
+        <img alt="Robot Odyssey title screen" class="layer" src="<%= require('../build/show/splash2.png') %>" />
+    </div>
 
-        <div id="game_menu" class="layer hidden">
-            <img alt="Robot Odyssey" class="stack-1" src="<%= require('../build/show/menu-00.png') %>" />
-            <img alt="Robotropolis" class="stack-2 choice" data-exec="show.exe" src="<%= require('../build/show/menu-01.png') %>" />
-            <img alt="Innovation Lab" class="stack-2 choice" data-exec="lab.exe 30" src="<%= require('../build/show/menu-02.png') %>" />
-            <img alt="Odyssey Training" class="stack-3" src="<%= require('../build/show/menu-03.png') %>" />
-            <img alt="Robot Anatomy" class="stack-3 choice" data-exec="tut.exe 21" src="<%= require('../build/show/menu-04.png') %>" />
-            <img alt="Robot Wiring" class="stack-3 choice" data-exec="tut.exe 22" src="<%= require('../build/show/menu-05.png') %>" />
-            <img alt="Sensors" class="stack-3 choice" data-exec="tut.exe 23" src="<%= require('../build/show/menu-06.png') %>" />
-            <img alt="The Toolkit" class="stack-3 choice" data-exec="tut.exe 24" src="<%= require('../build/show/menu-07.png') %>" />
-            <img alt="Robot Circuits" class="stack-3 choice" data-exec="tut.exe 25" src="<%= require('../build/show/menu-08.png') %>" />
-            <img alt="Robot Teamwork" class="stack-3 choice" data-exec="tut.exe 26" src="<%= require('../build/show/menu-09.png') %>" />
-            <img alt="Chip Design" class="stack-3 choice" data-exec="lab.exe 27" src="<%= require('../build/show/menu-10.png') %>" />
-            <img alt="Press SPACE to choose - ENTER to go" class="stack-4" src="<%= require('../build/show/menu-11.png') %>" />
-            <img alt="Robot Cursor" id="game_menu_cursor" class="layer" src="<%= require('../build/show/menu-cursor.png') %>" />
-        </div>
+    <div id="game_menu" class="layer hidden">
+        <img alt="Robot Odyssey" class="stack-1" src="<%= require('../build/show/menu-00.png') %>" />
+        <img alt="Robotropolis" class="stack-2 choice" data-exec="show.exe" src="<%= require('../build/show/menu-01.png') %>" />
+        <img alt="Innovation Lab" class="stack-2 choice" data-exec="lab.exe 30" src="<%= require('../build/show/menu-02.png') %>" />
+        <img alt="Odyssey Training" class="stack-3" src="<%= require('../build/show/menu-03.png') %>" />
+        <img alt="Robot Anatomy" class="stack-3 choice" data-exec="tut.exe 21" src="<%= require('../build/show/menu-04.png') %>" />
+        <img alt="Robot Wiring" class="stack-3 choice" data-exec="tut.exe 22" src="<%= require('../build/show/menu-05.png') %>" />
+        <img alt="Sensors" class="stack-3 choice" data-exec="tut.exe 23" src="<%= require('../build/show/menu-06.png') %>" />
+        <img alt="The Toolkit" class="stack-3 choice" data-exec="tut.exe 24" src="<%= require('../build/show/menu-07.png') %>" />
+        <img alt="Robot Circuits" class="stack-3 choice" data-exec="tut.exe 25" src="<%= require('../build/show/menu-08.png') %>" />
+        <img alt="Robot Teamwork" class="stack-3 choice" data-exec="tut.exe 26" src="<%= require('../build/show/menu-09.png') %>" />
+        <img alt="Chip Design" class="stack-3 choice" data-exec="lab.exe 27" src="<%= require('../build/show/menu-10.png') %>" />
+        <img alt="Press SPACE to choose - ENTER to go" class="stack-4" src="<%= require('../build/show/menu-11.png') %>" />
+        <img alt="Robot Cursor" id="game_menu_cursor" class="layer" src="<%= require('../build/show/menu-cursor.png') %>" />
+    </div>
 
-        <div id="loading" class="layer hidden"></div>
-        <canvas id="framebuffer" class="layer hidden"></canvas>
-        <div id="error" class="layer hidden"></div>
-
-    </div></div></div></div>
-
-    <div id="engine_controls" class="hidden">
-    <div class="column_width">
-
-        <div id="joystick">
-            <div id="joystick_xy"></div>
-            <button class="joystick_btn">BUTTON</button>
-        </div>
-
-        <div class="button_area">
-            <button class="keyboard_btn keyboard_spacebar" data-ascii=" " data-scancode="0x39" data-rdelay="250" data-rrate="100">SPACE</button>
-            <button class="keyboard_btn keyboard_enter" data-ascii="0x0D" data-scancode="0x1C">ENTER</button>
-            <button class="keyboard_btn keyboard_esc" data-ascii="0x1B" data-scancode="0x01">ESC</button>
-            <button class="keyboard_btn" data-ascii="?">?</button>
-        </div>
-
-        <div class="button_area">
-            <button class="keyboard_btn" data-ascii="R">R</button>
-            <button class="keyboard_btn" data-ascii="T">T</button>
-            <button class="keyboard_btn" data-ascii="C">C</button>
-            <button class="keyboard_btn" data-ascii="S">S</button>
-            <button class="keyboard_btn" data-ascii="P">P</button>
-            <button class="keyboard_btn" data-ascii="H">H</button>
-            <button class="keyboard_btn" data-ascii="O">O</button>
-            <button class="keyboard_btn" data-ascii="L">L</button>
-        </div>
-
-        <div class="button_area">
-            <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x4B" data-rdelay="250" data-rrate="80">←</button>
-            <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x50" data-rdelay="250" data-rrate="80">↓</button>
-            <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x48" data-rdelay="250" data-rrate="80">↑</button>
-            <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x4D" data-rdelay="250" data-rrate="80">→</button>
-        </div>
-
-        <div class="button_area">
-            <button class="keyboard_btn" data-ascii="4" data-scancode="0x4B" data-rdelay="250" data-rrate="40">⇠</button>
-            <button class="keyboard_btn" data-ascii="2" data-scancode="0x50" data-rdelay="250" data-rrate="40">⇣</button>
-            <button class="keyboard_btn" data-ascii="8" data-scancode="0x48" data-rdelay="250" data-rrate="40">⇡</button>
-            <button class="keyboard_btn" data-ascii="6" data-scancode="0x4D" data-rdelay="250" data-rrate="40">⇢</button>
-        </div>
-
-        <div class="button_area">
-            <button class="setspeed_btn" data-speed="0.24">&frac14;</button>
-            <button class="setspeed_btn" data-speed="0.5">&frac12;</button>
-            <button class="setspeed_btn active_btn" data-speed="1.0">1x</button>
-            <button class="setspeed_btn" data-speed="2.0">2x</button>
-            <button class="setspeed_btn" data-speed="10">10x</button>
-        </div>
-
-        <div class="button_area">
-            <button class="savefile_btn warning_btn">Load File</button>
-            <button class="loadgame_btn warning_btn">Re-Load</button>
-            <button class="savegame_btn">Save Game</button>
-            <button class="palette_btn active_btn" data-src="<%= require('./rewired-tileset.png') %>">Rewired Tileset</button>
-            <button class="palette_btn" data-name="hgr">Apple (HGR) Colors</button>
-            <button class="palette_btn" data-name="cga">PC (CGA) Colors</button>
-        </div>
-
-        <div id="footer">
-            <a href="https://github.com/scanlime/robot-odyssey-rewired" target="_blank" rel="noopener">open source software</a>
-        </div>
-
-    </div></div>
+    <div id="loading" class="layer hidden"></div>
+    <canvas id="framebuffer" class="layer hidden"></canvas>
+    <div id="error" class="layer hidden"></div>
 
 </div>
+</div>
+</div>
+</div>
+
+<div id="engine_controls" class="hidden">
+<div class="column_width">
+
+    <div id="joystick">
+        <div id="joystick_xy"></div>
+        <button class="joystick_btn">BUTTON</button>
+    </div>
+
+    <div class="button_area">
+        <button class="keyboard_btn keyboard_spacebar" data-ascii=" " data-scancode="0x39" data-rdelay="250" data-rrate="100">SPACE</button>
+        <button class="keyboard_btn keyboard_enter" data-ascii="0x0D" data-scancode="0x1C">ENTER</button>
+        <button class="keyboard_btn keyboard_esc" data-ascii="0x1B" data-scancode="0x01">ESC</button>
+        <button class="keyboard_btn" data-ascii="?">?</button>
+    </div>
+
+    <div class="button_area">
+        <button class="keyboard_btn" data-ascii="R">R</button>
+        <button class="keyboard_btn" data-ascii="T">T</button>
+        <button class="keyboard_btn" data-ascii="C">C</button>
+        <button class="keyboard_btn" data-ascii="S">S</button>
+        <button class="keyboard_btn" data-ascii="P">P</button>
+        <button class="keyboard_btn" data-ascii="H">H</button>
+        <button class="keyboard_btn" data-ascii="O">O</button>
+        <button class="keyboard_btn" data-ascii="L">L</button>
+    </div>
+
+    <div class="button_area">
+        <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x4B" data-rdelay="250" data-rrate="80">←</button>
+        <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x50" data-rdelay="250" data-rrate="80">↓</button>
+        <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x48" data-rdelay="250" data-rrate="80">↑</button>
+        <button class="keyboard_btn" data-ascii="0x00" data-scancode="0x4D" data-rdelay="250" data-rrate="80">→</button>
+    </div>
+
+    <div class="button_area">
+        <button class="keyboard_btn" data-ascii="4" data-scancode="0x4B" data-rdelay="250" data-rrate="40">⇠</button>
+        <button class="keyboard_btn" data-ascii="2" data-scancode="0x50" data-rdelay="250" data-rrate="40">⇣</button>
+        <button class="keyboard_btn" data-ascii="8" data-scancode="0x48" data-rdelay="250" data-rrate="40">⇡</button>
+        <button class="keyboard_btn" data-ascii="6" data-scancode="0x4D" data-rdelay="250" data-rrate="40">⇢</button>
+    </div>
+
+    <div class="button_area">
+        <button class="setspeed_btn" data-speed="0.24">&frac14;</button>
+        <button class="setspeed_btn" data-speed="0.5">&frac12;</button>
+        <button class="setspeed_btn active_btn" data-speed="1.0">1x</button>
+        <button class="setspeed_btn" data-speed="2.0">2x</button>
+        <button class="setspeed_btn" data-speed="10">10x</button>
+    </div>
+
+    <div class="button_area">
+        <button class="savefile_btn warning_btn">Load File</button>
+        <button class="loadgame_btn warning_btn">Re-Load</button>
+        <button class="savegame_btn">Save Game</button>
+        <button class="palette_btn active_btn" data-src="<%= require('./rewired-tileset.png') %>">Rewired Tileset</button>
+        <button class="palette_btn" data-name="hgr">Apple (HGR) Colors</button>
+        <button class="palette_btn" data-name="cga">PC (CGA) Colors</button>
+    </div>
+
+    <div id="footer">
+        <a href="https://github.com/scanlime/robot-odyssey-rewired" target="_blank" rel="noopener">open source software</a>
+    </div>
+
+</div>
+</div>
+
 </body>
 </html>
