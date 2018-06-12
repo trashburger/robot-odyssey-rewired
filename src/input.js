@@ -3,10 +3,11 @@ import { audioContextSetup } from "./sound.js"
 import * as GameMenu from "./game_menu.js"
 import './input.css'
 
-var joystick = null;
+let joystick = null;
 
 const canvas = document.getElementById('framebuffer');
 const game_area = document.getElementById('game_area');
+const gamepad_button_mappings = [];
 
 function controlCode(key)
 {
@@ -15,7 +16,7 @@ function controlCode(key)
 
 export function init(engine)
 {
-    var mouse_tracking_unlocked = false;
+    let mouse_tracking_unlocked = false;
 
     // Joystick is created immediately, but callbacks aren't hooked up until the engine loads
     joystick = nipplejs.create({
@@ -28,6 +29,61 @@ export function init(engine)
 
     // Fade in the controls as soon as this Javascript is ready
     document.getElementById('engine_controls').classList.remove('hidden');
+
+    // Gamepads must be polled; currently this isn't hooked into the game's own event polling
+    // cycle at all, since that happens on the C++ side without any JS callbacks.
+    function gamepadPoll(gamepad, last_axes, last_pressed)
+    {
+        if (gamepad.connected) {
+            const axes = gamepad.axes;
+            const pressed = gamepad.buttons.map(b => b.pressed);
+
+            window.requestAnimationFrame( function () {
+                // Must call getGamepads() to refresh the state snapshot
+                gamepadPoll(navigator.getGamepads()[gamepad.index], axes, pressed);
+            });
+
+            // If any axes changed, send an XY event
+            if (axes[0] !== last_axes[0] || axes[1] !== last_axes[1]) {
+                gamepadAxesChanged(axes[0], axes[1]);
+            }
+
+            // Dispatch individual button events to mapping handlers
+            for (let i = 0; i < pressed.length; i++) {
+                if (pressed[i] !== last_pressed[i]) {
+                    const handler = gamepad_button_mappings[i];
+                    if (handler) {
+                        handler(pressed[i], i);
+                    }
+                }
+            }
+        }
+    }
+
+    function gamepadAxesChanged(x, y)
+    {
+        // Pass it on to the engine and menu
+        const scale = 10;
+        joystickAxes(x * scale, y * scale);
+
+        // Animate the on-screen joystick
+        const js = joystick[0];
+        const size = js.options.size * 0.25;
+        const threshold = 0.1;
+        js.ui.front.style.left = (x * size) + 'px';
+        js.ui.front.style.top = (y * size) + 'px';
+        if (x*x + y*y > threshold*threshold) {
+            js.show();
+        } else {
+            js.hide();
+        }
+    }
+
+    // Begin polling gamepads if a new one appears
+    window.addEventListener('gamepadconnected', function (e)
+    {
+        gamepadPoll(e.gamepad, [], []);
+    });
 
     function mouseTrackingEnd()
     {
@@ -64,8 +120,8 @@ export function init(engine)
         const framebufferY = canvasY - border;
 
         // Adjust for cursor hotspot and game coordinate system
-        var x = framebufferX / cga_zoom / 2 - hotspot_x;
-        var y = game_height - framebufferY / cga_zoom - hotspot_y;
+        let x = framebufferX / cga_zoom / 2 - hotspot_x;
+        let y = game_height - framebufferY / cga_zoom - hotspot_y;
 
         // Make it easier to get through doorways; if the cursor
         // is near a screen border, push it past the border.
@@ -160,7 +216,7 @@ export function init(engine)
         e.preventDefault();
     });
 
-    function addButtonEvents(button, down, up, click)
+    function addButtonEvents(button_element, down, up, click)
     {
         const down_wrapper = function (e)
         {
@@ -182,7 +238,7 @@ export function init(engine)
             if (up) {
                 up(e);
             }
-            button.blur();
+            button_element.blur();
             canvas.focus();
         };
 
@@ -190,16 +246,31 @@ export function init(engine)
             passive: !!click
         };
 
-        button.addEventListener('mousedown', down_wrapper, options);
-        button.addEventListener('mouseup', up_wrapper, options);
-        button.addEventListener('mouseleave', up_wrapper, options);
+        button_element.addEventListener('mousedown', down_wrapper, options);
+        button_element.addEventListener('mouseup', up_wrapper, options);
+        button_element.addEventListener('mouseleave', up_wrapper, options);
 
-        button.addEventListener('touchstart', down_wrapper, options);
-        button.addEventListener('touchend', up_wrapper, options);
-        button.addEventListener('touchcancel', up_wrapper, options);
+        button_element.addEventListener('touchstart', down_wrapper, options);
+        button_element.addEventListener('touchend', up_wrapper, options);
+        button_element.addEventListener('touchcancel', up_wrapper, options);
 
         if (click) {
-            button.addEventListener('click', click);
+            button_element.addEventListener('click', click);
+        }
+
+        const gamepad_button = parseInt(button_element.dataset.gamepad);
+        if (gamepad_button >= 0) {
+            gamepad_button_mappings[gamepad_button] = function (pressed)
+            {
+                if (pressed) {
+                    down();
+                } else {
+                    if (click) {
+                        click();
+                    }
+                    up();
+                }
+            }
         }
     }
 
@@ -216,7 +287,13 @@ export function init(engine)
         audioContextSetup();
     }
 
-    function joystickAxes(x, y) {
+    function joystickAxes(x, y)
+    {
+        // This limit is much larger than the usable range, it's for preventing overflow
+        const limit = 127;
+        x = Math.min(limit, Math.max(-limit, x));
+        y = Math.min(limit, Math.max(-limit, y));
+
         if (engine.calledRun) {
             engine.setJoystickAxes(x, y);
             engine.autoSave();
@@ -224,7 +301,8 @@ export function init(engine)
         GameMenu.setJoystickAxes(engine, x, y);
     }
 
-    function joystickButton(b) {
+    function joystickButton(b)
+    {
         if (engine.calledRun) {
             engine.setJoystickButton(b);
             engine.autoSave();
@@ -269,18 +347,14 @@ export function init(engine)
     joystick.on('move', function (e, data)
     {
         const scale = 8.0;
-        const limit = 127;
-        const x = scale * data.force * Math.cos(data.angle.radian);
-        const y = scale * data.force * Math.sin(data.angle.radian);
         mouseTrackingEnd();
-        joystickAxes(Math.min(limit, Math.max(-limit, x)),
-                     Math.min(limit, Math.max(-limit, -y)));
+        joystickAxes(scale * data.force * Math.cos(data.angle.radian),
+                    -scale * data.force * Math.sin(data.angle.radian));
     });
 
     joystick.on('end', function (e)
     {
         joystickAxes(0, 0);
-        audioContextSetup();
     });
 
     for (let button of Array.from(document.getElementsByClassName('joystick_btn'))) {
@@ -293,8 +367,8 @@ export function init(engine)
         });
     }
 
-    var delay = null;
-    var repeater = null;
+    let delay = null;
+    let repeater = null;
     const stop_repeat = () => {
         if (delay !== null) {
             clearTimeout(delay);
