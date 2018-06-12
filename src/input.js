@@ -54,7 +54,7 @@ export function init(engine)
         const game_height = 192;
         const cga_zoom = 2;
 
-        const doorway_border = 6;
+        const doorway_border = 14;
 
         const canvasX = (e.clientX - canvasRect.x) * canvas_width / canvasRect.width;
         const canvasY = (e.clientY - canvasRect.y) * canvas_height / canvasRect.height;
