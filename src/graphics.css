@@ -3,7 +3,7 @@
     overflow: hidden;
 }
 
-#game_area > div {
+#game_area .width_sizer {
     max-width: 133vh;
     margin: 0 auto;
     width: 100%;

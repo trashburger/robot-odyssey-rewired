@@ -7,9 +7,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 </head>
 <body>
-<div id="main_column">
 
-    <div id="game_area"><div><div id="frame">
+    <div id="game_area">
+    <div class="column_width">
+    <div class="width_sizer">
+    <div id="frame">
 
         <div id="splash" class="layer">
             <img alt="The Learning Company presents" class="layer" src="<%= require('../build/show/splash1.png') %>" />
@@ -36,9 +38,10 @@
         <canvas id="framebuffer" class="layer hidden"></canvas>
         <div id="error" class="layer hidden"></div>
 
-    </div></div></div>
+    </div></div></div></div>
 
     <div id="engine_controls" class="hidden">
+    <div class="column_width">
 
         <div id="joystick">
             <div id="joystick_xy"></div>
@@ -97,7 +100,8 @@
         <div id="footer">
             <a href="https://github.com/scanlime/robot-odyssey-rewired" target="_blank" rel="noopener">open source software</a>
         </div>
-    </div>
+
+    </div></div>
 
 </div>
 </body>
