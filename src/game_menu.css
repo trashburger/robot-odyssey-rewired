@@ -86,13 +86,9 @@
 }
 
 #error {
-    display: none;
-    position: absolute;
-    left: 10%;
-    top: 10%;
-    width: 80%;
-    height: 80%;
-    font-size: 18px;
-    color: #ddd;
+    border: 20px solid #600;
+    padding: 30px;
+    font-size: 20px;
+    color: #eee;
     white-space: pre;
 }

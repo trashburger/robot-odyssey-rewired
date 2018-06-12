@@ -16,7 +16,7 @@ const game_menu = document.getElementById('game_menu');
 const game_menu_cursor = document.getElementById('game_menu_cursor');
 const choices = Array.from(game_menu.getElementsByClassName("choice"));
 
-var current_state = States.S_SPLASH;
+var current_state = null;
 var current_menu_choice = 0;
 var menu_joystick_interval = null;
 var menu_joystick_y = 0;
@@ -33,7 +33,7 @@ export function showError(e)
     }
 
     error.innerText = e;
-    setState(States.S_ERROR);
+    setState(States.ERROR);
 }
 
 export function init(engine)
