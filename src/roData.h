@@ -53,6 +53,7 @@ enum ROObjectId {
     RO_OBJ_ROBOT_MC_L                 = 0x01,
     RO_OBJ_ROBOT_MC_R                 = 0x02,
 
+    RO_OBJ_MAGNET                     = 0x03,
     RO_OBJ_TOKEN                      = 0x04,
 
     RO_OBJ_MC_GRABBER_IN              = 0x09,
