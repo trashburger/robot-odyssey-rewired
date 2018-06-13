@@ -113,8 +113,8 @@ export function init(engine)
 
         const doorway_border = 8;
 
-        const canvasX = (e.clientX - canvasRect.x) * canvas_width / canvasRect.width;
-        const canvasY = (e.clientY - canvasRect.y) * canvas_height / canvasRect.height;
+        const canvasX = (e.clientX - canvasRect.left) * canvas_width / canvasRect.width;
+        const canvasY = (e.clientY - canvasRect.top) * canvas_height / canvasRect.height;
         const framebufferX = canvasX - border;
         const framebufferY = canvasY - border;
 
