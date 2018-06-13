@@ -311,29 +311,37 @@ export function init(engine)
 
     document.body.addEventListener('keydown', function (e)
     {
-        if (e.code.includes("Arrow")) {
+        const code = e.code || e.key || '';
+        const key = e.key || '';
+        const shift = e.shiftKey;
+        const ctrl = e.ctrlKey;
+        const alt = e.altKey;
+        const meta = e.metaKey;
+        const plain = !(ctrl || alt || meta);
+
+        if (code.includes("Arrow")) {
             // Most keys can coexist with mouse tracking, but arrow keys will take over.
             mouseTrackingEnd();
         }
 
-        if (e.code == "ArrowUp" && e.shiftKey == false) keycode(0, 0x48);
-        else if (e.code == "ArrowUp" && e.shiftKey == true) keycode('8', 0x48);
-        else if (e.code == "ArrowDown" && e.shiftKey == false) keycode(0, 0x50);
-        else if (e.code == "ArrowDown" && e.shiftKey == true) keycode('2', 0x50);
-        else if (e.code == "ArrowLeft" && e.shiftKey == false) keycode(0, 0x4B);
-        else if (e.code == "ArrowLeft" && e.shiftKey == true) keycode('4', 0x4B);
-        else if (e.code == "ArrowRight" && e.shiftKey == false) keycode(0, 0x4D);
-        else if (e.code == "ArrowRight" && e.shiftKey == true) keycode('6', 0x4D);
-        else if (e.code == "Backspace" && !e.ctrlKey && !e.altKey && !e.metaKey) keycode('\x08', 0);
-        else if (e.code == "Enter" && !e.ctrlKey && !e.altKey && !e.metaKey) keycode('\x0D', 0x1C);
-        else if (e.code == "Escape" && !e.ctrlKey && !e.altKey && !e.metaKey) keycode('\x1b', 0x01);
+        if (code == "ArrowUp" && !shift)         keycode(0, 0x48);
+        else if (code == "ArrowUp" && shift)     keycode('8', 0x48);
+        else if (code == "ArrowDown" && !shift)  keycode(0, 0x50);
+        else if (code == "ArrowDown" && shift)   keycode('2', 0x50);
+        else if (code == "ArrowLeft" && !shift)  keycode(0, 0x4B);
+        else if (code == "ArrowLeft" && shift)   keycode('4', 0x4B);
+        else if (code == "ArrowRight" && !shift) keycode(0, 0x4D);
+        else if (code == "ArrowRight" && shift)  keycode('6', 0x4D);
+        else if (code == "Backspace" && plain)   keycode('\x08', 0);
+        else if (code == "Enter" && plain)       keycode('\x0D', 0x1C);
+        else if (code == "Escape" && plain)      keycode('\x1b', 0x01);
 
-        else if (e.key.length == 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        else if (key.length == 1 && plain) {
             // Letter keys
-            keycode(e.key.toUpperCase(), 0);
-        } else if (e.key.length == 1 && e.ctrlKey && !e.altKey && !e.metaKey) {
+            keycode(key.toUpperCase(), 0);
+        } else if (key.length == 1 && ctrl && !alt && !meta) {
             // CTRL keys, useful for sound on-off and for cheats
-            keycode(controlCode(e.key), 0);
+            keycode(controlCode(key), 0);
         } else {
             // Unrecognized special key, let the browser keep it.
             return;
