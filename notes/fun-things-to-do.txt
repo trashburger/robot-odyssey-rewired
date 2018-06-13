@@ -91,6 +91,13 @@ ROEngine.onRenderFrame = function(data) {
 	});
 }
 
+// Experimental nugget for bt_game.py for replacing builtin PRNG with Javascript
+
+b.decl("#include <emscripten.h>")
+b.patchAndHook('0E3B:492D', 'ret', 'r.al = EM_ASM_INT({ return Module.myRandom($0); }, r.al);')
+
+ROEngine.myRandom = function (limit) {  return (Math.random()*(limit+0.999999))|0; }
+
 // Visual debugging, DOM style
 
 f=document.getElementById("frame");
