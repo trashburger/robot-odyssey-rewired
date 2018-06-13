@@ -100,7 +100,7 @@ function update_obj(id) {
 	if (w[0x300+id] == current_room) {
 		div.style.display = "block";
 		div.style.left = (x*100/160.0) + "%";
-		div.style.top = ((196-y-16 + id/96)*100/200.0) + "%";
+		div.style.top = ((196-y-16 + (id%7))*100/200.0) + "%";
 		div.innerText = `#${id.toString(16)}, spr=${sprite.toString(16)}, col=${color.toString(16)} (${x},${y})`;
 	} else {
 		div.style.display = "none";
