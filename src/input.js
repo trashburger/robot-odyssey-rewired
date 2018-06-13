@@ -447,7 +447,7 @@ export function init(engine)
 
     for (let button of Array.from(document.getElementsByClassName('palette_btn'))) {
         addButtonEvents(button, (e) => {
-            for (let sibling of button.parentNode.children) {
+            for (let sibling of Array.from(button.parentNode.children)) {
                 sibling.classList.remove('active_btn');
             }
             button.classList.add('active_btn');
