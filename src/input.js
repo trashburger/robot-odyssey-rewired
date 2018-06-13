@@ -18,7 +18,6 @@ export function init(engine)
 {
     let mouse_tracking_unlocked = false;
 
-    // Joystick is created immediately, but callbacks aren't hooked up until the engine loads
     joystick = nipplejs.create({
         zone: document.getElementById('joystick_xy'),
         mode: 'static',
