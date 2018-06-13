@@ -83,11 +83,11 @@ obj=[]; for (var i = 0; i < 256; i++) {
 	f.appendChild(obj[i] = document.createElement("div"));
 	obj[i].classList.add("layer");
 	obj[i].style.display = "none";
-	obj[i].style.font = "14px monospace";
+	obj[i].style.font = "10px monospace";
 	obj[i].style.color = "rgba(255, 255, 255, 0.7)";
-	obj[i].style.background = "rgba(0, 0, 0, 0.4)";
-	obj[i].style.width = "10%";
-	obj[i].style.height = "5%";
+	obj[i].style.background = "rgba(0, 0, 0, 0.2)";
+	obj[i].style.width = "auto";
+	obj[i].style.height = "auto";
 }
 function update_obj(id) {
 	var w=ROEngine.getGameMemory().world;
@@ -100,8 +100,8 @@ function update_obj(id) {
 	if (w[0x300+id] == current_room) {
 		div.style.display = "block";
 		div.style.left = (x*100/160.0) + "%";
-		div.style.top = ((196-y-16)*100/200.0) + "%";
-		div.innerText = `#${id.toString(16)}, spr=${sprite.toString(16)}, col=${color.toString(16)}`;
+		div.style.top = ((196-y-16 + id/96)*100/200.0) + "%";
+		div.innerText = `#${id.toString(16)}, spr=${sprite.toString(16)}, col=${color.toString(16)} (${x},${y})`;
 	} else {
 		div.style.display = "none";
 	}
