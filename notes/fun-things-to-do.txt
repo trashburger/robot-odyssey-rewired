@@ -76,6 +76,21 @@ function render(c) {
 	}
 }
 
+// Show the item randomization state
+
+_onRenderFrame = ROEngine.onRenderFrame;
+mem = ROEngine.getMemory()
+ROEngine.onRenderFrame = function(data) {
+	_onRenderFrame(data); 
+	console.log({
+		objects_have_been_placed: mem[0xCF02],
+		cycle3_key_position: mem[0xD40F],
+		cycle6_chip1_location: mem[0xD413],
+		rng2_crystal_magnet_order: mem[0xD414],
+		rng6_blackcrystal_location: mem[0xD415],
+	});
+}
+
 // Visual debugging, DOM style
 
 f=document.getElementById("frame");
@@ -92,16 +107,16 @@ obj=[]; for (var i = 0; i < 256; i++) {
 function update_obj(id) {
 	var w=ROEngine.getGameMemory().world;
 	var div = obj[id];
-	var current_room = w[0x300];
+	var room = w[0x300];
 	var x = w[0x400+id];
 	var y = w[0x500+id];
 	var sprite = w[0x100+id];
 	var color = w[0x200+id];
-	if (w[0x300+id] == current_room) {
+	if (w[0x300+id] == room) {
 		div.style.display = "block";
 		div.style.left = (x*100/160.0) + "%";
 		div.style.top = ((196-y-16 + (id%7))*100/200.0) + "%";
-		div.innerText = `#${id.toString(16)}, spr=${sprite.toString(16)}, col=${color.toString(16)} (${x},${y})`;
+		div.innerText = `#${id.toString(16)} r=${room.toString(16)} spr=${sprite.toString(16)}, col=${color.toString(16)} (${x},${y})`;
 	} else {
 		div.style.display = "none";
 	}
