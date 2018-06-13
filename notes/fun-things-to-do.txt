@@ -78,29 +78,33 @@ function render(c) {
 
 // Visual debugging, DOM style
 
-fb=document.getElementById("framebuffer").getClientRects()[0];
 f=document.getElementById("frame");
-obj=[]; for (var i = 0; i < 256; i++) f.appendChild(obj[i] = document.createElement("div"));
-w=ROEngine.getGameMemory().world
+obj=[]; for (var i = 0; i < 256; i++) {
+	f.appendChild(obj[i] = document.createElement("div"));
+	obj[i].classList.add("layer");
+	obj[i].style.display = "none";
+	obj[i].style.font = "14px monospace";
+	obj[i].style.color = "rgba(255, 255, 255, 0.7)";
+	obj[i].style.background = "rgba(0, 0, 0, 0.4)";
+	obj[i].style.width = "10%";
+	obj[i].style.height = "5%";
+}
 function update_obj(id) {
+	var w=ROEngine.getGameMemory().world;
 	var div = obj[id];
 	var current_room = w[0x300];
-	if (w[0x300+id] != current_room) {
-		div.style.display = "none";
-		return;
-	}
 	var x = w[0x400+id];
 	var y = w[0x500+id];
 	var sprite = w[0x100+id];
 	var color = w[0x200+id];
-	div.style.display = "block";
-	div.style.font = "14px monospace";
-	div.style.color = "rgba(255, 255, 255, 0.7)";
-	div.style.background = "rgba(0, 0, 0, 0.4)";
-	div.style.position = "absolute";
-	div.style.left = ((x/160.0)*fb.width+fb.left)+"px";
-	div.style.top = ((196-y-16)/200.0*fb.height+fb.top)+"px";
-	div.innerText = `#${id.toString(16)}, spr=${sprite.toString(16)}, col=${color.toString(16)}`;
+	if (w[0x300+id] == current_room) {
+		div.style.display = "block";
+		div.style.left = (x*100/160.0) + "%";
+		div.style.top = ((196-y-16)*100/200.0) + "%";
+		div.innerText = `#${id.toString(16)}, spr=${sprite.toString(16)}, col=${color.toString(16)}`;
+	} else {
+		div.style.display = "none";
+	}
 }
 _onRenderFrame = ROEngine.onRenderFrame;
 ROEngine.onRenderFrame = function(data) { _onRenderFrame(data); for (var i = 0; i < 256; i++) update_obj(i); }
