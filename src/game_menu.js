@@ -185,7 +185,7 @@ export function setState(s)
             if (current_state == States.MENU_TRANSITION) {
                 setState(States.MENU_ACTIVE);
             }
-        }, 500);
+        }, 300);
     }
 
     if (s == States.ERROR) {
