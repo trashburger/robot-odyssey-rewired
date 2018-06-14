@@ -10,12 +10,9 @@ import bt_common
 b = sbt86.DOSBinary('GAME.EXE')
 
 bt_common.patch(b)
-bt_common.patchChips(b)
-#bt_common.findSelfModifyingCode(b)
 
 b.decl("#include <stdio.h>")
-b.patchAndHook(b.findCode('2c01 :2f a2____ a2____ b12c 32ed'),
-               'nop', length=1, cCode='''
+b.patchAndHook("0D3B:BC3F", 'nop', length=1, cCode='''
    printf("XXX: Skipping unimplemented 'das' instruction.\\n");
 ''')
 

@@ -54,12 +54,6 @@ import sys
 import struct
 import subprocess
 import re
-import binascii
-import tempfile
-
-
-def log(msg):
-    print "SBT86: %s" % msg
 
 
 class Signature:
@@ -113,9 +107,6 @@ class Signature:
                 else:
                     SignatureFormatError("Pattern has blanks which are "
                                          "not byte aligned: %r" % self.shortText)
-            elif hexByte == '00':
-                # NUL is special, they get escaped in an unusual way
-                regex += r'\x00'
             else:
                 char = chr(int(hexByte, 16))
                 if char in ".^$*+?\\{}[]()|":
@@ -194,31 +185,19 @@ class Addr16:
 
 
 class Literal(int):
-    def __new__(self, x, addr=None, width=None, dynamic=False):
-        """A literal value. Optionally has a width in bytes,
-           and an Addr16 where this literal is located in the
-           code segment.
+    def __new__(self, x):
+        # We never really want a signed literal.
+        if x < 0:
+            x += 0x10000
 
-           If 'dynamic' is set, this literal may be modified at
-           runtime. We code-generate it as a reference to the
-           immeidate data within an instruction in the code
-           segment.
-           """
         obj = int.__new__(self, x)
-        obj.addr = addr
-        obj.width = width
-        obj.dynamic = dynamic
+        obj.width = 2
         return obj
 
     def __repr__(self):
         return self.codegen()
 
     def codegen(self):
-        if self.dynamic:
-            return Indirect(Register('cs'),
-                            (Literal(self.addr.offset),),
-                            self.width).codegen()
-
         if self < 16:
             return str(self)
         elif self < 0x100:
@@ -240,11 +219,8 @@ class Register:
     def __repr__(self):
         return "Reg(%s)" % self.name
 
-    def codegen(self, mode='r'):
-        if mode == 'w':
-            return "reg.%s =(" % self.name
-        else:
-            return "reg.%s" % self.name
+    def codegen(self):
+        return "reg.%s" % self.name
 
 
 class Indirect:
@@ -265,57 +241,28 @@ class Indirect:
         return (self.segment.codegen(),
                 " + ".join([o.codegen() for o in self.offsets]))
 
-    def codegen(self, mode='r'):
-        # Instead of using the normal code generated for segment, use
-        # the segment cache. This means our segment _must_ be a
-        # register.
-
-        assert isinstance(self.segment, Register)
-        _, offset = self.genAddr()
-        mem = "reg.ptr.%s[(uint16_t)(%s)]" % (self.segment.name, offset)
-
+    def codegen(self):
         if self.width == 1:
-            if mode == 'w':
-                return "%s=(" % mem
-            else:
-                return mem
+            return "MEM8(%s,%s)" % self.genAddr()
         elif self.width == 2:
-            if mode == 'w':
-                return "M16W(&%s," % mem
-            else:
-                return "M16R(&%s)" % mem
+            return "MEM16(%s,%s)" % self.genAddr()
         else:
-            raise InternalError("Unsupported memory access width")
-
+            raise InternalError("Indirect %r has unknown width" % self)
 
 
 def signed(operand):
     """Generate signed code for an operand."""
-    if operand.width == 1:
+    if operand.width == 2:
+        return "((int16_t)%s)" % operand.codegen()
+    elif operand.width == 1:
         return "((int8_t)%s)" % operand.codegen()
     else:
-        return "((int16_t)%s)" % operand.codegen()
+        raise InternalError("Unsupported width for signed operand (%s)" % operand.width)
 
 def u32(operand):
     """Generate 32-bit unsigned code for an operand."""
     return "((uint32_t)%s)" % operand.codegen()
 
-def findAll(needle, haystack):
-    """Find all occurrances of 'needle' in 'haystack', even overlapping ones.
-       Returns a list of zero-based offsets.
-       """
-    results = []
-    offset = 0
-    while True:
-        search = haystack[offset:]
-        if not search:
-            break
-        x = search.find(needle)
-        if x < 0:
-            break
-        results.append(offset + x)
-        offset += x + 1
-    return results
 
 class InternalError(Exception):
     pass
@@ -337,126 +284,6 @@ class Trace:
             self.name, self._args, self.fire)
 
 
-def _genCycleTable():
-    """Generate a table of 8086/8086 instruction timings.  This isn't
-       quite accurate, as it doesn't bother calculating the number of
-       cycles necessary to look up the effective address based on the
-       type of Indirect() argument we have. It also doesn't account
-       for instructions that take a variable number of clocks
-       depending on their arguments, like MUL. In practice I doubt
-       this matters, at least for the things we're using our virtual
-       clock for.
-
-       This is based on the information from:
-          http://umcs.maine.edu/~cmeadow/courses/cos335/
-          80x86-Integer-Instruction-Set-Clocks.pdf
-       """
-
-    table = {
-        ('mov', Register, Register): 2,
-        ('mov', Indirect, Register): 13,
-        ('mov', Register, Indirect): 12,
-        ('mov', Indirect, Literal): 14,
-        ('mov', Register, Literal): 4,
-
-        ('cmp', Register, Register): 3,
-        ('cmp', Indirect, Register): 13,
-        ('cmp', Register, Indirect): 12,
-        ('cmp', Indirect, Literal): 14,
-        ('cmp', Register, Literal): 4,
-
-        ('test', Register, Register): 3,
-        ('test', Indirect, Register): 13,
-        ('test', Register, Indirect): 13,
-        ('test', Indirect, Literal): 11,
-        ('test', Register, Literal): 5,
-
-        ('xchg', Register, Register): 4,
-        ('xchg', Indirect, Register): 25,
-        ('xchg', Register, Indirect): 25,
-
-        ('imul', Register): 89,  # Average (8-bit)
-        ('imul', Indirect): 95,
-
-        ('mul', Register): 73,  # Average (8-bit)
-        ('mul', Indirect): 79,
-
-        ('div', Register): 85,  # Average (8-bit)
-        ('div', Indirect): 91,
-
-        ('not', Register): 3,
-        ('not', Indirect): 24,
-
-        ('neg', Register): 3,
-        ('neg', Indirect): 24,
-
-        ('inc', Register): 3,
-        ('inc', Indirect): 23,
-
-        ('dec', Register): 3,
-        ('dec', Indirect): 23,
-
-        ('les', Register, Indirect): 24,
-
-        ('jmp', Literal): 15,
-        ('loop', Literal): 17,
-        ('call', Literal): 23,
-        ('ret',): 20,
-
-        ('out', Literal, Register): 14,
-        ('out', Register, Register): 12,
-
-        ('in', Register, Literal): 14,
-        ('in', Register, Register): 12,
-
-        ('push', Register): 15,
-        ('push', Indirect): 24,
-
-        ('pop', Register): 12,
-        ('pop', Indirect): 25,
-
-        ('cmc',): 2,
-        ('clc',): 2,
-        ('stc',): 2,
-        ('cbw',): 2,
-
-        # Stubs for instructions that take a long and variable
-        # amount of time to execute. No sane programmer would
-        # use these in a timing-critical loop.. (fingers crossed)
-
-        ('int', Literal): 0,
-        ('rep_stosb',): 0,
-        ('rep_stosw',): 0,
-        ('rep_movsb',): 0,
-        ('rep_movsw',): 0,
-        }
-
-    # Conditional jumps (assume jump taken)
-    for op in 'jz jnz jc jnc js jns ja jnl jl jng jna jcxz'.split():
-        table[(op, Literal)] = 16
-
-    # All shifts and rotates are the same
-    for op in ('shl', 'shr', 'rcl', 'rcr', 'sar', 'ror'):
-        table.update({
-                (op, Register, Register): 12,
-                (op, Indirect, Register): 32,   # This is why you see so many
-                (op, Indirect, Literal): 23,    #    repeated shifts by 1...
-                (op, Register, Literal): 2,     # <-- Much cheaper.
-                })
-
-    # 2-operand ALU operations are mostly the same.
-    for op in ('xor', 'and', 'or', 'add', 'sub', 'adc', 'sbb'):
-        table.update({
-                (op, Register, Register): 3,
-                (op, Indirect, Register): 24,
-                (op, Register, Indirect): 13,
-                (op, Register, Literal): 4,
-                (op, Indirect, Literal): 23,
-                })
-
-    return table
-
-
 class Instruction:
     """A disassembled instruction, in NASM format."""
 
@@ -464,16 +291,9 @@ class Instruction:
         "byte": 1,
         "short": 2,
         "word": 2,
-        "dword": 4,
         }
 
-    _cycleTable = _genCycleTable()
-
-    # Optional dynamic branch targets, assigned during subroutine
-    # analysis.  This is a list of Addr16 instances.
-    dynTargets = None
-
-    def __init__(self, line, offset=None, prefix=None, dynLiteralsMap=None):
+    def __init__(self, line, offset=None, prefix=None):
         self.raw = line
         self._offset = offset
 
@@ -481,24 +301,9 @@ class Instruction:
         line = line.replace("far ", "")
         line = line.replace("near ", "")
 
-        # Different versions of ndisasm treat prefixes differently...
-        # Some of them disassemble prefixes correctly ("rep stosb"),
-        # whereas some versions don't disassemble the prefix at all
-        # and give a separate 'db' pseudo-op for the prefix.
-        #
-        # We want to convert either of these to a single combined
-        # opcode (like "rep_stosb"). If it's a separate 'db', we'll
-        # convert the db into a rep/rene here, then combine that with
-        # the next instruction via the isPrefix flag below.
-        #
-        # If ndisasm gives us a normal prefix, though, we can just
-        # do a string replace to combine it with the opcode.
-
+        # ndisasm doesn't seem to decode prefixes...
         line = line.replace("db 0xF3", "rep")
         line = line.replace("db 0xF2", "repne")
-        line = line.replace("rep ", "rep_")
-        line = line.replace("repe ", "rep_")
-        line = line.replace("repne ", "repne_")
 
         # Split up the ndisasm line into useful pieces.
 
@@ -516,16 +321,7 @@ class Instruction:
 
         self.op = op
         self.addr = Addr16(str=addr).add(offset or 0)
-        try:
-            self.encoding = binascii.a2b_hex(encoding)
-        except TypeError:
-            self.encoding = None
-
-        # Figure out whether this instruction has dynamic literals
-        # (if it was marked by patchDynamicLiteral)
-
-        self.dynLiteralsMap = dynLiteralsMap or {}
-        self.dynamicLiterals = self.addr.offset in self.dynLiteralsMap
+        self.encoding = encoding
 
         # Normally we get an offset from the disassembler,
         # but if this is a manually entered (patch) instruction,
@@ -557,10 +353,7 @@ class Instruction:
         # Calculate instruction length *after* merging the prefix.
         # Otherwise, we'll end up decoding the instruction after
         # the prefix twice.
-        if self.encoding:
-            self.length = len(self.encoding)
-        else:
-            self.length = None
+        self.length = len(self.encoding) / 2
 
         # Calculate the next address(es) for this instruction.
         # For most instructions, this is the next instruction.
@@ -576,8 +369,6 @@ class Instruction:
         # computed jumps can't be translated automatically.
 
         if op in ('jmp', 'ret', 'iret', 'retf'):
-            self.nextAddrs = ()
-        elif self.length is None:
             self.nextAddrs = ()
         else:
             self.nextAddrs = (self.addr.add(self.length),)
@@ -609,8 +400,9 @@ class Instruction:
         return w
 
     def _decodeOperand(self, text):
-        """Decode an instruction operand."""
-
+        """Decode an instruction operand. If this operand includes a clue
+        about the instruction width, sets self.width as a side-effect.
+           """
         # Does the operand begin with a width keyword?
         firstToken = text.split(None, 2)[0]
         if firstToken in self._widthNames:
@@ -621,11 +413,9 @@ class Instruction:
 
         # Is it an immediate value?
         try:
-            value = int(text, 0)
+            return Literal(int(text, 0))
         except ValueError:
             pass
-        else:
-            return self._decodeLiteral(value)
 
         # Does it look like a register?
         if len(text) == 2:
@@ -641,54 +431,6 @@ class Instruction:
 
         raise InternalError("Unsupported operand %r in %r at %r" %
                             (text, self.raw, self.addr))
-
-    def _findLiteralAddr(self, value, opcodeLen=1):
-        """Try to figure out the address of a string that occurs inside the
-           encoded instruction. Returns an (address, width) tuple if
-           there is one unique place where the value occurs. If the
-           value can't be found or isn't unique, returns (None, None).
-
-           XXX: This is a huge hack. Really we should just be
-                decoding the machine code directly, parsing asm
-                is turning out to be more trouble than it's worth.
-           """
-        if self.encoding:
-            # First try 16-bit
-            offsets = findAll(struct.pack("<H", value), self.encoding[opcodeLen:])
-            if len(offsets) == 1:
-                return self.addr.add(offsets[0] + opcodeLen), 2
-
-            # Now 8-bit
-            if value < 0x100:
-                offsets = findAll(struct.pack("<B", value), self.encoding[opcodeLen:])
-                if len(offsets) == 1:
-                    return self.addr.add(offsets[0] + opcodeLen), 1
-
-        return None, None
-
-    def _decodeLiteral(self, value):
-        """Decode a literal operand.
-           Optionally converts it to an indirect reference to the code segment,
-           in case we expect the literal to be modified at runtime.
-           """
-
-        # Ignore dynamic literals for certain instructions.
-        # Shifts are encoded with less than one byte, jumps
-        # aren't yet supported.
-        dynamic = self.dynamicLiterals and not (
-            self.op[0] == 'j' or self.op in (
-                'call', 'shl', 'shr', 'rol', 'ror', 'sar', 'rcl', 'rcr'))
-
-        # Make it unsigned
-        if value < 0:
-            value += 0x10000
-
-        addr, width = self._findLiteralAddr(value)
-        if dynamic and not addr:
-            raise Exception("Can't find address for dynamic literal 0x%x at %s"
-                            % (value, self.addr))
-
-        return Literal(value, addr, width, dynamic=dynamic)
 
     def _decodeIndirect(self, text, width=None):
         """Decode an operand that uses indirect addressing."""
@@ -727,99 +469,57 @@ class Instruction:
         else:
             return ""
 
-    def codegen(self, traces=None, clockEnable=False):
+    def _call(self, name):
+        return "reg = %s(reg);" % name
+
+    def codegen(self, traces=None):
         f = getattr(self, "codegen_%s" % self.op, None)
         if not f:
             raise NotImplementedError("Unsupported opcode in %s" % self)
         self._traces = traces
-
-        code = f(*self.args)
-
-        if clockEnable:
-            # Come up with a signature for this instruction, which
-            # consists of its opcode name and operand types. This
-            # will be used to index into a table of instruction timings.
-
-            sig = (self.op,) + tuple([arg.__class__ for arg in self.args])
-            code += 'clock+=%d;' % self._cycleTable[sig]
-
-        return code
+        return f(*self.args)
 
     def _genTraces(self, *ops):
         """Generate code to fire any runtime traces. If there are no runtime
            traces, this generates no code (and there is no overhead).
 
            'ops' is a list of (operand, mode) tuples, which describe
-           accesses to operands. Currently we only care about tracing memry,
+           accesses to operands. Currently we only care about tracing memory,
            so we ignore operands that aren't Indirects. If any traces are in
            place, we call an inline 'probe' function to test whether we should
            call its 'fire' function.
-
-           Besides user-provided traces, this function also implements
-           the internal traces we use to update cached segment pointers
-           and to detect writes to the code segment.
            """
+        if not self._traces:
+            return ''
 
         code = []
         for operand, mode in ops:
+            if not isinstance(operand, Indirect):
+                continue
 
-            if (isinstance(operand, Register) and mode == 'w'
-                and operand.name in ('cs', 'es', 'ds', 'ss')):
+            for trace in self._traces:
+                if mode not in trace.mode:
+                    continue
 
-                code.append("reg.ptr.%s = mem + (reg.%s << 4);"
-                            % (operand.name, operand.name))
+                seg, off = operand.genAddr()
+                args = "%s,%s,0x%x,0x%x,%d" % (seg, off, self.addr.segment,
+                                               self.addr.offset, operand.width)
 
-            if (isinstance(operand, Indirect) and
-                isinstance(operand.segment, Register) and
-                operand.segment.name == 'cs'):
-
-                self._warnSelfModifyingCode(operand, mode)
-
-            if isinstance(operand, Indirect):
-                for trace in self._traces:
-                    if mode not in trace.mode:
-                        continue
-
-                    seg, off = operand.genAddr()
-                    args = "%s,%s,0x%x,0x%x,%d" % (seg, off, self.addr.segment,
-                                                   self.addr.offset, operand.width)
-
-                    code.append("if (%s_probe(%s)) %s_fire(%s);" % (
-                            trace.name, args, trace.name, args))
+                code.append("if (%s_probe(%s)) %s_fire(%s);" % (
+                        trace.name, args, trace.name, args))
 
         return ''.join(code)
 
-    def _warnSelfModifyingCode(self, operand, mode):
-        """This is a read or write to the code segment.
-           The address may be static or dynamic. If any
-           of the given offsets are inside the dynLiteralsMap,
-           ignore it. Otherwise, print a warning.
-           """
-        for offset in operand.offsets:
-            if isinstance(offset, int) and offset in self.dynLiteralsMap:
-                return
-
-        if (len(operand.offsets) != 1 or
-            not isinstance(operand.offsets[0], int)):
-            log("Warning! Access (%s) to code segment "
-                "@%s with dynamic offset %r" % (
-                    mode, self.addr, operand.offsets))
-
-        elif int(operand.offsets[0]) not in self.dynLiteralsMap:
-            log("Warning! Access (%s) to code segment "
-                "@%s with offset %04x. Mark as dynamic literal."
-                % (mode, self.addr, operand.offsets[0]))
-
     def codegen_mov(self, dest, src):
-        return "%s%s);%s" % (
-            dest.codegen('w'), src.codegen(),
+        return "%s = %s;%s" % (
+            dest.codegen(), src.codegen(),
             self._genTraces((src, 'r'),
                             (dest, 'w')),
             )
 
     def codegen_xor(self, dest, src):
-        return "reg.uresult = %s ^ %s; %sreg.uresult); reg.sresult=0; %s%s" % (
-            dest.codegen(), src.codegen(), dest.codegen('w'),
+        return "reg.uresult = %s ^= %s; reg.sresult=0; %s%s" % (
+            dest.codegen(), src.codegen(),
             self._resultShift(dest),
             self._genTraces((src, 'r'),
                             (dest, 'r'),
@@ -827,8 +527,8 @@ class Instruction:
             )
 
     def codegen_or(self, dest, src):
-        return "reg.uresult = %s | %s; %sreg.uresult); reg.sresult=0; %s%s" % (
-            dest.codegen(), src.codegen(), dest.codegen('w'),
+        return "reg.uresult = %s |= %s; reg.sresult=0; %s%s" % (
+            dest.codegen(), src.codegen(),
             self._resultShift(dest),
             self._genTraces((src, 'r'),
                             (dest, 'r'),
@@ -836,8 +536,8 @@ class Instruction:
             )
 
     def codegen_and(self, dest, src):
-        return "reg.uresult = %s & %s; %sreg.uresult); reg.sresult=0; %s%s" % (
-            dest.codegen(), src.codegen(), dest.codegen('w'),
+        return "reg.uresult = %s &= %s; reg.sresult=0; %s%s" % (
+            dest.codegen(), src.codegen(),
             self._resultShift(dest),
             self._genTraces((src, 'r'),
                             (dest, 'r'),
@@ -845,9 +545,9 @@ class Instruction:
             )
 
     def codegen_add(self, dest, src):
-        return "reg.sresult = %s + %s; reg.uresult = %s + %s; %sreg.uresult); %s%s" % (
+        return "reg.sresult = %s + %s; %s = reg.uresult = %s + %s; %s%s" % (
             signed(dest), signed(src),
-            u32(dest), u32(src), dest.codegen('w'),
+            dest.codegen(), u32(dest), u32(src),
             self._resultShift(dest),
             self._genTraces((src, 'r'),
                             (dest, 'r'),
@@ -855,10 +555,9 @@ class Instruction:
             )
 
     def codegen_adc(self, dest, src):
-        return ("reg.sresult = %s + %s + CF; reg.uresult = %s + %s + CF;"
-                "%sreg.uresult); %s%s") % (
+        return "reg.sresult = %s + %s + CF; %s = reg.uresult = %s + %s + CF; %s%s" % (
             signed(dest), signed(src),
-            u32(dest), u32(src), dest.codegen('w'),
+            dest.codegen(), u32(dest), u32(src),
             self._resultShift(dest),
             self._genTraces((src, 'r'),
                             (dest, 'r'),
@@ -866,9 +565,9 @@ class Instruction:
             )
 
     def codegen_sub(self, dest, src):
-        return "reg.sresult = %s - %s; reg.uresult = %s - %s; %sreg.uresult); %s%s" % (
+        return "reg.sresult = %s - %s; %s = reg.uresult = %s - %s; %s%s" % (
             signed(dest), signed(src),
-            u32(dest), u32(src), dest.codegen('w'),
+            dest.codegen(), u32(dest), u32(src),
             self._resultShift(dest),
             self._genTraces((src, 'r'),
                             (dest, 'r'),
@@ -876,10 +575,9 @@ class Instruction:
             )
 
     def codegen_sbb(self, dest, src):
-        return ("reg.sresult=%s - (%s + CF); reg.uresult=%s - (%s + CF);"
-                "%sreg.uresult); %s%s") % (
+        return "reg.sresult=%s - (%s + CF); %s=reg.uresult=%s - (%s + CF); %s%s" % (
             signed(dest), signed(src),
-            u32(dest), u32(src), dest.codegen('w'),
+            dest.codegen(), u32(dest), u32(src),
             self._resultShift(dest),
             self._genTraces((src, 'r'),
                             (dest, 'r'),
@@ -888,9 +586,8 @@ class Instruction:
 
     def codegen_shl(self, r, cnt):
         return self._repeat(cnt,
-                            ("reg.sresult=0; reg.uresult = ((uint32_t)%s) << 1;"
-                             "%sreg.uresult); %s") %
-                            (r.codegen(), r.codegen('w'),
+                            "reg.sresult=0; %s=reg.uresult = ((uint32_t)%s) << 1; %s" %
+                            (r.codegen(), r.codegen(),
                              self._genTraces((cnt, 'r'),
                                              (r, 'r'),
                                              (r, 'w')),
@@ -900,8 +597,8 @@ class Instruction:
         return self._repeat(cnt,
                             ("reg.sresult=0; "
                              "reg.uresult = (%s & 1) << 16; "
-                             "%s%s >> 1); %s") %
-                            (u32(r), r.codegen('w'), r.codegen(),
+                             "(%s) >>= 1; %s") %
+                            (u32(r), r.codegen(),
                              self._genTraces((cnt, 'r'),
                                              (r, 'r'),
                                              (r, 'w'))))
@@ -910,8 +607,8 @@ class Instruction:
         return self._repeat(cnt,
                             ("reg.sresult=0; "
                              "reg.uresult = (%s & 1) << 16; "
-                             "%s(int16_t)%s) >> 1); %s") %
-                            (u32(r), r.codegen('w'), r.codegen(),
+                             "(%s) = ((int16_t)%s) >> 1; %s") %
+                            (u32(r), r.codegen(), r.codegen(),
                              self._genTraces((cnt, 'r'),
                                              (r, 'r'),
                                              (r, 'w'))))
@@ -921,8 +618,8 @@ class Instruction:
         return self._repeat(cnt,
                             ("reg.sresult=0; "
                              "reg.uresult = ((uint32_t)(%s) & 1) << 16;"
-                             "%s((%s) >> 1) + ((%s) << %s)); %s") %
-                            (r.codegen(), r.codegen('w'),
+                             "(%s) = ((%s) >> 1) + ((%s) << %s); %s") %
+                            (r.codegen(), r.codegen(),
                              r.codegen(), r.codegen(), msbShift,
                              self._genTraces((cnt, 'r'),
                                              (r, 'r'),
@@ -934,8 +631,8 @@ class Instruction:
                             ("int cf = CF;"
                              "reg.sresult=0; "
                              "reg.uresult = %s << 16;"
-                             "%s((%s) >> 1) + (cf << %s)); %s") %
-                            (r.codegen(), r.codegen('w'), r.codegen(), msbShift,
+                             "(%s) = ((%s) >> 1) + (cf << %s); %s") %
+                            (r.codegen(), r.codegen(), r.codegen(), msbShift,
                              self._genTraces((cnt, 'r'),
                                              (r, 'r'),
                                              (r, 'w'))))
@@ -943,15 +640,15 @@ class Instruction:
     def codegen_rcl(self, r, cnt):
         return self._repeat(cnt,
                             ("reg.sresult=0; "
-                             "reg.uresult = (%s << 1) + CF; %sreg.uresult); %s%s") %
-                            (u32(r), r.codegen('w'), self._resultShift(r),
+                             "%s = reg.uresult = (%s << 1) + CF; %s%s") %
+                            (r.codegen(), u32(r), self._resultShift(r),
                              self._genTraces((cnt, 'r'),
                                              (r, 'r'),
                                              (r, 'w'))))
 
     def codegen_xchg(self, a, b):
-        return "{ uint16_t t = %s; %s%s); %st); %s}" % (
-            a.codegen(), a.codegen('w'), b.codegen(), b.codegen('w'),
+        return "{ uint16_t t = %s; %s = %s; %s = t; %s}" % (
+            a.codegen(), a.codegen(), b.codegen(), b.codegen(),
             self._genTraces((a, 'r'),
                             (b, 'r'),
                             (a, 'w'),
@@ -990,22 +687,20 @@ class Instruction:
             a.codegen(), b.codegen(), self._resultShift(a))
 
     def codegen_inc(self, arg):
-        return "{ uint32_t _cf = SAVE_CF; %s; RESTORE_CF(_cf); }" % (
-            self.codegen_add(arg, Literal(1)))
+        return self.codegen_add(arg, Literal(1))
 
     def codegen_dec(self, arg):
-        return "{ uint32_t _cf = SAVE_CF; %s; RESTORE_CF(_cf); }" % (
-            self.codegen_sub(arg, Literal(1)))
+        return self.codegen_sub(arg, Literal(1))
 
     def codegen_not(self, arg):
-        return "%s~%s);%s" % (
-            arg.codegen('w'), arg.codegen(),
+        return "%s = ~%s;%s" % (
+            arg.codegen(), arg.codegen(),
             self._genTraces((arg, 'r'),
                             (arg, 'w')))
 
     def codegen_neg(self, arg):
-        return "%s-%s);%s" % (
-            arg.codegen('w'), arg.codegen(),
+        return "%s = -%s;%s" % (
+            arg.codegen(), arg.codegen(),
             self._genTraces((arg, 'r'),
                             (arg, 'w')))
 
@@ -1013,15 +708,13 @@ class Instruction:
         assert isinstance(src, Indirect)
         assert src.width == 2
         segPtr = Indirect(src.segment, src.offsets + [Literal(2)], 2)
-        es = Register('es')
 
-        return "%s%s); %s%s);%s" % (
-            dest.codegen('w'), src.codegen(),
-            es.codegen('w'), segPtr.codegen(),
+        return "%s = %s; %s = %s;%s" % (
+            dest.codegen(), src.codegen(),
+            Register('es').codegen(), segPtr.codegen(),
             self._genTraces((src, 'r'),
                             (segPtr, 'r'),
-                            (dest, 'w'),
-                            (es, 'w')))
+                            (dest, 'w')))
 
     def codegen_rep_stosw(self):
         cx = Register('cx').codegen()
@@ -1044,23 +737,23 @@ class Instruction:
     def codegen_movsw(self):
         dest = Indirect(Register('es'), (Register('di'),), 2)
         src = Indirect(Register('ds'), (Register('si'),), 2)
-        return "%s%s); %s += 2; %s += 2;%s" % (
-            dest.codegen('w'), src.codegen(),
+        return "%s = %s; %s += 2; %s += 2;%s" % (
+            dest.codegen(), src.codegen(),
             Register('si').codegen(), Register('di').codegen(),
             self._genTraces((src, 'r'),
                             (dest, 'w')))
 
     def codegen_stosb(self):
         dest = Indirect(Register('es'), (Register('di'),), 1)
-        return "%s%s); %s++;%s" % (
-            dest.codegen('w'),
+        return "%s = %s; %s++;%s" % (
+            dest.codegen(),
             Register('al').codegen(), Register('di').codegen(),
             self._genTraces((dest, 'w')))
 
     def codegen_stosw(self):
         dest = Indirect(Register('es'), (Register('di'),), 2)
-        return "%s%s); %s += 2;%s" % (
-            dest.codegen('w'),
+        return "%s = %s; %s += 2;%s" % (
+            dest.codegen(),
             Register('ax').codegen(), Register('di').codegen(),
             self._genTraces((dest, 'w')))
 
@@ -1080,14 +773,10 @@ class Instruction:
     def codegen_push(self, arg):
         # We currently implement the stack as a totally separate memory
         # area which can hold 16-bit words or native code return addresses.
-        return "pushw(%s);%s" % (
-            arg.codegen(),
-            self._genTraces((arg, 'r')))
+        return "stack[stackPtr++].word = %s;" % arg.codegen()
 
     def codegen_pop(self, arg):
-        return "%spopw());%s" % (
-            arg.codegen('w'),
-            self._genTraces((arg, 'w')))
+        return "%s = stack[--stackPtr].word;" % arg.codegen()
 
     def codegen_pushaw(self):
         return ' '.join((
@@ -1114,16 +803,12 @@ class Instruction:
                 ))
 
     def codegen_pushfw(self):
-        return "pushf();"
-
-    def codegen_pushf(self):
-        return "pushf();"
+        return ("stack[stackPtr].uresult = reg.uresult;"
+                "stack[stackPtr++].sresult = reg.sresult;")
 
     def codegen_popfw(self):
-        return "popf();"
-
-    def codegen_popf(self):
-        return "popf();"
+        return ("reg.uresult = stack[--stackPtr].uresult;"
+                "reg.sresult = stack[stackPtr].sresult;")
 
     def codegen_nop(self):
         return "/* nop */;"
@@ -1176,123 +861,56 @@ class Instruction:
     def codegen_jmp(self, arg):
         if isinstance(arg, Literal) or isinstance(arg, Addr16):
             return "goto %s;" % self.nextAddrs[-1].label()
-
-        elif self.dynTargets:
-            # Generate a dynamic branch to any of the targets in
-            # dynTargets.  This is implemented as a switch statement
-            # that maps operand to label. If no target matches, we
-            # cause a runtime error.
-
-            # XXX: Only handles near jumps
-
-            return "switch (%s) { %s default: failedDynamicBranch(%s,%s,%s); }" % (
-                arg.codegen(),
-                ''.join([ "case 0x%04x: goto %s;" % (addr.offset, addr.label())
-                          for addr in self.dynTargets ]),
-                self.addr.segment,
-                self.addr.offset,
-                arg.codegen())
-
         else:
-            raise Exception("Dynamic jmp at %s must be patched." % self.addr)
+            raise NotImplementedError("Dynamic jmp not supported at %s" % self)
 
     def codegen_call(self, arg):
         if isinstance(arg, Literal) or isinstance(arg, Addr16):
-            return "sub_%X();" % self.nextAddrs[-1].linear
-
-        elif self.dynTargets:
-            # Generate a dynamic call to any of the targets in
-            # dynTargets.  This is implemented as a switch statement
-            # that maps operand to a function call. If no target
-            # matches, we cause a runtime error.
-
-            # XXX: Only handles near calls
-
-            return "switch (%s) { %s default: failedDynamicBranch(%s,%s,%s); }" % (
-                arg.codegen(),
-                ''.join([ "case 0x%04x: sub_%X(); break;" % (addr.offset, addr.linear)
-                          for addr in self.dynTargets ]),
-                self.addr.segment,
-                self.addr.offset,
-                arg.codegen())
-
+            return self._call("sub_%X" % self.nextAddrs[-1].linear)
         else:
-            raise Exception("Dynamic call at %s must be patched." % self.addr)
+            raise NotImplementedError("Dynamic call not supported at %s" % self)
 
     def codegen_ret(self):
-        return "goto ret;"
+        return "return reg;"
 
     def codegen_retf(self):
         return self.codegen_ret()
 
     def codegen_int(self, arg):
-        return "reg = interrupt%X(reg);" % arg
+        return self._call("int%x" % arg);
 
     def codegen_out(self, port, value):
-        return "out(%s,%s,clock);" % (port.codegen(), value.codegen())
+        return "out(%s,%s);" % (port.codegen(), value.codegen())
 
     def codegen_in(self, value, port):
-        return "%s = in(%s,clock);" % (value.codegen(), port.codegen())
+        return "%s = in(%s);" % (value.codegen(), port.codegen())
 
 
 class BinaryImage:
     def __init__(self, filename=None, file=None, offset=0, data=None):
         if file is None:
             file = open(filename, "rb")
-
         if data is None:
-            file.seek(offset)
+            file.seek(0)
             data = file.read()
-            offset = 0
-
-        if offset:
-            data = data[offset:]
 
         self.filename = filename
         self._data = data
-        self.loadSegment = 0
+        self._file = file
+        self._offset = offset
         self.parseHeader()
         self._iCache = {}
-        self.dynLiterals = {}
-        self._tempFile = None
-
-    def relocate(self, segment, addrs):
-        """Apply a list of relocations to this image. 'addrs' is a list of
-           Addr16s which describe 16-bit relocations, 'segment' is the
-           amount we'll add to each relocation. This function modifies
-           the BinaryImage's data buffer.
-
-           This implementation is horribly inefficient, but given how
-           few relocations we have and how slow gcc is at compiling
-           our output anyway, I don't care.
-           """
-
-        log("Applying relocations at %r" % addrs)
-        self.loadSegment = segment
-
-        if self._tempFile:
-            raise Exception("Must relocate before starting disassembly!")
-
-        for addr in addrs:
-            offset = addr.linear
-            pre = self._data[:offset]
-            reloc = self._data[offset:offset+2]
-            post = self._data[offset+2:]
-
-            reloc = struct.unpack("<H", reloc)[0]
-            reloc = (reloc + segment) & 0xFFFF
-            reloc = struct.pack("<H", reloc)
-
-            self._data = ''.join((pre, reloc, post))
 
     def offset(self, offset):
-        return BinaryImage(self.filename, offset=offset, data=self._data)
+        return BinaryImage(self.filename, self._file,
+                           self._offset + offset, self._data)
 
     def parseHeader(self):
         pass
 
     def read(self, offset, length):
-        return self._data[offset:offset + length]
+        return self._data[self._offset + offset:
+                          self._offset + offset + length]
 
     def unpack(self, offset, fmt):
         return struct.unpack(fmt, self.read(offset, struct.calcsize(fmt)))
@@ -1307,33 +925,18 @@ class BinaryImage:
         return self.unpack(offset, "<I")[0]
 
     def disasm(self, addr, bits=16):
-        """This is an iterator which disassembles starting at the specified
-           memory address. Uses a temporary file to pass the relocated
-           binary image to ndisasm.
-
-           If the memory address is different from the address on disk,
-           self.loadSegment must be set to the segment where this image
-           is loaded.
-           """
-
-        if not self._tempFile:
-            self._tempFile = tempfile.NamedTemporaryFile()
-            self._tempFile.write(self._data)
-            self._tempFile.flush()
-
         args = ["ndisasm",
                 "-o", str(addr.offset),
                 "-b", str(bits),
-                "-e", str(addr.linear - (self.loadSegment << 4)),
-                self._tempFile.name]
+                "-e", str(addr.linear + self._offset),
+                self.filename]
         proc = subprocess.Popen(args, stdout=subprocess.PIPE)
 
         prefix = None
         base = Addr16(addr.segment, 0)
 
         for line in proc.stdout:
-            i = Instruction(line, base, prefix, self.dynLiterals)
-
+            i = Instruction(line, base, prefix)
             prefix = None
             if i.isPrefix:
                 prefix = i
@@ -1347,21 +950,14 @@ class BinaryImage:
            """
         if addr.linear not in self._iCache:
             self._disasmToCache(addr)
-        try:
-            return self._iCache[addr.linear]
-        except KeyError:
-            raise InternalError("Failed to disassemble instruction at %s" % addr)
+        return self._iCache[addr.linear]
 
-    def _disasmToCache(self, addr, instructionLimit=100):
-
-        # XXX: This ends up leaving many ndisasm subprocesses open in
-        #      the background until the translator finishes.
-
+    def _disasmToCache(self, addr, instructions=100):
         for i in self.disasm(addr):
-            if i.addr and i.addr.linear not in self._iCache:
+            if i.addr.linear not in self._iCache:
                 self._iCache[i.addr.linear] = i
-            instructionLimit -= 1
-            if instructionLimit <= 0:
+            instructions -= 1
+            if instructions <= 0:
                 break
 
 
@@ -1371,26 +967,15 @@ class Subroutine:
        'call' and ends at all 'ret's. One code fragment may be used
        by multiple subroutines.
        """
-
-    # Should this subroutine generate clock cycle counting code?
-    clockEnable = False
-
-    def __init__(self, image, entryPoint, hooks=None, staticData=None):
+    def __init__(self, image, entryPoint, hooks=None):
         self.image = image
         self.entryPoint = entryPoint
         self.hooks = hooks or {}
-        self.staticData = staticData or BinaryImage()
         self.name = "sub_%X" % self.entryPoint.linear
 
-    def analyze(self, dynBranches=None, verbose=False):
+    def analyze(self, verbose=False):
         """Analyze the code in this subroutine.
            Stores analysis results in member attributes.
-
-           The optional 'dynBranches' parameter is a map of dynamic
-           branch targets for each dynamic branch intruction. The
-           dynamic branch targets must be included alongside static
-           branch targets when we perform the label, branch, and call
-           analysis.
            """
 
         # Address memo: linear -> Addr16
@@ -1416,19 +1001,9 @@ class Subroutine:
             i = self.image.iFetch(ptr)
             i.referent = referent
 
-            # Remove this instruction from our static data
-            if i.length and not i.dynamicLiterals:
-                self.staticData.remove(i.addr, i.length)
-
             if verbose:
                 sys.stderr.write("%s R[%-9s] D%-3d %-50s -> %-22s || %s\n" % (
                         self.name, referent, len(stack), i, i.nextAddrs, i.raw.strip()))
-
-            # I/O instructions enable cycle counting, so that we can
-            # give in() and out() accurate timestamps.
-
-            if i.op in ('in', 'out'):
-                self.clockEnable = True
 
             # Remember all label targets, and remember future
             # addresses to analyze. Treat subroutine calls specially.
@@ -1442,24 +1017,6 @@ class Subroutine:
             else:
                 for next in i.nextAddrs:
                     stack.append((ptr, next))
-
-            # If this instruction is in the dynamic branch table,
-            # include all branch targets in the label/subroutine
-            # analysis.
-
-            if i.addr.linear in dynBranches:
-                i.dynTargets = dynBranches[i.addr.linear]
-                for target in i.dynTargets:
-                    target = Addr16(str=str(target))
-
-                    if i.op == 'call':
-                        self.callsTo[target.linear] = target
-                    elif i.op == 'jmp':
-                        self.labels[target.linear] = True
-                        stack.append((ptr, target))
-                    else:
-                        raise InternalError("Unknown dynamic branch origin opcode %r"
-                                            % i.op)
 
         # Sort the instruction memo, and store a list
         # of instructions sorted by address.
@@ -1477,69 +1034,14 @@ class Subroutine:
             body.append("/* %-60s R[%-9s] */ %15s %s%s" % (
                     i, i.referent, label,
                     self.hooks.get(i.addr.linear, ''),
-                    i.codegen(traces=traces, clockEnable=self.clockEnable)))
+                    i.codegen(traces=traces)))
         return """
-void
-%s(void)
+Regs
+%s(Regs reg)
 {
-  pushret();
   goto %s;
 %s
-ret:
-  popret();
-  return;
 }""" % (self.name, self.entryPoint.label(), '\n'.join(body))
-
-
-class BinaryData:
-    """Represents the data portions of a binary image. These parts are RLE
-       compressed and converted to an array in the generated code.
-       """
-    def __init__(self, data='', baseAddr=Addr16(0,0)):
-        self.data = list(data)
-        self.baseAddr = baseAddr
-
-    def remove(self, addr, len):
-        """Remove a section of data from the image. This operation is
-           performed on ranges of bytes that we've identified as static code.
-           """
-        offset = addr.linear - self.baseAddr.linear
-        self.data[offset:offset+len] = ['\0'] * len
-
-    def toHexArray(self):
-        """Convert compressed binary data to a list of hexadecimal values
-           suitable for including in a C array.
-           """
-        return ''.join(["0x%02x,%s" % (ord(b), "\n"[:(i&15)==15])
-                        for i, b in enumerate(self.compressRLE())])
-
-    def compressRLE(self):
-        """Compress a string using a simple form of RLE which
-           is optimized for eliminating long runs of zeroes. This
-           is used to automatically avoid storing zeroed portions
-           of the data segment.
-
-           In the resulting binary, any run of two consecutive zeroes is
-           followed by a 16-bit value (little endian) which indicates how
-           many more zeroes have been omitted afterwards.
-
-           Trailing zeroes in the data are ignored.
-           """
-        output = []
-        zeroes = []
-        for byte in self.data:
-            if byte == '\0':
-                zeroes.append(byte)
-            elif not zeroes:
-                output.append(byte)
-            elif len(zeroes) == 1:
-                output.append('\0')
-                output.append(byte)
-                zeroes = []
-            else:
-                output.extend(list('\0\0' + struct.pack("<H", len(zeroes) - 2) + byte))
-                zeroes = []
-        return output
 
 
 class DOSBinary(BinaryImage):
@@ -1558,8 +1060,10 @@ class DOSBinary(BinaryImage):
 static uint8_t dataImage[] = {
 %(dataImage)s};
 
-#define SBT86_CODE
 #include "sbt86.h"
+
+static StackItem stack[64];
+static int stackPtr;
 
 %(subDecls)s
 
@@ -1571,9 +1075,7 @@ static uint8_t dataImage[] = {
 uint8_t
 %(mainFunction)s(const char *cmdLine)
 {
-    const uint32_t relocSegment = 0x%(relocSegment)04x;
-    const uint32_t pspSegment = 0x%(pspSegment)04x;
-    const uint32_t memorySize = 0x%(memorySize)08x;
+    Regs reg = {{ 0 }};
     int retval;
 
     // Set up our DOS Exit handler
@@ -1583,63 +1085,39 @@ uint8_t
         return (uint8_t)retval;
     }
 
-    memset(mem, 0, memorySize + SEG(relocSegment, 0));
-    decompressRLE(mem + SEG(relocSegment, 0), dataImage, sizeof dataImage);
-
-    /*
-     * We explicitly don't zero Regs, since that would break
-     * compiler optimizations that only work on non-aliased data.
-     * A single memset(&reg, 0, sizeof reg) here bloats the binary
-     * by tens of kilobytes.
-     */
-    reg.ax = reg.dx = reg.si = reg.di = reg.bp = 0;
+    memset(mem, 0, %(memorySize)d);
+    memcpy(mem, dataImage, sizeof dataImage);
 
     // Memory size (32-bit)
-    reg.bx = memorySize >> 16;
-    reg.cx = (uint16_t) memorySize;
+    reg.bx = %(memorySize)d >> 16;
+    reg.cx = (uint16_t) %(memorySize)d;
 
     // XXX: Stack is fake.
     stackPtr = 0;
     reg.ss = 0;
+    reg.sp = 0xFFFF;
 
-    // Beginning of EXE image, after relocation
-    reg.ds = relocSegment;
-    reg.cs = 0x%(entryCS)04x;
+    // Beginning of EXE image (unrelocated)
+    reg.ds = 0;
 
-    // Program Segment Prefix.
-    // Zero it, and copy in our command line.
+    // Program Segment Prefix. Put it right after
+    // the end of the program's requested memory,
+    // zero it, and copy in our command line.
 
-    reg.es = pspSegment;
+    reg.es = (%(memorySize)d + 16) >> 4;
     memset(mem + SEG(reg.es, 0), 0, 0x100);
 
     mem[SEG(reg.es, 0x80)] = strlen(cmdLine);
-    strcpy((char*) (mem + SEG(reg.es, 0x81)), cmdLine);
-
-    // Populate segment pointer cache
-
-    reg.ptr.cs = mem + (reg.cs << 4);
-    reg.ptr.ds = mem + (reg.ds << 4);
-    reg.ptr.es = mem + (reg.es << 4);
-    reg.ptr.ss = mem + (reg.ss << 4);
+    strcpy(mem + SEG(reg.es, 0x81), cmdLine);
 
     // Jump to the entry point
 
-    sub_%(entryLinear)X();
+    reg.cs = 0x%(entryCS)04x;
+    sub_%(entryLinear)X(reg);
 
     return 0xFF;
 }
 """
-
-    # Memory map:
-    #
-    #  relocSegment -- Segment to relocate binary to. This must be
-    #  after the BIOS data area, IVT, and other low-memory areas.
-    #
-    #  pspSegment - Segment to place the Program Segment Prefix in.
-    #  Generally this is 256 bytes prior to the relocSegment.
-    #
-    relocSegment = 0x70
-    pspSegment = 0x60
 
     subroutines = None
 
@@ -1650,7 +1128,6 @@ uint8_t
         self._hooks = {}
         self._traces = []
         self._decls = ''
-        self._dynBranches = {}
 
         (signature, bytesInLastPage, numPages, numRelocations,
          headerParagraphs, minMemParagraphs, maxMemParagraphs,
@@ -1664,27 +1141,19 @@ uint8_t
 
         self.headerSize = headerParagraphs * 16
         self.memorySize = minMemParagraphs * 16 + self.exeSize
-        self.entryPoint = Addr16(self.relocSegment + entryCS, entryIP)
+        self.entryPoint = Addr16(entryCS, entryIP)
         self.image = self.offset(self.headerSize)
 
-        relocs = []
-        for i in range(numRelocations):
-            offset, segment = self.unpack(relocTable + i * 4, "<HH")
-            relocs.append(Addr16(segment, offset))
-        self.image.relocate(self.relocSegment, relocs)
-
-        # By default, treat the whole relocated image as data.
-        # We'll carve out the pieces that we can identify as code,
-        # and the zeroes will be compressed out.
-        self.staticData = BinaryData(self.image._data,
-                                     Addr16(self.relocSegment, 0))
+    def _toHexArray(self, data):
+        return ''.join(["0x%02x,%s" % (ord(b), "\n"[:(i&15)==15])
+                         for i, b in enumerate(data)])
 
     def decl(self, code):
         """Add code to the declarations in the generated C file.
            This is useful if patches require global variables or
            shared code.
            """
-        self._decls = "%s\n%s\n" % (self._decls, code)
+        self._decls += code
 
     def patch(self, addr, code, length=0):
         """Manually stick a line of assembly into the iCache,
@@ -1698,7 +1167,7 @@ uint8_t
            code you provide, it's just used to locate the next
            instruction to disassemble.
            """
-        i = Instruction("%s %s %s" % (addr, ("00" * length) or '-', code))
+        i = Instruction("%s %s %s" % (addr, ("--" * length) or '-', code))
         self.image._iCache[i.addr.linear] = i
 
     def hook(self, addr, code):
@@ -1706,57 +1175,12 @@ uint8_t
            instruction at address 'addr'.  The address and C-code are
            both specified as strings.
            """
-        code = "{\n%s\n } " % code
-        linear = Addr16(str=str(addr)).linear
-
-        if linear in self._hooks:
-            self._hooks[linear] += code
-        else:
-            self._hooks[linear] = code
+        self._hooks[Addr16(str=str(addr)).linear] = "{\n%s\n } " % code
 
     def patchAndHook(self, addr, asmCode, cCode, length=0):
         """This is a shorthand for patching and hooking the same address."""
         self.patch(addr, asmCode, length)
         self.hook(addr, cCode)
-
-    def patchDynamicBranch(self, addr, targets):
-        """Patch a dynamic jmp or call, using a static list of possible
-           targets.  Each of the possible targets will be analyzed as
-           if they were a static target of the function. This means
-           that all static jmp targets will be inlined into the
-           calling subroutine if they aren't already.
-
-           This will generate code to select a target at runtime. If
-           the branch does not target any of the addresses in the
-           list, the failedDynamicBranch() function will be invoked.
-
-           If 'addr' is already registered as a dynamic branch site,
-           this function will add additional targets. It is an error
-           to specify one target twice.
-           """
-        linear = Addr16(str=str(addr)).linear
-        prevTargets = self._dynBranches.get(linear, [])
-        for target in targets:
-            if target in prevTargets:
-                raise Exception("Duplicate dynamic branch target %s at address %s"
-                                % (target, addr))
-        self._dynBranches[linear] = prevTargets + targets
-
-    def patchDynamicLiteral(self, addr, length=1):
-        """Patch a common flavour of self-modifying code by marking an
-           instruction's literal data as dynamic. Instead of translating
-           the data as numeric literals, it will be translated as
-           indirect references to the code segment. Also, the instruction
-           will be preserved in the static data image.
-
-           If 'length' is specified, any instructions in a range of
-           addresses will be translated using dynamic literals.
-           """
-        offset = Addr16(str=str(addr)).offset
-        while length > 0:
-            self.image.dynLiterals[offset] = True
-            offset += 1
-            length -= 1
 
     def trace(self, mode, probe, fire):
         """Define a memory trace.
@@ -1780,7 +1204,7 @@ uint8_t
           subroutines, and analyzes each routine.
           """
 
-       log("Analyzing %s..." % self.filename)
+       print "Analyzing %s..." % self.filename
 
        self.subroutines = {}
        stack = [ self.entryPoint ]
@@ -1792,8 +1216,8 @@ uint8_t
                    sys.stderr.write("Subroutine %s already visited\n" % ptr)
                continue
 
-           sub = Subroutine(self.image, ptr, self._hooks, self.staticData)
-           sub.analyze(self._dynBranches, verbose)
+           sub = Subroutine(self.image, ptr, self._hooks)
+           sub.analyze(verbose)
            stack.extend(sub.callsTo.values())
            self.subroutines[ptr.linear] = sub
 
@@ -1810,33 +1234,39 @@ uint8_t
            times. Returns a list of Addr16s.
            """
         sig = Signature(signature)
-        addrs = [self.entryPoint.add(o + (self.relocSegment << 4)
-                                     - self.entryPoint.linear)
+        addrs = [self.entryPoint.add(o - self.image._offset - self.entryPoint.linear)
                  for o in sig.find(self.image._data)]
         if expectedCount is not None and len(addrs) != expectedCount:
             raise SignatureMatchError("Signature found %d times, expected to "
                                       "find %d. Matches: %r" %
                                       (len(addrs), expectedCount, addrs))
-        log("Found patch location %r in %s for: %r" % (
-            addrs, self.filename, sig.shortText))
+        print "Found patch location %r in %s for: %r" % (
+            addrs, self.filename, sig.shortText)
         return addrs
 
     def codegen(self, mainFunction):
-        vars = dict(self.__class__.__dict__)
-        vars.update(self.__dict__)
+        vars = dict(self.__dict__)
 
-        log("Code generating %s (%d subroutines)..." % (
-                self.filename, len(self.subroutines.values())))
+        print "Code generating %s (%d subroutines)..." % (
+            self.filename, len(self.subroutines.values()))
 
         vars['mainFunction'] = mainFunction
         vars['subCode'] = '\n'.join([s.codegen(traces=self._traces)
                                      for s in self.subroutines.itervalues()])
-        vars['subDecls'] = '\n'.join(["static void %s(void);" % s.name
+        vars['subDecls'] = '\n'.join(["static Regs %s(Regs r);" % s.name
                                      for s in self.subroutines.itervalues()])
         vars['traceDecls'] = '\n'.join([t.codegen() for t in self._traces])
         vars['entryLinear'] = self.entryPoint.linear
         vars['entryCS'] = self.entryPoint.segment
-        vars['dataImage'] = self.staticData.toHexArray()
+
+        # The data image contains everything prior to the entry point
+        # (discard most of the code segment). This assumes the program
+        # doesn't have any initialized data in the code segment, or any
+        # self-modifying or self-referential code. Any exceptions will
+        # need to be patched.
+
+        dataSize = min(self.exeSize, self.entryPoint.linear)
+        vars['dataImage'] = self._toHexArray(self.image.read(0, dataSize))
 
         return self._skel % vars
 
