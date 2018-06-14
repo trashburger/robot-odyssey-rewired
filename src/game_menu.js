@@ -4,9 +4,10 @@ export const States = {
     SPLASH: 0,
     MENU_TRANSITION: 1,
     MENU_ACTIVE: 2,
-    EXEC: 3,
-    LOADING: 4,
-    ERROR: 5,
+    EXEC_LAUNCHING: 3,
+    EXEC: 4,
+    LOADING: 5,
+    ERROR: 6,
 };
 
 const splash = document.getElementById('splash');
@@ -196,11 +197,13 @@ export function setState(s)
 
     if (s == States.SPLASH) {
         splash.classList.remove('hidden');
-    } else if (s == States.ERROR || s == States.LOADING) {
+    } else if (s == States.ERROR || s == States.LOADING || s == States.EXEC_LAUNCHING) {
         splash.classList.add('hidden');
     }
 
-    if (s != States.EXEC && s != States.LOADING) {
+    if (s == States.EXEC_LAUNCHING) {
+        game_menu.classList.add('fadeout');
+    } else if (s != States.EXEC && s != States.LOADING) {
         game_menu.classList.remove('fadeout');
     }
 
@@ -244,18 +247,14 @@ function setMenuChoice(c)
 function execMenuChoice(engine)
 {
     // Sequence of operations:
-    //   1. Menu fades out immediately
+    //   1. Menu fades out immediately, we enter States.EXEC_LAUNCHING
     //   2. If the WASM needs to load, it does so with the spinner visible
     //   3. The game will take a small amount of time between exec() and the first frame
     //   4. At the first frame, we setState(EXEC) and show the game with an iris transition
 
-    loading.classList.add('hidden');
-    splash.classList.add('hidden');
-    game_menu.classList.add('fadeout');
-
     const args = choices[current_menu_choice].dataset.exec.split(" ");
-
     afterLoading(engine, function () {
+        setState(States.EXEC_LAUNCHING);
         engine.exec(args[0], args[1] || "");
     });
 }

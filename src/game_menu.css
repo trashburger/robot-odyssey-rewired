@@ -3,7 +3,7 @@
 }
 
 #splash > img:nth-of-type(2) {
-    animation: 3.0s ease 3.0s 1 normal both running iris;
+    animation: 3.0s ease 2.75s 1 normal both running iris;
 }
 
 #game_menu {
