@@ -2,10 +2,11 @@ import './game_menu.css'
 
 export const States = {
     SPLASH: 0,
-    MENU: 1,
-    EXEC: 2,
-    LOADING: 3,
-    ERROR: 4,
+    MENU_TRANSITION: 1,
+    MENU_ACTIVE: 2,
+    EXEC: 3,
+    LOADING: 4,
+    ERROR: 5,
 };
 
 const splash = document.getElementById('splash');
@@ -41,12 +42,12 @@ export function init(engine)
     // Splashscreen pointing events
     splash.addEventListener('mousedown', function () {
         if (current_state == States.SPLASH) {
-            setState(States.MENU);
+            setState(States.MENU_TRANSITION);
         }
     });
     splash.addEventListener('touchstart', function () {
         if (current_state == States.SPLASH) {
-            setState(States.MENU);
+            setState(States.MENU_TRANSITION);
         }
     });
 
@@ -54,7 +55,7 @@ export function init(engine)
     getLastSplashImage().addEventListener('animationend', function () {
         setTimeout(function () {
             if (current_state == States.SPLASH) {
-                setState(States.MENU);
+                setState(States.MENU_TRANSITION);
             }
         }, 1000);
     });
@@ -62,13 +63,13 @@ export function init(engine)
     // Mouse/touch handlers for menu choices
     for (let i = 0; i < choices.length; i++) {
         choices[i].addEventListener('click', function () {
-            if (current_state == States.MENU) {
+            if (current_state == States.MENU_ACTIVE) {
                 setMenuChoice(i);
                 execMenuChoice(engine);
             }
         })
         choices[i].addEventListener('mouseenter', function () {
-            if (current_state == States.MENU) {
+            if (current_state == States.MENU_ACTIVE) {
                 setMenuChoice(i);
             }
         })
@@ -76,7 +77,7 @@ export function init(engine)
 
     // Back to the menu when a game binary exits
     engine.onProcessExit = function () {
-        setState(States.MENU);
+        setState(States.MENU_TRANSITION);
     };
 
     // We're already running the splashscreen via CSS animations
@@ -86,9 +87,9 @@ export function init(engine)
 export function pressKey(engine, ascii, scancode)
 {
     if (current_state == States.SPLASH) {
-        setState(States.MENU);
+        setState(States.MENU_TRANSITION);
 
-    } else if (current_state == States.MENU) {
+    } else if (current_state == States.MENU_ACTIVE) {
 
         if (scancode == 0x50 || ascii == 0x20) {
             // Down or Space
@@ -105,13 +106,13 @@ export function pressKey(engine, ascii, scancode)
 
 export function setJoystickAxes(engine, x, y)
 {
-    if (current_state == States.MENU) {
+    if (current_state == States.MENU_ACTIVE) {
         // Timed movements, according to Y axis.
         // This installs an interval handler if needed, which stays installed
         // until we change game_menu states.
 
         const interval = 80;
-        const speed = 0.04;
+        const speed = 0.03;
 
         menu_joystick_y = y;
         if (!menu_joystick_interval) {
@@ -134,8 +135,8 @@ export function setJoystickAxes(engine, x, y)
 export function setJoystickButton(engine, b)
 {
     if (b && current_state == States.SPLASH) {
-        setState(States.MENU);
-    } else if (b && current_state == States.MENU) {
+        setState(States.MENU_TRANSITION);
+    } else if (b && current_state == States.MENU_ACTIVE) {
         execMenuChoice(engine);
     }
 }
@@ -178,6 +179,15 @@ export function setState(s)
         menu_joystick_interval = null;
     }
 
+    if (s == States.MENU_TRANSITION) {
+        // Brief timed state to lock out input when menu is fading in
+        setTimeout(function () {
+            if (current_state == States.MENU_TRANSITION) {
+                setState(States.MENU_ACTIVE);
+            }
+        }, 500);
+    }
+
     if (s == States.ERROR) {
         error.classList.remove('hidden');
     } else {
@@ -194,7 +204,7 @@ export function setState(s)
         game_menu.classList.remove('fadeout');
     }
 
-    if (s == States.MENU) {
+    if (s == States.MENU_TRANSITION || s == States.MENU_ACTIVE) {
         game_menu.classList.remove('hidden');
     } else if (s == States.ERROR) {
         game_menu.classList.add('hidden');

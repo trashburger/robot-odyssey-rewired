@@ -58,7 +58,7 @@
 
 #game_menu_cursor {
     pointer-events: none;
-    transition: top 0.15s ease;
+    transition: top 0.1s ease;
 }
 
 #frame #loading {
