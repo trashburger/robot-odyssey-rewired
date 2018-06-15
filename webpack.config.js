@@ -15,7 +15,8 @@ module.exports = {
     entry: './src/main.js',
     output: {
         filename: '[name].[hash].js',
-        path: path.resolve(__dirname, 'dist')
+        path: path.resolve(__dirname, 'dist'),
+        globalObject: 'this'
     },
     node: {
         fs: 'empty'
