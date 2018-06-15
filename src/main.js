@@ -3,7 +3,7 @@ import * as Sound from "./sound.js"
 import * as Input from "./input.js"
 import * as AutoSave from "./autoSave.js"
 import * as Files from "./files.js"
-import * as GameMenu from "./game_menu.js"
+import * as GameMenu from "./gameMenu.js"
 
 import OfflinePluginRuntime from 'offline-plugin/runtime'
 import EngineFactory from "../build/engine.js"

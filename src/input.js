@@ -1,6 +1,6 @@
 import nipplejs from 'nipplejs';
 import { audioContextSetup } from "./sound.js"
-import * as GameMenu from "./game_menu.js"
+import * as GameMenu from "./gameMenu.js"
 import './input.css'
 
 let joystick = null;

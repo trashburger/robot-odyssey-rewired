@@ -1,4 +1,4 @@
-import './game_menu.css'
+import './gameMenu.css'
 
 export const States = {
     SPLASH: 0,

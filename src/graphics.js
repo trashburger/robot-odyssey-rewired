@@ -1,4 +1,4 @@
-import * as GameMenu from './game_menu.js'
+import * as GameMenu from './gameMenu.js'
 import './graphics.css'
 
 export function init(engine)

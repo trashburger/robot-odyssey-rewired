@@ -1,4 +1,4 @@
-import * as GameMenu from './game_menu.js';
+import * as GameMenu from './gameMenu.js';
 import base64 from 'base64-arraybuffer';
 
 let last_set_window_hash = null;
@@ -45,7 +45,7 @@ function doAutoSave(engine)
     } finally {
 
         engine.onSaveFileWrite = saved_callback;
-        engine.setSaveFile(saved_contents);
+        engine.setSaveFile(saved_contents, false);
     }
 }
 
@@ -57,7 +57,7 @@ function checkHashForAutoSave(engine)
         if (s != last_set_window_hash) {
             const packed = new Uint8Array(base64.decode(s));
             GameMenu.afterLoading(engine, function () {
-                if (engine.unpackSaveFile(packed)) {
+                if (engine.setSaveFile(packed, true)) {
                     if (engine.loadGame()) {
                         console.log("Loading packed saved game");
                     } else {

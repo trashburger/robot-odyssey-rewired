@@ -32,10 +32,9 @@ function engineLoaded(engine)
         });
     }
 
-    engine.loadSaveFile = function (array)
+    engine.loadSaveFile = function (array, compressed)
     {
-        engine.setSaveFile(new Uint8Array(array));
-        engine.loadGame();
+        return engine.setSaveFile(new Uint8Array(array), !!compressed) && engine.loadGame();
     };
 
     engine.downloadRAMSnapshot = function (filename)

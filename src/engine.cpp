@@ -198,34 +198,42 @@ static val getSaveFile()
     return getFile(hw.fs.save.file);
 }
 
-static void setSaveFileForHardware(val buffer, Hardware &h)
+static bool setSaveFileWithInstance(val buffer, Hardware &inst, bool compressed)
 {
     uint32_t size = buffer["length"].as<uint32_t>();
-    if (size >= sizeof h.fs.save.buffer) {
-        EM_ASM(throw "Save file too large";);
-        return;
+    uint32_t max_size = compressed ? sizeof tinySave.buffer : sizeof inst.fs.save.buffer;
+    uintptr_t addr = compressed ? (uintptr_t) tinySave.buffer : (uintptr_t) inst.fs.save.buffer;
+
+    if (size > max_size) {
+        return false;
+    }
+    if (size == 0) {
+        return false;
     }
 
-    h.fs.save.file.size = size;
-    if (size > 0) {
-        uintptr_t addr = (uintptr_t) h.fs.save.buffer;
-        val view = val::global("Uint8Array").new_(val::module_property("buffer"), addr, size);
-        view.call<void>("set", buffer);
+    val view = val::global("Uint8Array").new_(val::module_property("buffer"), addr, size);
+    view.call<void>("set", buffer);
+
+    if (compressed) {
+        tinySave.size = size;
+        return tinySave.decompress(inst.fs.save.file);
+    } else {
+        inst.fs.save.file.size = size;
+        return true;
     }
 }
 
-static void setSaveFile(val buffer)
+static bool setSaveFile(val buffer, bool compressed)
 {
-    setSaveFileForHardware(buffer, hw);
+    return setSaveFileWithInstance(buffer, hw, compressed);
 }
 
-static val screenshotSaveFile(val buffer)
+static val screenshotSaveFile(val buffer, bool compressed)
 {
     // Load the save file within our auxiliary hardware instance, and run until the first frame.
     // Has no effect on the main game instance. Returns null if the save file can't be loaded.
 
-    setSaveFileForHardware(buffer, hwAux);
-    if (hwAux.loadGame()) {
+    if (setSaveFileWithInstance(buffer, hwAux, compressed) && hwAux.loadGame()) {
 
         // Run until first frame
         outputAux.clear();
@@ -251,24 +259,6 @@ static val packSaveFile()
 {
     tinySave.compress(hw.fs.save.file);
     return val(typed_memory_view(tinySave.size, tinySave.buffer));
-}
-
-static bool unpackSaveFile(val buffer)
-{
-    uint32_t size = buffer["length"].as<uint32_t>();
-    if (size >= sizeof tinySave.buffer) {
-        EM_ASM(throw "Compressed save file too large";);
-        return false;
-    }
-
-    tinySave.size = size;
-    if (size > 0) {
-        uintptr_t addr = (uintptr_t) tinySave.buffer;
-        val view = val::global("Uint8Array").new_(val::module_property("buffer"), addr, size);
-        view.call<void>("set", buffer);
-    }
-
-    return tinySave.decompress(hw.fs.save.file);
 }
 
 static void setCheatsEnabled(bool enable)
@@ -349,7 +339,6 @@ EMSCRIPTEN_BINDINGS(engine)
     function("screenshotSaveFile", &screenshotSaveFile);
     function("setCheatsEnabled", &setCheatsEnabled);
     function("packSaveFile", &packSaveFile);
-    function("unpackSaveFile", &unpackSaveFile);
     function("getGameMemory", &getGameMemory);
     function("getColorMemory", &getColorMemory);
 }
