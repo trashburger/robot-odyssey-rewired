@@ -1,12 +1,13 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
-const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const OfflinePlugin = require('offline-plugin');
 const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
-var FaviconsWebpackPlugin = require('favicons-webpack-plugin')
-var WebpackPwaManifest = require('webpack-pwa-manifest')
+const WebfontPlugin = require('webfont-webpack-plugin').default;
+const FaviconsWebpackPlugin = require('favicons-webpack-plugin')
+const WebpackPwaManifest = require('webpack-pwa-manifest')
 
 const title = 'Robot Odyssey Rewired';
 
@@ -51,6 +52,15 @@ module.exports = {
                 firefox: false,
             }
         }),
+        new WebfontPlugin({
+            files: './build/font/glyph-*.svg',
+            dest: './build/font/',
+            fontName: 'rofont',
+            formats: ['woff'],
+            template: './src/font.template.css',
+            fixedWidth: true,
+            startUnicode: 0x20,
+        }),
         new WebpackPwaManifest({
             name: title,
             background_color: '#000000',
@@ -87,7 +97,7 @@ module.exports = {
                 }
             },
             {
-                test: /\.png$/,
+                test: /\.(png|woff|woff2)$/,
                 loader: 'url-loader',
                 options: {
                     limit: 8192,

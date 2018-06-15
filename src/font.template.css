@@ -1,0 +1,10 @@
+@font-face {
+    font-family: {{ fontName }};
+    font-style: normal;
+    font-weight: 400;
+    src: url("{{ fontPath }}{{ fontName }}.woff") format("woff");
+}
+
+.{{ className }} {
+    font: normal normal 400 14px/16px {{ fontName }};
+}

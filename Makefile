@@ -39,6 +39,7 @@ OBJS := \
 
 WEBPACK_DEPS := \
 	build/engine.js \
+	build/font/glyph-00.svg \
 	src/*.js \
 	src/*.html \
 	src/*.css
@@ -102,6 +103,11 @@ build/original:
 # Re-pack the game's show files, and generate additional outputs based on them
 build/fs/show.shw: build/original src/showfile-repacker.py
 	$(PYTHON) src/showfile-repacker.py build
+
+# Generate SVGs from the game font
+build/font/glyph-00.svg: build/original
+	@mkdir -p build/font/
+	node src/font2svg.js
 
 # Compile libzstd from source to LLVM bitcode
 library/zstd/lib/libzstd.a:

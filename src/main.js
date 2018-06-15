@@ -10,6 +10,7 @@ import EngineFactory from "../build/engine.js"
 import EngineWasm from "../build/engine.wasm"
 
 import './main.css'
+import '../build/font/font.template.css'
 
 // Strong local caching using a Service Worker.
 // This starts prefetching all resources.
