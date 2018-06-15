@@ -8,6 +8,7 @@
 
 using namespace emscripten;
 
+static bool has_main_loop = false;
 static float delay_multiplier = 1.0f;
 static TinySave tinySave;
 
@@ -68,6 +69,7 @@ int main()
     // used for initialization, just for setting up the main loop.
 
     emscripten_set_main_loop(loop, 0, false);
+    has_main_loop = true;
     return 0;
 }
 
@@ -75,7 +77,9 @@ static void exec(const std::string &process, const std::string &arg)
 {
     outputQueue.clear();
     hw.exec(process.c_str(), arg.c_str());
-    emscripten_resume_main_loop();
+    if (has_main_loop) {
+        emscripten_resume_main_loop();
+    }
 }
 
 static void setSpeed(float speed)
@@ -166,7 +170,9 @@ static bool loadGame()
 {
     if (hw.loadGame()) {
         outputQueue.clear();
-        emscripten_resume_main_loop();
+        if (has_main_loop) {
+            emscripten_resume_main_loop();
+        }
         return true;
     }
     return false;
