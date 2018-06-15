@@ -43,7 +43,11 @@ To build a static site into the `dist` directory:
 
 To run the development hot-reload server:
 
-- make serve
+- make hotserve
+
+Alternatively, you can just build the static site and serve it from `dist` without hot-reloading:
+
+- make distserve
 
 
 Saved chips
