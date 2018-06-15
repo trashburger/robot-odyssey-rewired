@@ -23,26 +23,54 @@ struct OutputItem
     } u;
 };
 
-class OutputQueue
+class OutputInterface
 {
  public:
-    OutputQueue();
+    OutputInterface(ColorTable &colorTable);
+
+    virtual void pushFrameCGA(SBTStack *stack, uint8_t *framebuffer) = 0;
+    virtual void pushFrameRGB(SBTStack *stack, uint32_t *framebuffer) = 0;
+    virtual void pushDelay(uint32_t millis) = 0;
+    virtual void pushSpeakerTimestamp(uint32_t timestamp) = 0;
+
+    RGBDraw draw;
+};
+
+class OutputMinimal : public OutputInterface
+{
+ public:
+    OutputMinimal(ColorTable &colorTable);
+
+    void clear();
+
+    virtual void pushFrameCGA(SBTStack *stack, uint8_t *framebuffer);
+    virtual void pushFrameRGB(SBTStack *stack, uint32_t *framebuffer);
+    virtual void pushDelay(uint32_t millis);
+    virtual void pushSpeakerTimestamp(uint32_t timestamp);
+
+    uint32_t frame_counter;
+    uint32_t speaker_counter;
+    uint32_t delay_accumulator;
+};
+
+class OutputQueue : public OutputInterface
+{
+ public:
+    OutputQueue(ColorTable &colorTable);
 
     void clear();
     void skipDelay();
     uint32_t run();
 
-    void pushFrameCGA(SBTStack *stack, uint8_t *framebuffer);
-    void pushFrameRGB(SBTStack *stack, uint32_t *framebuffer);
-    void pushDelay(uint32_t millis);
-    void pushSpeakerTimestamp(uint32_t timestamp);
+    virtual void pushFrameCGA(SBTStack *stack, uint8_t *framebuffer);
+    virtual void pushFrameRGB(SBTStack *stack, uint32_t *framebuffer);
+    virtual void pushDelay(uint32_t millis);
+    virtual void pushSpeakerTimestamp(uint32_t timestamp);
 
     static const unsigned SCREEN_WIDTH = CGAFramebuffer::WIDTH * CGAFramebuffer::ZOOM;
     static const unsigned SCREEN_HEIGHT = CGAFramebuffer::HEIGHT * CGAFramebuffer::ZOOM;
 
     uint32_t rgb_pixels[SCREEN_WIDTH * SCREEN_HEIGHT];
-    uint32_t cga_palette[4];
-    RGBDraw draw;
 
     static const int CPU_CLOCK_HZ = 4770000;
     static const unsigned CPU_CLOCKS_PER_SAMPLE = 200;
@@ -52,7 +80,7 @@ class OutputQueue
 
     int8_t pcm_samples[AUDIO_BUFFER_SAMPLES];
 
-    static const unsigned MAX_BUFFERED_FRAMES = 256;
+    static const unsigned MAX_BUFFERED_FRAMES = 128;
     static const unsigned MAX_BUFFERED_EVENTS = 16384;
 
  protected:

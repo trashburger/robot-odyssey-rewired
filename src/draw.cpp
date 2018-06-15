@@ -3,7 +3,8 @@
 #include "draw.h"
 #include "roData.h"
 
-RGBDraw::RGBDraw()
+RGBDraw::RGBDraw(ColorTable &colorTable)
+    : colorTable(colorTable)
 {
     // Cleared to transparent black
     memset(backbuffer, 0, sizeof backbuffer);
@@ -21,18 +22,20 @@ void RGBDraw::pixel_320x192(unsigned x, unsigned y, uint8_t color, unsigned anch
         return;
     }
 
-    unsigned screen_x = x * CGAFramebuffer::ZOOM;
-    unsigned screen_y = (191 - y) * CGAFramebuffer::ZOOM;
+    unsigned tile_size = ColorTable::SCREEN_TILE_SIZE;
+    unsigned zoom = CGAFramebuffer::ZOOM;
+    unsigned screen_x = x * zoom;
+    unsigned screen_y = (191 - y) * zoom;
 
-    uint32_t *pattern = patterns + (SCREEN_TILE_SIZE * SCREEN_TILE_SIZE * color);
-    unsigned pattern_x = anchor_x * CGAFramebuffer::ZOOM;
-    unsigned pattern_y = SCREEN_TILE_SIZE - (1 + anchor_y) * CGAFramebuffer::ZOOM;
+    uint32_t *pattern = colorTable.patterns + (tile_size * tile_size * color);
+    unsigned pattern_x = anchor_x * zoom;
+    unsigned pattern_y = tile_size - (1 + anchor_y) * zoom;
 
-    for (unsigned zy = 0; zy < CGAFramebuffer::ZOOM; zy++) {
-        for (unsigned zx = 0; zx < CGAFramebuffer::ZOOM; zx++) {
-            unsigned px = (pattern_x + zx) % SCREEN_TILE_SIZE;
-            unsigned py = (pattern_y + zy) % SCREEN_TILE_SIZE;
-            uint32_t rgb = pattern[px + py * SCREEN_TILE_SIZE];
+    for (unsigned zy = 0; zy < zoom; zy++) {
+        for (unsigned zx = 0; zx < zoom; zx++) {
+            unsigned px = (pattern_x + zx) % tile_size;
+            unsigned py = (pattern_y + zy) % tile_size;
+            uint32_t rgb = pattern[px + py * tile_size];
             backbuffer[screen_x + zx + (zy + screen_y) * SCREEN_WIDTH] = rgb;
         }
     }
@@ -55,20 +58,22 @@ void RGBDraw::playfield(uint8_t *data, uint8_t foreground, uint8_t background)
 {
     // Profiler notes: About 30% of CPU is spent in this function!
 
+    unsigned tile_size = ColorTable::SCREEN_TILE_SIZE;
+
     for (unsigned byte_index = 0; byte_index < 30; byte_index++) {
         uint8_t byte = data[byte_index];
         for (unsigned bit_index = 0; bit_index < 8; bit_index++) {
             unsigned pattern_id = ((byte >> bit_index) & 1) ? foreground : background;
-            uint32_t *pattern = patterns + (SCREEN_TILE_SIZE * SCREEN_TILE_SIZE * pattern_id);
+            uint32_t *pattern = colorTable.patterns + (tile_size * tile_size * pattern_id);
             unsigned tile_x = (byte_index % 10)*2 + (bit_index >> 2);
             unsigned tile_y = (byte_index / 10)*4 + (bit_index & 3);
-            unsigned screen_x = tile_x * SCREEN_TILE_SIZE;
-            unsigned screen_y = tile_y * SCREEN_TILE_SIZE;
+            unsigned screen_x = tile_x * tile_size;
+            unsigned screen_y = tile_y * tile_size;
             uint32_t *dest = backbuffer + screen_x + screen_y * SCREEN_WIDTH;
-            for (unsigned y = 0; y < SCREEN_TILE_SIZE; y++) {
-                uint32_t *pattern_line = pattern + y*SCREEN_TILE_SIZE;
+            for (unsigned y = 0; y < tile_size; y++) {
+                uint32_t *pattern_line = pattern + y*tile_size;
                 uint32_t *dest_line = dest + y*SCREEN_WIDTH;
-                for (unsigned x = 0; x < SCREEN_TILE_SIZE; x++) {
+                for (unsigned x = 0; x < tile_size; x++) {
                     dest_line[x] = pattern_line[x];
                 }
             }

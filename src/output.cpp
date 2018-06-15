@@ -6,7 +6,45 @@
 #include "hardware.h"
 
 
-OutputQueue::OutputQueue()
+OutputInterface::OutputInterface(ColorTable &colorTable)
+    : draw(colorTable)
+{}
+
+OutputMinimal::OutputMinimal(ColorTable &colorTable)
+    : OutputInterface(colorTable)
+{
+    clear();
+}
+
+void OutputMinimal::clear()
+{
+    frame_counter = 0;
+    speaker_counter = 0;
+    delay_accumulator = 0;
+}
+
+void OutputMinimal::pushFrameCGA(SBTStack *stack, uint8_t *framebuffer)
+{
+    frame_counter++;
+}
+
+void OutputMinimal::pushFrameRGB(SBTStack *stack, uint32_t *framebuffer)
+{
+    frame_counter++;
+}
+
+void OutputMinimal::pushDelay(uint32_t millis)
+{
+    delay_accumulator += millis;
+}
+
+void OutputMinimal::pushSpeakerTimestamp(uint32_t timestamp)
+{
+    speaker_counter++;
+}
+
+OutputQueue::OutputQueue(ColorTable &colorTable)
+    : OutputInterface(colorTable)
 {
     clear();
 }
@@ -94,7 +132,7 @@ void OutputQueue::dequeueCGAFrame()
                 unsigned byte = 0x2000*plane + (x + CGAFramebuffer::WIDTH*y)/4;
                 unsigned bit = 3 - (x % 4);
                 unsigned color = 0x3 & (frame.bytes[byte] >> (bit * 2));
-                uint32_t rgb = cga_palette[color];
+                uint32_t rgb = draw.colorTable.cga[color];
 
                 // Zoom each CGA pixel
                 for (unsigned zy=0; zy<CGAFramebuffer::ZOOM; zy++) {

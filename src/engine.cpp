@@ -8,28 +8,56 @@
 
 using namespace emscripten;
 
-static Hardware hw;
+static float delay_multiplier = 1.0f;
 static TinySave tinySave;
 
-SBT_STATIC_PROCESS(&hw, ShowEXE);
-SBT_STATIC_PROCESS(&hw, Show2EXE);
-SBT_STATIC_PROCESS(&hw, LabEXE);
-SBT_STATIC_PROCESS(&hw, GameEXE);
-SBT_STATIC_PROCESS(&hw, TutorialEXE);
+SBT_DECL_PROCESS(ShowEXE);
+SBT_DECL_PROCESS(Show2EXE);
+SBT_DECL_PROCESS(LabEXE);
+SBT_DECL_PROCESS(GameEXE);
+SBT_DECL_PROCESS(TutorialEXE);
 
-static float delay_multiplier = 1.0f;
+// Main hardware instance, for running the game
+static ColorTable colorTable;
+static OutputQueue outputQueue(colorTable);
+static Hardware hw(outputQueue);
+SBT_STATIC_PROCESS(hw, ShowEXE);
+SBT_STATIC_PROCESS(hw, Show2EXE);
+SBT_STATIC_PROCESS(hw, LabEXE);
+SBT_STATIC_PROCESS(hw, GameEXE);
+SBT_STATIC_PROCESS(hw, TutorialEXE);
+
+// Auxiliary hardware instance, for screenshots. Shares main color table.
+static OutputMinimal outputAux(colorTable);
+static Hardware hwAux(outputAux);
+SBT_STATIC_PROCESS(hwAux, LabEXE);
+SBT_STATIC_PROCESS(hwAux, GameEXE);
+
 
 static void loop()
 {
-    // Runs until the next queued delay
-    uint32_t millis = hw.run();
+    // Run the main hardware instance until the next queued delay
 
-    if (hw.input.checkForInputBacklog()) {
-        // Speed up for keyboard input backlog
-        emscripten_set_main_loop_timing(EM_TIMING_RAF, 1);
-    } else {
-        // Millisecond-based timing, with optional modifier
-        emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, millis * delay_multiplier);
+    while (true) {
+        uint32_t delay = outputQueue.run();
+
+        if (delay) {
+            if (hw.input.checkForInputBacklog()) {
+                // Speed up for keyboard input backlog
+                emscripten_set_main_loop_timing(EM_TIMING_RAF, 1);
+            } else {
+                // Millisecond-based timing, with optional modifier
+                emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, delay * delay_multiplier);
+            }
+            break;
+        }
+
+        if (hw.process) {
+            hw.process->run();
+        } else {
+            emscripten_pause_main_loop();
+            break;
+        }
     }
 }
 
@@ -45,8 +73,9 @@ int main()
 
 static void exec(const std::string &process, const std::string &arg)
 {
-    hw.output.clear();
+    outputQueue.clear();
     hw.exec(process.c_str(), arg.c_str());
+    emscripten_resume_main_loop();
 }
 
 static void setSpeed(float speed)
@@ -58,7 +87,7 @@ static void setSpeed(float speed)
 
 static void pressKey(uint8_t ascii, uint8_t scancode)
 {
-    hw.output.skipDelay();
+    outputQueue.skipDelay();
     hw.input.pressKey(ascii, scancode);
 }
 
@@ -70,7 +99,7 @@ static void setJoystickAxes(int x, int y)
 static void setJoystickButton(bool button)
 {
     if (button) {
-        hw.output.skipDelay();
+        outputQueue.skipDelay();
     }
     hw.input.setJoystickButton(button);
 }
@@ -83,7 +112,7 @@ static void setMouseTracking(int x, int y)
 static void setMouseButton(bool button)
 {
     if (button) {
-        hw.output.skipDelay();
+        outputQueue.skipDelay();
     }
     hw.input.setMouseButton(button);
 }
@@ -135,13 +164,10 @@ static SaveStatus saveGame()
 
 static bool loadGame()
 {
-    // If the buffer contains a loadable game, loads it and returns true.
-    if (hw.fs.save.isGame()) {
-        const char *process = hw.fs.save.asGame().getProcessName();
-        if (process) {
-            exec(process, "99");
-            return true;
-        }
+    if (hw.loadGame()) {
+        outputQueue.clear();
+        emscripten_resume_main_loop();
+        return true;
     }
     return false;
 }
@@ -172,19 +198,52 @@ static val getSaveFile()
     return getFile(hw.fs.save.file);
 }
 
-static void setSaveFile(val buffer)
+static void setSaveFileForHardware(val buffer, Hardware &h)
 {
     uint32_t size = buffer["length"].as<uint32_t>();
-    if (size >= sizeof hw.fs.save.buffer) {
+    if (size >= sizeof h.fs.save.buffer) {
         EM_ASM(throw "Save file too large";);
         return;
     }
 
-    hw.fs.save.file.size = size;
+    h.fs.save.file.size = size;
     if (size > 0) {
-        uintptr_t addr = (uintptr_t) hw.fs.save.buffer;
+        uintptr_t addr = (uintptr_t) h.fs.save.buffer;
         val view = val::global("Uint8Array").new_(val::module_property("buffer"), addr, size);
         view.call<void>("set", buffer);
+    }
+}
+
+static void setSaveFile(val buffer)
+{
+    setSaveFileForHardware(buffer, hw);
+}
+
+static val screenshotSaveFile(val buffer)
+{
+    // Load the save file within our auxiliary hardware instance, and run until the first frame.
+    // Has no effect on the main game instance. Returns null if the save file can't be loaded.
+
+    setSaveFileForHardware(buffer, hwAux);
+    if (hwAux.loadGame()) {
+
+        // Run until first frame
+        outputAux.clear();
+        do {
+            assert(hwAux.process);
+            hwAux.process->run();
+        } while (outputAux.frame_counter == 0);
+
+        uintptr_t addr = (uintptr_t) outputAux.draw.backbuffer;
+        size_t size = sizeof outputAux.draw.backbuffer;
+        unsigned width = RGBDraw::SCREEN_WIDTH;
+        unsigned height = RGBDraw::SCREEN_HEIGHT;
+        val view = val::global("Uint8ClampedArray").new_(val::module_property("buffer"), addr, size);
+        val image = val::global("ImageData").new_(view, width, height);
+        return image;
+
+    } else {
+        return val::null();
     }
 }
 
@@ -251,8 +310,8 @@ static val getGameMemory()
 static val getColorMemory()
 {
     val r = val::object();
-    r.set("cga", val(typed_memory_view(sizeof hw.output.cga_palette / sizeof hw.output.cga_palette[0], hw.output.cga_palette)));
-    r.set("patterns", val(typed_memory_view(sizeof hw.output.draw.patterns / sizeof hw.output.draw.patterns[0], hw.output.draw.patterns)));
+    r.set("cga", val(typed_memory_view(sizeof colorTable.cga / sizeof colorTable.cga[0], colorTable.cga)));
+    r.set("patterns", val(typed_memory_view(sizeof colorTable.patterns / sizeof colorTable.patterns[0], colorTable.patterns)));
     return r;
 }
 
@@ -264,7 +323,7 @@ EMSCRIPTEN_BINDINGS(engine)
     constant("AUDIO_HZ", (unsigned) OutputQueue::AUDIO_HZ);
     constant("SCREEN_WIDTH", (unsigned) OutputQueue::SCREEN_WIDTH);
     constant("SCREEN_HEIGHT", (unsigned) OutputQueue::SCREEN_HEIGHT);
-    constant("SCREEN_TILE_SIZE", (unsigned) RGBDraw::SCREEN_TILE_SIZE);
+    constant("SCREEN_TILE_SIZE", (unsigned) ColorTable::SCREEN_TILE_SIZE);
 
     enum_<SaveStatus>("SaveStatus")
         .value("OK", SaveStatus::OK)
@@ -287,6 +346,7 @@ EMSCRIPTEN_BINDINGS(engine)
     function("getJoyFile", &getJoyFile);
     function("getSaveFile", &getSaveFile);
     function("setSaveFile", &setSaveFile);
+    function("screenshotSaveFile", &screenshotSaveFile);
     function("setCheatsEnabled", &setCheatsEnabled);
     function("packSaveFile", &packSaveFile);
     function("unpackSaveFile", &unpackSaveFile);

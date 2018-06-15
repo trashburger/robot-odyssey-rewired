@@ -367,7 +367,5 @@ static SBT_INLINE void write16(uint8_t *ptr, uint16_t x) {
         virtual const char *getFilename(); \
     };
 
-#define SBT_STATIC_PROCESS(h, name) \
-    SBT_DECL_PROCESS(name); \
-    static name name##_inst(h);
-
+#define SBT_STATIC_PROCESS(hw, name) \
+    static name name##_##hw##_inst(&hw);

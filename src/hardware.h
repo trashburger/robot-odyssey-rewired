@@ -10,9 +10,8 @@
 class Hardware
 {
  public:
-    Hardware();
+    Hardware(OutputInterface &output);
 
-    uint32_t run();
     void registerProcess(SBTProcess *p);
 
     uint8_t in(uint16_t port, uint32_t timestamp);
@@ -23,13 +22,14 @@ class Hardware
     SBTRegs interrupt21(SBTRegs reg, SBTStack *stack);
 
     void exec(const char *program, const char *args = "");
+    bool loadGame();
 
     static const uint32_t MEM_SIZE = 256 * 1024;
     uint8_t mem[MEM_SIZE];
 
     DOSFilesystem fs;
-    OutputQueue output;
     InputBuffer input;
+    OutputInterface &output;
     SBTProcess *process;
 
  protected:

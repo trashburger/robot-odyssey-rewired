@@ -7,7 +7,8 @@
 
 static const bool verbose_process_info = false;
 
-Hardware::Hardware()
+Hardware::Hardware(OutputInterface &output)
+    : output(output)
 {
     memset(mem, 0, MEM_SIZE);
     process = 0;
@@ -33,6 +34,19 @@ void Hardware::exec(const char *program, const char *args)
     assert(0 && "Program not found in exec()");
 }
 
+bool Hardware::loadGame()
+{
+    // If the buffer contains a loadable game, loads it and returns true.
+    if (fs.save.isGame()) {
+        const char *process = fs.save.asGame().getProcessName();
+        if (process) {
+            exec(process, "99");
+            return true;
+        }
+    }
+    return false;
+}
+
 void Hardware::exit(SBTProcess *exiting_process, uint8_t code)
 {
     if (verbose_process_info) {
@@ -55,23 +69,6 @@ void Hardware::exit(SBTProcess *exiting_process, uint8_t code)
 void Hardware::registerProcess(SBTProcess *p)
 {
     process_vec.push_back(p);
-}
-
-uint32_t Hardware::run()
-{
-    while (true) {
-        uint32_t delay = output.run();
-        if (delay) {
-            return delay;
-        }
-
-        if (!process) {
-            // Default delay while no process is loaded, arbitrarily large.
-            return 1000;
-        }
-
-        process->run();
-    }
 }
 
 uint8_t Hardware::in(uint16_t port, uint32_t timestamp)
