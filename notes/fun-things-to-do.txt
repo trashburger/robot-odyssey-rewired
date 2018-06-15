@@ -3,11 +3,13 @@
 function sshot(f) {
 	var c = document.createElement('canvas');
 	c.width = 644; c.height = 388;
-	c.style.width = '160px'; c.style.height = '120px';
 	c.getContext('2d').putImageData(ROEngine.screenshotSaveFile(f, false), 2, 2);
-	document.body.appendChild(c);
+	var im = document.createElement('img');
+	im.width = 80; im.height = 60;
+	im.src = c.toDataURL();
+	document.body.appendChild(im);
 }
-for(let i=0;i<16;i++) sshot(ROEngine.getSaveFile());
+for (var i = 0; i < 30; i++) sshot(ROEngine.getSaveFile());
 
 // Microphone spectrum analyzer input
 
