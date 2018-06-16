@@ -14,7 +14,7 @@ WASMFLAGS := \
 	--emit-symbol-map
 
 INCLUDES := \
-	-I src \
+	-I src/engine \
 	-I library/circular_buffer/include \
 	-I library/zstd/lib
 
@@ -45,7 +45,7 @@ WEBPACK_DEPS := \
 	src/*.css
 
 CPP_DEPS := \
-	src/*.h
+	src/engine/*.h
 
 all: dist
 
@@ -74,7 +74,7 @@ build/engine.js: $(OBJS)
 	$(CC) $(CCFLAGS) $(WASMFLAGS) -o build/engine.js $(OBJS)
 
 # Build normal C++ code to LLVM bitcode
-build/%.bc: src/%.cpp $(CPP_DEPS)
+build/%.bc: src/engine/%.cpp $(CPP_DEPS)
 	@mkdir -p build/
 	$(CC) $(CCFLAGS) $(INCLUDES) -c -o $@ $<
 
@@ -83,7 +83,7 @@ build/%.bc: build/%.cpp $(CPP_DEPS)
 	$(CC) $(CCFLAGS) $(INCLUDES) -c -o $@ $<
 
 # Generate C++ code from 8086 EXEs by running Python translation scripts
-build/%.cpp: src/%.py src/sbt86.py build/original
+build/%.cpp: src/engine/%.py src/engine/sbt86.py build/original
 	$(PYTHON) $< build
 
 # Tell gmake not to delete the intermediate .cpp files we generate
