@@ -8,7 +8,8 @@
 InputBuffer::InputBuffer()
     : savedPlayerX(-1),
       savedPlayerY(-1),
-      savedPlayerRoom(RO_ROOM_NONE)
+      savedPlayerRoom(RO_ROOM_NONE),
+      mouse_delay_timer(0)
 {
     clear();
 }
@@ -133,14 +134,21 @@ void InputBuffer::updateMouse(ROWorld *world)
     // If the player has moved to a different room, clear buffered mouse input
     if (world) {
         RORoomId room = world->getObjectRoom(RO_OBJ_PLAYER);
-        if (!mouse_buffer.empty() && room != savedPlayerRoom) {
-            js_x = 0;
-            js_y = 0;
-            mouse_buffer.clear();
+        if (room != savedPlayerRoom) {
+            mouse_delay_timer = MOUSE_DELAY_ON_ROOM_CHANGE;
         }
         savedPlayerRoom = room;
     }
 
+    // Keep the mouse buffer empty while the delay timer is in effect
+    if (mouse_delay_timer) {
+        mouse_delay_timer--;
+        if (!mouse_buffer.empty()) {
+            setJoystickAxes(0, 0);
+        }
+    }
+
+    // Everything else is about handling events
     if (mouse_buffer.empty()) {
         return;
     }
