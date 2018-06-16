@@ -176,13 +176,27 @@ export function init(engine)
 
     game_area.addEventListener('mouseleave', mouseTrackingEnd);
 
+    let touch_timer = null;
+    const stopTouchTimer = () => {
+        if (touch_timer !== null) {
+            clearTimeout(touch_timer);
+            touch_timer = null;
+        }
+    };
+
     canvas.addEventListener('touchstart', function (e)
     {
+        stopTouchTimer();
         if (engine.calledRun) {
             const loc = mouseLocationForEvent(e.targetTouches[0]);
             engine.setMouseTracking(loc.x, loc.y);
-            engine.setMouseButton(true);
             engine.autoSave();
+
+            // Short touches only move, slightly longer touches also engage the button
+            const long_touch_threshold = 160;
+            touch_timer = setInterval(function () {
+                engine.setMouseButton(true);
+            }, long_touch_threshold);
         }
         audioContextSetup();
         e.preventDefault();
@@ -199,6 +213,7 @@ export function init(engine)
 
     canvas.addEventListener('touchend', function (e)
     {
+        stopTouchTimer();
         if (engine.calledRun) {
             engine.setMouseButton(false);
             engine.autoSave();
@@ -208,10 +223,8 @@ export function init(engine)
 
     canvas.addEventListener('touchcancel', function (e)
     {
-        if (engine.calledRun) {
-            engine.setMouseButton(false);
-            engine.autoSave();
-        }
+        stopTouchTimer();
+        mouseTrackingEnd();
         e.preventDefault();
     });
 
@@ -376,7 +389,8 @@ export function init(engine)
 
     let delay = null;
     let repeater = null;
-    const stop_repeat = () => {
+    function stopRepeat()
+    {
         if (delay !== null) {
             clearTimeout(delay);
             delay = null;
@@ -396,16 +410,16 @@ export function init(engine)
         addButtonEvents(button, () => {
             button.classList.add('active_btn');
             press();
-            stop_repeat();
+            stopRepeat();
             if (button.dataset.rdelay && button.dataset.rrate) {
                 delay = setTimeout(() => {
-                    stop_repeat();
+                    stopRepeat();
                     repeater = setInterval(press, parseInt(button.dataset.rrate));
                 }, parseInt(button.dataset.rdelay));
             }
         }, () => {
             button.classList.remove('active_btn');
-            stop_repeat();
+            stopRepeat();
         });
     }
 
