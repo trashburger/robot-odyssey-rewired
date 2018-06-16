@@ -8,6 +8,7 @@ const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin
 const WebfontPlugin = require('webfont-webpack-plugin').default;
 const FaviconsWebpackPlugin = require('favicons-webpack-plugin')
 const WebpackPwaManifest = require('webpack-pwa-manifest')
+const GitRevisionPlugin = require('git-revision-webpack-plugin')
 
 const title = 'Robot Odyssey Rewired';
 
@@ -35,6 +36,7 @@ module.exports = {
             template: './src/main.html',
             inlineSource: '.css$',
             title,
+            version: (new GitRevisionPlugin()).version(),
         }),
         new HtmlWebpackInlineSourcePlugin(),
         new FaviconsWebpackPlugin({
