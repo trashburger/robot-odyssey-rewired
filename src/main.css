@@ -20,10 +20,13 @@ a {
 }
 
 #footer {
-    margin: 12px;
+    line-height: 2;
+    margin: 30px 20px 60px 20px;
 }
 
 #footer .version {
+    float: right;
     margin: 0 20px;
+    white-space: nowrap;
     color: #555;
 }
