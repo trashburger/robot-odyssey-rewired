@@ -57,7 +57,7 @@ module.exports = {
             dest: './build/font/',
             fontName: 'rofont',
             formats: ['woff'],
-            template: './src/font.template.css',
+            template: './src/assets/font.template.css',
             fixedWidth: true,
             startUnicode: 0x20,
         }),

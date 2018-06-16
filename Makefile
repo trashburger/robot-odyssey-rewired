@@ -91,23 +91,23 @@ build/%.cpp: src/engine/%.py src/engine/sbt86.py build/original
 
 # Pack all files in the build/fs/* directory, including a subset of
 # the original game files, and the repacked show files.
-build/fspack.cpp: src/fs-packer.py build/original build/fs/show.shw
+build/fspack.cpp: src/assets/fs-packer.py build/original build/fs/show.shw
 	$(PYTHON) $< build/fs $@
 
 # Pseudo-target to clean up and extract original Robot Odyssey data
-build/original:
+build/original: src/assets/check-originals.py
 	@mkdir -p build/
-	$(PYTHON) src/check-originals.py original build
+	$(PYTHON) $< original build
 	@touch $@
 
 # Re-pack the game's show files, and generate additional outputs based on them
-build/fs/show.shw: build/original src/showfile-repacker.py
-	$(PYTHON) src/showfile-repacker.py build
+build/fs/show.shw: src/assets/showfile-repacker.py build/original
+	$(PYTHON) $< build
 
 # Generate SVGs from the game font
-build/font/glyph-00.svg: build/original
+build/font/glyph-00.svg: src/assets/font2svg.js build/original
 	@mkdir -p build/font/
-	node src/font2svg.js
+	node $<
 
 # Compile libzstd from source to LLVM bitcode
 library/zstd/lib/libzstd.a:

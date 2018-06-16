@@ -1,4 +1,5 @@
 import * as GameMenu from './gameMenu.js'
+import DefaultFileset from './assets/rewired-tileset.png'
 import './graphics.css'
 
 export function init(engine)
@@ -302,6 +303,6 @@ function engineLoaded(engine)
 
         // Try to asynchronously load a partial custom tileset.
         // Any missing tiles will still refer to the HGR version.
-        engine.setColorTilesFromImage(require("./rewired-tileset.png"));
+        engine.setColorTilesFromImage(DefaultTileset);
     });
 }
