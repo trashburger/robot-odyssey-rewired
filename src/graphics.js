@@ -1,5 +1,5 @@
-import * as GameMenu from './gameMenu.js'
-import DefaultTileset from './assets/rewired-tileset.png'
+import * as GameMenu from './gameMenu.js';
+import DefaultTileset from './assets/rewired-tileset.png';
 
 export function init(engine)
 {
@@ -44,12 +44,12 @@ function engineLoaded(engine)
     engine.setEmulatedCGAPalette = function(colors)
     {
         cga.set(colors);
-    }
+    };
 
     engine.setSolidColor = function(slot, rgb)
     {
         patterns.fill(rgb, slot*PATTERN_SIZE, (slot+1)*PATTERN_SIZE);
-    }
+    };
 
     engine.setColorTilesFromImage = function(img_src, first_slot)
     {
@@ -62,7 +62,7 @@ function engineLoaded(engine)
                 canvas.width = img.width;
                 canvas.height = img.height;
 
-                const ctx = canvas.getContext("2d");
+                const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0);
                 const idata = ctx.getImageData(0, 0, img.width, img.height);
                 const words = new Uint32Array(idata.data.buffer);
@@ -72,10 +72,10 @@ function engineLoaded(engine)
                 ok();
             };
 
-            img.crossOrigin = "Anonymous";
+            img.crossOrigin = 'Anonymous';
             img.src = img_src;
         });
-    }
+    };
 
     engine.saveColorTilesToImage = function(first_slot, num_slots)
     {
@@ -88,18 +88,18 @@ function engineLoaded(engine)
         canvas.width = SCREEN_TILE_SIZE;
         canvas.height = num_slots * SCREEN_TILE_SIZE;
 
-        const ctx = canvas.getContext("2d");
+        const ctx = canvas.getContext('2d');
         const idata = ctx.createImageData(canvas.width, canvas.height);
         const dest_words = new Uint32Array(idata.data.buffer);
         dest_words.set(src_words);
         ctx.putImageData(idata, 0, 0);
 
-        return new Promise(function (resolve, reject) {
+        return new Promise(function (resolve) {
             canvas.toBlob( function (blob) {
                 resolve(blob);
             });
         });
-    }
+    };
 
     engine.setCheckerboardColor = function(slot, rgb1, rgb2, size)
     {
@@ -112,7 +112,7 @@ function engineLoaded(engine)
                 pattern[i++] = ((x^y) & size) ? rgb2 : rgb1;
             }
         }
-    }
+    };
 
     engine.setStripedColor = function(slot, rgb1, rgb2, size)
     {
@@ -125,7 +125,7 @@ function engineLoaded(engine)
                 pattern[i++] = (x & size) ? rgb2 : rgb1;
             }
         }
-    }
+    };
 
     engine.setHGRColors = function(color_table)
     {
@@ -216,7 +216,7 @@ function engineLoaded(engine)
                 engine.setStripedColor(slot, hgr[(stripe % 6)|0], hgr[(stripe / 6)|0], slot >> 1);
             }
         }
-    }
+    };
 
     engine.setCGAColors = function(color_table)
     {
@@ -292,16 +292,17 @@ function engineLoaded(engine)
                 engine.setStripedColor(slot, cga[stripe & 3], cga[stripe >> 2], slot >> 1);
             }
         }
-    }
+    };
 
     // Palette generation can take some time, and it can wait a tick.
-    setImmediate(function ()
-    {
+    setTimeout(() => {
+
         // Built-in default palette, until the tileset (if any) loads.
         engine.setHGRColors();
 
         // Try to asynchronously load a partial custom tileset.
         // Any missing tiles will still refer to the HGR version.
         engine.setColorTilesFromImage(DefaultTileset);
-    });
+
+    }, 0);
 }

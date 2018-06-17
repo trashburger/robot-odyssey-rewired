@@ -23,7 +23,7 @@ export function chipNameFromSaveData(bytes)
             }
             name += String.fromCharCode(byte);
         }
-        return name.trim() || "untitled";
+        return name.trim() || 'untitled';
     }
     return null;
 }
@@ -36,13 +36,13 @@ export function filenameForSaveData(bytes)
 
     if (world !== null) {
         if (world == LAB_WORLD) {
-            return "robotodyssey-lab-" + now.toISOString() + ".lsv";
+            return 'robotodyssey-lab-' + now.toISOString() + '.lsv';
         } else {
-            return "robotodyssey-world" + (world+1) + "-" + now.toISOString() + ".gsv";
+            return 'robotodyssey-world' + (world+1) + '-' + now.toISOString() + '.gsv';
         }
     }
     if (chip !== null) {
-        return "robotodyssey-chip-" + chip + "-" + now.toISOString() + ".csv";
+        return 'robotodyssey-chip-' + chip + '-' + now.toISOString() + '.csv';
     }
-    return "robotodyssey-" + now.toISOString() + ".bin";
+    return 'robotodyssey-' + now.toISOString() + '.bin';
 }

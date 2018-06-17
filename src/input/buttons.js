@@ -1,6 +1,6 @@
-import { audioContextSetup } from "../sound.js"
-import { mouseTrackingEnd } from "./mouse.js"
-import * as GameMenu from "../gameMenu.js"
+import { audioContextSetup } from '../sound.js';
+import { mouseTrackingEnd } from './mouse.js';
+import * as GameMenu from '../gameMenu.js';
 
 const canvas = document.getElementById('framebuffer');
 const gamepad_button_mappings = [];
@@ -66,13 +66,13 @@ export function addButtonEvents(button_element, down, up, click)
                 }
                 up();
             }
-        }
+        };
     }
 }
 
 function controlCode(key)
 {
-    return String.fromCharCode(key.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0) + 1)
+    return String.fromCharCode(key.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0) + 1);
 }
 
 export function init(engine)
@@ -103,22 +103,22 @@ export function init(engine)
         const meta = e.metaKey;
         const plain = !(ctrl || alt || meta);
 
-        if (code.includes("Arrow")) {
+        if (code.includes('Arrow')) {
             // Most keys can coexist with mouse tracking, but arrow keys will take over.
             mouseTrackingEnd();
         }
 
-        if (code == "ArrowUp" && !shift)         keycode(0, 0x48);
-        else if (code == "ArrowUp" && shift)     keycode('8', 0x48);
-        else if (code == "ArrowDown" && !shift)  keycode(0, 0x50);
-        else if (code == "ArrowDown" && shift)   keycode('2', 0x50);
-        else if (code == "ArrowLeft" && !shift)  keycode(0, 0x4B);
-        else if (code == "ArrowLeft" && shift)   keycode('4', 0x4B);
-        else if (code == "ArrowRight" && !shift) keycode(0, 0x4D);
-        else if (code == "ArrowRight" && shift)  keycode('6', 0x4D);
-        else if (code == "Backspace" && plain)   keycode('\x08', 0);
-        else if (code == "Enter" && plain)       keycode('\x0D', 0x1C);
-        else if (code == "Escape" && plain)      keycode('\x1b', 0x01);
+        if (code == 'ArrowUp' && !shift)         keycode(0, 0x48);
+        else if (code == 'ArrowUp' && shift)     keycode('8', 0x48);
+        else if (code == 'ArrowDown' && !shift)  keycode(0, 0x50);
+        else if (code == 'ArrowDown' && shift)   keycode('2', 0x50);
+        else if (code == 'ArrowLeft' && !shift)  keycode(0, 0x4B);
+        else if (code == 'ArrowLeft' && shift)   keycode('4', 0x4B);
+        else if (code == 'ArrowRight' && !shift) keycode(0, 0x4D);
+        else if (code == 'ArrowRight' && shift)  keycode('6', 0x4D);
+        else if (code == 'Backspace' && plain)   keycode('\x08', 0);
+        else if (code == 'Enter' && plain)       keycode('\x0D', 0x1C);
+        else if (code == 'Escape' && plain)      keycode('\x1b', 0x01);
 
         else if (key.length == 1 && plain) {
             // Letter keys
@@ -208,16 +208,16 @@ export function init(engine)
     }
 
     for (let button of Array.from(document.getElementsByClassName('palette_btn'))) {
-        addButtonEvents(button, (e) => {
+        addButtonEvents(button, () => {
             for (let sibling of Array.from(button.parentNode.children)) {
                 sibling.classList.remove('active_btn');
             }
             button.classList.add('active_btn');
 
             engine.then(function () {
-                if (button.dataset.name == "hgr") {
+                if (button.dataset.name == 'hgr') {
                     engine.setHGRColors();
-                } else if (button.dataset.name == "cga") {
+                } else if (button.dataset.name == 'cga') {
                     engine.setCGAColors();
                 }
                 if (button.dataset.src) {

@@ -14,7 +14,7 @@ const framebuffer = document.getElementById('framebuffer');
 const error = document.getElementById('error');
 const game_menu = document.getElementById('game_menu');
 const game_menu_cursor = document.getElementById('game_menu_cursor');
-const choices = Array.from(game_menu.getElementsByClassName("choice"));
+const choices = Array.from(game_menu.getElementsByClassName('choice'));
 
 let current_state = null;
 let current_menu_choice = 0;
@@ -25,12 +25,12 @@ let menu_joystick_accum = 0;
 export function showError(e)
 {
     e = e.toString();
-    if (e.includes("no binaryen method succeeded")) {
+    if (e.includes('no binaryen method succeeded')) {
         // This is obtuse; we only build for wasm, so really this means the device doesn't support wasm
-        e = "No WebAssembly?\n\nSorry, this browser might not be supported.";
+        e = 'No WebAssembly?\n\nSorry, this browser might not be supported.';
     } else {
         // Something else went wrong.
-        e = "Fail.\n\n" + e;
+        e = 'Fail.\n\n' + e;
     }
 
     error.innerText = e;
@@ -67,12 +67,12 @@ export function init(engine)
                 setMenuChoice(i);
                 execMenuChoice(engine);
             }
-        })
+        });
         choices[i].addEventListener('mouseenter', function () {
             if (current_state == States.MENU_ACTIVE && menu_joystick_y == 0) {
                 setMenuChoice(i);
             }
-        })
+        });
     }
 
     // Back to the menu when a game binary exits
@@ -263,9 +263,9 @@ function execMenuChoice(engine)
     //   3. The game will take a small amount of time between exec() and the first frame
     //   4. At the first frame, we setState(EXEC) and show the game with an iris transition
 
-    const args = choices[current_menu_choice].dataset.exec.split(" ");
+    const args = choices[current_menu_choice].dataset.exec.split(' ');
     afterLoading(engine, function () {
         setState(States.EXEC_LAUNCHING);
-        engine.exec(args[0], args[1] || "");
+        engine.exec(args[0], args[1] || '');
     });
 }

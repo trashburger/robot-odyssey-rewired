@@ -22,21 +22,22 @@ function doAutoSave(engine)
     engine.onSaveFileWrite = function () {};
 
     try {
+        /* eslint-disable no-console */
         let hash = '';
 
         switch (engine.saveGame()) {
 
-            case engine.SaveStatus.OK:
-                hash = base64.encode(engine.packSaveFile());
-                console.log(`autoSave, ${hash.length} bytes`);
-                break;
+        case engine.SaveStatus.OK:
+            hash = base64.encode(engine.packSaveFile());
+            console.log(`autoSave, ${hash.length} bytes`);
+            break;
 
-            case engine.SaveStatus.BLOCKED:
-                return;
+        case engine.SaveStatus.BLOCKED:
+            return;
 
-            case engine.SaveStatus.NOT_SUPPORTED:
-                hash = '';
-                break;
+        case engine.SaveStatus.NOT_SUPPORTED:
+            hash = '';
+            break;
         }
 
         last_set_window_hash = hash;
@@ -52,19 +53,20 @@ function doAutoSave(engine)
 function checkHashForAutoSave(engine)
 {
     const hash = window.location.hash;
-    if (hash && hash[0] == "#") {
+    if (hash && hash[0] == '#') {
         let s = hash.slice(1);
         if (s != last_set_window_hash) {
             const packed = new Uint8Array(base64.decode(s));
             GameMenu.afterLoading(engine, function () {
+                /* eslint-disable no-console */
                 if (engine.setSaveFile(packed, true)) {
                     if (engine.loadGame()) {
-                        console.log("Loading packed saved game");
+                        console.log('Loading packed saved game');
                     } else {
-                        console.warn("FAILED to load packed saved game");
+                        console.warn('FAILED to load packed saved game');
                     }
                 } else {
-                    console.warn("FAILED to unpack saved game");
+                    console.warn('FAILED to unpack saved game');
                 }
             });
         }

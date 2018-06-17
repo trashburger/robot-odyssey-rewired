@@ -1,4 +1,4 @@
-import { audioContextSetup } from "../sound.js"
+import { audioContextSetup } from '../sound.js';
 
 let mouse_tracking_unlocked = false;
 let end_tracking_func = null;

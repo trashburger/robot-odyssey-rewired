@@ -1,7 +1,7 @@
 import nipplejs from 'nipplejs';
-import { mouseTrackingEnd } from "./mouse.js"
-import * as Buttons from "./buttons.js"
-import * as GameMenu from "../gameMenu.js"
+import { mouseTrackingEnd } from './mouse.js';
+import * as Buttons from './buttons.js';
+import * as GameMenu from '../gameMenu.js';
 
 export function init(engine)
 {
@@ -31,15 +31,13 @@ export function init(engine)
         GameMenu.setJoystickButton(engine, b);
     }
 
-    joystick.on('move', function (e, data)
-    {
+    joystick.on('move', (e, data) => {
         mouseTrackingEnd();
         joystickAxes(data.force * Math.cos(data.angle.radian),
-                    -data.force * Math.sin(data.angle.radian));
+            -data.force * Math.sin(data.angle.radian));
     });
 
-    joystick.on('end', function (e)
-    {
+    joystick.on('end', () => {
         joystickAxes(0, 0);
     });
 

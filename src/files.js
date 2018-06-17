@@ -18,13 +18,13 @@ function engineLoaded(engine)
 
     // Loader for arbitrary saved files
     for (let button of Array.from(document.getElementsByClassName('savefile_btn'))) {
-        button.addEventListener('click', (e) => {
+        button.addEventListener('click', () => {
             let input = document.createElement('input');
             input.type = 'file';
-            input.addEventListener('change', (e) => {
+            input.addEventListener('change', () => {
                 if (input.files.length == 1 && input.files[0].size <= engine.MAX_FILESIZE) {
                     const reader = new FileReader();
-                    reader.onload = (e) => engine.loadSaveFile(reader.result);
+                    reader.onload = () => engine.loadSaveFile(reader.result);
                     reader.readAsArrayBuffer(input.files[0]);
                 }
             });
@@ -52,5 +52,5 @@ function engineLoaded(engine)
         return engine.saveColorTilesToImage(first_slot, num_slots).then(function (blob) {
             downloadjs(blob, 'color-tiles.png', 'image/png'); 
         });
-    }
+    };
 }
