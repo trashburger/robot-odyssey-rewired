@@ -52,6 +52,8 @@ button, select {
     margin: 2px;
     padding: 8px;
     flex: 1 0 0;
+    text-align: center;
+    text-align-last: center;
 }
 
 .button_area {
