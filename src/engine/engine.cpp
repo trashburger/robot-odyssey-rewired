@@ -95,7 +95,7 @@ static void pressKey(uint8_t ascii, uint8_t scancode)
     hw.input.pressKey(ascii, scancode);
 }
 
-static void setJoystickAxes(int x, int y)
+static void setJoystickAxes(float x, float y)
 {
     hw.input.setJoystickAxes(x, y);
 }

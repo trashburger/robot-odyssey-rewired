@@ -42,7 +42,6 @@ export function init(engine)
             // virtual joystick input.
 
             const deadzone = 0.11;
-            const scale = 10;
 
             if (axes[0]*axes[0] + axes[1]*axes[1] <= deadzone*deadzone) {
                 axes = [0,0];
@@ -67,7 +66,7 @@ export function init(engine)
 
             // If any axes changed, send an XY event
             if (axes[0] != last_axes[0] || axes[1] != last_axes[1]) {
-                joystickAxes(axes[0] * scale, axes[1] * scale);
+                joystickAxes(axes[0], axes[1]);
 
                 // Animate the on-screen joystick
                 const size = js.options.size * 0.25;
@@ -310,11 +309,6 @@ export function init(engine)
 
     function joystickAxes(x, y)
     {
-        // This limit is much larger than the usable range, it's for preventing overflow
-        const limit = 127;
-        x = Math.min(limit, Math.max(-limit, x));
-        y = Math.min(limit, Math.max(-limit, y));
-
         if (engine.calledRun) {
             engine.setJoystickAxes(x, y);
             engine.autoSave();
@@ -375,10 +369,9 @@ export function init(engine)
 
     joystick.on('move', function (e, data)
     {
-        const scale = 8.0;
         mouseTrackingEnd();
-        joystickAxes(scale * data.force * Math.cos(data.angle.radian),
-                    -scale * data.force * Math.sin(data.angle.radian));
+        joystickAxes(data.force * Math.cos(data.angle.radian),
+                    -data.force * Math.sin(data.angle.radian));
     });
 
     joystick.on('end', function (e)

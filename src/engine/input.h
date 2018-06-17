@@ -12,7 +12,7 @@ class InputBuffer
     InputBuffer();
 
     void pressKey(uint8_t ascii, uint8_t scancode = 0);
-    void setJoystickAxes(int x, int y);
+    void setJoystickAxes(float x, float y);
     void setJoystickButton(bool button);
     void setMouseTracking(int x, int y);
     void setMouseButton(bool button);

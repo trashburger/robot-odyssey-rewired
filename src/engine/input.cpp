@@ -36,11 +36,11 @@ void InputBuffer::pressKey(uint8_t ascii, uint8_t scancode)
     }
 }
 
-void InputBuffer::setJoystickAxes(int x, int y)
+void InputBuffer::setJoystickAxes(float x, float y)
 {
     mouse_buffer.clear();
-    js_x = x;
-    js_y = y;
+    js_x = std::max(-1.0f, std::min(1.0f, x)) * 10.0f;
+    js_y = std::max(-1.0f, std::min(1.0f, y)) * 10.0f;
 }
 
 void InputBuffer::setJoystickButton(bool button)

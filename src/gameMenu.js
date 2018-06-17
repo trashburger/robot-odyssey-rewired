@@ -22,6 +22,7 @@ let current_state = null;
 let current_menu_choice = 0;
 let menu_joystick_interval = null;
 let menu_joystick_y = 0;
+let menu_joystick_accum = 0;
 
 export function showError(e)
 {
@@ -70,7 +71,7 @@ export function init(engine)
             }
         })
         choices[i].addEventListener('mouseenter', function () {
-            if (current_state == States.MENU_ACTIVE) {
+            if (current_state == States.MENU_ACTIVE && menu_joystick_y == 0) {
                 setMenuChoice(i);
             }
         })
@@ -107,26 +108,33 @@ export function pressKey(engine, ascii, scancode)
 
 export function setJoystickAxes(engine, x, y)
 {
+    x = Math.max(-1, Math.min(1, x));
+    y = Math.max(-1, Math.min(1, y));
+
     if (current_state == States.MENU_ACTIVE) {
-        // Timed movements, according to Y axis.
-        // This installs an interval handler if needed, which stays installed
-        // until we change game_menu states.
-
-        const interval = 80;
-        const speed = 0.03;
-
         menu_joystick_y = y;
-        if (!menu_joystick_interval) {
-            let accumulator = 0;
 
+        if (y == 0) {
+            // Reset on idle
+            menu_joystick_accum = 0;
+            if (menu_joystick_interval) {
+                clearInterval(menu_joystick_interval);
+                menu_joystick_interval = null;
+            }
+        }
+
+        // Variable repeat rate
+        const interval = 100;
+        const exponent = 2.5;
+
+        if (!menu_joystick_interval) {
             menu_joystick_interval = setInterval(function () {
-                accumulator += menu_joystick_y * speed;
-                if (accumulator > 1) {
-                    accumulator = Math.min(accumulator - 1, 1);
-                    setMenuChoice(current_menu_choice + 1);
-                } else if (accumulator < -1) {
-                    accumulator = Math.max(accumulator + 1, -1);
-                    setMenuChoice(current_menu_choice - 1);
+                const rate = Math.pow(Math.abs(menu_joystick_y), exponent) * Math.sign(menu_joystick_y);
+                menu_joystick_accum += rate;
+                let intpart = menu_joystick_accum|0;
+                if (intpart != 0) {
+                    menu_joystick_accum -= intpart;
+                    setMenuChoice(current_menu_choice + intpart);
                 }
             }, interval);
         }
