@@ -1,6 +1,5 @@
 import * as GameMenu from './gameMenu.js'
 import DefaultTileset from './assets/rewired-tileset.png'
-import './graphics.css'
 
 export function init(engine)
 {

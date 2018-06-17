@@ -1,5 +1,3 @@
-import './gameMenu.css'
-
 export const States = {
     SPLASH: 0,
     MENU_TRANSITION: 1,

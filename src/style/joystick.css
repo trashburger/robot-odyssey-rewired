@@ -1,0 +1,19 @@
+#joystick {
+    display: flex;
+    margin: 6px 50px 10px 50px;
+}
+
+#joystick_xy {
+    flex: 1 0 0;
+    position: relative;
+    height: 110px;
+    background: #111;
+}
+
+.joystick_btn {
+    flex: 1 0 0;
+    touch-action: none;
+    border: none;
+    margin: 0;
+    padding: 4px;
+}

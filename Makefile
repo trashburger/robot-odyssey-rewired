@@ -41,8 +41,9 @@ WEBPACK_DEPS := \
 	build/engine.js \
 	build/font/glyph-00.svg \
 	src/*.js \
+	src/*/*.js \
 	src/*.html \
-	src/*.css
+	src/style/*.css
 
 CPP_DEPS := \
 	src/engine/*.h
