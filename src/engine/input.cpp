@@ -42,7 +42,7 @@ void InputBuffer::setJoystickAxes(float x, float y)
 {
     mouse_buffer.clear();
     js_x = std::max(-1.0f, std::min(1.0f, x)) * JOYSTICK_RANGE_MAX;
-    js_y = std::max(-1.0f, std::min(1.0f, y)) * JOYSTICK_RANGE_MAX;
+    js_y = std::max(-1.0f, std::min(1.0f, y)) * JOYSTICK_RANGE_MAX * JOYSTICK_ASPECT_CORRECTION;
 }
 
 void InputBuffer::setJoystickButton(bool button)

@@ -26,12 +26,13 @@ class InputBuffer
     void pollJoystick(ROWorld *world, uint16_t &x, uint16_t &y, uint8_t &status);
 
  protected:
-    static const unsigned KEY_BUFFER_SIZE = 32;
-    static const unsigned MOUSE_BUFFER_SIZE = 8;
-    static const unsigned MOUSE_DELAY_ON_ROOM_CHANGE = 4;
+    static constexpr unsigned KEY_BUFFER_SIZE = 32;
+    static constexpr unsigned MOUSE_BUFFER_SIZE = 8;
+    static constexpr unsigned MOUSE_DELAY_ON_ROOM_CHANGE = 4;
     static constexpr float MOUSE_GAIN = 0.5;
-    static const unsigned JOYSTICK_RANGE_MIN = 3;
-    static const unsigned JOYSTICK_RANGE_MAX = 10;
+    static constexpr unsigned JOYSTICK_RANGE_MIN = 3;
+    static constexpr unsigned JOYSTICK_RANGE_MAX = 10;
+    static constexpr float JOYSTICK_ASPECT_CORRECTION = 0.8;
 
     enum MouseEventType {
         EVT_POS,
