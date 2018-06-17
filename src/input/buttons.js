@@ -207,6 +207,19 @@ export function init(engine)
         });
     }
 
+    // Loader for arbitrary saved files
+    for (let button of Array.from(document.getElementsByClassName('loadsavefile_btn'))) {
+        addButtonEvents(button, () => {
+            button.classList.add('active_btn');
+        }, () => {
+            button.classList.remove('active_btn');
+        }, () => {
+            if (engine.calledRun) {
+                engine.loadSaveFilePicker();
+            }
+        });
+    }
+
     for (let button of Array.from(document.getElementsByClassName('palette_btn'))) {
         addButtonEvents(button, () => {
             for (let sibling of Array.from(button.parentNode.children)) {
