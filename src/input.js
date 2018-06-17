@@ -29,15 +29,31 @@ export function init(engine)
     // Fade in the controls as soon as this Javascript is ready
     document.getElementById('engine_controls').classList.remove('hidden');
 
-    // Gamepads must be polled; currently this isn't hooked into the game's own event polling
-    // cycle at all, since that happens on the C++ side without any JS callbacks.
     function gamepadPoll(gamepad, last_axes, last_pressed)
     {
         if (gamepad && gamepad.connected) {
-            const axes = gamepad.axes;
+            const js = joystick[0];
             const pressed = gamepad.buttons.map(b => b.pressed);
+            var axes = gamepad.axes;
 
+            // If the controller is nearly centered, assume it's centered.
+            // This is needed for some wired controllers that will constantly
+            // spam positions near zero when idle, overriding any mouse or
+            // virtual joystick input.
+
+            const deadzone = 0.11;
+            const scale = 10;
+
+            if (axes[0]*axes[0] + axes[1]*axes[1] <= deadzone*deadzone) {
+                axes = [0,0];
+                js.hide();
+            } else {
+                js.show();
+            }
+
+            // Poll gamepads on every frame, to animate the virtual joystick
             window.requestAnimationFrame(() => {
+
                 // Must call getGamepads() to refresh the state snapshot.
                 // Game pads can disappear unpredictably, and Firefox
                 // seems to be going so far as making 'gamepad' from the
@@ -50,8 +66,14 @@ export function init(engine)
             });
 
             // If any axes changed, send an XY event
-            if (axes[0] !== last_axes[0] || axes[1] !== last_axes[1]) {
-                gamepadAxesChanged(axes[0], axes[1]);
+            if (axes[0] != last_axes[0] || axes[1] != last_axes[1]) {
+                console.log(axes,last_axes);
+                joystickAxes(axes[0] * scale, axes[1] * scale);
+
+                // Animate the on-screen joystick
+                const size = js.options.size * 0.25;
+                js.ui.front.style.left = (axes[0] * size) + 'px';
+                js.ui.front.style.top = (axes[1] * size) + 'px';
             }
 
             // Dispatch individual button events to mapping handlers
@@ -66,30 +88,8 @@ export function init(engine)
         }
     }
 
-    function gamepadAxesChanged(x, y)
-    {
-        // Pass it on to the engine and menu
-        const scale = 10;
-        joystickAxes(x * scale, y * scale);
-
-        // Animate the on-screen joystick
-        const js = joystick[0];
-        const size = js.options.size * 0.25;
-        const threshold = 0.1;
-        js.ui.front.style.left = (x * size) + 'px';
-        js.ui.front.style.top = (y * size) + 'px';
-        if (x*x + y*y > threshold*threshold) {
-            js.show();
-        } else {
-            js.hide();
-        }
-    }
-
     // Begin polling gamepads if a new one appears
-    window.addEventListener('gamepadconnected', function (e)
-    {
-        gamepadPoll(e.gamepad, [], []);
-    });
+    window.addEventListener('gamepadconnected', (e) => gamepadPoll(e.gamepad, [0,0], []));
 
     function mouseTrackingEnd()
     {
