@@ -38,13 +38,17 @@
     opacity: 0;
 }
 
-button {
+button, select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
     user-select: none;
     -webkit-user-select: none;
     background-color: #222;
     font: 17px sans-serif;
     color: #888;
     border: 1px solid #555;
+    border-radius: 2px;
     margin: 2px;
     padding: 8px;
     flex: 1 0 0;
