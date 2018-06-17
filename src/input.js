@@ -46,9 +46,9 @@ export function init(engine)
 
             if (axes[0]*axes[0] + axes[1]*axes[1] <= deadzone*deadzone) {
                 axes = [0,0];
-                js.hide();
-            } else {
-                js.show();
+                if (axes[0] != last_axes[0] || axes[1] != last_axes[1]) {
+                    js.hide();
+                }
             }
 
             // Poll gamepads on every frame, to animate the virtual joystick
@@ -67,13 +67,13 @@ export function init(engine)
 
             // If any axes changed, send an XY event
             if (axes[0] != last_axes[0] || axes[1] != last_axes[1]) {
-                console.log(axes,last_axes);
                 joystickAxes(axes[0] * scale, axes[1] * scale);
 
                 // Animate the on-screen joystick
                 const size = js.options.size * 0.25;
                 js.ui.front.style.left = (axes[0] * size) + 'px';
                 js.ui.front.style.top = (axes[1] * size) + 'px';
+                js.show();
             }
 
             // Dispatch individual button events to mapping handlers
