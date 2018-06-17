@@ -46,7 +46,7 @@ export function init(engine)
 
             if (axes[0]*axes[0] + axes[1]*axes[1] <= deadzone*deadzone) {
                 axes = [0,0];
-                if (axes[0] != last_axes[0] || axes[1] != last_axes[1]) {
+                if (last_axes[0] != 0 || last_axes[1] != 0) {
                     js.hide();
                 }
             }
@@ -73,7 +73,9 @@ export function init(engine)
                 const size = js.options.size * 0.25;
                 js.ui.front.style.left = (axes[0] * size) + 'px';
                 js.ui.front.style.top = (axes[1] * size) + 'px';
-                js.show();
+                if (last_axes[0] == 0 && last_axes[1] == 0) {
+                    js.show();
+                }
             }
 
             // Dispatch individual button events to mapping handlers
