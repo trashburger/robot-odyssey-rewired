@@ -106,37 +106,42 @@ export function pressKey(engine, ascii, scancode)
     }
 }
 
+function joystickIntervalFunc()
+{
+    var rate = 0.25;  // Max menu ticks per interval
+
+    // Make rollover at the edges slower
+    if ((current_menu_choice == 0 && menu_joystick_y < 0) ||
+        (current_menu_choice == choices.length-1 && menu_joystick_y > 0)) {
+        rate *= 0.3;
+    }
+
+    menu_joystick_accum += rate * menu_joystick_y;
+    let intpart = menu_joystick_accum|0;
+    if (intpart != 0) {
+        menu_joystick_accum -= intpart;
+        setMenuChoice(current_menu_choice + intpart);
+    }
+}
+
 export function setJoystickAxes(engine, x, y)
 {
-    x = Math.max(-1, Math.min(1, x));
-    y = Math.max(-1, Math.min(1, y));
-
     if (current_state == States.MENU_ACTIVE) {
-        menu_joystick_y = y;
-
+        menu_joystick_y = Math.max(-1, Math.min(1, y));
         if (y == 0) {
             // Reset on idle
-            menu_joystick_accum = 0;
             if (menu_joystick_interval) {
                 clearInterval(menu_joystick_interval);
                 menu_joystick_interval = null;
             }
-        }
 
-        // Variable repeat rate
-        const interval = 100;
-        const exponent = 2.5;
-
-        if (!menu_joystick_interval) {
-            menu_joystick_interval = setInterval(function () {
-                const rate = Math.pow(Math.abs(menu_joystick_y), exponent) * Math.sign(menu_joystick_y);
-                menu_joystick_accum += rate;
-                let intpart = menu_joystick_accum|0;
-                if (intpart != 0) {
-                    menu_joystick_accum -= intpart;
-                    setMenuChoice(current_menu_choice + intpart);
-                }
-            }, interval);
+        } else {
+            // Immediate response + variable repeat rate
+            if (!menu_joystick_interval) {
+                menu_joystick_accum = Math.sign(menu_joystick_y);
+                menu_joystick_interval = setInterval(joystickIntervalFunc, 50);
+                joystickIntervalFunc();
+            }
         }
     }
 }
