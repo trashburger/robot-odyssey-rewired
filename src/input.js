@@ -33,13 +33,20 @@ export function init(engine)
     // cycle at all, since that happens on the C++ side without any JS callbacks.
     function gamepadPoll(gamepad, last_axes, last_pressed)
     {
-        if (gamepad.connected) {
+        if (gamepad && gamepad.connected) {
             const axes = gamepad.axes;
             const pressed = gamepad.buttons.map(b => b.pressed);
 
-            window.requestAnimationFrame( function () {
-                // Must call getGamepads() to refresh the state snapshot
-                gamepadPoll(navigator.getGamepads()[gamepad.index], axes, pressed);
+            window.requestAnimationFrame(() => {
+                // Must call getGamepads() to refresh the state snapshot.
+                // Game pads can disappear unpredictably, and Firefox
+                // seems to be going so far as making 'gamepad' from the
+                // scope above unexpectedly become undefined.
+                const g = gamepad;
+                if (g && g.index >= 0) {
+                    const next_state = navigator.getGamepads()[g.index];
+                    gamepadPoll(next_state, axes, pressed);
+                }
             });
 
             // If any axes changed, send an XY event
