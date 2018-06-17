@@ -29,6 +29,9 @@ class InputBuffer
     static const unsigned KEY_BUFFER_SIZE = 32;
     static const unsigned MOUSE_BUFFER_SIZE = 8;
     static const unsigned MOUSE_DELAY_ON_ROOM_CHANGE = 4;
+    static constexpr float MOUSE_GAIN = 0.5;
+    static const unsigned JOYSTICK_RANGE_MIN = 3;
+    static const unsigned JOYSTICK_RANGE_MAX = 10;
 
     enum MouseEventType {
         EVT_POS,
@@ -43,7 +46,8 @@ class InputBuffer
     jm::circular_buffer<uint16_t, KEY_BUFFER_SIZE> key_buffer;
     jm::circular_buffer<MouseEvent, MOUSE_BUFFER_SIZE> mouse_buffer;
 
-    int js_x, js_y;
+    float js_x, js_y;
+    float js_residual_x, js_residual_y;
     bool js_button_pressed, js_button_held;
 
     int savedPlayerX, savedPlayerY;
