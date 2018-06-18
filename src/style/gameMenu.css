@@ -61,7 +61,7 @@
     transition: top 0.075s ease;
 }
 
-#frame #loading {
+#loading {
     position: absolute;
     overflow: visible;
     left: 50%;
@@ -72,7 +72,7 @@
     height: 120px;
 }
 
-#frame #loading:after {
+#loading:after {
     content: " ";
     display: block;
     overflow: visible;
@@ -90,25 +90,29 @@
     100% { transform: rotate(360deg); }
 }
 
-#modal_textbox {
+.modal {
     transition: top 0.5s ease;
-    padding: 10px;
+    padding: 6px;
+    background: #000;
 }
 
-#modal_textbox.hidden {
+.modal.hidden {
     display: block;
     top: 100%;
 }
 
-#modal_textbox_message {
-    white-space: pre;
+.modal .modal_border {
     background: #000;
     color: #ececec;
-    border: 6px solid #ff5e38;
+    border: 6px solid #09a9d8;
     width: 100%;
     height: 100%;
     padding: 20px;
     border-radius: 25px;
+    overflow: scroll;
+}
+
+.modal pre {
     font-size: 120%;
     line-height: 1.1;
 }

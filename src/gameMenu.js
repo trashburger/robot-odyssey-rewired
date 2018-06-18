@@ -6,14 +6,15 @@ export const States = {
     EXEC: 4,
     LOADING: 5,
     MODAL_TEXTBOX: 6,
-    ERROR_HALT: 7,
+    MODAL_FILES: 7,
+    ERROR_HALT: 8,
 };
 
 const splash = document.getElementById('splash');
 const loading = document.getElementById('loading');
 const framebuffer = document.getElementById('framebuffer');
 const modal_textbox = document.getElementById('modal_textbox');
-const modal_textbox_message = document.getElementById('modal_textbox_message');
+const modal_files = document.getElementById('modal_files');
 const game_menu = document.getElementById('game_menu');
 const game_menu_cursor = document.getElementById('game_menu_cursor');
 const choices = Array.from(game_menu.getElementsByClassName('choice'));
@@ -35,7 +36,7 @@ export function showError(e)
         e = 'Fail.\n\n' + e;
     }
 
-    modal_textbox_message.innerText = e;
+    modal_textbox.firstElementChild.innerText = e;
     setState(States.MODAL_TEXTBOX);
     setState(States.ERROR_HALT);
 }
@@ -208,9 +209,15 @@ export function setState(s)
         modal_textbox.classList.add('hidden');
     }
 
+    if (s == States.MODAL_FILES) {
+        modal_files.classList.remove('hidden');
+    } else {
+        modal_files.classList.add('hidden');
+    }
+
     if (s == States.SPLASH) {
         splash.classList.remove('hidden');
-    } else if (s == States.MODAL_TEXTBOX || s == States.LOADING || s == States.EXEC_LAUNCHING) {
+    } else if (s == States.LOADING || s == States.EXEC_LAUNCHING) {
         splash.classList.add('hidden');
     }
 
@@ -222,8 +229,6 @@ export function setState(s)
 
     if (s == States.MENU_TRANSITION || s == States.MENU_ACTIVE) {
         game_menu.classList.remove('hidden');
-    } else if (s == States.MODAL_TEXTBOX) {
-        game_menu.classList.add('hidden');
     }
 
     if (s == States.LOADING) {
@@ -234,7 +239,7 @@ export function setState(s)
 
     if (s == States.EXEC) {
         framebuffer.classList.remove('hidden');
-    } else {
+    } else if (s == States.MENU_TRANSITION || s == States.MENU_ACTIVE || s == States.SPLASH) {
         framebuffer.classList.add('hidden');
     }
 }

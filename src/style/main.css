@@ -10,13 +10,18 @@ body {
     font: 16px sans-serif;
 }
 
+a {
+    color: #067697;
+    text-decoration: none;
+}
+
+.hidden {
+    display: none;
+}
+
 .column_width {
     margin: 0 auto;
     max-width: 1200px;
-}
-
-a {
-    color: #067697;
 }
 
 #footer {
