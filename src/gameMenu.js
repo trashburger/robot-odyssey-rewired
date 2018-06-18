@@ -5,13 +5,15 @@ export const States = {
     EXEC_LAUNCHING: 3,
     EXEC: 4,
     LOADING: 5,
-    ERROR: 6,
+    MODAL_TEXTBOX: 6,
+    ERROR_HALT: 7,
 };
 
 const splash = document.getElementById('splash');
 const loading = document.getElementById('loading');
 const framebuffer = document.getElementById('framebuffer');
-const error = document.getElementById('error');
+const modal_textbox = document.getElementById('modal_textbox');
+const modal_textbox_message = document.getElementById('modal_textbox_message');
 const game_menu = document.getElementById('game_menu');
 const game_menu_cursor = document.getElementById('game_menu_cursor');
 const choices = Array.from(game_menu.getElementsByClassName('choice'));
@@ -33,8 +35,9 @@ export function showError(e)
         e = 'Fail.\n\n' + e;
     }
 
-    error.innerText = e;
-    setState(States.ERROR);
+    modal_textbox_message.innerText = e;
+    setState(States.MODAL_TEXTBOX);
+    setState(States.ERROR_HALT);
 }
 
 export function init(engine)
@@ -180,8 +183,7 @@ export function setState(s)
     if (s == current_state) {
         return;
     }
-    if (current_state == States.ERROR) {
-        // Stay stuck in error state
+    if (current_state == States.ERROR_HALT) {
         return;
     }
     current_state = s;
@@ -200,15 +202,15 @@ export function setState(s)
         }, 300);
     }
 
-    if (s == States.ERROR) {
-        error.classList.remove('hidden');
-    } else {
-        error.classList.add('hidden');
+    if (s == States.MODAL_TEXTBOX) {
+        modal_textbox.classList.remove('hidden');
+    } else if (s != States.ERROR_HALT) {
+        modal_textbox.classList.add('hidden');
     }
 
     if (s == States.SPLASH) {
         splash.classList.remove('hidden');
-    } else if (s == States.ERROR || s == States.LOADING || s == States.EXEC_LAUNCHING) {
+    } else if (s == States.MODAL_TEXTBOX || s == States.LOADING || s == States.EXEC_LAUNCHING) {
         splash.classList.add('hidden');
     }
 
@@ -220,7 +222,7 @@ export function setState(s)
 
     if (s == States.MENU_TRANSITION || s == States.MENU_ACTIVE) {
         game_menu.classList.remove('hidden');
-    } else if (s == States.ERROR) {
+    } else if (s == States.MODAL_TEXTBOX) {
         game_menu.classList.add('hidden');
     }
 
