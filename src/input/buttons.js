@@ -207,23 +207,16 @@ export function init(engine)
         });
     }
 
-    for (let button of Array.from(document.getElementsByClassName('palette_btn'))) {
+    // Loader for arbitrary saved files
+    for (let button of Array.from(document.getElementsByClassName('loadsavefile_btn'))) {
         addButtonEvents(button, () => {
-            for (let sibling of Array.from(button.parentNode.children)) {
-                sibling.classList.remove('active_btn');
-            }
             button.classList.add('active_btn');
-
-            engine.then(function () {
-                if (button.dataset.name == 'hgr') {
-                    engine.setHGRColors();
-                } else if (button.dataset.name == 'cga') {
-                    engine.setCGAColors();
-                }
-                if (button.dataset.src) {
-                    engine.setColorTilesFromImage(button.dataset.src);
-                }
-            });
+        }, () => {
+            button.classList.remove('active_btn');
+        }, () => {
+            if (engine.calledRun) {
+                engine.loadSaveFilePicker();
+            }
         });
     }
 }

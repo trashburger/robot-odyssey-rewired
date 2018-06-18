@@ -67,10 +67,9 @@
         <button class="keyboard_btn rofont" data-gamepad="2" data-ascii="T">T</button>
         <button class="keyboard_btn rofont" data-gamepad="4" data-ascii="C">C</button>
         <button class="keyboard_btn rofont" data-gamepad="5" data-ascii="S">S</button>
+        <button class="keyboard_btn rofont" data-ascii="L">L</button>
         <button class="keyboard_btn rofont" data-ascii="P">P</button>
         <button class="keyboard_btn rofont" data-ascii="H">H</button>
-        <button class="keyboard_btn rofont" data-ascii="O">O</button>
-        <button class="keyboard_btn rofont" data-ascii="L">L</button>
     </div>
 
     <div class="button_area">
@@ -96,12 +95,14 @@
     </div>
 
     <div class="button_area">
-        <button class="savefile_btn warning_btn rofont">Load File</button>
+        <button class="loadsavefile_btn warning_btn rofont">Load File</button>
         <button class="loadgame_btn warning_btn rofont">Re-Load</button>
         <button class="savegame_btn rofont">Save Game</button>
-        <button class="palette_btn active_btn rofont" data-src="<%= require('./assets/rewired-tileset.png') %>">Rewired Tileset</button>
-        <button class="palette_btn rofont" data-name="hgr">Apple (HGR) Colors</button>
-        <button class="palette_btn rofont" data-name="cga">PC (CGA) Colors</button>
+        <select class="palette_selector rofont">
+            <option selected class="rofont" value="rewired">Rewired Palette</option>
+            <option class="rofont" value="hgr">Apple (HGR) Colors</option>
+            <option class="rofont" value="cga">PC (CGA) Colors</option>
+        </select>
     </div>
 
     <div id="footer" class="rofont">

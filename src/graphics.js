@@ -1,5 +1,8 @@
 import * as GameMenu from './gameMenu.js';
-import DefaultTileset from './assets/rewired-tileset.png';
+import RewiredTileset from './assets/rewired-tileset.png';
+
+const canvas = document.getElementById('framebuffer');
+const DEFAULT_PALETTE = 'rewired';
 
 export function init(engine)
 {
@@ -8,7 +11,6 @@ export function init(engine)
     const visible_height = 384;
     const border = 2;
 
-    const canvas = document.getElementById('framebuffer');
     canvas.width = width + border*2;
     canvas.height = visible_height + border*2;
 
@@ -294,15 +296,27 @@ function engineLoaded(engine)
         }
     };
 
-    // Palette generation can take some time, and it can wait a tick.
-    setTimeout(() => {
+    engine.setNamedPalette = function(name)
+    {
+        if (name == 'hgr') {
+            engine.setHGRColors();
+        } else if (name == 'cga') {
+            engine.setCGAColors();
+        } else if (name == 'rewired') {
+            engine.setHGRColors();
+            engine.setColorTilesFromImage(RewiredTileset);
+        }
+    };
 
-        // Built-in default palette, until the tileset (if any) loads.
-        engine.setHGRColors();
+    for (let element of Array.from(document.getElementsByClassName('palette_selector'))) {
+        element.addEventListener('change', () => {
+            engine.setNamedPalette(element.value);
+            element.blur();
+            canvas.focus();
+        });
+    }
 
-        // Try to asynchronously load a partial custom tileset.
-        // Any missing tiles will still refer to the HGR version.
-        engine.setColorTilesFromImage(DefaultTileset);
-
-    }, 0);
+    // Palette generation can take some time, make it
+    // slightly async so this blocks CSS animations less.
+    setTimeout(() => engine.setNamedPalette(DEFAULT_PALETTE), 0);
 }
