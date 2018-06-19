@@ -6,6 +6,7 @@ struct FileInfo {
     const uint8_t *data;
     uint32_t size;
 
+    static const FileInfo* index[];
     static const FileInfo* lookup(const char* name);
 };
 

@@ -35,21 +35,11 @@ def write_file_data(cpp, name, data):
 
 
 def write_index(cpp, names):
-    cpp.write('\nstatic const FileInfo* file_index[] = {\n')
+    cpp.write('\nconst FileInfo* FileInfo::index[] = {\n')
     for name in names:
         cpp.write('\t&%s,\n' % varname_for_file(name))
     cpp.write('\t0,\n'
               '};\n')
-
-def write_lookup(cpp):
-    cpp.write('\nconst FileInfo* FileInfo::lookup(const char* name) {\n'
-              '\tfor (unsigned i = 0; file_index[i]; i++) {\n'
-              '\t\tif (!strcasecmp(name, file_index[i]->name)) {\n'
-              '\t\t\treturn file_index[i];\n'
-              '\t\t}\n'
-              '\t}\n'
-              '\treturn 0;\n'
-              '}\n')
 
 
 def main(in_dir, out_file):
@@ -59,7 +49,6 @@ def main(in_dir, out_file):
     for name, data in fs.items():
         write_file_data(cpp, name, data)
     write_index(cpp, fs.keys())
-    write_lookup(cpp)
     cpp.close()
 
 

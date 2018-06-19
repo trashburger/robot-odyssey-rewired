@@ -155,3 +155,13 @@ uint16_t DOSFilesystem::allocateFD()
 
     return fd;
 }
+
+const FileInfo* FileInfo::lookup(const char* name)
+{
+    for (unsigned i = 0; index[i]; i++) {
+        if (!strcasecmp(name, index[i]->name)) {
+            return index[i];
+        }
+    }
+    return 0;
+}

@@ -206,6 +206,18 @@ static val getFile(const FileInfo& file)
     return val(typed_memory_view(file.size, file.data));
 }
 
+static val getStaticFiles()
+{
+    val files = val::object();
+
+    for (const FileInfo **iter = FileInfo::index; *iter; iter++) {
+        const FileInfo &file = **iter;
+        files.set(file.name, getFile(file));
+    }
+
+    return files;
+}
+
 static val getMemory()
 {
     return val(typed_memory_view(Hardware::MEM_SIZE, hw.mem));
@@ -362,6 +374,7 @@ EMSCRIPTEN_BINDINGS(engine)
     function("loadGame", &loadGame);
     function("getMemory", &getMemory);
     function("getCompressionDictionary", &getCompressionDictionary);
+    function("getStaticFiles", &getStaticFiles);
     function("getJoyFile", &getJoyFile);
     function("getSaveFile", &getSaveFile);
     function("setSaveFile", &setSaveFile);
