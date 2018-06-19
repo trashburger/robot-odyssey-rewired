@@ -332,7 +332,7 @@ def patchVideoBackbuffer(b):
 
 def patchVideoHighLevel(b, trace_debug=False):
     # Replace all rendering, using our own high-depth9 backbuffer.
-    
+
     b.decl("#include <stdio.h>")
 
     # Help us track down writes directly to the backbuffer
@@ -374,7 +374,7 @@ def patchVideoHighLevel(b, trace_debug=False):
     # Hook the main text renderer entry point, before branching
     # to renderers separately for normal and large text based on 'style'.
     video_draw_text = b.findCode(':a0____ 3c00 7404 3c02 7404 e8____ c3 e8____ c3')
-    
+
     # Most text arguments are clustered around 'style' which we have a pointer to from above
     text_arg_style = b.peek16(video_draw_text.add(1))
     text_arg_string = text_arg_style - 2
@@ -430,4 +430,4 @@ def patchVideoHighLevel(b, trace_debug=False):
     ''' % locals())
 
     # Blit from backbuffer
-    patchVideoBlit(b, 'g.hw->output.pushFrameRGB(g.stack, g.hw->output.draw.backbuffer);')
+    patchVideoBlit(b, 'g.hw->output.drawFrameRGB();')

@@ -340,8 +340,8 @@ EMSCRIPTEN_BINDINGS(engine)
     constant("MEM_SIZE", (unsigned) Hardware::MEM_SIZE);
     constant("CPU_CLOCK_HZ", (unsigned) OutputQueue::CPU_CLOCK_HZ);
     constant("AUDIO_HZ", (unsigned) OutputQueue::AUDIO_HZ);
-    constant("SCREEN_WIDTH", (unsigned) OutputQueue::SCREEN_WIDTH);
-    constant("SCREEN_HEIGHT", (unsigned) OutputQueue::SCREEN_HEIGHT);
+    constant("SCREEN_WIDTH", (unsigned) RGBDraw::SCREEN_WIDTH);
+    constant("SCREEN_HEIGHT", (unsigned) RGBDraw::SCREEN_HEIGHT);
     constant("SCREEN_TILE_SIZE", (unsigned) ColorTable::SCREEN_TILE_SIZE);
 
     enum_<SaveStatus>("SaveStatus")

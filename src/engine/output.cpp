@@ -28,7 +28,7 @@ void OutputMinimal::pushFrameCGA(SBTStack *stack, uint8_t *framebuffer)
     frame_counter++;
 }
 
-void OutputMinimal::pushFrameRGB(SBTStack *stack, uint32_t *framebuffer)
+void OutputMinimal::drawFrameRGB()
 {
     frame_counter++;
 }
@@ -84,23 +84,22 @@ void OutputQueue::pushFrameCGA(SBTStack *stack, uint8_t *framebuffer)
     item.otype = OUT_CGA_FRAME;
     items.push_back(item);
 
+    // CGA frames are copied and queued
     frames.push_back(*(CGAFramebuffer*) framebuffer);
 }
 
-void OutputQueue::pushFrameRGB(SBTStack *stack, uint32_t *framebuffer)
+void OutputQueue::drawFrameRGB()
 {
-    if (items.full()) {
-        stack->trace();
-        assert(0 && "Frame queue is too deep! Infinite loop likely.");
-        return;
+    // Synchronously render a frame. Handles frame skip, if enabled.
+
+    if (frameskip_counter < frameskip_value) {
+        frameskip_counter++;
+    } else {
+        frameskip_counter = 0;
+        EM_ASM_({
+           Module.onRenderFrame(HEAPU8.subarray($0, $1));
+        }, draw.backbuffer, sizeof draw.backbuffer + (uintptr_t)draw.backbuffer);
     }
-
-    OutputItem item;
-    item.otype = OUT_RGB_FRAME;
-    items.push_back(item);
-
-    // RGB frames aren't queued, there's only one shared buffer.
-    memcpy(rgb_pixels, framebuffer, sizeof rgb_pixels);
 }
 
 void OutputQueue::pushDelay(uint32_t millis)
@@ -134,7 +133,7 @@ void OutputQueue::dequeueCGAFrame()
     // Expand CGA color to RGBA
     for (unsigned plane = 0; plane < 2; plane++) {
         for (unsigned y=0; y < CGAFramebuffer::HEIGHT/2; y++) {
-            uint32_t *rgb_line = rgb_pixels + (y*2+plane)*SCREEN_WIDTH*CGAFramebuffer::ZOOM;
+            uint32_t *rgb_line = draw.backbuffer + (y*2+plane)*RGBDraw::SCREEN_WIDTH*CGAFramebuffer::ZOOM;
 
             for (unsigned x=0; x < CGAFramebuffer::WIDTH; x++) {
                 unsigned byte = 0x2000*plane + (x + CGAFramebuffer::WIDTH*y)/4;
@@ -145,7 +144,7 @@ void OutputQueue::dequeueCGAFrame()
                 // Zoom each CGA pixel
                 for (unsigned zy=0; zy<CGAFramebuffer::ZOOM; zy++) {
                     for (unsigned zx=0; zx<CGAFramebuffer::ZOOM; zx++) {
-                        rgb_line[zx + zy*SCREEN_WIDTH] = rgb;
+                        rgb_line[zx + zy*RGBDraw::SCREEN_WIDTH] = rgb;
                     }
                 }
 
@@ -156,20 +155,6 @@ void OutputQueue::dequeueCGAFrame()
 
     // Free the ring buffer slot we were using
     frames.pop_front();
-}
-
-void OutputQueue::renderFrame()
-{
-    // Synchronously render a frame. Handles frame skip, if enabled.
-
-    if (frameskip_counter < frameskip_value) {
-        frameskip_counter++;
-    } else {
-        frameskip_counter = 0;
-        EM_ASM_({
-           Module.onRenderFrame(HEAPU8.subarray($0, $1));
-        }, rgb_pixels, rgb_pixels + (SCREEN_WIDTH * SCREEN_HEIGHT));
-    }
 }
 
 uint32_t OutputQueue::renderSoundEffect(uint32_t first_timestamp)
@@ -241,11 +226,7 @@ uint32_t OutputQueue::run()
 
             case OUT_CGA_FRAME:
                 dequeueCGAFrame();
-                renderFrame();
-                break;
-
-            case OUT_RGB_FRAME:
-                renderFrame();
+                drawFrameRGB();
                 break;
 
             case OUT_DELAY:

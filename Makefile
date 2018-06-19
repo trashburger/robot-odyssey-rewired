@@ -46,7 +46,8 @@ WEBPACK_DEPS := \
 	src/style/*.css
 
 CPP_DEPS := \
-	src/engine/*.h
+	src/engine/*.h \
+	src/engine/*.py
 
 all: dist
 

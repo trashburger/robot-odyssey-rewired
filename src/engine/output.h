@@ -9,7 +9,6 @@
 enum OutputType
 {
     OUT_CGA_FRAME,
-    OUT_RGB_FRAME,
     OUT_SPEAKER_TIMESTAMP,
     OUT_DELAY,
 };
@@ -29,7 +28,7 @@ class OutputInterface
     OutputInterface(ColorTable &colorTable);
 
     virtual void pushFrameCGA(SBTStack *stack, uint8_t *framebuffer) = 0;
-    virtual void pushFrameRGB(SBTStack *stack, uint32_t *framebuffer) = 0;
+    virtual void drawFrameRGB() = 0;
     virtual void pushDelay(uint32_t millis) = 0;
     virtual void pushSpeakerTimestamp(uint32_t timestamp) = 0;
 
@@ -44,7 +43,7 @@ class OutputMinimal : public OutputInterface
     void clear();
 
     virtual void pushFrameCGA(SBTStack *stack, uint8_t *framebuffer);
-    virtual void pushFrameRGB(SBTStack *stack, uint32_t *framebuffer);
+    virtual void drawFrameRGB();
     virtual void pushDelay(uint32_t millis);
     virtual void pushSpeakerTimestamp(uint32_t timestamp);
 
@@ -64,14 +63,9 @@ class OutputQueue : public OutputInterface
     uint32_t run();
 
     virtual void pushFrameCGA(SBTStack *stack, uint8_t *framebuffer);
-    virtual void pushFrameRGB(SBTStack *stack, uint32_t *framebuffer);
+    virtual void drawFrameRGB();
     virtual void pushDelay(uint32_t millis);
     virtual void pushSpeakerTimestamp(uint32_t timestamp);
-
-    static const unsigned SCREEN_WIDTH = CGAFramebuffer::WIDTH * CGAFramebuffer::ZOOM;
-    static const unsigned SCREEN_HEIGHT = CGAFramebuffer::HEIGHT * CGAFramebuffer::ZOOM;
-
-    uint32_t rgb_pixels[SCREEN_WIDTH * SCREEN_HEIGHT];
 
     static const int CPU_CLOCK_HZ = 4770000;
     static const unsigned CPU_CLOCKS_PER_SAMPLE = 200;
@@ -92,6 +86,5 @@ class OutputQueue : public OutputInterface
     uint32_t frameskip_counter;
 
     void dequeueCGAFrame();
-    void renderFrame();
     uint32_t renderSoundEffect(uint32_t first_timestamp);
 };
