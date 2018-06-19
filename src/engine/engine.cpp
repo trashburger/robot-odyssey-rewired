@@ -100,7 +100,13 @@ static void exec(const std::string &process, const std::string &arg)
 
 static void setSpeed(float speed)
 {
+    // Stored speed for delay calculations, used on each main loop iter
     engine_speed = speed;
+
+    // Update frameskip so we can fast-forward without being limited by draw speed
+    outputQueue.setFrameSkip((unsigned) std::max(0.0f, speed / 8.0f));
+
+    // This may restart a paused main loop
     if (has_main_loop && speed > 0.0f) {
         emscripten_resume_main_loop();
     }

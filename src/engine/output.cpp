@@ -44,7 +44,9 @@ void OutputMinimal::pushSpeakerTimestamp(uint32_t timestamp)
 }
 
 OutputQueue::OutputQueue(ColorTable &colorTable)
-    : OutputInterface(colorTable)
+    : OutputInterface(colorTable),
+      frameskip_value(0),
+      frameskip_counter(0)
 {
     clear();
 }
@@ -55,6 +57,12 @@ void OutputQueue::clear()
     frames.clear();
     skipDelay();
 }
+
+void OutputQueue::setFrameSkip(uint32_t frameskip)
+{
+    frameskip_value = frameskip;
+}
+
 
 void OutputQueue::skipDelay()
 {
@@ -152,10 +160,16 @@ void OutputQueue::dequeueCGAFrame()
 
 void OutputQueue::renderFrame()
 {
-    // Synchronously ask Javascript to do something with this array
-    EM_ASM_({
-        Module.onRenderFrame(HEAPU8.subarray($0, $1));
-    }, rgb_pixels, rgb_pixels + (SCREEN_WIDTH * SCREEN_HEIGHT));
+    // Synchronously render a frame. Handles frame skip, if enabled.
+
+    if (frameskip_counter < frameskip_value) {
+        frameskip_counter++;
+    } else {
+        frameskip_counter = 0;
+        EM_ASM_({
+           Module.onRenderFrame(HEAPU8.subarray($0, $1));
+        }, rgb_pixels, rgb_pixels + (SCREEN_WIDTH * SCREEN_HEIGHT));
+    }
 }
 
 uint32_t OutputQueue::renderSoundEffect(uint32_t first_timestamp)

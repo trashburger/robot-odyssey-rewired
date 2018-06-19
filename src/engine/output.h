@@ -60,6 +60,7 @@ class OutputQueue : public OutputInterface
 
     void clear();
     void skipDelay();
+    void setFrameSkip(uint32_t frameskip);
     uint32_t run();
 
     virtual void pushFrameCGA(SBTStack *stack, uint8_t *framebuffer);
@@ -87,6 +88,8 @@ class OutputQueue : public OutputInterface
     jm::circular_buffer<OutputItem, MAX_BUFFERED_EVENTS> items;
     jm::circular_buffer<CGAFramebuffer, MAX_BUFFERED_FRAMES> frames;
     uint32_t delay_remaining;
+    uint32_t frameskip_value;
+    uint32_t frameskip_counter;
 
     void dequeueCGAFrame();
     void renderFrame();
