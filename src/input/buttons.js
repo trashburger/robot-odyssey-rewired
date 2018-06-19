@@ -3,6 +3,7 @@ import { mouseTrackingEnd } from './mouse.js';
 import * as GameMenu from '../gameMenu.js';
 
 const canvas = document.getElementById('framebuffer');
+const speed_selector = document.getElementById('speed_selector');
 const gamepad_button_mappings = [];
 
 export function updateMappedGamepadButton(pressed, index)
@@ -171,15 +172,22 @@ export function init(engine)
         });
     }
 
-    for (let button of Array.from(document.getElementsByClassName('setspeed_btn'))) {
+    speed_selector.addEventListener('change', (e) => {
+        engine.then(() => engine.setSpeed(parseFloat(speed_selector.value)));
+        e.target.blur();
+        canvas.focus();
+    });
+
+    for (let button of Array.from(document.getElementsByClassName('speed_adjust_btn'))) {
         addButtonEvents(button, () => {
-            if (engine.calledRun) {
-                for (let sibling of button.parentNode.children) {
-                    sibling.classList.remove('active_btn');
-                }
+            let i = speed_selector.selectedIndex + parseInt(button.dataset.value);
+            if (i >= 0 && i < speed_selector.length) {
+                speed_selector.selectedIndex = i;
+                engine.then(() => engine.setSpeed(parseFloat(speed_selector.value)));
                 button.classList.add('active_btn');
-                engine.setSpeed(parseFloat(button.dataset.speed));
             }
+        }, () => {
+            button.classList.remove('active_btn');
         });
     }
 

@@ -92,18 +92,28 @@
     </div>
 
     <div class="button_area">
-        <button class="setspeed_btn" data-speed="0.24">&frac14;</button>
-        <button class="setspeed_btn" data-speed="0.5">&frac12;</button>
-        <button class="setspeed_btn active_btn" data-speed="1.0">1x</button>
-        <button class="setspeed_btn" data-speed="2.0">2x</button>
-        <button class="setspeed_btn" data-speed="10">10x</button>
+        <button class="speed_adjust_btn rofont" data-value="-1">&lt;&lt;</button>
+        <select id="speed_selector">
+            <option value="0">pause</option>
+            <option value="0.125">⅛x</option>
+            <option value="0.25">¼x</option>
+            <option value="0.5">½x</option>
+            <option selected value="1">1x</option>
+            <option value="2">2x</option>
+            <option value="4">4x</option>
+            <option value="8">8x</option>
+            <option value="15">15x</option>
+            <option value="30">30x</option>
+            <option value="100">100x</option>
+        </select>
+        <button class="speed_adjust_btn rofont" data-value="1">&gt;&gt;</button>
     </div>
 
     <div class="button_area">
         <button class="loadsavefile_btn warning_btn rofont">Load File</button>
         <button class="loadgame_btn warning_btn rofont">Re-Load</button>
         <button class="savegame_btn rofont">Save Game</button>
-        <select class="palette_selector rofont">
+        <select id="palette_selector" class="rofont">
             <option selected class="rofont" value="rewired">Rewired Palette</option>
             <option class="rofont" value="hgr">Apple (HGR) Colors</option>
             <option class="rofont" value="cga">PC (CGA) Colors</option>

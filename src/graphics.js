@@ -31,6 +31,12 @@ export function init(engine)
         engineLoaded(engine);
     });
 
+    document.getElementById('palette_selector').addEventListener('change', (e) => {
+        engine.then(() => engine.setNamedPalette(e.target.value));
+        e.target.blur();
+        canvas.focus();
+    });
+
     canvas.focus();
 }
 
@@ -307,14 +313,6 @@ function engineLoaded(engine)
             engine.setColorTilesFromImage(RewiredTileset);
         }
     };
-
-    for (let element of Array.from(document.getElementsByClassName('palette_selector'))) {
-        element.addEventListener('change', () => {
-            engine.setNamedPalette(element.value);
-            element.blur();
-            canvas.focus();
-        });
-    }
 
     // Palette generation can take some time, make it
     // slightly async so this blocks CSS animations less.

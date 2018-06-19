@@ -9,7 +9,7 @@
 using namespace emscripten;
 
 static bool has_main_loop = false;
-static float delay_multiplier = 1.0f;
+static float engine_speed = 1.0f;
 static TinySave tinySave;
 
 SBT_DECL_PROCESS(ShowEXE);
@@ -39,25 +39,41 @@ static void loop()
 {
     // Run the main hardware instance until the next queued delay
 
-    while (true) {
-        uint32_t delay = outputQueue.run();
+    unsigned delay_accum = 0;
+    const float speed = engine_speed;
+    const unsigned minimum_delay_milliseconds = 10;
 
-        if (delay) {
+    if (!(speed > 0.0f)) {
+        // Engine paused via speed control
+        emscripten_pause_main_loop();
+        return;
+    }
+
+    while (true) {
+        unsigned queue_delay = outputQueue.run();
+
+        if (queue_delay == 0) {
+            if (hw.process) {
+                hw.process->run();
+            } else {
+                // Engine paused until exec
+                emscripten_pause_main_loop();
+                return;
+            }
+        }
+
+        delay_accum += queue_delay;
+        unsigned adjusted_delay = delay_accum / engine_speed;
+
+        if (adjusted_delay >= minimum_delay_milliseconds) {
             if (hw.input.checkForInputBacklog()) {
                 // Speed up for keyboard input backlog
                 emscripten_set_main_loop_timing(EM_TIMING_RAF, 1);
             } else {
                 // Millisecond-based timing, with optional modifier
-                emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, delay * delay_multiplier);
+                emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, adjusted_delay);
             }
-            break;
-        }
-
-        if (hw.process) {
-            hw.process->run();
-        } else {
-            emscripten_pause_main_loop();
-            break;
+            return;
         }
     }
 }
@@ -84,8 +100,9 @@ static void exec(const std::string &process, const std::string &arg)
 
 static void setSpeed(float speed)
 {
-    if (speed > 0.0f) {
-        delay_multiplier = 1.0 / speed;
+    engine_speed = speed;
+    if (has_main_loop && speed > 0.0f) {
+        emscripten_resume_main_loop();
     }
 }
 
