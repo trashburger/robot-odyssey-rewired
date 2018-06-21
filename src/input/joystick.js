@@ -51,6 +51,10 @@ export function init(engine)
         });
     }
 
+    // to do: preferences system, configurable joystick mapping
+    engine.gamepadInvertYAxis = false;
+    engine.gamepadDeadzone = 0.11;
+
     function gamepadPoll(gamepad, last_axes, last_pressed)
     {
         if (gamepad && gamepad.connected) {
@@ -63,8 +67,7 @@ export function init(engine)
             // spam positions near zero when idle, overriding any mouse or
             // virtual joystick input.
 
-            const deadzone = 0.11;
-
+            const deadzone = engine.gamepadDeadzone;
             if (axes[0]*axes[0] + axes[1]*axes[1] <= deadzone*deadzone) {
                 axes = [0,0];
                 if (last_axes[0] != 0 || last_axes[1] != 0) {
@@ -88,12 +91,13 @@ export function init(engine)
 
             // If any axes changed, send an XY event
             if (axes[0] != last_axes[0] || axes[1] != last_axes[1]) {
-                joystickAxes(axes[0], axes[1]);
+                const yinv = engine.gamepadInvertYAxis ? -1 : 1;
+                joystickAxes(axes[0], yinv * axes[1]);
 
                 // Animate the on-screen joystick
                 const size = js.options.size * 0.25;
                 js.ui.front.style.left = (axes[0] * size) + 'px';
-                js.ui.front.style.top = (axes[1] * size) + 'px';
+                js.ui.front.style.top = (yinv * axes[1] * size) + 'px';
                 if (last_axes[0] == 0 && last_axes[1] == 0) {
                     js.show();
                 }
@@ -109,5 +113,13 @@ export function init(engine)
     }
 
     // Begin polling gamepads if a new one appears
-    window.addEventListener('gamepadconnected', (e) => gamepadPoll(e.gamepad, [0,0], []));
+    window.addEventListener('gamepadconnected', (e) => {
+        gamepadPoll(e.gamepad, [0,0], []);
+
+        // This is a hack for a specific gamepad that needs Y axis inversion really.
+        // Replace this with more explicit preferences.
+        if (e.gamepad.mapping !== "standard" && id.includes('Nimbus')) {
+            engine.gamepadInvertYAxis = true;
+        }
+    });
 }
