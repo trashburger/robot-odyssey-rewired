@@ -1,3 +1,5 @@
+import { openFileManager } from './files.js';
+
 export const States = {
     SPLASH: 0,
     MENU_TRANSITION: 1,
@@ -69,7 +71,7 @@ export function init(engine)
         choices[i].addEventListener('click', function () {
             if (current_state == States.MENU_ACTIVE) {
                 setMenuChoice(i);
-                execMenuChoice(engine);
+                invokeMenuChoice(engine);
             }
         });
         choices[i].addEventListener('mouseenter', function () {
@@ -103,7 +105,7 @@ export function pressKey(engine, ascii, scancode)
             setMenuChoice(current_menu_choice - 1);
         } else if (ascii == 0x0D) {
             // Enter
-            execMenuChoice(engine);
+            invokeMenuChoice(engine);
         }
     }
 }
@@ -153,7 +155,7 @@ export function setJoystickButton(engine, b)
     if (b && current_state == States.SPLASH) {
         setState(States.MENU_TRANSITION);
     } else if (b && current_state == States.MENU_ACTIVE) {
-        execMenuChoice(engine);
+        invokeMenuChoice(engine);
     }
 }
 
@@ -262,17 +264,21 @@ function setMenuChoice(c)
     game_menu_cursor.style.top = offset_percent + '%';
 }
 
-function execMenuChoice(engine)
+function invokeMenuChoice(engine)
 {
-    // Sequence of operations:
-    //   1. Menu fades out immediately, we enter States.EXEC_LAUNCHING
-    //   2. If the WASM needs to load, it does so with the spinner visible
-    //   3. The game will take a small amount of time between exec() and the first frame
-    //   4. At the first frame, we setState(EXEC) and show the game with an iris transition
+    const choice = choices[current_menu_choice].dataset;
+    afterLoading(engine, () => {
 
-    const args = choices[current_menu_choice].dataset.exec.split(' ');
-    afterLoading(engine, function () {
-        setState(States.EXEC_LAUNCHING);
-        engine.exec(args[0], args[1] || '');
+        if (choice.files && openFileManager(choice.files)) {
+            // New or saved game/lab
+            setState(States.MODAL_FILES);
+
+        } else if (choice.exec) {
+            // Tutorials, new game/lab with no saves available
+            const args = choice.exec.split(' ');
+            setState(States.EXEC_LAUNCHING);
+            engine.exec(args[0], args[1] || '');
+        }
+
     });
 }

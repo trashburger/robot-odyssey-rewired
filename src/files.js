@@ -53,3 +53,9 @@ function engineLoaded(engine)
         });
     };
 }
+
+export function openFileManager(options)
+{
+    // to do
+    return false;
+}
