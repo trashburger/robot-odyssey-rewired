@@ -118,7 +118,7 @@ export function init(engine)
 
         // This is a hack for a specific gamepad that needs Y axis inversion really.
         // Replace this with more explicit preferences.
-        if (e.gamepad.mapping !== "standard" && id.includes('Nimbus')) {
+        if (e.gamepad.mapping !== 'standard' && e.gamepad.id.includes('Nimbus')) {
             engine.gamepadInvertYAxis = true;
         }
     });
