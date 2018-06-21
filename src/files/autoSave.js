@@ -1,4 +1,4 @@
-import * as GameMenu from './gameMenu.js';
+import * as GameMenu from '../gameMenu.js';
 import base64 from 'base64-arraybuffer';
 
 let last_set_window_hash = null;

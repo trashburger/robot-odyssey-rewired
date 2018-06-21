@@ -1,5 +1,5 @@
 import downloadjs from 'downloadjs';
-import { filenameForSaveData } from './roData.js';
+import { filenameForSaveData } from '../roData.js';
 
 export function init(engine)
 {
@@ -49,13 +49,7 @@ function engineLoaded(engine)
     engine.downloadColorTileImage = function(first_slot, num_slots)
     {
         return engine.saveColorTilesToImage(first_slot, num_slots).then(function (blob) {
-            downloadjs(blob, 'color-tiles.png', 'image/png'); 
+            downloadjs(blob, 'color-tiles.png', 'image/png');
         });
     };
-}
-
-export function openFileManager(options)
-{
-    // to do
-    return false;
 }

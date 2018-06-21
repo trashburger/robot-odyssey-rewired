@@ -1,4 +1,4 @@
-import { openFileManager } from './files.js';
+import * as FileManager from './files/fileManager.js';
 
 export const States = {
     SPLASH: 0,
@@ -269,7 +269,7 @@ function invokeMenuChoice(engine)
     const choice = choices[current_menu_choice].dataset;
     afterLoading(engine, () => {
 
-        if (choice.files && openFileManager(choice.files)) {
+        if (choice.files && FileManager.open(choice.files)) {
             // New or saved game/lab
             setState(States.MODAL_FILES);
 

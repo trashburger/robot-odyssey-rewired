@@ -39,7 +39,18 @@
 
     <div id="modal_files" class="modal layer hidden">
         <div class="modal_border">
-            <div class="rofont">Files</div>
+
+            <button id="files_game_new" class="exec_btn rofont" data-exec="show.exe">Start a new game</button>
+            <div id="files_game_load" class="rofont">Load a saved game:</div>
+            <div id="files_game_grid" class="file_grid"></div>
+
+            <button id="files_lab_new" class="exec_btn rofont" data-exec="lab.exe 30">Start a new lab</button>
+            <div id="files_lab_load" class="rofont">Load a saved lab:</div>
+            <div id="files_lab_grid" class="file_grid"></div>
+
+            <div id="files_chip_load" class="rofont">Load a saved chip:</div>
+            <div id="files_chip_grid" class="file_grid"></div>
+
         </div>
     </div>
 
@@ -115,8 +126,8 @@
         <button class="savegame_btn rofont">Save Game</button>
         <select id="palette_selector" class="rofont">
             <option selected class="rofont" value="rewired">Rewired Palette</option>
-            <option class="rofont" value="hgr">Apple (HGR) Colors</option>
-            <option class="rofont" value="cga">PC (CGA) Colors</option>
+            <option class="rofont" value="hgr">Apple ][ Colors</option>
+            <option class="rofont" value="cga">DOS/CGA Colors</option>
         </select>
     </div>
 

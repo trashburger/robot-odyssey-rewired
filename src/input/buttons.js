@@ -78,8 +78,10 @@ function controlCode(key)
 
 export function init(engine)
 {
-    // Fade in the controls as soon as this Javascript is ready
-    document.getElementById('engine_controls').classList.remove('hidden');
+    // Fade in the controls about a frame after the JS is ready, before the engine loads
+    setTimeout(() => {
+        document.getElementById('engine_controls').classList.remove('hidden');
+    }, 10);
 
     function keycode(ascii, scancode)
     {
@@ -224,6 +226,20 @@ export function init(engine)
         }, () => {
             if (engine.calledRun) {
                 engine.loadSaveFilePicker();
+            }
+        });
+    }
+
+    for (let button of Array.from(document.getElementsByClassName('exec_btn'))) {
+        addButtonEvents(button, () => {
+            button.classList.add('active_btn');
+        }, () => {
+            button.classList.remove('active_btn');
+        }, () => {
+            if (engine.calledRun) {
+                const args = button.dataset.exec.split(' ');
+                GameMenu.setState(GameMenu.States.EXEC_LAUNCHING);
+                engine.exec(args[0], args[1] || '');
             }
         });
     }

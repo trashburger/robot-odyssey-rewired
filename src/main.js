@@ -3,8 +3,9 @@ import * as Sound from './sound.js';
 import * as Buttons from './input/buttons.js';
 import * as Mouse from './input/mouse.js';
 import * as Joystick from './input/joystick.js';
-import * as AutoSave from './autoSave.js';
-import * as Files from './files.js';
+import * as AutoSave from './files/autoSave.js';
+import * as FileActions from './files/fileActions.js';
+import * as Storage from './files/storage.js';
 import * as GameMenu from './gameMenu.js';
 
 import OfflinePluginRuntime from 'offline-plugin/runtime';
@@ -30,12 +31,13 @@ try {
 
     window.ROEngine = engine;
 
+    Storage.init(engine);
     Graphics.init(engine);
     Sound.init(engine);
     Buttons.init(engine);
     Mouse.init(engine);
     Joystick.init(engine);
-    Files.init(engine);
+    FileActions.init(engine);
     GameMenu.init(engine);
 
     // Autosave should be last, it may try to launch a saved game

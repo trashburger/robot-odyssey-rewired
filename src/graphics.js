@@ -2,7 +2,6 @@ import * as GameMenu from './gameMenu.js';
 import RewiredTileset from './assets/rewired-tileset.png';
 
 const canvas = document.getElementById('framebuffer');
-const DEFAULT_PALETTE = 'rewired';
 
 export function init(engine)
 {
@@ -21,7 +20,7 @@ export function init(engine)
     // rather than causing a delay later on when the game is opening.
     context.putImageData(image, border, border);
 
-    engine.onRenderFrame = function (rgb) {
+    engine.onRenderFrame = (rgb) => {
         image.data.set(rgb);
         context.putImageData(image, border, border);
         GameMenu.setState(GameMenu.States.EXEC);
@@ -31,8 +30,17 @@ export function init(engine)
         engineLoaded(engine);
     });
 
-    document.getElementById('palette_selector').addEventListener('change', (e) => {
-        engine.then(() => engine.setNamedPalette(e.target.value));
+    const palette_selector = document.getElementById('palette_selector');
+
+    engine.settings.watch('palette', (s) => {
+        palette_selector.value = s.name;
+    });
+
+    palette_selector.addEventListener('change', (e) => {
+        engine.settings.put({
+            setting: 'palette',
+            name: e.target.value,
+        });
         e.target.blur();
         canvas.focus();
     });
@@ -314,7 +322,8 @@ function engineLoaded(engine)
         }
     };
 
-    // Palette generation can take some time, make it
-    // slightly async so this blocks CSS animations less.
-    setTimeout(() => engine.setNamedPalette(DEFAULT_PALETTE), 0);
+    // Load the initial palette asynchronously
+    setTimeout(() => {
+        engine.settings.watch('palette', (s) => engine.setNamedPalette(s.name));
+    }, 0);
 }
