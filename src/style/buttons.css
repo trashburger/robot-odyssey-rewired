@@ -14,11 +14,6 @@
     background: #382222;
 }
 
-.setspeed_btn {
-    background: #223022;
-    touch-action: none;
-}
-
 .active_btn {
     background-color: #444440;
     border-color: #777;
