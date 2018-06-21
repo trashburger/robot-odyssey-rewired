@@ -54,7 +54,7 @@ button, select {
     flex: 1 0 0;
     text-align: center;
     text-align-last: center;
-    min-height: 40px;
+    min-height: 50px;
 }
 
 .button_area {
