@@ -1,3 +1,6 @@
+import JSZip from 'jszip';
+
+
 export function init(engine)
 {
     engine.settings = new Settings();
@@ -59,6 +62,29 @@ class Files
             const file = { name, data, date, extension };
             this.objectStore('readwrite').put(file);
         }
+    }
+
+    toZip()
+    {
+        return new Promise((resolve) => {
+            const zip = new JSZip();
+            if (this.db) {
+                this.objectStore().openCursor().onsuccess = (e) => {
+                    const cursor = e.target.result;
+                    if (cursor) {
+                        zip.file(cursor.value.name, cursor.value.data, {
+                            date: cursor.value.date,
+                            binary: true,
+                        });
+                        cursor.continue();
+                    } else {
+                        resolve(zip);
+                    }
+                };
+            } else {
+                resolve(zip);
+            }
+        });
     }
 }
 

@@ -55,4 +55,19 @@ function engineLoaded(engine)
             downloadjs(blob, 'color-tiles.png', 'image/png');
         });
     };
+
+    engine.downloadArchive = function()
+    {
+        const date = new Date();
+        const datestr = date.toLocaleString().replace(/\//g,'-');
+        engine.files.toZip().then((zip) => {
+            return zip.generateAsync({
+                type: 'blob',
+                compression: 'DEFLATE',
+                compressionOptions: {level: 9},
+            });
+        }).then((blob) => {
+            downloadjs(blob, `Robot Odyssey Files (${datestr}).zip`);
+        });
+    };
 }
