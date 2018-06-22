@@ -1,4 +1,5 @@
 import * as GameMenu from '../gameMenu.js';
+import { filenameForAutosave } from '../roData.js';
 import base64 from 'base64-arraybuffer';
 
 let last_set_window_hash = null;
@@ -22,29 +23,22 @@ function doAutoSave(engine)
     engine.onSaveFileWrite = function () {};
 
     try {
-        /* eslint-disable no-console */
-        let hash = '';
-
         switch (engine.saveGame()) {
 
         case engine.SaveStatus.OK:
-            hash = base64.encode(engine.packSaveFile());
-            console.log(`autoSave, ${hash.length} bytes`);
+            storeAutoSave(engine);
             break;
 
         case engine.SaveStatus.BLOCKED:
             return;
 
         case engine.SaveStatus.NOT_SUPPORTED:
-            hash = '';
+            last_set_window_hash = '';
+            window.location.hash = '';
             break;
         }
 
-        last_set_window_hash = hash;
-        window.location.hash = hash;
-
     } finally {
-
         engine.onSaveFileWrite = saved_callback;
         engine.setSaveFile(saved_contents, false);
     }
@@ -96,4 +90,18 @@ function engineLoaded(engine)
             doAutoSave(engine);
         }, autosave_delay);
     };
+}
+
+function storeAutoSave(engine)
+{
+    const saveData = engine.getSaveFile();
+    const packed = engine.packSaveFile();
+
+    const date = new Date();
+    const name = filenameForAutosave(saveData, date);
+    engine.files.save(name, packed, date);
+
+    const hash = base64.encode(packed);
+    last_set_window_hash = hash;
+    window.location.hash = hash;
 }

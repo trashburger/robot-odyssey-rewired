@@ -51,6 +51,16 @@ class Files
     {
         this.db = db;
     }
+
+    save(name, data, date)
+    {
+        if (this.db) {
+            date = date || new Date();
+            const extension = name.split('.').pop();
+            const file = { name, data, date, extension };
+            this.objectStore('readwrite').put(file);
+        }
+    }
 }
 
 
@@ -107,6 +117,8 @@ class Settings
         const key = obj.setting;
         const fn = this.watchfn[key];
         if (fn) fn(obj);
-        this.objectStore('readwrite').put(obj);
+        if (this.db) {
+            this.objectStore('readwrite').put(obj);
+        }
     }
 }

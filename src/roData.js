@@ -28,21 +28,36 @@ export function chipNameFromSaveData(bytes)
     return null;
 }
 
-export function filenameForSaveData(bytes)
+export function filenameForSaveData(bytes, date)
 {
     const world = worldIdFromSaveData(bytes);
     const chip = chipNameFromSaveData(bytes);
-    const now = new Date();
+    const datestr = date.toLocaleString().replace('/','-');
 
     if (world !== null) {
         if (world == LAB_WORLD) {
-            return 'robotodyssey-lab-' + now.toISOString() + '.lsv';
+            return `Saved Lab (${datestr}).lsv`;
         } else {
-            return 'robotodyssey-world' + (world+1) + '-' + now.toISOString() + '.gsv';
+            return `Robotropolis, World ${world+1} (${datestr}).gsv`;
         }
     }
-    if (chip !== null) {
-        return 'robotodyssey-chip-' + chip + '-' + now.toISOString() + '.csv';
+    if (chip !==  null) {
+        return `${chip} (${datestr}).csv`;
     }
-    return 'robotodyssey-' + now.toISOString() + '.bin';
+    return `${datestr}.bin`;
+}
+
+export function filenameForAutosave(bytes, date)
+{
+    const world = worldIdFromSaveData(bytes);
+    const datestr = date.toLocaleString().replace('/','-');
+
+    if (world !== null) {
+        if (world == LAB_WORLD) {
+            return `Autosave (${datestr}).lsvz`;
+        } else {
+            return `Autosave (${datestr}).gsvz`;
+        }
+    }
+    return `Autosave (${datestr}).bin`;
 }

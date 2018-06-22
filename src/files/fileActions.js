@@ -14,7 +14,10 @@ function engineLoaded(engine)
     engine.onSaveFileWrite = function ()
     {
         const saveData = engine.getSaveFile();
-        downloadjs(saveData, filenameForSaveData(saveData), 'application/octet-stream');
+        const date = new Date();
+        const name = filenameForSaveData(saveData, date);
+        engine.files.save(name, saveData, date);
+        downloadjs(saveData, name, 'application/octet-stream');
     };
 
     engine.loadSaveFilePicker = function ()
