@@ -21,7 +21,6 @@ export function init(engine)
         db.createObjectStore('settings', { keyPath: 'setting' });
 
         const files = db.createObjectStore('files', { keyPath: 'name' });
-        files.createIndex('length', 'data.length');
         files.createIndex('extension', 'extension');
         files.createIndex('date', 'date');
     };

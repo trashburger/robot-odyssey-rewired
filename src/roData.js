@@ -23,7 +23,7 @@ export function chipNameFromSaveData(bytes)
             }
             name += String.fromCharCode(byte);
         }
-        return name.trim() || 'untitled';
+        return name.trim() || 'Untitled Chip';
     }
     return null;
 }
@@ -32,7 +32,7 @@ export function filenameForSaveData(bytes, date)
 {
     const world = worldIdFromSaveData(bytes);
     const chip = chipNameFromSaveData(bytes);
-    const datestr = date.toLocaleString().replace('/','-');
+    const datestr = date.toLocaleString().replace(/\//g,'-');
 
     if (world !== null) {
         if (world == LAB_WORLD) {
@@ -50,7 +50,7 @@ export function filenameForSaveData(bytes, date)
 export function filenameForAutosave(bytes, date)
 {
     const world = worldIdFromSaveData(bytes);
-    const datestr = date.toLocaleString().replace('/','-');
+    const datestr = date.toLocaleString().replace(/\//g,'-');
 
     if (world !== null) {
         if (world == LAB_WORLD) {
