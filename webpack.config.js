@@ -36,7 +36,9 @@ module.exports = {
             template: './src/main.html',
             inlineSource: '.css$',
             title,
-            version: (new GitRevisionPlugin()).version(),
+            version: (new GitRevisionPlugin({
+                versionCommand: 'describe --always --tags --dirty',
+            })).version(),
         }),
         new HtmlWebpackInlineSourcePlugin(),
         new FaviconsWebpackPlugin({
