@@ -1,6 +1,8 @@
 import * as Graphics from '../graphics.js';
 import ScreenshotLoadingImage from '../assets/screenshot-loading.png';
 
+const INTERVAL = 20;
+
 const screenshot_render_queue = [];
 let screenshot_render_timer = null;
 
@@ -42,7 +44,7 @@ function callback(entries)
                     // File is loaded and engine is ready. Now rate-limit and serialize the actual rendering
                     screenshot_render_queue.push(element);
                     if (screenshot_render_timer === null) {
-                        screenshot_render_timer = setInterval(renderer, 10);
+                        screenshot_render_timer = setInterval(renderer, INTERVAL);
                     }
                 });
             });

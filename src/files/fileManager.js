@@ -75,7 +75,9 @@ export function close(optionalStateOverride)
         GameMenu.setState(optionalStateOverride || saved.state);
         speed_selector.value = saved.speed;
         speed_selector.dispatchEvent(new Event('change'));
+        return true;
     }
+    return false;
 }
 
 export function setChipId(chip_id)

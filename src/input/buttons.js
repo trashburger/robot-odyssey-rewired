@@ -1,6 +1,7 @@
 import { audioContextSetup } from '../sound.js';
 import { mouseTrackingEnd } from './mouse.js';
 import * as GameMenu from '../gameMenu.js';
+import * as FileManager from '../files/fileManager.js';
 
 const canvas = document.getElementById('framebuffer');
 const speed_selector = document.getElementById('speed_selector');
@@ -220,7 +221,8 @@ export function init(engine)
         addButtonClick(button, () => {
             const args = button.dataset.exec.split(' ');
             engine.then(() => {
-                GameMenu.setState(GameMenu.States.EXEC_LAUNCHING);
+                const s = GameMenu.States.EXEC_LAUNCHING;
+                FileManager.close(s) || GameMenu.setState(s);
                 engine.exec(args[0], args[1] || '');
             });
         });
