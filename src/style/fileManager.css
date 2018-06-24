@@ -1,7 +1,6 @@
 #modal_files h1 {
-	margin: 10px 0;
+	margin: 2vmin 0;
     font-size: 110%;
-    line-height: 1.1;
 }
 
 #modal_files .files {
@@ -29,6 +28,7 @@
 	display: flex;
 	flex-direction: column;
 	margin-left: 10px;
+	margin-right: 5px;
 	justify-content: space-around;
 	overflow: hidden;
 }
@@ -45,7 +45,7 @@
 }
 
 #modal_files .thumbnail:hover {
-	transform: scale(2);
+	transform: scale(2.25);
 	z-index: 2;
 }
 

@@ -119,7 +119,7 @@ function filesStoredConfirmation(result, onclick)
 
     const msg = files.length ?
         'Ok!\n\nThese files have been stored:\n\n' + files.join('\n')
-        : 'Didn\'t find any supported files!';
+        : 'Didn\'t find any supported files!\n\n' + FILE_TYPES;
 
     FileManager.close();
     return GameMenu.modal(msg, onclick);
