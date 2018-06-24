@@ -1,75 +1,75 @@
 #modal_files h1 {
-	margin: 2vmin 0;
+    margin: 2vmin 0;
     font-size: 110%;
 }
 
 #modal_files .files {
     display: flex;
     flex-wrap: wrap;
-	justify-content: center;
+    justify-content: center;
     width: 100%;
 }
 
 #modal_files .item {
-	flex: 0 0 0;
-	display: flex;
-	margin: -1px;
-	padding: 1px;
-	border: 1px solid #111;
-	background: #000;
-	min-width: 330px;
+    flex: 0 0 0;
+    display: flex;
+    margin: -1px;
+    padding: 1px;
+    border: 1px solid #111;
+    background: #000;
+    min-width: 330px;
 }
 
 #modal_files .item:hover {
-	background: #444;
+    background: #444;
 }
 
 #modal_files .details {
-	display: flex;
-	flex-direction: column;
-	margin-left: 10px;
-	margin-right: 5px;
-	justify-content: space-around;
-	overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+    margin-right: 5px;
+    justify-content: space-around;
+    overflow: hidden;
 }
 
 #modal_files .thumbnail {
-	position: relative;
+    position: relative;
     flex: 0 0 0;
-	width: 120px;
-	height: 90px;
-	background: rgba(0,0,0,0.8);
-	border: 1px solid #000;
-	transition: transform 0.2s ease;
-	transform: none;
-	z-index: 1;
+    width: 120px;
+    height: 90px;
+    background: rgba(0,0,0,0.8);
+    border: 1px solid #000;
+    transition: transform 0.2s ease;
+    transform: none;
+    z-index: 1;
 }
 
 #modal_files .thumbnail:hover {
-	transform: scale(2.25);
-	z-index: 2;
+    transform: scale(2.25);
+    z-index: 2;
 }
 
 #modal_files .filename {
-	color: #eee;
-	overflow-wrap: break-word;
-	font-size: 80%;
+    color: #eee;
+    overflow-wrap: break-word;
+    font-size: 80%;
 }
 
 #modal_files .date {
-	color: #777;
-	font-size: 70%;
+    color: #777;
+    font-size: 70%;
 }
 
 #modal_files .button_area {
     display: flex;
     flex-wrap: wrap;
-	justify-content: space-between;
+    justify-content: space-between;
     margin: 0;
 }
 
 #modal_files .button_area.hidden {
-	display: none;
+    display: none;
 }
 
 #modal_files .button_area .spacer {
