@@ -113,7 +113,7 @@ class Files
                     const file = { name, date, extension };
                     file.load = () => db.transaction('files').objectStore('files').get(name).then((v) => {
                         // Cache file data after it's loaded once
-                        file.data = v.data;
+                        file.data = new Uint8Array(v.data);
                         file.load = () => Promise.resolve(file);
                         return file;
                     });
