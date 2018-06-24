@@ -21,7 +21,7 @@ const onclick = {
 function clickedSavedFile(engine, file)
 {
     file.load().then((file) => {
-        if (engine.setSaveFile(file.data, file.name.includes('z')) && engine.loadGame()) {
+        if (engine.setSaveFile(file.data, file.extension.includes('z')) && engine.loadGame()) {
             close(GameMenu.States.LOADING);
         }
     });
@@ -66,7 +66,7 @@ export function setChipId(chip_id)
     // Set the click handler to load the correct chip slot and go back to the game
     onclick.chip = (engine, file) => {
         file.load().then((file) => {
-            if (engine.setSaveFile(file.data, file.name.includes('z'))
+            if (engine.setSaveFile(file.data, file.extension.includes('z'))
                 && engine.loadChip(chip_id)) {
                 close(GameMenu.States.EXEC);
             }
