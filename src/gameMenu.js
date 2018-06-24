@@ -174,6 +174,12 @@ export function pressKey(engine, ascii, scancode)
             // Escape
             FileManager.close();
         }
+
+    } else if (current_state == States.EXEC && engine.calledRun) {
+        // Engine gets keys only when it's in front
+        engine.pressKey(ascii, scancode);
+        engine.autoSave();
+
     }
 }
 

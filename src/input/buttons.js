@@ -98,10 +98,6 @@ export function init(engine)
         if (typeof(ascii) != typeof(0)) {
             ascii = ascii.length == 1 ? ascii.charCodeAt(0) : parseInt(ascii, 0);
         }
-        if (engine.calledRun) {
-            engine.pressKey(ascii, scancode);
-            engine.autoSave();
-        }
         GameMenu.pressKey(engine, ascii, scancode);
         audioContextSetup();
     }
