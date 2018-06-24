@@ -3,26 +3,26 @@ import RewiredTileset from './assets/rewired-tileset.png';
 
 const canvas = document.getElementById('framebuffer');
 
+export const WIDTH = 640;
+export const HEIGHT = 400;
+export const VISIBLE_HEIGHT = 384;
+export const BORDER = 2;
+
 export function init(engine)
 {
-    const width = 640;
-    const height = 400;
-    const visible_height = 384;
-    const border = 2;
-
-    canvas.width = width + border*2;
-    canvas.height = visible_height + border*2;
+    canvas.width = WIDTH + BORDER*2;
+    canvas.height = VISIBLE_HEIGHT + BORDER*2;
 
     const context = canvas.getContext('2d');
-    const image = context.createImageData(width, height);
+    const image = context.createImageData(WIDTH, HEIGHT);
 
     // The first putImageData can take a while on Chrome? Do this at init
     // rather than causing a delay later on when the game is opening.
-    context.putImageData(image, border, border);
+    context.putImageData(image, BORDER, BORDER);
 
     engine.onRenderFrame = (rgb) => {
         image.data.set(rgb);
-        context.putImageData(image, border, border);
+        context.putImageData(image, BORDER, BORDER);
 
         const state = GameMenu.getState();
         const S = GameMenu.States;

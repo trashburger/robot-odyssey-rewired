@@ -1,13 +1,11 @@
 import relativeDate from 'relative-date';
 import 'intersection-observer';
 import * as GameMenu from '../gameMenu.js';
+import * as LazyScreenshot from './lazyScreenshot.js';
 
 const modal_files = document.getElementById('modal_files');
 
 let files_close_state = null;
-
-const screenshot_render_queue = [];
-let screenshot_render_timer = null;
 
 const filters = {
     game: (file) => ['gsv', 'gsvz'].includes(file.extension),
@@ -28,47 +26,6 @@ function clickedSavedFile(engine, file)
         }
     });
 }
-
-function lazyScreenshotRenderer()
-{
-    if (!screenshot_render_queue.length) {
-        clearInterval(screenshot_render_timer);
-        screenshot_render_timer = null;
-        return;
-    }
-
-    const element = screenshot_render_queue.pop();
-    const engine = element.roEngine;
-    const file = element.roLoadedFile;
-    const ctx = element.getContext('2d');
-
-    ctx.putImageData(engine.screenshotSaveFile(file.data, file.name.includes('z')), 0, 0);
-}
-
-// Start loading screenshots only when they're visible
-const lazyScreenshotLoader = new IntersectionObserver((entries) => {
-    for (let entry of entries) {
-        const element = entry.target;
-        if (entry.isIntersecting) {
-            // Stop observing after the first intersection, async load the file data
-            lazyScreenshotLoader.unobserve(entry.target);
-            element.roFile.load().then((file) => {
-                element.roLoadedFile = file;
-                element.roEngine.then(() => {
-                    // File is loaded and engine is ready. Now rate-limit and serialize the actual rendering
-                    screenshot_render_queue.push(entry.target);
-                    if (screenshot_render_timer === null) {
-                        screenshot_render_timer = setInterval(lazyScreenshotRenderer, 10);
-                    }
-                });
-            });
-        }
-    }
-}, {
-    root: document.getElementById('game_area'),
-    rootMargin: '0px',
-    threshold: 0,
-});
 
 export function open(engine, mode, next_state)
 {
@@ -139,7 +96,7 @@ function visitElements(element, mode, file_elements)
         // File view: replace with a container we populate asynchronously
 
         var new_element = element.cloneNode(false);
-        lazyScreenshotLoader.disconnect();
+        LazyScreenshot.disconnect();
         if (mode.includes(data.filemode)) {
             file_elements.push(new_element);
         }
@@ -160,14 +117,10 @@ function fileView(engine, file, mode)
     item.classList.add('item');
     item.addEventListener('click', () => onclick[mode](engine, file));
 
-    const thumbnail = document.createElement('canvas');
+    const thumbnail = document.createElement('img');
     thumbnail.classList.add('thumbnail');
-    thumbnail.width = 640;
-    thumbnail.height = 384;
-    thumbnail.roFile = file;
-    thumbnail.roEngine = engine;
     item.appendChild(thumbnail);
-    lazyScreenshotLoader.observe(thumbnail);
+    LazyScreenshot.add(engine, file, thumbnail);
 
     const details = document.createElement('div');
     details.classList.add('details');
