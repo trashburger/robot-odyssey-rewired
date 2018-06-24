@@ -155,8 +155,6 @@ function engineLoaded(engine)
 
         const p = engine.files.createZip().then((zip) => zip.generateAsync({
             type: 'blob',
-            compression: 'DEFLATE',
-            compressionOptions: {level: 9},
         })).then((blob) => {
             downloadjs(blob, `Robot Odyssey Files (${datestr}).zip`);
             return true;
