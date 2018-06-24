@@ -1,5 +1,5 @@
 #modal_files h1 {
-	margin: 20px 0 15px 0;
+	margin: 10px 0;
     font-size: 110%;
     line-height: 1.1;
 }
@@ -7,17 +7,18 @@
 #modal_files .files {
     display: flex;
     flex-wrap: wrap;
+	justify-content: center;
     width: 100%;
 }
 
 #modal_files .item {
-	flex: 1 1 0;
+	flex: 0 0 0;
 	display: flex;
 	margin: -1px;
 	padding: 1px;
 	border: 1px solid #111;
 	background: #000;
-	min-width: 300px;
+	min-width: 360px;
 }
 
 #modal_files .item:hover {
@@ -33,17 +34,19 @@
 }
 
 #modal_files .thumbnail {
+	position: relative;
 	width: 120px;
 	height: 90px;
 	background: rgba(0,0,0,0.8);
 	border: 1px solid #000;
 	transition: transform 0.2s ease;
 	transform: none;
+	z-index: 1;
 }
 
 #modal_files .thumbnail:hover {
-	transform: translate(60%, 0%) scale(2.5);
-	z-index: 10;
+	transform: scale(2);
+	z-index: 2;
 }
 
 #modal_files .filename {

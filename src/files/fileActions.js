@@ -121,6 +121,7 @@ function filesStoredConfirmation(result, onclick)
         'Ok!\n\nThese files have been stored:\n\n' + files.join('\n')
         : 'Didn\'t find any supported files!';
 
+    FileManager.close();
     return GameMenu.modal(msg, onclick);
 }
 

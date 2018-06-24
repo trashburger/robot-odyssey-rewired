@@ -100,9 +100,24 @@ class Files
 
     listFiles(fn)
     {
-        return this.dbPromise.then((db) => {
+        // Put static files first, then wait on the database.
+        // In the case of the chip loader (currently the only place where
+        // this distinction matters) we want to present the built-in chips
+        // quickly and consistently even if the db takes its time.
 
-            // First, return all database files, newest first
+        return this.staticFilesPromise.then((staticFiles) => {
+            const date = new Date('1986-01-01T00:00:00.000Z');
+
+            for (const [name, data] of Object.entries(staticFiles)) {
+                const extension = getExtension(name);
+                const file = { name, date, extension, data };
+                file.load = () => Promise.resolve(file);
+                fn(file);
+            }
+
+            return this.dbPromise;
+        }).then((db) => {
+
             const tx = db.transaction('files');
             tx.objectStore('files').index('date').iterateKeyCursor(null, 'prev', (cursor) => {
                 if (!cursor) return;
@@ -122,16 +137,7 @@ class Files
                 cursor.continue();
             });
 
-            // After the database files, return static files
-            return tx.complete.then(() => this.staticFilesPromise).then((staticFiles) => {
-                const date = new Date('1986-01-01T00:00:00.000Z');
-                for (const [name, data] of Object.entries(staticFiles)) {
-                    const extension = getExtension(name);
-                    const file = { name, date, extension, data };
-                    file.load = () => Promise.resolve(file);
-                    fn(file);
-                }
-            });
+            return tx.complete;
         });
     }
 
