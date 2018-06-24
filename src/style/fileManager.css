@@ -57,3 +57,18 @@
 #modal_files .date {
 	color: #777;
 }
+
+#modal_files .button_area {
+    display: flex;
+    flex-wrap: wrap;
+	justify-content: space-between;
+    margin: 0;
+}
+
+#modal_files .button_area.hidden {
+	display: none;
+}
+
+#modal_files .button_area .spacer {
+    flex: 0.25 0 0;
+}

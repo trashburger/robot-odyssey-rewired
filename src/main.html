@@ -40,11 +40,23 @@
     <div id="modal_files" class="modal layer hidden">
         <div class="modal_border">
 
-            <button class="exec_btn rofont" data-exec="show.exe" data-filemode="game">} Start a new game</button>
+            <div data-filemode="game" class="button_area">
+                <button class="exec_btn rofont" data-exec="show.exe">} Start a new game</button>
+                <div class="spacer"></div>
+                <button class="filepicker_btn rofont">Choose Files...</button>
+                <button class="savezip_btn rofont">Download Archive</button>
+            </div>
+
             <h1 data-filemode="game" class="rofont">Load a saved game:</h1>
             <div data-filemode="game" class="files"></div>
 
-            <button class="exec_btn rofont" data-exec="lab.exe 30" data-filemode="lab">} Start a new lab</button>
+            <div data-filemode="lab" class="button_area">
+                <button class="exec_btn rofont" data-exec="lab.exe 30" data-filemode="lab">} Start a new lab</button>
+                <div class="spacer"></div>
+                <button class="filepicker_btn rofont">Choose Files...</button>
+                <button class="savezip_btn rofont">Download Archive</button>
+            </div>
+
             <h1 data-filemode="lab" class="rofont">Load a saved lab:</h1>
             <div data-filemode="lab" class="files"></div>
 
@@ -118,11 +130,6 @@
             <option value="200">200x</option>
         </select>
         <button class="speed_adjust_btn rofont" data-value="1">&gt;&gt;</button>
-    </div>
-
-    <div class="button_area">
-        <button class="filepicker_btn rofont">Use Files...</button>
-        <button class="savezip_btn rofont">Save ZIP</button>
         <select id="palette_selector" class="rofont">
             <option selected class="rofont" value="rewired">Rewired Palette</option>
             <option class="rofont" value="hgr">Apple ][ Colors</option>
