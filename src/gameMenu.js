@@ -1,4 +1,5 @@
 import * as FileManager from './files/fileManager.js';
+import { mouseTrackingEnd } from './input/mouse.js';
 
 export const States = {
     SPLASH: 0,
@@ -262,14 +263,21 @@ export function setState(s)
         return;
     }
     if (current_state == States.ERROR_HALT) {
+        // Stay stuck in error halt
         return;
     }
     current_state = s;
+
+    // At this point, a state change is definitely happening.
+    // Reset per-state context, and make UI visibility changes.
 
     if (menu_joystick_interval) {
         clearInterval(menu_joystick_interval);
         menu_joystick_interval = null;
     }
+
+    // Clear mouse lockout, clear keyboard buffer
+    mouseTrackingEnd();
 
     if (s == States.MENU_TRANSITION) {
         // Brief timed state to lock out input when menu is fading in
