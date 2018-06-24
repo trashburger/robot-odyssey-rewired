@@ -17,7 +17,7 @@
 	padding: 1px;
 	border: 1px solid #111;
 	background: #000;
-	min-width: 360px;
+	min-width: 330px;
 }
 
 #modal_files .item:hover {
@@ -35,6 +35,7 @@
 
 #modal_files .thumbnail {
 	position: relative;
+    flex: 0 0 0;
 	width: 120px;
 	height: 90px;
 	background: rgba(0,0,0,0.8);
@@ -52,10 +53,12 @@
 #modal_files .filename {
 	color: #eee;
 	overflow-wrap: break-word;
+	font-size: 80%;
 }
 
 #modal_files .date {
 	color: #777;
+	font-size: 70%;
 }
 
 #modal_files .button_area {
