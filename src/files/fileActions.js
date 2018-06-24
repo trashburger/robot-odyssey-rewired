@@ -82,11 +82,7 @@ export function init(engine)
     // When a chip is loaded in-game, we get to pause here and show a file picker
     engine.onLoadChipRequest = (chip_id) => {
         FileManager.setChipId(chip_id);
-        FileManager.open(engine, 'chip').then((result) => {
-            if (result) {
-                GameMenu.setState(GameMenu.States.MODAL_FILES);
-            }
-        });
+        FileManager.open(engine, 'chip');
     };
 
     // Request a picker for uploading native files

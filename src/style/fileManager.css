@@ -4,10 +4,6 @@
     line-height: 1.1;
 }
 
-#modal_files button {
-	color: #eee;
-}
-
 #modal_files .files {
     display: flex;
     flex-wrap: wrap;
@@ -49,10 +45,10 @@
 }
 
 #modal_files .filename {
-	color: #aaa;
+	color: #eee;
 	overflow-wrap: break-word;
 }
 
 #modal_files .date {
-	color: #888;
+	color: #777;
 }

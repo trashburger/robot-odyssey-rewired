@@ -4,8 +4,8 @@ import * as GameMenu from '../gameMenu.js';
 import * as LazyScreenshot from './lazyScreenshot.js';
 
 const modal_files = document.getElementById('modal_files');
-
-let files_close_state = null;
+const speed_selector = document.getElementById('speed_selector');
+let modal_saved = null;
 
 const filters = {
     game: (file) => ['gsv', 'gsvz'].includes(file.extension),
@@ -29,16 +29,14 @@ function clickedSavedFile(engine, file)
 
 export function open(engine, mode, next_state)
 {
-    files_close_state = next_state;
-
     const file_elements = [];
     visitElements(modal_files, mode.split(' '), file_elements);
 
-    // The returned promise indicates whether we successfully found
-    // any files (resolving on the first success) or if we made it
-    // to the end of the transaction without finding anything.
-
     return new Promise((resolve, reject) => {
+        // The returned promise indicates whether we successfully found
+        // any files (resolving on the first success) or if we made it
+        // to the end of the transaction without finding anything.
+
         engine.files.listFiles((file) => {
             // One file returned from the database
             for (let element of file_elements) {
@@ -50,14 +48,33 @@ export function open(engine, mode, next_state)
                 }
             }
         }).then(() => resolve(false), reject);
+
+    }).then((result) => {
+        if (result) {
+            // Activate the file selector modal
+            modal_saved = {
+                state: next_state || GameMenu.getState(),
+                speed: speed_selector.value,
+            };
+
+            // Pause
+            speed_selector.value = '0';
+            speed_selector.dispatchEvent(new Event('change'));
+
+            GameMenu.setState(GameMenu.States.MODAL_FILES);
+        }
     });
 }
 
 export function close(optionalStateOverride)
 {
-    if (files_close_state !== null && GameMenu.getState() === GameMenu.States.MODAL_FILES) {
-        GameMenu.setState(optionalStateOverride || files_close_state);
-        files_close_state = null;
+    const saved = modal_saved;
+    if (saved !== null && GameMenu.getState() === GameMenu.States.MODAL_FILES) {
+        modal_saved = null;
+
+        GameMenu.setState(optionalStateOverride || saved.state);
+        speed_selector.value = saved.speed;
+        speed_selector.dispatchEvent(new Event('change'));
     }
 }
 
