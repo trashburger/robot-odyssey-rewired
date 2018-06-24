@@ -292,7 +292,7 @@ export function setState(s)
         splash.classList.add('hidden');
     }
 
-    if (s == States.EXEC_LAUNCHING) {
+    if (s == States.EXEC_LAUNCHING || s == States.LOADING) {
         game_menu.classList.add('fadeout');
     } else if (s != States.EXEC && s != States.LOADING && s != States.MODAL_FILES && s != States.MODAL_TEXTBOX) {
         game_menu.classList.remove('fadeout');
