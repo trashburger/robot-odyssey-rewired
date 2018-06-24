@@ -149,44 +149,14 @@ static void endMouseTracking()
     hw.input.endMouseTracking();
 }
 
-enum class SaveStatus {
-    OK,
-    NOT_SUPPORTED,
-    BLOCKED,
-};
-
 static SaveStatus saveGame()
 {
-    if (!hw.process) {
-        // Not running at all
-        return SaveStatus::NOT_SUPPORTED;
-    }
+    return hw.saveGame();
+}
 
-    if (!hw.process->hasFunction(SBTADDR_SAVE_GAME_FUNC)) {
-        // No save function in this process
-        return SaveStatus::NOT_SUPPORTED;
-    }
-
-    if (!hw.process->isWaitingInMainLoop()) {
-        // Can't safely interrupt the process
-        return SaveStatus::BLOCKED;
-    }
-
-    hw.fs.save.file.size = 0;
-    hw.process->call(SBTADDR_SAVE_GAME_FUNC, hw.process->reg);
-
-    if (!hw.fs.save.isGame()) {
-        // File isn't the right size
-        return SaveStatus::NOT_SUPPORTED;
-    }
-
-    if (!hw.fs.save.asGame().getProcessName()) {
-        // File isn't something we know how to load.
-        // (Tutorial 6 runs in LAB.EXE, which knows how to save, but we can't load those files.)
-        return SaveStatus::NOT_SUPPORTED;
-    }
-
-    return SaveStatus::OK;
+static bool loadChip(uint8_t id)
+{
+    return hw.loadChip(id);
 }
 
 static bool loadGame()
@@ -274,26 +244,28 @@ static val screenshotSaveFile(val buffer, bool compressed)
     // Load the save file within our auxiliary hardware instance, and run until the first frame.
     // Has no effect on the main game instance. Returns null if the save file can't be loaded.
 
-    if (setSaveFileWithInstance(buffer, hwAux, compressed) && hwAux.loadGame()) {
-
-        // Run until first frame
-        outputAux.clear();
-        do {
-            assert(hwAux.process);
-            hwAux.process->run();
-        } while (outputAux.frame_counter == 0);
-
-        uintptr_t addr = (uintptr_t) outputAux.draw.backbuffer;
-        size_t size = sizeof outputAux.draw.backbuffer;
-        unsigned width = RGBDraw::SCREEN_WIDTH;
-        unsigned height = RGBDraw::SCREEN_HEIGHT;
-        val view = val::global("Uint8ClampedArray").new_(val::module_property("buffer"), addr, size);
-        val image = val::global("ImageData").new_(view, width, height);
-        return image;
-
-    } else {
+    if (!setSaveFileWithInstance(buffer, hwAux, compressed)) {
         return val::null();
     }
+
+    if (!hwAux.loadGame() && !hwAux.loadChipDocumentation()) {
+        return val::null();
+    }
+
+    // Run until first frame
+    outputAux.clear();
+    do {
+        assert(hwAux.process);
+        hwAux.process->run();
+    } while (outputAux.frame_counter == 0);
+
+    uintptr_t addr = (uintptr_t) outputAux.draw.backbuffer;
+    size_t size = sizeof outputAux.draw.backbuffer;
+    unsigned width = RGBDraw::SCREEN_WIDTH;
+    unsigned height = RGBDraw::SCREEN_HEIGHT;
+    val view = val::global("Uint8ClampedArray").new_(val::module_property("buffer"), addr, size);
+    val image = val::global("ImageData").new_(view, width, height);
+    return image;
 }
 
 static val packSaveFile()
@@ -372,6 +344,7 @@ EMSCRIPTEN_BINDINGS(engine)
     function("endMouseTracking", &endMouseTracking);
     function("saveGame", &saveGame);
     function("loadGame", &loadGame);
+    function("loadChip", &loadChip);
     function("getMemory", &getMemory);
     function("getCompressionDictionary", &getCompressionDictionary);
     function("getStaticFiles", &getStaticFiles);

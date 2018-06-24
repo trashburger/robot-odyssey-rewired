@@ -23,7 +23,12 @@ export function init(engine)
     engine.onRenderFrame = (rgb) => {
         image.data.set(rgb);
         context.putImageData(image, border, border);
-        GameMenu.setState(GameMenu.States.EXEC);
+
+        const state = GameMenu.getState();
+        const S = GameMenu.States;
+        if (state === S.EXEC_LAUNCHING || state === S.LOADING) {
+            GameMenu.setState(GameMenu.States.EXEC);
+        }
     };
 
     engine.then(function () {

@@ -1,0 +1,58 @@
+#modal_files h1 {
+	margin: 20px 0 15px 0;
+    font-size: 110%;
+    line-height: 1.1;
+}
+
+#modal_files button {
+	color: #eee;
+}
+
+#modal_files .files {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+#modal_files .item {
+	flex: 1 1 0;
+	display: flex;
+	margin: 2px;
+	background: #000;
+	min-width: 300px;
+}
+
+#modal_files .item:hover {
+	background: #444;
+}
+
+#modal_files .details {
+	display: flex;
+	flex-direction: column;
+	margin-left: 10px;
+	justify-content: space-around;
+	overflow: hidden;
+}
+
+#modal_files .thumbnail {
+	width: 120px;
+	height: 90px;
+	background: rgba(0,0,0,0.8);
+	border: 1px solid #000;
+	transition: transform 0.2s ease;
+	transform: none;
+}
+
+#modal_files .thumbnail:hover {
+	transform: translate(60%, 0%) scale(2.5);
+	z-index: 10;
+}
+
+#modal_files .filename {
+	color: #aaa;
+	overflow-wrap: break-word;
+}
+
+#modal_files .date {
+	color: #888;
+}

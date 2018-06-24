@@ -40,6 +40,16 @@ enum RORoomId {
     RO_ROOM_CHECKERS    = 0x0A,   // Inside Checkers
     RO_ROOM_SCANNER     = 0x0B,   // Inside Scanner
 
+    RO_ROOM_CHIP_HELP   = 0x15,
+    RO_ROOM_CHIP_1      = 0x16,
+    RO_ROOM_CHIP_2      = 0x17,
+    RO_ROOM_CHIP_3      = 0x18,
+    RO_ROOM_CHIP_4      = 0x19,
+    RO_ROOM_CHIP_5      = 0x1A,
+    RO_ROOM_CHIP_6      = 0x1B,
+    RO_ROOM_CHIP_7      = 0x1C,
+    RO_ROOM_CHIP_8      = 0x1D,
+
     RO_ROOM_NONE        = 0x3F,
 };
 

@@ -113,27 +113,7 @@
 }
 
 .modal pre {
-    font-size: 120%;
+    font-size: 110%;
     line-height: 1.1;
     white-space: pre-wrap;
-}
-
-.file_grid {
-
-}
-
-.file_grid .item {
-
-}
-
-.file_grid img {
-
-}
-
-.file_grid .filename {
-
-}
-
-.file_grid .date {
-
 }

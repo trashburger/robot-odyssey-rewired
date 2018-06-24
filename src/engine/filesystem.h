@@ -35,6 +35,10 @@ public:
         bool openForWrite;
         uint8_t buffer[MAX_FILESIZE];
 
+        inline bool isChip() {
+            return file.size == 1333;
+        }
+
         inline bool isGame() {
             return file.size == sizeof(ROSavedGame);
         }

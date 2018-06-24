@@ -47,6 +47,87 @@ bool Hardware::loadGame()
     return false;
 }
 
+SaveStatus Hardware::saveGame()
+{
+    if (!process) {
+        // Not running at all
+        return SaveStatus::NOT_SUPPORTED;
+    }
+
+    if (!process->hasFunction(SBTADDR_SAVE_GAME_FUNC)) {
+        // No save function in this process
+        return SaveStatus::NOT_SUPPORTED;
+    }
+
+    if (!process->isWaitingInMainLoop()) {
+        // Can't safely interrupt the process
+        return SaveStatus::BLOCKED;
+    }
+
+    fs.save.file.size = 0;
+    process->call(SBTADDR_SAVE_GAME_FUNC, process->reg);
+
+    if (!fs.save.isGame()) {
+        // File isn't the right size
+        return SaveStatus::NOT_SUPPORTED;
+    }
+
+    if (!fs.save.asGame().getProcessName()) {
+        // File isn't something we know how to load.
+        // (Tutorial 6 runs in LAB.EXE, which knows how to save, but we can't load those files.)
+        return SaveStatus::NOT_SUPPORTED;
+    }
+
+    return SaveStatus::OK;
+}
+
+bool Hardware::loadChipDocumentation()
+{
+    if (!fs.save.isChip()) {
+        return false;
+    }
+
+    // Get a fresh lab and run it until it's in the main loop
+    exec("lab.exe", "30");
+    while (!process->isWaitingInMainLoop()) {
+        process->run();
+    }
+
+    // Load into the first chip
+    if (!loadChip(0)) {
+        return false;
+    }
+
+    // Switch to the documentation room for that chip
+    ROWorld *world = ROWorld::fromProcess(process);
+    if (!world) {
+        return false;
+    }
+
+    world->objects.room[RO_OBJ_PLAYER] = RO_ROOM_CHIP_1;
+    return true;
+}
+
+void Hardware::requestLoadChip(SBTRegs reg)
+{
+    EM_ASM_({
+        if (Module.onLoadChipRequest) {
+            Module.onLoadChipRequest($0);
+        }
+    }, reg.dl);
+}
+
+bool Hardware::loadChip(uint8_t id)
+{
+    if (process && process->isWaitingInMainLoop() && fs.save.isChip()) {
+        SBTRegs r = process->reg;
+        r.dl = id;
+        process->call(SBTADDR_LOAD_CHIP_FUNC, r);
+        return true;
+    }
+    return false;
+}
+
 void Hardware::exit(SBTProcess *exiting_process, uint8_t code)
 {
     if (verbose_process_info) {

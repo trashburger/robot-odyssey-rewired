@@ -14,6 +14,15 @@ export function updateMappedGamepadButton(pressed, index)
     }
 }
 
+export function addButtonClick(button_element, click)
+{
+    addButtonEvents(button_element, () => {
+        button_element.classList.add('active_btn');
+    }, () => {
+        button_element.classList.remove('active_btn');
+    }, click);
+}
+
 export function addButtonEvents(button_element, down, up, click)
 {
     const down_wrapper = function (e)
@@ -176,8 +185,10 @@ export function init(engine)
 
     speed_selector.addEventListener('change', (e) => {
         engine.then(() => engine.setSpeed(parseFloat(speed_selector.value)));
-        e.target.blur();
-        canvas.focus();
+        if (e && e.target) {
+            e.target.blur();
+            canvas.focus();
+        }
     });
 
     for (let button of Array.from(document.getElementsByClassName('speed_adjust_btn'))) {
@@ -193,54 +204,25 @@ export function init(engine)
         });
     }
 
-    for (let button of Array.from(document.getElementsByClassName('loadgame_btn'))) {
-        addButtonEvents(button, () => {
-            button.classList.add('active_btn');
-        }, () => {
-            button.classList.remove('active_btn');
-        }, () => {
-            if (engine.calledRun) {
-                engine.loadGame();
-            }
+    for (let button of Array.from(document.getElementsByClassName('savezip_btn'))) {
+        addButtonClick(button, () => {
+            engine.then(() => engine.downloadArchive());
         });
     }
 
-    for (let button of Array.from(document.getElementsByClassName('savegame_btn'))) {
-        addButtonEvents(button, () => {
-            button.classList.add('active_btn');
-        }, () => {
-            button.classList.remove('active_btn');
-        }, () => {
-            if (engine.calledRun) {
-                engine.saveGame();
-            }
-        });
-    }
-
-    // Loader for arbitrary saved files
-    for (let button of Array.from(document.getElementsByClassName('loadsavefile_btn'))) {
-        addButtonEvents(button, () => {
-            button.classList.add('active_btn');
-        }, () => {
-            button.classList.remove('active_btn');
-        }, () => {
-            if (engine.calledRun) {
-                engine.loadSaveFilePicker();
-            }
+    for (let button of Array.from(document.getElementsByClassName('filepicker_btn'))) {
+        addButtonClick(button, () => {
+            engine.then(() => engine.filePicker());
         });
     }
 
     for (let button of Array.from(document.getElementsByClassName('exec_btn'))) {
-        addButtonEvents(button, () => {
-            button.classList.add('active_btn');
-        }, () => {
-            button.classList.remove('active_btn');
-        }, () => {
-            if (engine.calledRun) {
-                const args = button.dataset.exec.split(' ');
+        addButtonClick(button, () => {
+            const args = button.dataset.exec.split(' ');
+            engine.then(() => {
                 GameMenu.setState(GameMenu.States.EXEC_LAUNCHING);
                 engine.exec(args[0], args[1] || '');
-            }
+            });
         });
     }
 }

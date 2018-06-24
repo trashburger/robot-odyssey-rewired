@@ -17,6 +17,7 @@ import './style/buttons.css';
 import './style/joystick.css';
 import './style/graphics.css';
 import './style/gameMenu.css';
+import './style/fileManager.css';
 import '../build/font/font.template.css';
 
 // Strong local caching using a Service Worker.

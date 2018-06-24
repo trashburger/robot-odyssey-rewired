@@ -7,6 +7,13 @@
 #include "output.h"
 #include "input.h"
 
+
+enum class SaveStatus {
+    OK,
+    NOT_SUPPORTED,
+    BLOCKED,
+};
+
 class Hardware
 {
  public:
@@ -21,8 +28,14 @@ class Hardware
     SBTRegs interrupt16(SBTRegs reg, SBTStack *stack);
     SBTRegs interrupt21(SBTRegs reg, SBTStack *stack);
 
+    void requestLoadChip(SBTRegs reg);
+
     void exec(const char *program, const char *args = "");
+
+    SaveStatus saveGame();
     bool loadGame();
+    bool loadChip(uint8_t id);
+    bool loadChipDocumentation();
 
     static const uint32_t MEM_SIZE = 256 * 1024;
     uint8_t mem[MEM_SIZE];

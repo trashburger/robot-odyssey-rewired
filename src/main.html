@@ -40,16 +40,16 @@
     <div id="modal_files" class="modal layer hidden">
         <div class="modal_border">
 
-            <button id="files_game_new" class="exec_btn rofont" data-exec="show.exe">Start a new game</button>
-            <div id="files_game_load" class="rofont">Load a saved game:</div>
-            <div id="files_game_grid" class="file_grid"></div>
+            <button class="exec_btn rofont" data-exec="show.exe" data-filemode="game">Start a new game</button>
+            <h1 data-filemode="game" class="rofont">Load a saved game:</h1>
+            <div data-filemode="game" class="files"></div>
 
-            <button id="files_lab_new" class="exec_btn rofont" data-exec="lab.exe 30">Start a new lab</button>
-            <div id="files_lab_load" class="rofont">Load a saved lab:</div>
-            <div id="files_lab_grid" class="file_grid"></div>
+            <button class="exec_btn rofont" data-exec="lab.exe 30" data-filemode="lab">Start a new lab</button>
+            <h1 data-filemode="lab" class="rofont">Load a saved lab:</h1>
+            <div data-filemode="lab" class="files"></div>
 
-            <div id="files_chip_load" class="rofont">Load a saved chip:</div>
-            <div id="files_chip_grid" class="file_grid"></div>
+            <h1 data-filemode="chip" class="rofont">Load a design into chip <span class="chip_id"></span>:</h1>
+            <div data-filemode="chip" class="files"></div>
 
         </div>
     </div>
@@ -121,9 +121,8 @@
     </div>
 
     <div class="button_area">
-        <button class="loadsavefile_btn warning_btn rofont">Load File</button>
-        <button class="loadgame_btn warning_btn rofont">Re-Load</button>
-        <button class="savegame_btn rofont">Save Game</button>
+        <button class="filepicker_btn rofont">Use Files...</button>
+        <button class="savezip_btn rofont">Save ZIP</button>
         <select id="palette_selector" class="rofont">
             <option selected class="rofont" value="rewired">Rewired Palette</option>
             <option class="rofont" value="hgr">Apple ][ Colors</option>

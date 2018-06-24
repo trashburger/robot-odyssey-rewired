@@ -269,6 +269,23 @@ def patchLoadSave(b):
     b.patch(jumpToSave, 'call 0x%x' % saveFunc.offset, length=1)
     b.patch(jumpToSave.add(1), 'ret')
 
+    # Most file operations can be dealt with asynchronously, but when the game tries
+    # to load chip data, this particular invocation of the filename picker functions
+    # (patched above) needs to correspond with a synchronous file picker on the
+    # JS ui side. To do this, we patch right after the chip ID to load has been
+    # determined, issuing a callback, and publishing the address of a continuation.
+    #
+    # The actual function we're patching is a mov that stores the chip ID from DL
+    # in a data segment byte.
+
+    loadChipEntry = b.findCode(
+        ':8816____ e8____ a0____ 98 f726____ 0500__ a3____ a0____ 98 d1e0 d1e0 d1e0'
+        '05____ a3____ c606____01 e8____ 0bdb 75__')
+    loadChipContinued = loadChipEntry.add(3)
+    b.patch(loadChipContinued, 'mov byte [0x%x],dl' % b.peek16(loadChipEntry.add(2)), length=1)
+    b.publishSubroutine('SBTADDR_LOAD_CHIP_FUNC', loadChipContinued)
+    b.patchAndHook(loadChipEntry, 'ret', 'g.hw->requestLoadChip(r);')
+
 
 def patchJoystick(b):
     # This game uses cycle timing to poll the joystick; we could emulate that

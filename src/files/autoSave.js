@@ -52,15 +52,8 @@ function checkHashForAutoSave(engine)
         if (s != last_set_window_hash) {
             const packed = new Uint8Array(base64.decode(s));
             GameMenu.afterLoading(engine, function () {
-                /* eslint-disable no-console */
-                if (engine.setSaveFile(packed, true)) {
-                    if (engine.loadGame()) {
-                        console.log('Loading packed saved game');
-                    } else {
-                        console.warn('FAILED to load packed saved game');
-                    }
-                } else {
-                    console.warn('FAILED to unpack saved game');
+                if (!engine.setSaveFile(packed, true) || !engine.loadGame()) {
+                    GameMenu.modal('FAILED to load packed saved game');
                 }
             });
         }

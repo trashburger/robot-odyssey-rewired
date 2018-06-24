@@ -12,6 +12,7 @@ export const States = {
     ERROR_HALT: 8,
 };
 
+const speed_selector = document.getElementById('speed_selector');
 const splash = document.getElementById('splash');
 const loading = document.getElementById('loading');
 const framebuffer = document.getElementById('framebuffer');
@@ -26,6 +27,7 @@ let current_menu_choice = 0;
 let menu_joystick_interval = null;
 let menu_joystick_y = 0;
 let menu_joystick_accum = 0;
+let modal_saved = null;
 
 export function showError(e)
 {
@@ -38,24 +40,74 @@ export function showError(e)
         e = 'Fail.\n\n' + e;
     }
 
-    modal_textbox.firstElementChild.innerText = e;
-    setState(States.MODAL_TEXTBOX);
+    modal(e);
     setState(States.ERROR_HALT);
+}
+
+export function modal(message, onclick)
+{
+    return new Promise((resolve) => {
+
+        if (modal_saved === null) {
+            modal_saved = {
+                state: current_state,
+                speed: speed_selector.value,
+            };
+        }
+
+        if (modal_saved.resolve) {
+            // Resolve and replace previous modal
+            modal_saved.resolve();
+        }
+        modal_saved.resolve = resolve;
+
+        modal_textbox.firstElementChild.innerText = message;
+        modal_textbox.onclick = onclick || exitModal;
+
+        speed_selector.value = '0';
+        speed_selector.dispatchEvent(new Event('change'));
+
+        setState(States.MODAL_TEXTBOX);
+    });
+}
+
+export function exitModal()
+{
+    const saved = modal_saved;
+    modal_saved = null;
+
+    if (current_state === States.MODAL_TEXTBOX && saved) {
+        speed_selector.value = saved.speed;
+        speed_selector.dispatchEvent(new Event('change'));
+        setState(saved.state);
+    }
+
+    // Resolve promise from modal()
+    saved.resolve();
+}
+
+export function modalDuringPromise(promise, message)
+{
+    var end = exitModal;
+    const nop = () => {};
+    const finish = () => { end = nop; };
+    modal(message, nop).then(finish);
+    setTimeout(() => { promise.then(() => end(), () => end()); }, 750);
+}
+
+export function getState()
+{
+    return current_state;
 }
 
 export function init(engine)
 {
     // Splashscreen pointing events
-    splash.addEventListener('mousedown', function () {
+    splash.onclick = () => {
         if (current_state == States.SPLASH) {
             setState(States.MENU_TRANSITION);
         }
-    });
-    splash.addEventListener('touchstart', function () {
-        if (current_state == States.SPLASH) {
-            setState(States.MENU_TRANSITION);
-        }
-    });
+    };
 
     // Splash animation end
     getLastSplashImage().addEventListener('animationend', function () {
@@ -93,7 +145,10 @@ export function init(engine)
 export function pressKey(engine, ascii, scancode)
 {
     if (current_state == States.SPLASH) {
-        setState(States.MENU_TRANSITION);
+        if (ascii == 0x0D || ascii == 0x20) {
+            // Enter or space
+            setState(States.MENU_TRANSITION);
+        }
 
     } else if (current_state == States.MENU_ACTIVE) {
 
@@ -106,6 +161,18 @@ export function pressKey(engine, ascii, scancode)
         } else if (ascii == 0x0D) {
             // Enter
             invokeMenuChoice(engine);
+        }
+
+    } else if (current_state == States.MODAL_TEXTBOX) {
+        if (ascii == 0x0D || ascii == 0x20 || ascii == 0x1B) {
+            // Enter, space, escape
+            modal_textbox.onclick();
+        }
+
+    } else if (current_state == States.MODAL_FILES) {
+        if (ascii == 0x1B) {
+            // Escape
+            FileManager.close();
         }
     }
 }
@@ -154,6 +221,8 @@ export function setJoystickButton(engine, b)
 {
     if (b && current_state == States.SPLASH) {
         setState(States.MENU_TRANSITION);
+    } else if (b && current_state == States.MODAL_TEXTBOX) {
+        modal_textbox.onclick();
     } else if (b && current_state == States.MENU_ACTIVE) {
         invokeMenuChoice(engine);
     }
@@ -225,7 +294,7 @@ export function setState(s)
 
     if (s == States.EXEC_LAUNCHING) {
         game_menu.classList.add('fadeout');
-    } else if (s != States.EXEC && s != States.LOADING) {
+    } else if (s != States.EXEC && s != States.LOADING && s != States.MODAL_FILES && s != States.MODAL_TEXTBOX) {
         game_menu.classList.remove('fadeout');
     }
 
@@ -269,16 +338,35 @@ function invokeMenuChoice(engine)
     const choice = choices[current_menu_choice].dataset;
     afterLoading(engine, () => {
 
-        if (choice.files && FileManager.open(choice.files)) {
-            // New or saved game/lab
-            setState(States.MODAL_FILES);
+        // Immediate feedback that we're working on launching,
+        // even if it takes a sec to query the database and
+        // launch a new instance of the game.
+        setState(States.EXEC_LAUNCHING);
 
-        } else if (choice.exec) {
-            // Tutorials, new game/lab with no saves available
-            const args = choice.exec.split(' ');
-            setState(States.EXEC_LAUNCHING);
-            engine.exec(args[0], args[1] || '');
+        // If no files are available, go right to exec
+        const try_exec = () => {
+            if (choice.exec) {
+                const args = choice.exec.split(' ');
+                engine.exec(args[0], args[1] || '');
+            }
+        };
+
+        if (!choice.files) {
+            // No file manager is associated with this choice
+            return try_exec();
         }
+
+        // Asynchronously load the file manager, but it may
+        // report that there are no files to manage, in which
+        // case we should also try exec.
+
+        FileManager.open(engine, choice.files, States.MENU_TRANSITION).then((result) => {
+            if (result) {
+                setState(States.MODAL_FILES);
+            } else {
+                try_exec();
+            }
+        });
 
     });
 }
