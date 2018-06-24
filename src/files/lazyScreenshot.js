@@ -22,7 +22,8 @@ function renderer()
     const data = element._screenshot_data;
     const file = data.loadedFile;
 
-    const image = data.engine.screenshotSaveFile(file.data, file.extension.includes('z'));
+    const compressed = file.extension.includes('z');
+    const image = data.engine.screenshotSaveFile(file.data, compressed);
     render_canvas.width = image.width;
     render_canvas.height = image.height;
     render_canvas.getContext('2d').putImageData(image, 0, 0);
