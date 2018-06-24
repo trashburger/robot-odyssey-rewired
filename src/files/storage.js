@@ -48,6 +48,7 @@ class Files
     save(name, data, date)
     {
         date = date || new Date();
+        data = new Uint8Array(data);
         const extension = getExtension(name);
 
         if (isHiddenFile(name)) {
@@ -127,8 +128,18 @@ class Files
                     const extension = getExtension(name);
                     const file = { name, date, extension };
                     file.load = () => db.transaction('files').objectStore('files').get(name).then((v) => {
+                        var data = v.data;
+
+                        // Object data must always be stored as a Uint8Array without a larger
+                        // than necessary backing buffer. But older versions didn't adhere to
+                        // this rule. Convert records as we encounter them.
+                        if (!(data instanceof Uint8Array) || data.buffer.byteLength != data.length) {
+                            this.save(name, data, date);
+                            data = new Uint8Array(data);
+                        }
+
                         // Cache file data after it's loaded once
-                        file.data = new Uint8Array(v.data);
+                        file.data = data;
                         file.load = () => Promise.resolve(file);
                         return file;
                     });
