@@ -2,16 +2,45 @@ import { audioContextSetup } from '../sound.js';
 
 let mouse_tracking_unlocked = false;
 let end_tracking_func = null;
+let end_tracking_timer = null;
 
 const canvas = document.getElementById('framebuffer');
 const game_area = document.getElementById('game_area');
 
-export function mouseTrackingEnd()
+export function mouseTrackingEnd(afterDelay)
 {
-    if (mouse_tracking_unlocked && end_tracking_func) {
-        end_tracking_func();
+    // After an optional delay, prevent automatic mouse tracking
+    // without an explicit unlock click.
+
+    if (end_tracking_timer) {
+        clearTimeout(end_tracking_timer);
+        end_tracking_timer = null;
     }
-    mouse_tracking_unlocked = false;
+    end_tracking_timer = setTimeout(() => {
+        if (mouse_tracking_unlocked && end_tracking_func) {
+            end_tracking_func();
+        }
+        mouse_tracking_unlocked = false;
+    }, afterDelay || 0);
+}
+
+function mouseTrackingContinue()
+{
+    // Don't start tracking if we aren't already, but prevent
+    // tracking from being stopped if an end is scheduled.
+
+    if (end_tracking_timer) {
+        clearTimeout(end_tracking_timer);
+        end_tracking_timer = null;
+    }
+}
+
+function mouseTrackingBegin()
+{
+    // Start tracking the mouse because of an explicit click.
+
+    mouseTrackingContinue();
+    mouse_tracking_unlocked = true;
 }
 
 export function mouseLocationForEvent(e)
@@ -64,6 +93,7 @@ export function init(engine)
             const loc = mouseLocationForEvent(e);
             engine.setMouseTracking(loc.x, loc.y);
             engine.autoSave();
+            mouseTrackingContinue();
         }
     });
 
@@ -74,6 +104,7 @@ export function init(engine)
             if (mouse_tracking_unlocked) {
                 // Already unlocked, this is a click
                 engine.setMouseButton(true);
+                mouseTrackingContinue();
             } else {
                 // Move to this location, and unlock tracking on mouseup
                 const loc = mouseLocationForEvent(e);
@@ -93,15 +124,14 @@ export function init(engine)
                 // Already unlocked
                 engine.setMouseButton(false);
                 engine.autoSave();
-            } else {
-                // Unlock now; already moved to the location on mousedown
-                mouse_tracking_unlocked = true;
             }
+            // Unlock and/or prevent re-locking
+            mouseTrackingBegin();
         }
         audioContextSetup();
     });
 
-    game_area.addEventListener('mouseleave', mouseTrackingEnd);
+    game_area.addEventListener('mouseleave', () => mouseTrackingEnd(2000));
 
     let touch_timer = null;
     const stopTouchTimer = () => {
