@@ -15,6 +15,10 @@
     font-size: 110%;
 }
 
+#modal_files button {
+    color: #eee;
+}
+
 #modal_files .files {
     display: flex;
     flex-wrap: wrap;
@@ -29,10 +33,15 @@
     padding: 1px;
     background: #000;
     min-width: 330px;
+    justify-content: space-around;
+}
+
+#modal_files .item:hover {
+    background: #333;
 }
 
 #modal_files .details {
-    flex: 1 1 0;
+    flex: 0.96 1 0;
     display: flex;
     flex-direction: column;
     margin-left: 10px;
@@ -50,11 +59,12 @@
     border: 1px solid #000;
     transition: transform 0.2s ease;
     transform: none;
+    pointer-events: none;
     z-index: 9001;
 }
 
-#modal_files .thumbnail:hover {
-    transform: translate(58%, 0%) scale(2.25);
+#modal_files .item:hover .thumbnail {
+    transform: translate(30%, 0%) scale(2);
     z-index: 9002;
 }
 
