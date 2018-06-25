@@ -1,5 +1,4 @@
 import relativeDate from 'relative-date';
-import 'intersection-observer';
 import * as GameMenu from '../gameMenu.js';
 import * as LazyScreenshot from './lazyScreenshot.js';
 
