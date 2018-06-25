@@ -34,10 +34,47 @@
     background: #000;
     min-width: 330px;
     justify-content: space-around;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
-#modal_files .item:hover {
-    background: #333;
+#modal_files .thumbnail {
+    flex: 0 0 0;
+    position: relative;
+    width: 120px;
+    height: 90px;
+    background: rgba(0,0,0,0.85);
+    border: 1px solid #000;
+    transition: transform 0.2s ease;
+    transform: none;
+    pointer-events: none;
+    z-index: 9001;
+    user-select: none;
+    -webkit-user-select: none;
+    user-drag: none;
+    -webkit-user-drag: none;
+    -moz-user-drag: none;
+}
+
+@media not all and (hover: none) {
+    /* Hover effects disabled on touch devices, so they don't get stuck */
+
+    #modal_files .item:hover {
+        background: #333;
+    }
+
+    #modal_files .item:hover .thumbnail {
+        transform: translate(40%, 0%) scale(2.5);
+        z-index: 9002;
+    }
+
+    #modal_files .item:hover .filename {
+        transform: scale(1.1) translate(140px, 3px);
+    }
+
+    #modal_files .item:hover .date {
+        transform: translate(130px, 0px);
+    }
 }
 
 #modal_files .details {
@@ -50,31 +87,15 @@
     overflow: hidden;
 }
 
-#modal_files .thumbnail {
-    flex: 0 0 0;
-    position: relative;
-    width: 120px;
-    height: 90px;
-    background: rgba(0,0,0,0.8);
-    border: 1px solid #000;
-    transition: transform 0.2s ease;
-    transform: none;
-    pointer-events: none;
-    z-index: 9001;
-}
-
-#modal_files .item:hover .thumbnail {
-    transform: translate(30%, 0%) scale(2);
-    z-index: 9002;
-}
-
 #modal_files .filename {
+    transition: transform 0.2s ease;
     color: #eee;
     overflow-wrap: break-word;
     font-size: 80%;
 }
 
 #modal_files .date {
+    transition: transform 0.2s ease;
     color: #777;
     font-size: 70%;
 }
