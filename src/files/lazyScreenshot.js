@@ -27,24 +27,30 @@ function renderer()
     element.src = render_canvas.toDataURL();
 }
 
+async function thumbnailIsVisible(element)
+{
+    // Wait for the file contents to load from indexedDb
+    const data = element._screenshot_data;
+    data.loadedFile = await data.file.load();
+
+    // Ensure the engine is ready (not a promise, don't await this)
+    // Rate-limit and serialize the actual rendering
+    data.engine.then(() => {
+        render_stack.push(element);
+        if (render_stack.length === 1) {
+            requestAnimationFrame(renderer);
+        }
+    });
+}
+
 function callback(entries)
 {
     for (let entry of entries) {
         const element = entry.target;
-        const data = element._screenshot_data;
         if (entry.isIntersecting) {
             // Stop observing after the first intersection, async load the file data
             observer.unobserve(element);
-            data.file.load().then((file) => {
-                data.loadedFile = file;
-                data.engine.then(() => {
-                    // File is loaded and engine is ready. Now rate-limit and serialize the actual rendering
-                    render_stack.push(element);
-                    if (render_stack.length === 1) {
-                        requestAnimationFrame(renderer);
-                    }
-                });
-            });
+            thumbnailIsVisible(element);
         }
     }
 }
