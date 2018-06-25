@@ -5,13 +5,7 @@ import * as GameMenu from '../gameMenu.js';
 
 export function init(engine)
 {
-    const joystick = nipplejs.create({
-        zone: document.getElementById('joystick_xy'),
-        mode: 'static',
-        size: 100,
-        threshold: 0.01,
-        position: { left: '50%', top: '50%' }
-    });
+    let joystick = null;
 
     function joystickAxes(x, y)
     {
@@ -31,15 +25,42 @@ export function init(engine)
         GameMenu.setJoystickButton(engine, b);
     }
 
-    joystick.on('move', (e, data) => {
-        mouseTrackingEnd();
-        joystickAxes(data.force * Math.cos(data.angle.radian),
-            -data.force * Math.sin(data.angle.radian));
-    });
+    // Create the on-screen joystick after the UI has become visible,
+    // when it's starting to fade in. In our initial state, the whole
+    // UI is invisible and nipplejs will capture the wrong position
+    // for its default joystick.
 
-    joystick.on('end', () => {
-        joystickAxes(0, 0);
+    const zone = document.getElementById('joystick_xy');
+    const observer = new IntersectionObserver((entries) => {
+        if (!entries.length || !entries[0].isIntersecting) {
+            return;
+        }
+        observer.disconnect();
+
+        joystick = nipplejs.create({
+            zone,
+            mode: 'static',
+            size: 100,
+            threshold: 0.01,
+            position: { left: '50%', top: '50%' }
+        });
+
+        joystick.on('move', (e, data) => {
+            mouseTrackingEnd();
+            joystickAxes(data.force * Math.cos(data.angle.radian),
+                -data.force * Math.sin(data.angle.radian));
+        });
+
+        joystick.on('end', () => {
+            joystickAxes(0, 0);
+        });
+
+    }, {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0,
     });
+    observer.observe(zone);
 
     for (let button of Array.from(document.getElementsByClassName('joystick_btn'))) {
         Buttons.addButtonEvents(button, () => {
@@ -58,7 +79,6 @@ export function init(engine)
     function gamepadPoll(gamepad, last_axes, last_pressed)
     {
         if (gamepad && gamepad.connected) {
-            const js = joystick[0];
             const pressed = gamepad.buttons.map(b => b.pressed);
             var axes = gamepad.axes;
 
@@ -71,7 +91,9 @@ export function init(engine)
             if (axes[0]*axes[0] + axes[1]*axes[1] <= deadzone*deadzone) {
                 axes = [0,0];
                 if (last_axes[0] != 0 || last_axes[1] != 0) {
-                    js.hide();
+                    if (joystick) {
+                        joystick[0].hide();
+                    }
                 }
             }
 
@@ -95,11 +117,13 @@ export function init(engine)
                 joystickAxes(axes[0], yinv * axes[1]);
 
                 // Animate the on-screen joystick
-                const size = js.options.size * 0.25;
-                js.ui.front.style.left = (axes[0] * size) + 'px';
-                js.ui.front.style.top = (yinv * axes[1] * size) + 'px';
-                if (last_axes[0] == 0 && last_axes[1] == 0) {
-                    js.show();
+                if (joystick) {
+                    const size = joystick[0].options.size * 0.25;
+                    joystick[0].ui.front.style.left = (axes[0] * size) + 'px';
+                    joystick[0].ui.front.style.top = (yinv * axes[1] * size) + 'px';
+                    if (last_axes[0] == 0 && last_axes[1] == 0) {
+                        joystick[0].show();
+                    }
                 }
             }
 
