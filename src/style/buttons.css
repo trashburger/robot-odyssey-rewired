@@ -3,6 +3,10 @@
     margin: 0 50px 2px 50px;
 }
 
+.button_area.wrap {
+    flex-wrap: wrap;
+}
+
 .keyboard_spacebar {
     flex: 4 0 0;
 }
