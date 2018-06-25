@@ -21,17 +21,24 @@ void Hardware::exec(const char *program, const char *args)
         printf("EXEC, '%s' '%s'\n", program, args);
     }
 
-    for (std::vector<SBTProcess*>::iterator i = process_vec.begin(); i != process_vec.end(); i++) {
-        const char *filename = (*i)->getFilename();
-        if (!strcasecmp(program, filename)) {
-            process = *i;
-            fs.reset();
-            input.clear();
-            process->exec(args);
-            return;
+    fs.reset();
+    input.clear();
+
+    if (*program) {
+        for (std::vector<SBTProcess*>::iterator i = process_vec.begin(); i != process_vec.end(); i++) {
+            const char *filename = (*i)->getFilename();
+            if (!strcasecmp(program, filename)) {
+                process = *i;
+                process->exec(args);
+                return;
+            }
         }
+        assert(0 && "Program not found in exec()");
+
+    } else {
+        // Empty program string: run no program.
+        process = 0;
     }
-    assert(0 && "Program not found in exec()");
 }
 
 bool Hardware::loadGame()
