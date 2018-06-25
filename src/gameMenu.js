@@ -387,6 +387,7 @@ function invokeMenuChoice(engine)
         // report that there are no files to manage, in which
         // case we should also try exec.
 
+        setState(States.LOADING);
         FileManager.open(engine, choice.files, States.MENU_TRANSITION).then((result) => {
             if (result) {
                 setState(States.MODAL_FILES);

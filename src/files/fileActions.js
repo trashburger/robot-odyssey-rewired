@@ -56,6 +56,7 @@ export function init(engine)
             return;
         }
 
+        GameMenu.modal('Processing dropped files...');
         getFilesFromDragEvent(e, { recursive: true })
             .then((f) => engine.files.saveFiles(f))
             .then(filesStoredConfirmation);
@@ -92,11 +93,17 @@ export function init(engine)
             const input = document.createElement('input');
             input.type = 'file';
             input.multiple = true;
+            input.style.display = 'none';
+            document.body.appendChild(input);
             input.addEventListener('change', () => {
-                engine.files.saveFiles(input.files).then((results) => {
-                    filesStoredConfirmation(results);
-                    resolve(results);
-                });
+                if (input.files.length) {
+                    GameMenu.modal('Processing selected files...');
+                    engine.files.saveFiles(input.files).then((results) => {
+                        filesStoredConfirmation(results);
+                        resolve(results);
+                    });
+                }
+                input.remove();
             });
             input.click();
         });
