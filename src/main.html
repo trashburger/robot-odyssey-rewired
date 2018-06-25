@@ -40,27 +40,27 @@
     <div id="modal_files" class="modal layer hidden">
         <div class="modal_border">
 
-            <div data-filemode="game" class="button_area">
-                <button class="exec_btn rofont" data-exec="show.exe">} Start a new game</button>
+            <div class="button_area">
+                <button class="exec_btn rofont" data-filemode="game" data-exec="show.exe">} New Game</button>
+                <div data-filemode="game" class="spacer"></div>
+
+                <button class="exec_btn rofont" data-filemode="lab" data-exec="lab.exe 30">} New Lab</button>
+                <div data-filemode="lab" class="spacer"></div>
+
+                <button class="keyboard_btn keyboard_esc rofont" data-gamepad="8" data-ascii="0x1B" data-scancode="0x01">ESC</button>
                 <div class="spacer"></div>
-                <button class="filepicker_btn rofont">Import Files...</button>
+
+                <button class="filepicker_btn rofont">File Import...</button>
                 <button class="savezip_btn rofont">Export All</button>
             </div>
 
-            <h1 data-filemode="game" class="rofont">Load a saved game:</h1>
+            <h1 data-filemode="game" class="rofont">Saved Games:</h1>
             <div data-filemode="game" class="files"></div>
 
-            <div data-filemode="lab" class="button_area">
-                <button class="exec_btn rofont" data-exec="lab.exe 30" data-filemode="lab">} Start a new lab</button>
-                <div class="spacer"></div>
-                <button class="filepicker_btn rofont">Import Files...</button>
-                <button class="savezip_btn rofont">Export All</button>
-            </div>
-
-            <h1 data-filemode="lab" class="rofont">Load a saved lab:</h1>
+            <h1 data-filemode="lab" class="rofont">Saved Labs:</h1>
             <div data-filemode="lab" class="files"></div>
 
-            <h1 data-filemode="chip" class="rofont">Load a design into chip <span class="chip_id"></span>:</h1>
+            <h1 data-filemode="chip" class="rofont">Replace Chip <span class="chip_id"></span>:</h1>
             <div data-filemode="chip" class="files"></div>
 
         </div>

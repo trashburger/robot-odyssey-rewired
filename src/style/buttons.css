@@ -16,6 +16,18 @@
     flex: 2 0 0;
 }
 
+.exec_btn {
+    flex: 4 0 0;
+}
+
+.filepicker_btn {
+    flex: 3 0 0;
+}
+
+.savezip_btn {
+    flex: 3 0 0;
+}
+
 #palette_selector {
     flex: 2 0 0;
 }
