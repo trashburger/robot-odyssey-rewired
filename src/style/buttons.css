@@ -47,7 +47,7 @@
     transition: opacity 1.5s;
 }
 
-#engine_controls.hidden {
+#engine_controls.fadeout {
     display: block;
     opacity: 0;
 }

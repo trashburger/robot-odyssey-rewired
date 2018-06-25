@@ -82,6 +82,7 @@ export function init(engine)
             engine.autoSave();
         }
         audioContextSetup();
+        canvas.focus();
     });
 
     game_area.addEventListener('mouseup', function (e)
@@ -126,6 +127,7 @@ export function init(engine)
         }
         audioContextSetup();
         e.preventDefault();
+        canvas.focus();
     });
 
     canvas.addEventListener('touchmove', function (e)

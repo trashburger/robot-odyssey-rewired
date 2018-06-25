@@ -90,21 +90,27 @@
     100% { transform: rotate(360deg); }
 }
 
-.modal {
+#modal_textbox {
     transition: top 0.5s ease;
     padding: 2px;
     background: #000;
 }
 
-.modal.hidden {
+#modal_textbox.hidden {
     display: block;
     top: 100%;
 }
 
-.modal .modal_border {
+#modal_textbox pre {
+    font-size: 110%;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.modal_border {
     background: #000;
     color: #ececec;
-    border: 8px solid #222;
+    border: 8px solid #333;
     width: 100%;
     height: 100%;
     padding: 8px;
@@ -112,10 +118,4 @@
     overflow-y: auto;
     overflow-x: visible;
     -webkit-overflow-scrolling: touch;
-}
-
-.modal pre {
-    font-size: 110%;
-    line-height: 1.6;
-    white-space: pre-wrap;
 }

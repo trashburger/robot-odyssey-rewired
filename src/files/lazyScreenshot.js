@@ -11,7 +11,7 @@ function renderer()
 {
     // Limit of one render per frame; keep coming back while the queue has work.
     if (render_stack.length > 1) {
-        window.requestAnimationFrame(renderer);
+        requestAnimationFrame(renderer);
     }
 
     const element = render_stack.pop();
@@ -41,7 +41,7 @@ function callback(entries)
                     // File is loaded and engine is ready. Now rate-limit and serialize the actual rendering
                     render_stack.push(element);
                     if (render_stack.length == 1) {
-                        window.requestAnimationFrame(renderer);
+                        requestAnimationFrame(renderer);
                     }
                 });
             });
@@ -62,7 +62,7 @@ export function add(engine, file, element)
 }
 
 const observer = new IntersectionObserver(callback, {
-    root: document.getElementById('game_area'),
+    root: document.getElementById('modal_files'),
     rootMargin: '0px',
     threshold: 0,
 });

@@ -13,6 +13,7 @@ export const States = {
     ERROR_HALT: 8,
 };
 
+const engine_controls = document.getElementById('engine_controls');
 const speed_selector = document.getElementById('speed_selector');
 const splash = document.getElementById('splash');
 const loading = document.getElementById('loading');
@@ -295,9 +296,20 @@ export function setState(s)
     }
 
     if (s == States.MODAL_FILES) {
+        // Fade in
         modal_files.classList.remove('hidden');
+        requestAnimationFrame(() => modal_files.classList.remove('fadeout'));
     } else {
-        modal_files.classList.add('hidden');
+        // Hide and pass events immediately
+        modal_files.classList.add('fadeout', 'hidden');
+    }
+
+    if (s == States.MODAL_FILES) {
+        // Completely hide engine controls so their blank space can't be scrolled into
+        engine_controls.classList.add('hidden');
+    } else if (s != States.MODAL_TEXTBOX && s != States.SPLASH) {
+        // Fade in and/or unhide the controls in states other than modals and the splash
+        engine_controls.classList.remove('hidden', 'fadeout');
     }
 
     if (s == States.SPLASH) {

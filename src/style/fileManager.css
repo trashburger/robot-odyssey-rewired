@@ -1,3 +1,15 @@
+#modal_files {
+    /* Must occlude the nipplejs joystick, which uses z-index 999, sigh. */
+    z-index: 9000;
+    background: #000;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+
+#modal_files.fadeout {
+    opacity: 0;
+}
+
 #modal_files h1 {
     margin: 2vmin 0;
     font-size: 110%;
@@ -11,16 +23,12 @@
 }
 
 #modal_files .item {
-    flex: 0 0 0;
+    flex: 1 0 0;
     display: flex;
     margin: 2px;
     padding: 1px;
     background: #000;
     min-width: 330px;
-}
-
-#modal_files .item:hover {
-    background: #444;
 }
 
 #modal_files .details {
@@ -42,12 +50,12 @@
     border: 1px solid #000;
     transition: transform 0.2s ease;
     transform: none;
-    z-index: 1;
+    z-index: 9001;
 }
 
 #modal_files .thumbnail:hover {
-    transform: scale(2.25);
-    z-index: 2;
+    transform: translate(58%, 0%) scale(2.25);
+    z-index: 9002;
 }
 
 #modal_files .filename {

@@ -19,8 +19,11 @@
     height: 100%;
 }
 
-.layer {
+#frame .layer {
     touch-action: none;
+}
+
+.layer {
     overflow: hidden;
     position: absolute;
     left: 0;

@@ -126,7 +126,13 @@ module.exports = {
     optimization: {
         minimizer: [
             new UglifyJsPlugin({}),
-            new OptimizeCSSAssetsPlugin({})
+            new OptimizeCSSAssetsPlugin({
+                cssProcessor: require('cssnano'),
+                cssProcessorOptions: {
+                    zindex: false,
+                },
+                canPrint: true,
+            })
         ]
     },
 };

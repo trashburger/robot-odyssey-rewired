@@ -88,11 +88,6 @@ function controlCode(key)
 
 export function init(engine)
 {
-    // Fade in the controls about a frame after the JS is ready, before the engine loads
-    setTimeout(() => {
-        document.getElementById('engine_controls').classList.remove('hidden');
-    }, 10);
-
     function keycode(ascii, scancode)
     {
         if (typeof(ascii) != typeof(0)) {
