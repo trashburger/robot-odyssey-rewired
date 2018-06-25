@@ -306,11 +306,11 @@ export function setState(s)
 
     if (s == States.MODAL_FILES) {
         // Completely hide engine controls so their blank space can't be scrolled into
-        engine_controls.classList.add('hidden');
+        engine_controls.classList.add('hidden', 'fadeout');
     } else if (s != States.MODAL_TEXTBOX && s != States.SPLASH) {
         // Fade-in in states other than modals and the splash
         engine_controls.classList.remove('hidden');
-        requestAnimationFrame(() => engine_controls.classList.remove('fadeout'));
+        setTimeout(() => engine_controls.classList.remove('fadeout'), 50);
     }
 
     if (s == States.SPLASH) {
