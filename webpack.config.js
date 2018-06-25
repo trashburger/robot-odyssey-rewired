@@ -102,6 +102,7 @@ module.exports = {
         // and put the output in our build dir rather than 'dist' so it isn't uploaded.
         new BundleAnalyzerPlugin({
             analyzerMode: 'static',
+            defaultSizes: 'gzip',
             openAnalyzer: false,
             reportFilename: '../build/bundle-analyzer-report.html',
         }),

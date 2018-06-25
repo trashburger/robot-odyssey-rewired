@@ -5,9 +5,18 @@ CCFLAGS := -std=c++11 -Oz --bind
 
 ZSTD_OPTS := ZSTD_LEGACY_SUPPORT=0 CFLAGS=-Oz
 
+# Our emscripten configuration is pretty minimal. We need its library
+# support for embind and memset and an event loop, but for the most part
+# we want the emscripten runtime disabled to save space.
+
 WASMFLAGS := \
 	-s WASM=1 \
 	-s MODULARIZE=1 \
+	-s VERBOSE=1 \
+	-s "DEAD_FUNCTIONS=['_pthread_setspecific','_pthread_getspecific','_pthread_key_create']" \
+	-s ASSERTIONS=0 \
+	-s STRICT=1 \
+	-s MALLOC=emmalloc \
 	-s NO_FILESYSTEM=1 \
 	-s ALLOW_MEMORY_GROWTH=0 \
 	-s NO_DYNAMIC_EXECUTION=1 \
