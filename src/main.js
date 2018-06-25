@@ -1,6 +1,7 @@
-import 'intersection-observer';  // Polyfill
+import 'intersection-observer';
 import OfflinePluginRuntime from 'offline-plugin/runtime';
 
+// Game frontend modules
 import * as Graphics from './graphics.js';
 import * as Sound from './sound.js';
 import * as Buttons from './input/buttons.js';
@@ -11,11 +12,10 @@ import * as FileActions from './files/fileActions.js';
 import * as Storage from './files/storage.js';
 import * as GameMenu from './gameMenu.js';
 
-// Compiled engine loader and wasm bundle, from emscripten
+// Compiled engine loader and WASM code/data bundle, via emscripten
 import EngineFactory from '../build/engine.js';
 import EngineWasm from '../build/engine.wasm';
 
-// All styles
 import './style/main.css';
 import './style/buttons.css';
 import './style/joystick.css';

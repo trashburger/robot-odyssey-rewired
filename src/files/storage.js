@@ -1,4 +1,3 @@
-import JSZip from 'jszip';
 import idb from 'idb';
 import { readAsArrayBuffer } from 'promise-file-reader';
 
@@ -8,6 +7,11 @@ export function init(engine)
     const request = idb.open('robot-odyssey-rewired-storage', 1, upgradeDatabase);
     engine.settings = new Settings(request);
     engine.files = new Files(request, engine.MAX_FILE_SIZE, getStaticFiles(engine));
+}
+
+export function isCompressed(file)
+{
+    return file.extension.includes('z');
 }
 
 function upgradeDatabase(db)
@@ -45,49 +49,51 @@ class Files
         this.allowedExtensions = 'gsv lsv csv gsvz lsvz'.split(' ');
     }
 
-    save(name, data, date)
+    async save(name, data, date)
     {
         date = date || new Date();
         data = new Uint8Array(data);
         const extension = getExtension(name);
 
         if (isHiddenFile(name)) {
-            return Promise.resolve(null);
+            return null;
         }
 
         // Special file types: extract zip archives now
         if (extension === 'zip') {
-            return JSZip.loadAsync(data).then((zip) => this.saveZip(zip));
+            const JSZip = (await import('jszip')).default;
+            const zip = await JSZip.loadAsync(data);
+            return await this.saveZip(zip);
         }
 
         if (data.length > this.maxFileSize) {
             // Ignore files too big for the engine
-            return Promise.resolve(null);
+            return null;
         }
         if (!this.allowedExtensions.includes(extension)) {
             // Ignore unsupported extensions
-            return Promise.resolve(null);
+            return null;
         }
 
-        return this.dbPromise.then((db) => {
-            const file = { name, data, date, extension };
-            const tx = db.transaction('files', 'readwrite');
-            const store = tx.objectStore('files');
-            store.put(file);
-            return tx.complete.then(() => file);
-        });
+        const db = await this.dbPromise;
+        const file = { name, data, date, extension };
+        const tx = db.transaction('files', 'readwrite');
+        const store = tx.objectStore('files');
+        store.put(file);
+        await tx.complete;
+
+        return file;
     }
 
-    saveFile(file)
+    async saveFile(file)
     {
         const date = new Date(file.lastModified);
         if (!file.name) {
-            return Promise.resolve(null);
+            return null;
         }
 
-        return readAsArrayBuffer(file).then(
-            (data) => this.save(file.name, data, date),
-            () => null);
+        const data = await readAsArrayBuffer(file);
+        return await this.save(file.name, data, date);
     }
 
     saveFiles(iter)
@@ -99,74 +105,76 @@ class Files
         return Promise.all(promises);
     }
 
-    listFiles(fn)
+    async listFiles(fn)
     {
         // Put static files first, then wait on the database.
         // In the case of the chip loader (currently the only place where
         // this distinction matters) we want to present the built-in chips
         // quickly and consistently even if the db takes its time.
 
-        return this.staticFilesPromise.then((staticFiles) => {
-            const date = new Date('1986-01-01T00:00:00.000Z');
+        const staticFiles = await this.staticFilesPromise;
+        const date = new Date('1986-01-01T00:00:00.000Z');
 
-            for (const [name, data] of Object.entries(staticFiles)) {
+        for (const [name, data] of Object.entries(staticFiles)) {
+            const extension = getExtension(name);
+            const file = { name, date, extension, data };
+            file.load = () => Promise.resolve(file);
+            fn(file);
+        }
+
+        const db = await this.dbPromise;
+        const tx = db.transaction('files');
+
+        tx.objectStore('files').index('date').iterateKeyCursor(null, 'prev', (cursor) => {
+            if (!cursor) return;
+            const name = cursor.primaryKey;
+            const date = cursor.key;
+            if (!isHiddenFile(name)) {
                 const extension = getExtension(name);
-                const file = { name, date, extension, data };
-                file.load = () => Promise.resolve(file);
+                const file = { name, date, extension };
+                file.load = () => db.transaction('files').objectStore('files').get(name).then((v) => {
+                    var data = v.data;
+
+                    // Object data must always be stored as a Uint8Array without a larger
+                    // than necessary backing buffer. But older versions didn't adhere to
+                    // this rule. Convert records as we encounter them.
+                    if (!(data instanceof Uint8Array) || data.buffer.byteLength !== data.length) {
+                        this.save(name, data, date);
+                        data = new Uint8Array(data);
+                    }
+
+                    // Cache file data after it's loaded once
+                    file.data = data;
+                    file.load = () => Promise.resolve(file);
+                    return file;
+                });
                 fn(file);
             }
-
-            return this.dbPromise;
-        }).then((db) => {
-
-            const tx = db.transaction('files');
-            tx.objectStore('files').index('date').iterateKeyCursor(null, 'prev', (cursor) => {
-                if (!cursor) return;
-                const name = cursor.primaryKey;
-                const date = cursor.key;
-                if (!isHiddenFile(name)) {
-                    const extension = getExtension(name);
-                    const file = { name, date, extension };
-                    file.load = () => db.transaction('files').objectStore('files').get(name).then((v) => {
-                        var data = v.data;
-
-                        // Object data must always be stored as a Uint8Array without a larger
-                        // than necessary backing buffer. But older versions didn't adhere to
-                        // this rule. Convert records as we encounter them.
-                        if (!(data instanceof Uint8Array) || data.buffer.byteLength !== data.length) {
-                            this.save(name, data, date);
-                            data = new Uint8Array(data);
-                        }
-
-                        // Cache file data after it's loaded once
-                        file.data = data;
-                        file.load = () => Promise.resolve(file);
-                        return file;
-                    });
-                    fn(file);
-                }
-                cursor.continue();
-            });
-
-            return tx.complete;
+            cursor.continue();
         });
+
+        await tx.complete;
     }
 
-    createZip()
+    async createZip()
     {
-        return this.dbPromise.then((db) => {
-            const zip = new JSZip();
-            const tx = db.transaction('files');
-            tx.objectStore('files').iterateCursor((cursor) => {
-                if (!cursor) return;
-                zip.file(cursor.value.name, cursor.value.data, {
-                    date: cursor.value.date,
-                    binary: true,
-                });
-                cursor.continue();
+        const JSZip = (await import('jszip')).default;
+        const zip = new JSZip();
+
+        const db = await this.dbPromise;
+        const tx = db.transaction('files');
+
+        tx.objectStore('files').iterateCursor((cursor) => {
+            if (!cursor) return;
+            zip.file(cursor.value.name, cursor.value.data, {
+                date: cursor.value.date,
+                binary: true,
             });
-            return tx.complete.then(() => zip);
+            cursor.continue();
         });
+
+        await tx.complete;
+        return zip;
     }
 
     saveZip(zip)

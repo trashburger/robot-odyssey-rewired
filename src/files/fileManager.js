@@ -1,4 +1,5 @@
 import relativeDate from 'relative-date';
+import { isCompressed } from './storage.js';
 import * as GameMenu from '../gameMenu.js';
 import * as LazyScreenshot from './lazyScreenshot.js';
 
@@ -20,8 +21,7 @@ const onclick = {
 function clickedSavedFile(engine, file)
 {
     file.load().then((file) => {
-        const compressed = file.extension.includes('z');
-        if (engine.setSaveFile(file.data, compressed) && engine.loadGame()) {
+        if (engine.setSaveFile(file.data, isCompressed(file)) && engine.loadGame()) {
             close(GameMenu.States.LOADING);
         }
     });
@@ -85,8 +85,7 @@ export function setChipId(chip_id)
     // Set the click handler to load the correct chip slot and go back to the game
     onclick.chip = (engine, file) => {
         file.load().then((file) => {
-            const compressed = file.extension.includes('z');
-            if (engine.setSaveFile(file.data, compressed) && engine.loadChip(chip_id)) {
+            if (engine.setSaveFile(file.data, isCompressed(file)) && engine.loadChip(chip_id)) {
                 close(GameMenu.States.EXEC);
             }
         });

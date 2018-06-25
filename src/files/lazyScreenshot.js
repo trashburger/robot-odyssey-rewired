@@ -1,4 +1,5 @@
 import * as Graphics from '../graphics.js';
+import { isCompressed } from './storage.js';
 import ScreenshotLoadingImage from '../assets/screenshot-loading.gif';
 
 const render_stack = [];
@@ -18,8 +19,7 @@ function renderer()
     const data = element._screenshot_data;
     const file = data.loadedFile;
 
-    const compressed = file.extension.includes('z');
-    const image = data.engine.screenshotSaveFile(file.data, compressed);
+    const image = data.engine.screenshotSaveFile(file.data, isCompressed(file));
     render_canvas.width = image.width;
     render_canvas.height = image.height;
     render_canvas.getContext('2d').putImageData(image, 0, 0);

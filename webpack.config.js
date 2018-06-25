@@ -6,9 +6,10 @@ const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const OfflinePlugin = require('offline-plugin');
 const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
 const WebfontPlugin = require('webfont-webpack-plugin').default;
-const FaviconsWebpackPlugin = require('favicons-webpack-plugin')
-const WebpackPwaManifest = require('webpack-pwa-manifest')
-const GitRevisionPlugin = require('git-revision-webpack-plugin')
+const FaviconsWebpackPlugin = require('favicons-webpack-plugin');
+const WebpackPwaManifest = require('webpack-pwa-manifest');
+const GitRevisionPlugin = require('git-revision-webpack-plugin');
+const RemoveAssetsPlugin = require('remove-assets-webpack-plugin');
 
 const title = 'Robot Odyssey Rewired';
 
@@ -18,6 +19,13 @@ module.exports = {
     output: {
         filename: '[name].[hash].js',
         path: path.resolve(__dirname, 'dist')
+    },
+    stats: {
+        colors: true,
+        children: true,
+        chunks: true,
+        chunkModules: true,
+        modules: true,
     },
     node: {
         fs: 'empty'
@@ -41,6 +49,8 @@ module.exports = {
             })).version(),
         }),
         new HtmlWebpackInlineSourcePlugin(),
+        new RemoveAssetsPlugin(/\.css$/),
+
         new FaviconsWebpackPlugin({
             logo: path.resolve('./build/show/icon.png'),
             prefix: 'icon.[hash].',
@@ -48,12 +58,11 @@ module.exports = {
             title,
             background: '#000',
             icons: {
-                // No manifest outputs, only favicon and apple
                 favicons: true,
                 appleIcon: true,
-                appleStartup: false,
-                android: false,
-                firefox: false,
+                appleStartup: true,
+                android: false,         // No PWA manifest; that's below
+                firefox: false,         // No PWA manifest; that's below
             }
         }),
         new WebfontPlugin({
@@ -71,10 +80,11 @@ module.exports = {
             icons: [
                 {
                     src: path.resolve('./build/show/icon.png'),
-                    sizes: [32, 96, 128, 192, 256, 384, 512]
+                    sizes: [32, 128, 256, 512]
                 }
             ],
         }),
+
         // Offline plugin should be last
         new OfflinePlugin(),
     ],
@@ -97,8 +107,26 @@ module.exports = {
                     {
                         loader: 'babel-loader',
                         options: {
-                            presets: ['babel-preset-env']
-                        }
+                            cacheDirectory: true,
+                            presets: [
+                                ['@babel/preset-env', {
+                                    targets: {
+                                        browsers: [
+                                            'last 2 chrome versions',
+                                            'last 2 android versions',
+                                            'last 2 edge versions',
+                                            'last 2 firefox versions',
+                                            'last 2 safari versions',
+                                            'last 2 ios versions',
+                                        ],
+                                    },
+                                }],
+                            ],
+                            plugins: [
+                                '@babel/plugin-syntax-dynamic-import',
+                                '@babel/plugin-transform-runtime',
+                            ],
+                        },
                     },
                     {
                         loader: 'eslint-loader',
@@ -133,6 +161,12 @@ module.exports = {
                 },
                 canPrint: true,
             })
-        ]
+        ],
+        splitChunks: {
+            cacheGroups: {
+                vendors: false,
+                default: false,
+            }
+        }
     },
 };

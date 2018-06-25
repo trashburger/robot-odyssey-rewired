@@ -54,7 +54,9 @@ all: dist
 dist: $(WEBPACK_DEPS)
 	mkdir -p build/
 	mkdir -p dist/
+	rm -f dist/*
 	npx webpack --config ./webpack.config.js
+	@echo Done.
 
 clean:
 	rm -Rf build/ dist/ .cache/
