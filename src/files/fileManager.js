@@ -10,7 +10,7 @@ let modal_saved = null;
 const filters = {
     game: (file) => ['gsv', 'gsvz'].includes(file.extension),
     lab: (file) => ['lsv', 'lsvz'].includes(file.extension),
-    chip: (file) => file.extension == 'csv',
+    chip: (file) => file.extension === 'csv',
 };
 
 const onclick = {

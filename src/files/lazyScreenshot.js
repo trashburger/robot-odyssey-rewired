@@ -40,7 +40,7 @@ function callback(entries)
                 data.engine.then(() => {
                     // File is loaded and engine is ready. Now rate-limit and serialize the actual rendering
                     render_stack.push(element);
-                    if (render_stack.length == 1) {
+                    if (render_stack.length === 1) {
                         requestAnimationFrame(renderer);
                     }
                 });

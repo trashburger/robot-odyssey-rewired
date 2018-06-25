@@ -47,9 +47,9 @@ function doAutoSave(engine)
 function checkHashForAutoSave(engine)
 {
     const hash = window.location.hash;
-    if (hash && hash[0] == '#') {
+    if (hash && hash[0] === '#') {
         let s = hash.slice(1);
-        if (s != last_set_window_hash) {
+        if (s !== last_set_window_hash) {
             const packed = new Uint8Array(base64.decode(s));
             GameMenu.afterLoading(engine, function () {
                 if (!engine.setSaveFile(packed, true) || !engine.loadGame()) {

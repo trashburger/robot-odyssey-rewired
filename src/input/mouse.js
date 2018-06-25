@@ -69,7 +69,7 @@ export function init(engine)
 
     game_area.addEventListener('mousedown', function (e)
     {
-        if (e.button == 0 && engine.calledRun) {
+        if (e.button === 0 && engine.calledRun) {
             e.preventDefault();
             if (mouse_tracking_unlocked) {
                 // Already unlocked, this is a click
@@ -87,7 +87,7 @@ export function init(engine)
 
     game_area.addEventListener('mouseup', function (e)
     {
-        if (e.button == 0 && engine.calledRun) {
+        if (e.button === 0 && engine.calledRun) {
             e.preventDefault();
             if (mouse_tracking_unlocked) {
                 // Already unlocked

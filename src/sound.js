@@ -34,9 +34,9 @@ export function audioContextSetup()
         }
     }
 
-    if (context.state == 'suspended') {
+    if (context.state === 'suspended') {
         context.resume();
-        if (context.state == 'suspended') {
+        if (context.state === 'suspended') {
             return false;
         }
     }

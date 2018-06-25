@@ -6,7 +6,7 @@ const LAB_WORLD = 30;
 
 export function worldIdFromSaveData(bytes)
 {
-    if (bytes.length == 24389) {
+    if (bytes.length === 24389) {
         return bytes[bytes.length - 1];
     }
     return null;
@@ -14,7 +14,7 @@ export function worldIdFromSaveData(bytes)
 
 export function chipNameFromSaveData(bytes)
 {
-    if (bytes.length == 1333) {
+    if (bytes.length === 1333) {
         let name = '';
         const nameField = bytes.slice(0x40A, 0x41C);
         for (let byte of nameField) {
@@ -35,7 +35,7 @@ export function filenameForSaveData(bytes, date)
     const datestr = date.toLocaleString().replace(/\//g,'-');
 
     if (world !== null) {
-        if (world == LAB_WORLD) {
+        if (world === LAB_WORLD) {
             return `Saved Lab (${datestr}).lsv`;
         } else {
             return `Robotropolis, World ${world+1} (${datestr}).gsv`;
@@ -53,7 +53,7 @@ export function filenameForAutosave(bytes, date)
     const datestr = date.toLocaleString().replace(/\//g,'-');
 
     if (world !== null) {
-        if (world == LAB_WORLD) {
+        if (world === LAB_WORLD) {
             return `Autosave (${datestr}).lsvz`;
         } else {
             return `Autosave (${datestr}).gsvz`;

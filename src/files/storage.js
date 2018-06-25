@@ -56,7 +56,7 @@ class Files
         }
 
         // Special file types: extract zip archives now
-        if (extension == 'zip') {
+        if (extension === 'zip') {
             return JSZip.loadAsync(data).then((zip) => this.saveZip(zip));
         }
 
@@ -133,7 +133,7 @@ class Files
                         // Object data must always be stored as a Uint8Array without a larger
                         // than necessary backing buffer. But older versions didn't adhere to
                         // this rule. Convert records as we encounter them.
-                        if (!(data instanceof Uint8Array) || data.buffer.byteLength != data.length) {
+                        if (!(data instanceof Uint8Array) || data.buffer.byteLength !== data.length) {
                             this.save(name, data, date);
                             data = new Uint8Array(data);
                         }

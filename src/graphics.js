@@ -211,7 +211,7 @@ function engineLoaded(engine)
 
         for (let slot = 0x16; slot < 0x100; slot++) {
 
-            if (slot == 0x87) {
+            if (slot === 0x87) {
                 // The game actually uses this slot!
 
                 // When you get hit by an enemy in the "frogger" sections of the Skyway level,
@@ -292,7 +292,7 @@ function engineLoaded(engine)
 
         for (let slot = 0x16; slot < 0x100; slot++) {
 
-            if (slot == 0x87) {
+            if (slot === 0x87) {
                 // The game actually uses this slot!
 
                 // When you get hit by an enemy in the "frogger" sections of the Skyway level,
@@ -317,11 +317,11 @@ function engineLoaded(engine)
 
     engine.setNamedPalette = function(name)
     {
-        if (name == 'hgr') {
+        if (name === 'hgr') {
             engine.setHGRColors();
-        } else if (name == 'cga') {
+        } else if (name === 'cga') {
             engine.setCGAColors();
-        } else if (name == 'rewired') {
+        } else if (name === 'rewired') {
             engine.setHGRColors();
             engine.setColorTilesFromImage(RewiredTileset);
         }

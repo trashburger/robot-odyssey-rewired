@@ -90,8 +90,8 @@ export function init(engine)
 {
     function keycode(ascii, scancode)
     {
-        if (typeof(ascii) != typeof(0)) {
-            ascii = ascii.length == 1 ? ascii.charCodeAt(0) : parseInt(ascii, 0);
+        if (typeof(ascii) !== typeof(0)) {
+            ascii = ascii.length === 1 ? ascii.charCodeAt(0) : parseInt(ascii, 0);
         }
         GameMenu.pressKey(engine, ascii, scancode);
         audioContextSetup();
@@ -112,22 +112,22 @@ export function init(engine)
             mouseTrackingEnd();
         }
 
-        if (code == 'ArrowUp' && !shift)         keycode(0, 0x48);
-        else if (code == 'ArrowUp' && shift)     keycode('8', 0x48);
-        else if (code == 'ArrowDown' && !shift)  keycode(0, 0x50);
-        else if (code == 'ArrowDown' && shift)   keycode('2', 0x50);
-        else if (code == 'ArrowLeft' && !shift)  keycode(0, 0x4B);
-        else if (code == 'ArrowLeft' && shift)   keycode('4', 0x4B);
-        else if (code == 'ArrowRight' && !shift) keycode(0, 0x4D);
-        else if (code == 'ArrowRight' && shift)  keycode('6', 0x4D);
-        else if (code == 'Backspace' && plain)   keycode('\x08', 0);
-        else if (code == 'Enter' && plain)       keycode('\x0D', 0x1C);
-        else if (code == 'Escape' && plain)      keycode('\x1b', 0x01);
+        if (code === 'ArrowUp' && !shift)         keycode(0, 0x48);
+        else if (code === 'ArrowUp' && shift)     keycode('8', 0x48);
+        else if (code === 'ArrowDown' && !shift)  keycode(0, 0x50);
+        else if (code === 'ArrowDown' && shift)   keycode('2', 0x50);
+        else if (code === 'ArrowLeft' && !shift)  keycode(0, 0x4B);
+        else if (code === 'ArrowLeft' && shift)   keycode('4', 0x4B);
+        else if (code === 'ArrowRight' && !shift) keycode(0, 0x4D);
+        else if (code === 'ArrowRight' && shift)  keycode('6', 0x4D);
+        else if (code === 'Backspace' && plain)   keycode('\x08', 0);
+        else if (code === 'Enter' && plain)       keycode('\x0D', 0x1C);
+        else if (code === 'Escape' && plain)      keycode('\x1b', 0x01);
 
-        else if (key.length == 1 && plain) {
+        else if (key.length === 1 && plain) {
             // Letter keys
             keycode(key.toUpperCase(), 0);
-        } else if (key.length == 1 && ctrl && !alt && !meta) {
+        } else if (key.length === 1 && ctrl && !alt && !meta) {
             // CTRL keys, useful for sound on-off and for cheats
             keycode(controlCode(key), 0);
         } else {

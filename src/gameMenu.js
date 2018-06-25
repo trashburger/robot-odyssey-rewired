@@ -106,7 +106,7 @@ export function init(engine)
 {
     // Splashscreen pointing events
     splash.onclick = () => {
-        if (current_state == States.SPLASH) {
+        if (current_state === States.SPLASH) {
             setState(States.MENU_TRANSITION);
         }
     };
@@ -114,7 +114,7 @@ export function init(engine)
     // Splash animation end
     getLastSplashImage().addEventListener('animationend', function () {
         setTimeout(function () {
-            if (current_state == States.SPLASH) {
+            if (current_state === States.SPLASH) {
                 setState(States.MENU_TRANSITION);
             }
         }, 1000);
@@ -123,13 +123,13 @@ export function init(engine)
     // Mouse/touch handlers for menu choices
     for (let i = 0; i < choices.length; i++) {
         choices[i].addEventListener('click', function () {
-            if (current_state == States.MENU_ACTIVE) {
+            if (current_state === States.MENU_ACTIVE) {
                 setMenuChoice(i);
                 invokeMenuChoice(engine);
             }
         });
         choices[i].addEventListener('mouseenter', function () {
-            if (current_state == States.MENU_ACTIVE && menu_joystick_y == 0) {
+            if (current_state === States.MENU_ACTIVE && menu_joystick_y === 0) {
                 setMenuChoice(i);
             }
         });
@@ -146,38 +146,38 @@ export function init(engine)
 
 export function pressKey(engine, ascii, scancode)
 {
-    if (current_state == States.SPLASH) {
-        if (ascii == 0x0D || ascii == 0x20) {
+    if (current_state === States.SPLASH) {
+        if (ascii === 0x0D || ascii === 0x20) {
             // Enter or space
             setState(States.MENU_TRANSITION);
         }
 
-    } else if (current_state == States.MENU_ACTIVE) {
+    } else if (current_state === States.MENU_ACTIVE) {
 
-        if (scancode == 0x50 || ascii == 0x20) {
+        if (scancode === 0x50 || ascii === 0x20) {
             // Down or Space
             setMenuChoice(current_menu_choice + 1);
-        } else if (scancode == 0x48) {
+        } else if (scancode === 0x48) {
             // Up
             setMenuChoice(current_menu_choice - 1);
-        } else if (ascii == 0x0D) {
+        } else if (ascii === 0x0D) {
             // Enter
             invokeMenuChoice(engine);
         }
 
-    } else if (current_state == States.MODAL_TEXTBOX) {
-        if (ascii == 0x0D || ascii == 0x20 || ascii == 0x1B) {
+    } else if (current_state === States.MODAL_TEXTBOX) {
+        if (ascii === 0x0D || ascii === 0x20 || ascii === 0x1B) {
             // Enter, space, escape
             modal_textbox.onclick();
         }
 
-    } else if (current_state == States.MODAL_FILES) {
-        if (ascii == 0x1B) {
+    } else if (current_state === States.MODAL_FILES) {
+        if (ascii === 0x1B) {
             // Escape
             FileManager.close();
         }
 
-    } else if (current_state == States.EXEC && engine.calledRun) {
+    } else if (current_state === States.EXEC && engine.calledRun) {
         // Engine gets keys only when it's in front
         engine.pressKey(ascii, scancode);
         engine.autoSave();
@@ -190,14 +190,14 @@ function joystickIntervalFunc()
     var rate = 0.25;  // Max menu ticks per interval
 
     // Make rollover at the edges slower
-    if ((current_menu_choice == 0 && menu_joystick_y < 0) ||
-        (current_menu_choice == choices.length-1 && menu_joystick_y > 0)) {
+    if ((current_menu_choice === 0 && menu_joystick_y < 0) ||
+        (current_menu_choice === choices.length-1 && menu_joystick_y > 0)) {
         rate *= 0.3;
     }
 
     menu_joystick_accum += rate * menu_joystick_y;
     let intpart = menu_joystick_accum|0;
-    if (intpart != 0) {
+    if (intpart !== 0) {
         menu_joystick_accum -= intpart;
         setMenuChoice(current_menu_choice + intpart);
     }
@@ -205,9 +205,9 @@ function joystickIntervalFunc()
 
 export function setJoystickAxes(engine, x, y)
 {
-    if (current_state == States.MENU_ACTIVE) {
+    if (current_state === States.MENU_ACTIVE) {
         menu_joystick_y = Math.max(-1, Math.min(1, y));
-        if (y == 0) {
+        if (y === 0) {
             // Reset on idle
             if (menu_joystick_interval) {
                 clearInterval(menu_joystick_interval);
@@ -227,11 +227,11 @@ export function setJoystickAxes(engine, x, y)
 
 export function setJoystickButton(engine, b)
 {
-    if (b && current_state == States.SPLASH) {
+    if (b && current_state === States.SPLASH) {
         setState(States.MENU_TRANSITION);
-    } else if (b && current_state == States.MODAL_TEXTBOX) {
+    } else if (b && current_state === States.MODAL_TEXTBOX) {
         modal_textbox.onclick();
-    } else if (b && current_state == States.MENU_ACTIVE) {
+    } else if (b && current_state === States.MENU_ACTIVE) {
         invokeMenuChoice(engine);
     }
 }
@@ -251,7 +251,7 @@ function getLastSplashImage()
 {
     let result = null;
     for (let child of Array.from(splash.children)) {
-        if (child.nodeName == 'IMG') {
+        if (child.nodeName === 'IMG') {
             result = child;
         }
     }
@@ -260,10 +260,10 @@ function getLastSplashImage()
 
 export function setState(s)
 {
-    if (s == current_state) {
+    if (s === current_state) {
         return;
     }
-    if (current_state == States.ERROR_HALT) {
+    if (current_state === States.ERROR_HALT) {
         // Stay stuck in error halt
         return;
     }
@@ -280,22 +280,22 @@ export function setState(s)
     // Clear mouse lockout, clear keyboard buffer
     mouseTrackingEnd();
 
-    if (s == States.MENU_TRANSITION) {
+    if (s === States.MENU_TRANSITION) {
         // Brief timed state to lock out input when menu is fading in
         setTimeout(function () {
-            if (current_state == States.MENU_TRANSITION) {
+            if (current_state === States.MENU_TRANSITION) {
                 setState(States.MENU_ACTIVE);
             }
         }, 300);
     }
 
-    if (s == States.MODAL_TEXTBOX) {
+    if (s === States.MODAL_TEXTBOX) {
         modal_textbox.classList.remove('hidden');
-    } else if (s != States.ERROR_HALT) {
+    } else if (s !== States.ERROR_HALT) {
         modal_textbox.classList.add('hidden');
     }
 
-    if (s == States.MODAL_FILES) {
+    if (s === States.MODAL_FILES) {
         // Fade-in
         modal_files.classList.remove('hidden');
         requestAnimationFrame(() => modal_files.classList.remove('fadeout'));
@@ -304,40 +304,40 @@ export function setState(s)
         modal_files.classList.add('fadeout', 'hidden');
     }
 
-    if (s == States.MODAL_FILES) {
+    if (s === States.MODAL_FILES) {
         // Completely hide engine controls so their blank space can't be scrolled into
         engine_controls.classList.add('hidden', 'fadeout');
-    } else if (s != States.MODAL_TEXTBOX && s != States.SPLASH) {
+    } else if (s !== States.MODAL_TEXTBOX && s !== States.SPLASH) {
         // Fade-in in states other than modals and the splash
         engine_controls.classList.remove('hidden');
         setTimeout(() => engine_controls.classList.remove('fadeout'), 50);
     }
 
-    if (s == States.SPLASH) {
+    if (s === States.SPLASH) {
         splash.classList.remove('hidden');
-    } else if (s == States.LOADING || s == States.EXEC_LAUNCHING) {
+    } else if (s === States.LOADING || s === States.EXEC_LAUNCHING) {
         splash.classList.add('hidden');
     }
 
-    if (s == States.EXEC_LAUNCHING || s == States.LOADING) {
+    if (s === States.EXEC_LAUNCHING || s === States.LOADING) {
         game_menu.classList.add('fadeout');
-    } else if (s != States.EXEC && s != States.LOADING && s != States.MODAL_FILES && s != States.MODAL_TEXTBOX) {
+    } else if (s !== States.EXEC && s !== States.LOADING && s !== States.MODAL_FILES && s !== States.MODAL_TEXTBOX) {
         game_menu.classList.remove('fadeout');
     }
 
-    if (s == States.MENU_TRANSITION || s == States.MENU_ACTIVE) {
+    if (s === States.MENU_TRANSITION || s === States.MENU_ACTIVE) {
         game_menu.classList.remove('hidden');
     }
 
-    if (s == States.LOADING) {
+    if (s === States.LOADING) {
         loading.classList.remove('hidden');
-    } else if (s != States.EXEC) {
+    } else if (s !== States.EXEC) {
         loading.classList.add('hidden');
     }
 
-    if (s == States.EXEC) {
+    if (s === States.EXEC) {
         framebuffer.classList.remove('hidden');
-    } else if (s == States.MENU_TRANSITION || s == States.MENU_ACTIVE || s == States.SPLASH) {
+    } else if (s === States.MENU_TRANSITION || s === States.MENU_ACTIVE || s === States.SPLASH) {
         framebuffer.classList.add('hidden');
     }
 }
@@ -347,7 +347,7 @@ function setMenuChoice(c)
     c %= choices.length;
     if (c < 0) c += choices.length;
 
-    if (c != current_menu_choice) {
+    if (c !== current_menu_choice) {
         current_menu_choice = c;
     }
 

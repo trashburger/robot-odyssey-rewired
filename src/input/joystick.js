@@ -90,7 +90,7 @@ export function init(engine)
             const deadzone = engine.gamepadDeadzone;
             if (axes[0]*axes[0] + axes[1]*axes[1] <= deadzone*deadzone) {
                 axes = [0,0];
-                if (last_axes[0] != 0 || last_axes[1] != 0) {
+                if (last_axes[0] !== 0 || last_axes[1] !== 0) {
                     if (joystick) {
                         joystick[0].hide();
                     }
@@ -112,7 +112,7 @@ export function init(engine)
             });
 
             // If any axes changed, send an XY event
-            if (axes[0] != last_axes[0] || axes[1] != last_axes[1]) {
+            if (axes[0] !== last_axes[0] || axes[1] !== last_axes[1]) {
                 const yinv = engine.gamepadInvertYAxis ? -1 : 1;
                 joystickAxes(axes[0], yinv * axes[1]);
 
@@ -121,7 +121,7 @@ export function init(engine)
                     const size = joystick[0].options.size * 0.25;
                     joystick[0].ui.front.style.left = (axes[0] * size) + 'px';
                     joystick[0].ui.front.style.top = (yinv * axes[1] * size) + 'px';
-                    if (last_axes[0] == 0 && last_axes[1] == 0) {
+                    if (last_axes[0] === 0 && last_axes[1] === 0) {
                         joystick[0].show();
                     }
                 }
