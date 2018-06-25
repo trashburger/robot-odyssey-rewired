@@ -1,6 +1,5 @@
 .button_area {
     display: flex;
-    flex-wrap: wrap;
     margin: 0 50px 2px 50px;
 }
 
