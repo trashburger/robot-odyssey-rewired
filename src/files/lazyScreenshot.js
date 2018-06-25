@@ -1,10 +1,7 @@
 import * as Graphics from '../graphics.js';
 import ScreenshotLoadingImage from '../assets/screenshot-loading.png';
 
-const INTERVAL = 20;
-
-const screenshot_render_queue = [];
-let screenshot_render_timer = null;
+const render_stack = [];
 
 const render_canvas = document.createElement('canvas');
 render_canvas.width = Graphics.WIDTH;
@@ -12,13 +9,12 @@ render_canvas.height = Graphics.VISIBLE_HEIGHT;
 
 function renderer()
 {
-    if (!screenshot_render_queue.length) {
-        clearInterval(screenshot_render_timer);
-        screenshot_render_timer = null;
-        return;
+    // Limit of one render per frame; keep coming back while the queue has work.
+    if (render_stack.length > 1) {
+        window.requestAnimationFrame(renderer);
     }
 
-    const element = screenshot_render_queue.pop();
+    const element = render_stack.pop();
     const data = element._screenshot_data;
     const file = data.loadedFile;
 
@@ -43,9 +39,9 @@ function callback(entries)
                 data.loadedFile = file;
                 data.engine.then(() => {
                     // File is loaded and engine is ready. Now rate-limit and serialize the actual rendering
-                    screenshot_render_queue.push(element);
-                    if (screenshot_render_timer === null) {
-                        screenshot_render_timer = setInterval(renderer, INTERVAL);
+                    render_stack.push(element);
+                    if (render_stack.length == 1) {
+                        window.requestAnimationFrame(renderer);
                     }
                 });
             });
