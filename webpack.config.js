@@ -106,7 +106,7 @@ module.exports = {
                 ],
             },
             {
-                test: /\.(png|woff|woff2)$/,
+                test: /\.(png|gif|woff|woff2)$/,
                 loader: 'url-loader',
                 options: {
                     limit: 8192,

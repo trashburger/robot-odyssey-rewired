@@ -1,5 +1,5 @@
 import * as Graphics from '../graphics.js';
-import ScreenshotLoadingImage from '../assets/screenshot-loading.png';
+import ScreenshotLoadingImage from '../assets/screenshot-loading.gif';
 
 const render_stack = [];
 
