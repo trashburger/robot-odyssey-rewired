@@ -296,7 +296,7 @@ export function setState(s)
     }
 
     if (s == States.MODAL_FILES) {
-        // Fade in
+        // Fade-in
         modal_files.classList.remove('hidden');
         requestAnimationFrame(() => modal_files.classList.remove('fadeout'));
     } else {
@@ -308,8 +308,9 @@ export function setState(s)
         // Completely hide engine controls so their blank space can't be scrolled into
         engine_controls.classList.add('hidden');
     } else if (s != States.MODAL_TEXTBOX && s != States.SPLASH) {
-        // Fade in and/or unhide the controls in states other than modals and the splash
-        engine_controls.classList.remove('hidden', 'fadeout');
+        // Fade-in in states other than modals and the splash
+        engine_controls.classList.remove('hidden');
+        requestAnimationFrame(() => engine_controls.classList.remove('fadeout'));
     }
 
     if (s == States.SPLASH) {

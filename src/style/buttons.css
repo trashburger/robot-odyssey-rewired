@@ -48,7 +48,6 @@
 }
 
 #engine_controls.fadeout {
-    display: block;
     opacity: 0;
 }
 
