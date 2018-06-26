@@ -19,6 +19,10 @@ a {
     display: none;
 }
 
+.fadeout {
+    opacity: 0;
+}
+
 .column_width {
     margin: 0 auto;
     max-width: 1200px;

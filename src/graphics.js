@@ -18,7 +18,7 @@ export function init(engine)
 
     // The first putImageData can take a while on Chrome? Do this at init
     // rather than causing a delay later on when the game is opening.
-    context.putImageData(image, BORDER, BORDER);
+    requestAnimationFrame(() => context.putImageData(image, BORDER, BORDER));
 
     engine.onRenderFrame = (rgb) => {
         image.data.set(rgb);

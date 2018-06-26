@@ -277,7 +277,7 @@ export function setState(s)
         menu_joystick_interval = null;
     }
 
-    // Clear mouse lockout, clear keyboard buffer
+    // Interrupt mouse tracking on any state change
     mouseTrackingEnd();
 
     if (s === States.MENU_TRANSITION) {
@@ -291,8 +291,9 @@ export function setState(s)
 
     if (s === States.MODAL_TEXTBOX) {
         modal_textbox.classList.remove('hidden');
+        requestAnimationFrame(() => modal_textbox.classList.remove('fadeout'));
     } else if (s !== States.ERROR_HALT) {
-        modal_textbox.classList.add('hidden');
+        modal_textbox.classList.add('fadeout', 'hidden');
     }
 
     if (s === States.MODAL_FILES) {
@@ -304,10 +305,10 @@ export function setState(s)
         modal_files.classList.add('fadeout', 'hidden');
     }
 
-    if (s === States.MODAL_FILES) {
+    if (s === States.MODAL_FILES || s === States.MODAL_TEXTBOX) {
         // Completely hide engine controls so their blank space can't be scrolled into
         engine_controls.classList.add('hidden', 'fadeout');
-    } else if (s !== States.MODAL_TEXTBOX && s !== States.SPLASH) {
+    } else if (s !== States.SPLASH) {
         // Fade-in in states other than modals and the splash
         engine_controls.classList.remove('hidden');
         setTimeout(() => engine_controls.classList.remove('fadeout'), 50);

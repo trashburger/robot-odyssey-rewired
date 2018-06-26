@@ -1,15 +1,3 @@
-#modal_files {
-    /* Must occlude the nipplejs joystick, which uses z-index 999, sigh. */
-    z-index: 9000;
-    background: #000;
-    opacity: 1;
-    transition: opacity 0.5s ease;
-}
-
-#modal_files.fadeout {
-    opacity: 0;
-}
-
 #modal_files h1 {
     margin: 2vmin 0;
     font-size: 110%;
