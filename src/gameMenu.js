@@ -36,9 +36,6 @@ export function showError(e)
 {
     // This error handler should be callable at any time, even before init()
 
-    /* eslint-disable no-console */
-    console.warn('Stopped with Error:', e);
-
     e = e.toString();
     if (e.includes('no binaryen method succeeded')) {
         // This is obtuse; we only build for wasm, so really this means the device doesn't support wasm
@@ -50,6 +47,8 @@ export function showError(e)
 
     modal(e);
     setState(States.ERROR_HALT);
+
+    throw e;    // In case we have a debugger attached
 }
 
 export function modal(message, onclick)
@@ -283,8 +282,6 @@ export function setState(s)
         // Stay stuck in error halt
         return;
     }
-    /* eslint-disable no-console */
-    console.log(`State transition, ${current_state} -> ${s}`);
     current_state = s;
 
     // At this point, a state change is definitely happening.
