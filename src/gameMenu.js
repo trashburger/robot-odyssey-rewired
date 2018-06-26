@@ -3,15 +3,15 @@ import * as EngineLoader from './engineLoader.js';
 import { mouseTrackingEnd } from './input/mouse.js';
 
 export const States = {
-    SPLASH: 0,
-    MENU_TRANSITION: 1,
-    MENU_ACTIVE: 2,
-    EXEC_LAUNCHING: 3,
-    EXEC: 4,
-    LOADING: 5,
-    MODAL_TEXTBOX: 6,
-    MODAL_FILES: 7,
-    ERROR_HALT: 8,
+    SPLASH:             'SPLASH',
+    MENU_TRANSITION:    'MENU_TRANSITION',
+    MENU_ACTIVE:        'MENU_ACTIVE',
+    EXEC_LAUNCHING:     'EXEC_LAUNCHING',
+    EXEC:               'EXEC',
+    LOADING:            'LOADING',
+    MODAL_TEXTBOX:      'MODAL_TEXTBOX',
+    MODAL_FILES:        'MODAL_FILES',
+    ERROR_HALT:         'ERROR_HALT',
 };
 
 const engine_controls = document.getElementById('engine_controls');
@@ -148,7 +148,9 @@ export function init()
 
     // Back to the menu when a game binary exits
     EngineLoader.instance.onProcessExit = function () {
-        setState(States.MENU_TRANSITION);
+        if (current_state === States.EXEC || current_state === States.EXEC_LAUNCHING) {
+            setState(States.MENU_TRANSITION);
+        }
     };
 
     // We're already running the splashscreen via CSS animations
@@ -281,6 +283,8 @@ export function setState(s)
         // Stay stuck in error halt
         return;
     }
+    /* eslint-disable no-console */
+    console.log(`State transition, ${current_state} -> ${s}`);
     current_state = s;
 
     // At this point, a state change is definitely happening.
@@ -380,14 +384,9 @@ async function invokeMenuChoice()
     const choice = choices[current_menu_choice].dataset;
     const engine = await afterLoadingState();
 
-    // Immediate feedback that we're working on launching,
-    // even if it takes a sec to query the database and
-    // launch a new instance of the game.
-    setState(States.EXEC_LAUNCHING);
-
-    // If no files are available, go right to exec
     const try_exec = () => {
         if (choice.exec) {
+            setState(States.EXEC_LAUNCHING);
             const args = choice.exec.split(' ');
             engine.exec(args[0], args[1] || '');
         }
@@ -407,6 +406,7 @@ async function invokeMenuChoice()
     if (result) {
         setState(States.MODAL_FILES);
     } else {
+        // If no files are available, go right to exec
         try_exec();
     }
 }

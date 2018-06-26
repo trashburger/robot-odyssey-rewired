@@ -215,12 +215,15 @@ export function init()
 
     for (let button of document.getElementsByClassName('exec_btn')) {
         addButtonClick(button, async () => {
-            GameMenu.setState(GameMenu.States.LOADING);
-            const engine = await EngineLoader.complete;
+            // Go to the EXEC_LAUNCHING state, either via closing
+            // the file manager (if applicable) or waiting for the
+            // engine to finish loading.
+            if (!FileManager.close(GameMenu.States.EXEC_LAUNCHING)) {
+                await GameMenu.afterLoadingState();
+                GameMenu.setState(GameMenu.States.EXEC_LAUNCHING);
+            }
             const args = button.dataset.exec.split(' ');
-            const s = GameMenu.States.EXEC_LAUNCHING;
-            FileManager.close(s) || GameMenu.setState(s);
-            engine.exec(args[0], args[1] || '');
+            EngineLoader.instance.exec(args[0], args[1] || '');
         });
     }
 }
