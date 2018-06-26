@@ -76,9 +76,9 @@ module.exports = {
             title,
             background: '#000',
             icons: {
-                favicons: true,
-                appleIcon: true,
-                appleStartup: true,
+                favicons: true,         // useful
+                appleIcon: true,        // useful
+                appleStartup: false,    // broken; some are rotated?
                 android: false,         // No PWA manifest; that's below
                 firefox: false,         // No PWA manifest; that's below
             }
