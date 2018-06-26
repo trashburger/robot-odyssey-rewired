@@ -1,4 +1,5 @@
 import * as FileManager from './files/fileManager.js';
+import * as EngineLoader from './engineLoader.js';
 import { mouseTrackingEnd } from './input/mouse.js';
 
 export const States = {
@@ -33,6 +34,11 @@ let modal_saved = null;
 
 export function showError(e)
 {
+    // This error handler should be callable at any time, even before init()
+
+    /* eslint-disable no-console */
+    console.warn('Stopped with Error:', e);
+
     e = e.toString();
     if (e.includes('no binaryen method succeeded')) {
         // This is obtuse; we only build for wasm, so really this means the device doesn't support wasm
@@ -94,7 +100,9 @@ export function modalDuringPromise(promise, message)
     const nop = () => {};
     const finish = () => { end = nop; };
     modal(message, nop).then(finish);
-    setTimeout(() => { promise.then(() => end(), () => end()); }, 750);
+
+    const minimumDuration = 750;
+    setTimeout(() => { promise.then(() => end(), () => end()); }, minimumDuration);
 }
 
 export function getState()
@@ -102,8 +110,11 @@ export function getState()
     return current_state;
 }
 
-export function init(engine)
+export function init()
 {
+    // Handle asynchronous errors in loading the engine
+    EngineLoader.complete.then(null, showError);
+
     // Splashscreen pointing events
     splash.onclick = () => {
         if (current_state === States.SPLASH) {
@@ -125,7 +136,7 @@ export function init(engine)
         choices[i].addEventListener('click', function () {
             if (current_state === States.MENU_ACTIVE) {
                 setMenuChoice(i);
-                invokeMenuChoice(engine);
+                invokeMenuChoice();
             }
         });
         choices[i].addEventListener('mouseenter', function () {
@@ -136,7 +147,7 @@ export function init(engine)
     }
 
     // Back to the menu when a game binary exits
-    engine.onProcessExit = function () {
+    EngineLoader.instance.onProcessExit = function () {
         setState(States.MENU_TRANSITION);
     };
 
@@ -144,8 +155,10 @@ export function init(engine)
     setState(States.SPLASH);
 }
 
-export function pressKey(engine, ascii, scancode)
+export function pressKey(ascii, scancode)
 {
+    const engine = EngineLoader.instance;
+
     if (current_state === States.SPLASH) {
         if (ascii === 0x0D || ascii === 0x20) {
             // Enter or space
@@ -162,7 +175,7 @@ export function pressKey(engine, ascii, scancode)
             setMenuChoice(current_menu_choice - 1);
         } else if (ascii === 0x0D) {
             // Enter
-            invokeMenuChoice(engine);
+            invokeMenuChoice();
         }
 
     } else if (current_state === States.MODAL_TEXTBOX) {
@@ -203,7 +216,7 @@ function joystickIntervalFunc()
     }
 }
 
-export function setJoystickAxes(engine, x, y)
+export function setJoystickAxes(x, y)
 {
     if (current_state === States.MENU_ACTIVE) {
         menu_joystick_y = Math.max(-1, Math.min(1, y));
@@ -225,37 +238,38 @@ export function setJoystickAxes(engine, x, y)
     }
 }
 
-export function setJoystickButton(engine, b)
+export function setJoystickButton(b)
 {
     if (b && current_state === States.SPLASH) {
         setState(States.MENU_TRANSITION);
     } else if (b && current_state === States.MODAL_TEXTBOX) {
         modal_textbox.onclick();
     } else if (b && current_state === States.MENU_ACTIVE) {
-        invokeMenuChoice(engine);
-    }
-}
-
-export function afterLoading(engine, func)
-{
-    if (engine.calledRun) {
-        // Already loaded
-        func();
-    } else {
-        setState(States.LOADING);
-        engine.then(func);
+        invokeMenuChoice();
     }
 }
 
 function getLastSplashImage()
 {
     let result = null;
-    for (let child of Array.from(splash.children)) {
+    for (let child of splash.children) {
         if (child.nodeName === 'IMG') {
             result = child;
         }
     }
     return result;
+}
+
+export async function afterLoadingState()
+{
+    const engine = EngineLoader.instance;
+    if (engine.calledRun) {
+        // Already loaded
+        return engine;
+    }
+
+    setState(States.LOADING);
+    return await EngineLoader.complete;
 }
 
 export function setState(s)
@@ -361,41 +375,38 @@ function setMenuChoice(c)
     game_menu_cursor.style.top = offset_percent + '%';
 }
 
-function invokeMenuChoice(engine)
+async function invokeMenuChoice()
 {
     const choice = choices[current_menu_choice].dataset;
-    afterLoading(engine, () => {
+    const engine = await afterLoadingState();
 
-        // Immediate feedback that we're working on launching,
-        // even if it takes a sec to query the database and
-        // launch a new instance of the game.
-        setState(States.EXEC_LAUNCHING);
+    // Immediate feedback that we're working on launching,
+    // even if it takes a sec to query the database and
+    // launch a new instance of the game.
+    setState(States.EXEC_LAUNCHING);
 
-        // If no files are available, go right to exec
-        const try_exec = () => {
-            if (choice.exec) {
-                const args = choice.exec.split(' ');
-                engine.exec(args[0], args[1] || '');
-            }
-        };
-
-        if (!choice.files) {
-            // No file manager is associated with this choice
-            return try_exec();
+    // If no files are available, go right to exec
+    const try_exec = () => {
+        if (choice.exec) {
+            const args = choice.exec.split(' ');
+            engine.exec(args[0], args[1] || '');
         }
+    };
 
-        // Asynchronously load the file manager, but it may
-        // report that there are no files to manage, in which
-        // case we should also try exec.
+    if (!choice.files) {
+        // No file manager is associated with this choice
+        return try_exec();
+    }
 
-        setState(States.LOADING);
-        FileManager.open(engine, choice.files, States.MENU_TRANSITION).then((result) => {
-            if (result) {
-                setState(States.MODAL_FILES);
-            } else {
-                try_exec();
-            }
-        });
+    // Asynchronously load the file manager, but it may
+    // report that there are no files to manage, in which
+    // case we should also try exec.
 
-    });
+    setState(States.LOADING);
+    const result = await FileManager.open(choice.files, States.MENU_TRANSITION);
+    if (result) {
+        setState(States.MODAL_FILES);
+    } else {
+        try_exec();
+    }
 }

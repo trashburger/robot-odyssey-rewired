@@ -2,6 +2,7 @@ import relativeDate from 'relative-date';
 import { isCompressed } from './storage.js';
 import * as GameMenu from '../gameMenu.js';
 import * as LazyScreenshot from './lazyScreenshot.js';
+import * as EngineLoader from '../engineLoader.js';
 
 const modal_files = document.getElementById('modal_files');
 const speed_selector = document.getElementById('speed_selector');
@@ -14,25 +15,30 @@ const filters = {
 };
 
 const onclick = {
-    game: clickedSavedFile,
-    lab: clickedSavedFile,
+    game: (file) => clickedFile(file, (engine) => engine.loadGame()),
+    lab: (file) => clickedFile(file, (engine) => engine.loadGame()),
 };
 
-function clickedSavedFile(engine, file)
+async function clickedFile(file, loader)
 {
-    file.load().then((file) => {
-        if (engine.setSaveFile(file.data, isCompressed(file)) && engine.loadGame()) {
-            close(GameMenu.States.LOADING);
-        }
-    });
+    const engine = await EngineLoader.complete;
+    const loadedFile = await file.load();
+    if (!engine.setSaveFile(loadedFile.data, isCompressed(loadedFile))) {
+        return;
+    }
+    if (!loader(engine)) {
+        return;
+    }
+    close(GameMenu.States.LOADING);
 }
 
-export function open(engine, mode, next_state)
+export async function open(mode, next_state)
 {
     const file_elements = [];
+    const engine = EngineLoader.instance;
     visitElements(modal_files, mode.split(' '), file_elements);
 
-    return new Promise((resolve, reject) => {
+    const result = await new Promise((resolve, reject) => {
         // The returned promise indicates whether we successfully found
         // any files (resolving on the first success) or if we made it
         // to the end of the transaction without finding anything.
@@ -44,26 +50,27 @@ export function open(engine, mode, next_state)
                 if (filters[mode](file)) {
                     // Mapped that file to a grid where it appears
                     resolve(true);
-                    element.appendChild(fileView(engine, file, mode));
+                    element.appendChild(fileView(file, mode));
                 }
             }
         }).then(() => resolve(false), reject);
-
-    }).then((result) => {
-        if (result) {
-            // Activate the file selector modal
-            modal_saved = {
-                state: next_state || GameMenu.getState(),
-                speed: speed_selector.value,
-            };
-
-            // Pause
-            speed_selector.value = '0';
-            speed_selector.dispatchEvent(new Event('change'));
-
-            GameMenu.setState(GameMenu.States.MODAL_FILES);
-        }
     });
+
+    if (result) {
+        // Activate the file selector modal
+        modal_saved = {
+            state: next_state || GameMenu.getState(),
+            speed: speed_selector.value,
+        };
+
+        // Pause
+        speed_selector.value = '0';
+        speed_selector.dispatchEvent(new Event('change'));
+
+        GameMenu.setState(GameMenu.States.MODAL_FILES);
+    }
+
+    return result;
 }
 
 export function close(optionalStateOverride)
@@ -83,16 +90,10 @@ export function close(optionalStateOverride)
 export function setChipId(chip_id)
 {
     // Set the click handler to load the correct chip slot and go back to the game
-    onclick.chip = (engine, file) => {
-        file.load().then((file) => {
-            if (engine.setSaveFile(file.data, isCompressed(file)) && engine.loadChip(chip_id)) {
-                close(GameMenu.States.EXEC);
-            }
-        });
-    };
+    onclick.chip = (file) => clickedFile(file, (engine) => engine.loadChip(chip_id));
 
     // Update UI to show the correct chip number
-    for (let element of Array.from(modal_files.getElementsByClassName('chip_id'))) {
+    for (let element of modal_files.getElementsByClassName('chip_id')) {
         element.innerText = (1+chip_id).toString();
     }
 }
@@ -123,22 +124,22 @@ function visitElements(element, mode, file_elements)
     } else {
         // Other: visit children
 
-        for (let child of Array.from(element.children)) {
+        for (let child of element.children) {
             visitElements(child, mode, file_elements);
         }
     }
 }
 
-function fileView(engine, file, mode)
+function fileView(file, mode)
 {
     const item = document.createElement('div');
     item.classList.add('item');
-    item.addEventListener('click', () => onclick[mode](engine, file));
+    item.addEventListener('click', () => onclick[mode](file));
 
     const thumbnail = document.createElement('img');
     thumbnail.classList.add('thumbnail');
     item.appendChild(thumbnail);
-    LazyScreenshot.add(engine, file, thumbnail);
+    LazyScreenshot.add(file, thumbnail);
 
     const details = document.createElement('div');
     details.classList.add('details');

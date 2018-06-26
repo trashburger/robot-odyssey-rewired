@@ -2,6 +2,7 @@ import { audioContextSetup } from '../sound.js';
 import { mouseTrackingEnd } from './mouse.js';
 import * as GameMenu from '../gameMenu.js';
 import * as FileManager from '../files/fileManager.js';
+import * as EngineLoader from '../engineLoader.js';
 
 const canvas = document.getElementById('framebuffer');
 const speed_selector = document.getElementById('speed_selector');
@@ -86,14 +87,14 @@ function controlCode(key)
     return String.fromCharCode(key.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0) + 1);
 }
 
-export function init(engine)
+export function init()
 {
     function keycode(ascii, scancode)
     {
         if (typeof(ascii) !== typeof(0)) {
             ascii = ascii.length === 1 ? ascii.charCodeAt(0) : parseInt(ascii, 0);
         }
-        GameMenu.pressKey(engine, ascii, scancode);
+        GameMenu.pressKey(ascii, scancode);
         audioContextSetup();
     }
 
@@ -153,7 +154,7 @@ export function init(engine)
         }
     }
 
-    for (let button of Array.from(document.getElementsByClassName('keyboard_btn'))) {
+    for (let button of document.getElementsByClassName('keyboard_btn')) {
         const press = () => {
             delay = null;
             keycode(button.dataset.ascii || '0x00', parseInt(button.dataset.scancode || '0', 0));
@@ -175,20 +176,22 @@ export function init(engine)
         });
     }
 
-    speed_selector.addEventListener('change', (e) => {
-        engine.then(() => engine.setSpeed(parseFloat(speed_selector.value)));
+    speed_selector.addEventListener('change', async (e) => {
         if (e && e.target) {
             e.target.blur();
             canvas.focus();
         }
+        const engine = await EngineLoader.complete;
+        engine.setSpeed(parseFloat(speed_selector.value));
     });
 
-    for (let button of Array.from(document.getElementsByClassName('speed_adjust_btn'))) {
-        addButtonEvents(button, () => {
+    for (let button of document.getElementsByClassName('speed_adjust_btn')) {
+        addButtonEvents(button, async () => {
             let i = speed_selector.selectedIndex + parseInt(button.dataset.value);
             if (i >= 0 && i < speed_selector.length) {
                 speed_selector.selectedIndex = i;
-                engine.then(() => engine.setSpeed(parseFloat(speed_selector.value)));
+                const engine = await EngineLoader.complete;
+                engine.setSpeed(parseFloat(speed_selector.value));
                 button.classList.add('active_btn');
             }
         }, () => {
@@ -196,26 +199,28 @@ export function init(engine)
         });
     }
 
-    for (let button of Array.from(document.getElementsByClassName('savezip_btn'))) {
-        addButtonClick(button, () => {
-            engine.then(() => engine.downloadArchive());
+    for (let button of document.getElementsByClassName('savezip_btn')) {
+        addButtonClick(button, async () => {
+            const engine = await EngineLoader.complete;
+            engine.downloadArchive();
         });
     }
 
-    for (let button of Array.from(document.getElementsByClassName('filepicker_btn'))) {
-        addButtonClick(button, () => {
-            engine.then(() => engine.filePicker());
+    for (let button of document.getElementsByClassName('filepicker_btn')) {
+        addButtonClick(button, async () => {
+            const engine = await EngineLoader.complete;
+            engine.filePicker();
         });
     }
 
-    for (let button of Array.from(document.getElementsByClassName('exec_btn'))) {
-        addButtonClick(button, () => {
+    for (let button of document.getElementsByClassName('exec_btn')) {
+        addButtonClick(button, async () => {
+            GameMenu.setState(GameMenu.States.LOADING);
+            const engine = await EngineLoader.complete;
             const args = button.dataset.exec.split(' ');
-            engine.then(() => {
-                const s = GameMenu.States.EXEC_LAUNCHING;
-                FileManager.close(s) || GameMenu.setState(s);
-                engine.exec(args[0], args[1] || '');
-            });
+            const s = GameMenu.States.EXEC_LAUNCHING;
+            FileManager.close(s) || GameMenu.setState(s);
+            engine.exec(args[0], args[1] || '');
         });
     }
 }

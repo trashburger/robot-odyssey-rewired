@@ -1,4 +1,5 @@
 import * as GameMenu from '../gameMenu.js';
+import * as EngineLoader from '../engineLoader.js';
 import { filenameForAutosave } from '../roData.js';
 import base64 from 'base64-arraybuffer';
 
@@ -6,8 +7,13 @@ let last_set_window_hash = null;
 let autosave_timer = null;
 const autosave_delay = 500;
 
-function doAutoSave(engine)
+function doAutoSave()
 {
+    const engine = EngineLoader.instance;
+    if (!engine.calledRun) {
+        return;
+    }
+
     // this is hacky... autosaves have a different
     // completion action, and they shouldn't clobber
     // the user's save buffer (it's especially annoying
@@ -44,45 +50,40 @@ function doAutoSave(engine)
     }
 }
 
-function checkHashForAutoSave(engine)
+async function checkHashForAutoSave()
 {
     const hash = window.location.hash;
     if (hash && hash[0] === '#') {
         let s = hash.slice(1);
         if (s !== last_set_window_hash) {
             const packed = new Uint8Array(base64.decode(s));
-            GameMenu.afterLoading(engine, function () {
-                if (!engine.setSaveFile(packed, true) || !engine.loadGame()) {
-                    GameMenu.modal('FAILED to load packed saved game');
-                }
-            });
+
+            GameMenu.setState(GameMenu.States.LOADING);
+            const engine = await GameMenu.afterLoadingState();
+            if (engine.setSaveFile(packed, true) && engine.loadGame()) {
+                return true;
+            }
+
+            GameMenu.modal('FAILED to load packed saved game');
         }
     }
+    return false;
 }
 
-export function init(engine)
+export function init()
 {
-    engine.then(function () {
-        engineLoaded(engine);
-    });
-
-    window.addEventListener('hashchange', function () {
-        checkHashForAutoSave(engine);
-    });
-    checkHashForAutoSave(engine);
-}
-
-function engineLoaded(engine)
-{
-    engine.autoSave = function ()
+    EngineLoader.instance.autoSave = function ()
     {
         if (autosave_timer) {
             clearTimeout(autosave_timer);
         }
         autosave_timer = setTimeout(function () {
-            doAutoSave(engine);
+            doAutoSave();
         }, autosave_delay);
     };
+
+    window.addEventListener('hashchange', checkHashForAutoSave);
+    checkHashForAutoSave();
 }
 
 function storeAutoSave(engine)

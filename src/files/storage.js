@@ -1,12 +1,16 @@
 import idb from 'idb';
 import { readAsArrayBuffer } from 'promise-file-reader';
+import * as EngineLoader from '../engineLoader.js';
 
+const MAX_FILESIZE = 0x10000;
 
-export function init(engine)
+export function init()
 {
     const request = idb.open('robot-odyssey-rewired-storage', 1, upgradeDatabase);
+
+    const engine = EngineLoader.instance;
     engine.settings = new Settings(request);
-    engine.files = new Files(request, engine.MAX_FILE_SIZE, getStaticFiles(engine));
+    engine.files = new Files(request, getStaticFiles());
 }
 
 export function isCompressed(file)
@@ -27,11 +31,10 @@ function getExtension(name)
     return name.split('.').pop().toLowerCase();
 }
 
-function getStaticFiles(engine)
+async function getStaticFiles()
 {
-    return new Promise((resolve) => {
-        engine.then(() => resolve(engine.getStaticFiles()));
-    });
+    const engine = await EngineLoader.complete;
+    return engine.getStaticFiles();
 }
 
 function isHiddenFile(name)
@@ -41,11 +44,11 @@ function isHiddenFile(name)
 
 class Files
 {
-    constructor(dbPromise, maxFileSize, staticFilesPromise)
+    constructor(dbPromise, staticFilesPromise)
     {
         this.dbPromise = dbPromise;
         this.staticFilesPromise = staticFilesPromise;
-        this.maxFileSize = maxFileSize;
+        this.maxFileSize = MAX_FILESIZE;
         this.allowedExtensions = 'gsv lsv csv gsvz lsvz'.split(' ');
     }
 
@@ -132,28 +135,33 @@ class Files
             if (!isHiddenFile(name)) {
                 const extension = getExtension(name);
                 const file = { name, date, extension };
-                file.load = () => db.transaction('files').objectStore('files').get(name).then((v) => {
-                    var data = v.data;
-
-                    // Object data must always be stored as a Uint8Array without a larger
-                    // than necessary backing buffer. But older versions didn't adhere to
-                    // this rule. Convert records as we encounter them.
-                    if (!(data instanceof Uint8Array) || data.buffer.byteLength !== data.length) {
-                        this.save(name, data, date);
-                        data = new Uint8Array(data);
-                    }
-
-                    // Cache file data after it's loaded once
-                    file.data = data;
-                    file.load = () => Promise.resolve(file);
-                    return file;
-                });
+                file.load = () => this.loadFile(file);
                 fn(file);
             }
             cursor.continue();
         });
 
         await tx.complete;
+    }
+
+    async loadFile(file)
+    {
+        const db = await this.dbPromise;
+        const v = await db.transaction('files').objectStore('files').get(file.name);
+        var data = v.data;
+
+        // Object data must always be stored as a Uint8Array without a larger
+        // than necessary backing buffer. But older versions didn't adhere to
+        // this rule. Convert records as we encounter them.
+        if (!(data instanceof Uint8Array) || data.buffer.byteLength !== data.length) {
+            this.save(file.name, data, file.date);
+            data = new Uint8Array(data);
+        }
+
+        // Cache file data after it's loaded once
+        file.data = data;
+        file.load = async () => file;
+        return file;
     }
 
     async createZip()
@@ -175,6 +183,14 @@ class Files
 
         await tx.complete;
         return zip;
+    }
+
+    async createZipBlob()
+    {
+        const zip = await this.createZip();
+        return await zip.generateAsync({
+            type: 'blob'
+        });
     }
 
     saveZip(zip)

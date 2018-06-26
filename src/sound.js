@@ -1,11 +1,13 @@
+import * as EngineLoader from './engineLoader.js';
+
 let context = null;
 
-export function init(engine)
+export function init()
 {
-    engine.onRenderSound = onRenderSound;
+    EngineLoader.instance.onRenderSound = renderSound;
 }
 
-function onRenderSound(pcmData, rate)
+function renderSound(pcmData, rate)
 {
     // TO DO: Volume control
     const volume = 0.1;

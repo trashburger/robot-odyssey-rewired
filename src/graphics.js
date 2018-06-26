@@ -1,4 +1,5 @@
 import * as GameMenu from './gameMenu.js';
+import * as EngineLoader from './engineLoader.js';
 import RewiredTileset from './assets/rewired-tileset.png';
 
 const canvas = document.getElementById('framebuffer');
@@ -8,7 +9,7 @@ export const HEIGHT = 400;
 export const VISIBLE_HEIGHT = 384;
 export const BORDER = 2;
 
-export function init(engine)
+export function init()
 {
     canvas.width = WIDTH + BORDER*2;
     canvas.height = VISIBLE_HEIGHT + BORDER*2;
@@ -20,6 +21,7 @@ export function init(engine)
     // rather than causing a delay later on when the game is opening.
     requestAnimationFrame(() => context.putImageData(image, BORDER, BORDER));
 
+    const engine = EngineLoader.instance;
     engine.onRenderFrame = (rgb) => {
         image.data.set(rgb);
         context.putImageData(image, BORDER, BORDER);
@@ -31,9 +33,8 @@ export function init(engine)
         }
     };
 
-    engine.then(function () {
-        engineLoaded(engine);
-    });
+    // Begin the async portion of initialization, don't care when it finishes.
+    initAsync().then(null, GameMenu.showError);
 
     const palette_selector = document.getElementById('palette_selector');
 
@@ -53,8 +54,11 @@ export function init(engine)
     canvas.focus();
 }
 
-function engineLoaded(engine)
+async function initAsync()
 {
+    // Let the engine load before we go farther
+    const engine = await EngineLoader.complete;
+
     const colorMem = engine.getColorMemory();
     const cga = colorMem.cga;
     const patterns = colorMem.patterns;

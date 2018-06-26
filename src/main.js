@@ -1,20 +1,16 @@
 import 'intersection-observer';
 import OfflinePluginRuntime from 'offline-plugin/runtime';
 
-// Game frontend modules
+import * as EngineLoader from './engineLoader.js';
+import * as GameMenu from './gameMenu.js';
+import * as Storage from './files/storage.js';
 import * as Graphics from './graphics.js';
 import * as Sound from './sound.js';
 import * as Buttons from './input/buttons.js';
 import * as Mouse from './input/mouse.js';
 import * as Joystick from './input/joystick.js';
-import * as AutoSave from './files/autoSave.js';
 import * as FileActions from './files/fileActions.js';
-import * as Storage from './files/storage.js';
-import * as GameMenu from './gameMenu.js';
-
-// Compiled engine loader and WASM code/data bundle, via emscripten
-import EngineFactory from '../build/engine.js';
-import EngineWasm from '../build/engine.wasm';
+import * as AutoSave from './files/autoSave.js';
 
 import './style/main.css';
 import './style/buttons.css';
@@ -29,26 +25,26 @@ import '../build/font/font.template.css';
 OfflinePluginRuntime.install();
 
 try {
-    const engine = EngineFactory({
-        locateFile: function () { return EngineWasm; },
-        onAbort: GameMenu.showError,
-    });
+    // Engine loader must be first
+    EngineLoader.init();
 
-    window.ROEngine = engine;
-
-    Storage.init(engine);
-    Graphics.init(engine);
-    Sound.init(engine);
-    Buttons.init(engine);
-    Mouse.init(engine);
-    Joystick.init(engine);
-    FileActions.init(engine);
-    GameMenu.init(engine);
+    GameMenu.init();
+    Storage.init();
+    Graphics.init();
+    Sound.init();
+    Buttons.init();
+    Mouse.init();
+    Joystick.init();
+    FileActions.init();
 
     // Autosave should be last, it may try to launch a saved game
     // and the other subsystems should be installed by then.
-    AutoSave.init(engine);
+    AutoSave.init();
 
 } catch (e) {
     GameMenu.showError(e);
 }
+
+// Publish the engine to the JS console, to make it easy to tinker with! This is
+// only for debugging/experimenting, no code in this repository should rely on this.
+window.ROEngine = EngineLoader.instance;

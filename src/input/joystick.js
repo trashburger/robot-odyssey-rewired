@@ -2,28 +2,34 @@ import nipplejs from 'nipplejs';
 import { mouseTrackingEnd } from './mouse.js';
 import * as Buttons from './buttons.js';
 import * as GameMenu from '../gameMenu.js';
+import * as EngineLoader from '../engineLoader.js';
 
-export function init(engine)
+
+function joystickAxes(x, y)
 {
+    const engine = EngineLoader.instance;
+    if (engine.calledRun) {
+        engine.setJoystickAxes(x, y);
+        engine.autoSave();
+    }
+    GameMenu.setJoystickAxes(x, y);
+}
+
+function joystickButton(b)
+{
+    const engine = EngineLoader.instance;
+    if (engine.calledRun) {
+        engine.setJoystickButton(b);
+        engine.autoSave();
+    }
+    GameMenu.setJoystickButton(b);
+}
+
+
+export function init()
+{
+    const engine = EngineLoader.instance;
     let joystick = null;
-
-    function joystickAxes(x, y)
-    {
-        if (engine.calledRun) {
-            engine.setJoystickAxes(x, y);
-            engine.autoSave();
-        }
-        GameMenu.setJoystickAxes(engine, x, y);
-    }
-
-    function joystickButton(b)
-    {
-        if (engine.calledRun) {
-            engine.setJoystickButton(b);
-            engine.autoSave();
-        }
-        GameMenu.setJoystickButton(engine, b);
-    }
 
     // Create the on-screen joystick after the UI has become visible,
     // when it's starting to fade in. In our initial state, the whole
@@ -62,7 +68,7 @@ export function init(engine)
     });
     observer.observe(zone);
 
-    for (let button of Array.from(document.getElementsByClassName('joystick_btn'))) {
+    for (let button of document.getElementsByClassName('joystick_btn')) {
         Buttons.addButtonEvents(button, () => {
             button.classList.add('active_btn');
             joystickButton(true);

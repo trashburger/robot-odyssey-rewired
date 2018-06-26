@@ -1,4 +1,5 @@
 import * as Graphics from '../graphics.js';
+import * as EngineLoader from '../engineLoader.js';
 import { isCompressed } from './storage.js';
 import ScreenshotLoadingImage from '../assets/screenshot-loading.gif';
 
@@ -19,7 +20,9 @@ function renderer()
     const data = element._screenshot_data;
     const file = data.loadedFile;
 
-    const image = data.engine.screenshotSaveFile(file.data, isCompressed(file));
+    const engine = EngineLoader.instance;
+    const image = engine.screenshotSaveFile(file.data, isCompressed(file));
+
     render_canvas.width = image.width;
     render_canvas.height = image.height;
     render_canvas.getContext('2d').putImageData(image, 0, 0);
@@ -33,14 +36,12 @@ async function thumbnailIsVisible(element)
     const data = element._screenshot_data;
     data.loadedFile = await data.file.load();
 
-    // Ensure the engine is ready (not a promise, don't await this)
-    // Rate-limit and serialize the actual rendering
-    data.engine.then(() => {
-        render_stack.push(element);
-        if (render_stack.length === 1) {
-            requestAnimationFrame(renderer);
-        }
-    });
+    // Wait for the engine to load before queueing frames
+    await EngineLoader.complete;
+    render_stack.push(element);
+    if (render_stack.length === 1) {
+        requestAnimationFrame(renderer);
+    }
 }
 
 function callback(entries)
@@ -60,9 +61,9 @@ export function disconnect()
     observer.disconnect();
 }
 
-export function add(engine, file, element)
+export function add(file, element)
 {
-    element._screenshot_data = { engine, file };
+    element._screenshot_data = { file };
     element.src = ScreenshotLoadingImage;
     observer.observe(element);
 }

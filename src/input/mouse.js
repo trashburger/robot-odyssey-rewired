@@ -1,7 +1,7 @@
+import * as EngineLoader from '../engineLoader.js';
 import { audioContextSetup } from '../sound.js';
 
 let mouse_tracking_unlocked = false;
-let end_tracking_func = null;
 let end_tracking_timer = null;
 
 const canvas = document.getElementById('framebuffer');
@@ -16,11 +16,12 @@ export function mouseTrackingEnd(afterDelay)
         clearTimeout(end_tracking_timer);
         end_tracking_timer = null;
     }
-    end_tracking_timer = setTimeout(() => {
-        if (mouse_tracking_unlocked && end_tracking_func) {
-            end_tracking_func();
+    end_tracking_timer = setTimeout(async () => {
+        if (mouse_tracking_unlocked) {
+            mouse_tracking_unlocked = false;
+            const engine = await EngineLoader.complete;
+            engine.endMouseTracking();
         }
-        mouse_tracking_unlocked = false;
     }, afterDelay || 0);
 }
 
@@ -81,11 +82,9 @@ export function mouseLocationForEvent(e)
     return { x, y };
 }
 
-export function init(engine)
+export function init()
 {
-    engine.then(() => {
-        end_tracking_func = () => engine.endMouseTracking();
-    });
+    const engine = EngineLoader.instance;
 
     game_area.addEventListener('mousemove', function (e)
     {

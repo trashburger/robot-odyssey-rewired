@@ -3,6 +3,7 @@ import { getFilesFromDragEvent } from 'html-dir-content';
 import { filenameForSaveData } from '../roData.js';
 import * as GameMenu from '../gameMenu.js';
 import * as FileManager from './fileManager.js';
+import * as EngineLoader from '../engineLoader.js';
 
 const FILE_TYPES =
     ' ^ GSV - Game Save\n'+
@@ -11,11 +12,9 @@ const FILE_TYPES =
     ' ^ GSVZ, LSVZ - Compressed Game/Lab Save\n\n'+
     ' ^ ZIP files with any combination of the above\n';
 
-export function init(engine)
+export function init()
 {
-    engine.then(function () {
-        engineLoaded(engine);
-    });
+    const engine = EngineLoader.instance;
 
     var drag_timer = null;
 
@@ -43,7 +42,7 @@ export function init(engine)
         }
     });
 
-    document.body.addEventListener('drop', (e) => {
+    document.body.addEventListener('drop', async (e) => {
         e.preventDefault();
         if (drag_timer) {
             clearTimeout(drag_timer);
@@ -57,33 +56,32 @@ export function init(engine)
         }
 
         GameMenu.modal('Processing dropped files...');
-        getFilesFromDragEvent(e, { recursive: true })
-            .then((f) => engine.files.saveFiles(f))
-            .then(filesStoredConfirmation);
+
+        const files = await getFilesFromDragEvent(e, { recursive: true });
+        const results = await engine.files.saveFiles(files);
+        await filesStoredConfirmation(results);
     });
 
     // Default handler for files saved by the game
-    engine.onSaveFileWrite = function ()
-    {
+    engine.onSaveFileWrite = async () => {
         const saveData = engine.getSaveFile();
         const date = new Date();
         const name = filenameForSaveData(saveData, date);
 
-        return engine.files.save(name, saveData, date).then((result) => {
-            if (result) {
-                return filesStoredConfirmation([result]);
-            } else {
-                // Fallback, if we can't put it in storage download it right away
-                downloadjs(saveData, name, 'application/octet-stream');
-                return true;
-            }
-        });
+        const result = await engine.files.save(name, saveData, date);
+        if (result) {
+            await filesStoredConfirmation([result]);
+        } else {
+            // Fallback, if we can't put it in storage download it right away
+            downloadjs(saveData, name, 'application/octet-stream');
+            return true;
+        }
     };
 
     // When a chip is loaded in-game, we get to pause here and show a file picker
     engine.onLoadChipRequest = (chip_id) => {
         FileManager.setChipId(chip_id);
-        FileManager.open(engine, 'chip');
+        FileManager.open('chip');
     };
 
     // Request a picker for uploading native files
@@ -108,9 +106,42 @@ export function init(engine)
             input.click();
         });
     };
+
+    engine.downloadRAMSnapshot = function (filename)
+    {
+        downloadjs(engine.getMemory(), filename || 'ram-snapshot.bin', 'application/octet-stream');
+        return true;
+    };
+
+    engine.downloadCompressionDictionary = function (filename)
+    {
+        downloadjs(engine.getCompressionDictionary(), filename || 'dictionary.bin', 'application/octet-stream');
+        return true;
+    };
+
+    engine.downloadColorTileImage = async function(first_slot, num_slots)
+    {
+        const engine = await EngineLoader.complete;
+        const blob = await engine.saveColorTilesToImage(first_slot, num_slots);
+        downloadjs(blob, 'color-tiles.png', 'image/png');
+        return true;
+    };
+
+    engine.downloadArchive = async function()
+    {
+        const date = new Date();
+        const datestr = date.toLocaleString().replace(/\//g,'-');
+
+        const promise = engine.files.createZipBlob();
+        GameMenu.modalDuringPromise(promise, 'Preparing ZIP file...');
+
+        const blob = await promise;
+        downloadjs(blob, `Robot Odyssey Files (${datestr}).zip`);
+        return true;
+    };
 }
 
-function filesStoredConfirmation(result, onclick)
+async function filesStoredConfirmation(result, onclick)
 {
     const files = [];
     const flatten = (l) => {
@@ -129,44 +160,5 @@ function filesStoredConfirmation(result, onclick)
         : 'Didn\'t find any supported files!\n\n' + FILE_TYPES;
 
     FileManager.close();
-    return GameMenu.modal(msg, onclick);
-}
-
-
-function engineLoaded(engine)
-{
-    engine.downloadRAMSnapshot = function (filename)
-    {
-        downloadjs(engine.getMemory(), filename || 'ram-snapshot.bin', 'application/octet-stream');
-        return true;
-    };
-
-    engine.downloadCompressionDictionary = function (filename)
-    {
-        downloadjs(engine.getCompressionDictionary(), filename || 'dictionary.bin', 'application/octet-stream');
-        return true;
-    };
-
-    engine.downloadColorTileImage = function(first_slot, num_slots)
-    {
-        return engine.saveColorTilesToImage(first_slot, num_slots).then(function (blob) {
-            downloadjs(blob, 'color-tiles.png', 'image/png');
-            return true;
-        });
-    };
-
-    engine.downloadArchive = function()
-    {
-        const date = new Date();
-        const datestr = date.toLocaleString().replace(/\//g,'-');
-
-        const p = engine.files.createZip().then((zip) => zip.generateAsync({
-            type: 'blob',
-        })).then((blob) => {
-            downloadjs(blob, `Robot Odyssey Files (${datestr}).zip`);
-            return true;
-        });
-
-        GameMenu.modalDuringPromise(p, 'Preparing ZIP file...');
-    };
+    await GameMenu.modal(msg, onclick);
 }
