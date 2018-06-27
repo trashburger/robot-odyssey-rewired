@@ -249,6 +249,7 @@ class Settings
     put(obj)
     {
         const key = obj.setting;
+        this.values[key] = obj;
         const fn = this.watchfn[key];
         if (fn) fn(obj);
         return this.dbPromise.then((db) => {
