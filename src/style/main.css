@@ -29,13 +29,20 @@ a {
 }
 
 #footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    width: 100%;
+}
+
+#footer > * {
+    display: block;
+    flex: 0 0 0;
     line-height: 2;
-    margin: 30px 20px 60px 20px;
+    margin: 12px;
+    white-space: nowrap;
 }
 
 #footer .version {
-    float: right;
-    margin: 0 20px;
-    white-space: nowrap;
     color: #555;
 }
