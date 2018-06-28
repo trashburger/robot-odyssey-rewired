@@ -348,7 +348,7 @@ def patchVideoBackbuffer(b):
 
 
 def patchVideoHighLevel(b, trace_debug=False):
-    # Replace all rendering, using our own high-depth9 backbuffer.
+    # Replace all rendering, using our own high-depth backbuffer.
 
     b.decl("#include <stdio.h>")
 
