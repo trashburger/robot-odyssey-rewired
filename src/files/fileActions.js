@@ -74,7 +74,6 @@ export function init()
         } else {
             // Fallback, if we can't put it in storage download it right away
             downloadjs(saveData, name, 'application/octet-stream');
-            return true;
         }
     };
 
