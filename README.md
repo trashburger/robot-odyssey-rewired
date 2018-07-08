@@ -1,7 +1,7 @@
 Robot Odyssey Rewired
 =====================
 
-Modernized port of a classic electronics adventure game.
+Modernized browser port of a classic electronics adventure game.
 
 This repository contains open source modifications which can be applied to the original game. This project was not created by nor endorsed by the game's original authors. Robot Odyssey is Copyright 1984 The Learning Company. The game itself is NOT part of this repository.
 
