@@ -9,7 +9,7 @@ This repository contains open source modifications which can be applied to the o
 Game versions
 -------------
 
-Robot Odyssey was originally released for Apple II, with ports to DOS and Color Computer soon after. This port is for the latest version of the DOS port (1.1), which is similar but not identical to the latest version of the Apple II port (2.0).
+Robot Odyssey was originally released for Apple II, with ports to DOS and Color Computer soon after. This project builds on the latest version of the DOS port (1.1), which is similar but not identical to the latest version of the Apple II port (2.0).
 
 Notable differences include the "Robotropolis Preview" only available in Apple II, and the color palette differences. This port offers an extended color palette to emulate the Apple II or CGA palette styles, as well as palettes not possible with either system.
 
