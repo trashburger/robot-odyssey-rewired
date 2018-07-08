@@ -1292,6 +1292,10 @@ class BinaryImage:
         self.dynLiterals = {}
         self._tempFile = None
 
+    def __del__(self):
+        if self._tempFile:
+            os.unlink(self._tempFile.name)
+
     def relocate(self, segment, addrs):
         """Apply a list of relocations to this image. 'addrs' is a list of
            Addr16s which describe 16-bit relocations, 'segment' is the
@@ -1344,9 +1348,10 @@ class BinaryImage:
            """
 
         if not self._tempFile:
-            self._tempFile = tempfile.NamedTemporaryFile()
+            self._tempFile = tempfile.NamedTemporaryFile(delete=False)
             self._tempFile.write(self._data)
             self._tempFile.flush()
+            self._tempFile.close() # Windows compatibility
 
         args = ["ndisasm",
                 "-o", str(addr.offset),
