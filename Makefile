@@ -1,7 +1,7 @@
 PYTHON      := python3
-CC          := emcc
+CC          := em++
 
-CCFLAGS := -std=c++11 -Oz --bind
+CCFLAGS := -std=c++11 -Oz -flto --bind
 
 ZSTD_OPTS := ZSTD_LEGACY_SUPPORT=0 CFLAGS=-Oz
 
@@ -13,7 +13,6 @@ WASMFLAGS := \
 	-s WASM=1 \
 	-s MODULARIZE=1 \
 	-s VERBOSE=1 \
-	-s "DEAD_FUNCTIONS=['_pthread_setspecific','_pthread_getspecific','_pthread_key_create']" \
 	-s ASSERTIONS=0 \
 	-s STRICT=1 \
 	-s MALLOC=emmalloc \
