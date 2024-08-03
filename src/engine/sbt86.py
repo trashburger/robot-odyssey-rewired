@@ -229,7 +229,7 @@ class Literal(int):
             ).codegen()
 
         if self < 16:
-            return str(self)
+            return "%d" % self
         elif self < 0x100:
             return "0x%02x" % self
         else:
