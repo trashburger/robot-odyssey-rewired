@@ -11,14 +11,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/scanlime/robot-odyssey-rewired.git"
+    "url": "https://git.approximate.life/robot-odyssey-rewired.git"
   },
   "author": "Micah Elizabeth Scott",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/scanlime/robot-odyssey-rewired/issues"
-  },
-  "homepage": "https://github.com/scanlime/robot-odyssey-rewired#readme",
   "dependencies": {
     "@babel/runtime": "^7.0.0-beta.51",
     "base64-arraybuffer": "^0.1.5",
