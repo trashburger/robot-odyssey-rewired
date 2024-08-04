@@ -50,7 +50,7 @@
     "remove-assets-webpack-plugin": "^1.1.0",
     "uglifyjs-webpack-plugin": "^1.2.5",
     "url-loader": "^1.0.1",
-    "webfont-webpack-plugin": "^0.2.2",
+    "webfont": "^11.2.20",
     "webpack": "^4.12.1",
     "webpack-bundle-analyzer": "^2.13.1",
     "webpack-cli": "^2.1.5",

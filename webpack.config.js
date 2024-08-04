@@ -7,7 +7,6 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const OfflinePlugin = require('offline-plugin');
 const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
-const WebfontPlugin = require('webfont-webpack-plugin').default;
 const FaviconsWebpackPlugin = require('favicons-webpack-plugin');
 const WebpackPwaManifest = require('webpack-pwa-manifest');
 const GitRevisionPlugin = require('git-revision-webpack-plugin');
@@ -56,18 +55,6 @@ module.exports = {
         }),
         new HtmlWebpackInlineSourcePlugin(),
         new RemoveAssetsPlugin(/\.css$/),
-
-        // Generate the webfont from our pile of SVGs extracted from the game font
-
-        new WebfontPlugin({
-            files: './build/font/glyph-*.svg',
-            dest: './build/font/',
-            fontName: 'rofont',
-            formats: ['woff'],
-            template: './src/assets/font.template.css',
-            fixedWidth: true,
-            startUnicode: 0x20,
-        }),
 
         // Generate content for the progressive web app
 

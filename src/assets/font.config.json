@@ -1,0 +1,8 @@
+{
+        "dest": "./build/font/",
+        "fontName": "rofont",
+        "formats": ["woff"],
+        "template": "./src/assets/font.template.css",
+        "fixedWidth": true,
+        "startUnicode": 32
+}

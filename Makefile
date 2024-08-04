@@ -47,7 +47,7 @@ OBJS := \
 
 WEBPACK_DEPS := \
 	build/engine.js \
-	build/font/glyph-00.svg \
+	build/font/rofont.woff \
 	src/*.js \
 	src/*/*.js \
 	src/*.html \
@@ -120,6 +120,10 @@ build/fs/show.shw: src/assets/showfile-repacker.py build/original
 build/font/glyph-00.svg: src/assets/font2svg.js build/original
 	@mkdir -p build/font/
 	node $<
+
+# Generate web font from SVGs
+build/font/rofont.woff: build/font/glyph-00.svg src/assets/font.config.json
+	npx webfont build/font/glyph-*.svg --config ./src/assets/font.config.json
 
 # Compile libzstd from source to LLVM bitcode
 library/zstd/lib/libzstd.a:
