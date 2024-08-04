@@ -5,7 +5,13 @@ import base64 from 'base64-arraybuffer';
 
 let last_set_window_hash = null;
 let autosave_timer = null;
-const autosave_delay = 500;
+
+// Autosave takes place if the game has been modified
+// and then left alone for this many milliseconds.
+// The intent is to capture game state changes that
+// the user may forget to save, but we don't want to
+// create so many saves that it's just clutter.
+const autosave_delay = 10000;
 
 function doAutoSave()
 {
