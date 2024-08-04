@@ -1,5 +1,7 @@
-PYTHON      := python3
-CC          := em++
+PYTHON      := $(shell which python3)
+CC          := $(shell which em++)
+NODE        := $(shell which node)
+NPX         := $(shell which npx)
 
 CCFLAGS := -std=c++11 -Oz -flto --bind
 
@@ -63,7 +65,7 @@ dist: $(WEBPACK_DEPS)
 	mkdir -p build/
 	mkdir -p dist/
 	rm -f dist/*
-	npx webpack --config ./webpack.config.js
+	$(NPX) webpack --config ./webpack.config.js
 	@echo Done.
 
 clean:
@@ -73,7 +75,7 @@ clean:
 # Hot-reload server
 hotserve: $(WEBPACK_DEPS)
 	mkdir -p build/
-	npx webpack-serve --config ./webpack.config.js --host 0.0.0.0 --port 8000
+	$(NPX) webpack-serve --config ./webpack.config.js --host 0.0.0.0 --port 8000
 
 # Static server
 distserve: dist
@@ -119,11 +121,11 @@ build/fs/show.shw: src/assets/showfile-repacker.py build/original
 # Generate SVGs from the game font
 build/font/glyph-00.svg: src/assets/font2svg.js build/original
 	@mkdir -p build/font/
-	node $<
+	$(NODE) $<
 
 # Generate web font from SVGs
 build/font/rofont.woff: build/font/glyph-00.svg src/assets/font.config.json
-	npx webfont build/font/glyph-*.svg --config ./src/assets/font.config.json
+	$(NPX) webfont build/font/glyph-*.svg --config ./src/assets/font.config.json
 
 # Compile libzstd from source to LLVM bitcode
 library/zstd/lib/libzstd.a:
