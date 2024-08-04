@@ -53,7 +53,7 @@
     "webfont": "^11.2.20",
     "webpack": "^4.12.1",
     "webpack-bundle-analyzer": "^2.13.1",
-    "webpack-cli": "^2.1.5",
+    "webpack-cli": "^3.1.1",
     "webpack-pwa-manifest": "^3.6.2",
     "webpack-serve": "^1.0.4"
   }
