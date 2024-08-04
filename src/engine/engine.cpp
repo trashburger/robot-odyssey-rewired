@@ -213,7 +213,7 @@ static bool setSaveFileWithInstance(val buffer, Hardware &inst, bool compressed)
 {
     uint32_t size = buffer["length"].as<uint32_t>();
     uint32_t max_size = compressed ? sizeof tinySave.buffer : sizeof inst.fs.save.buffer;
-    uintptr_t addr = compressed ? (uintptr_t) tinySave.buffer : (uintptr_t) inst.fs.save.buffer;
+    uint8_t *dest_addr = compressed ? tinySave.buffer : inst.fs.save.buffer;
 
     if (size > max_size) {
         return false;
@@ -222,8 +222,8 @@ static bool setSaveFileWithInstance(val buffer, Hardware &inst, bool compressed)
         return false;
     }
 
-    val view = val::global("Uint8Array").new_(val::module_property("buffer"), addr, size);
-    view.call<void>("set", buffer);
+    val dest_view = val(typed_memory_view(size, dest_addr));
+    dest_view.call<void>("set", buffer);
 
     if (compressed) {
         tinySave.size = size;
@@ -259,12 +259,18 @@ static val screenshotSaveFile(val buffer, bool compressed)
         hwAux.process->run();
     } while (outputAux.frame_counter == 0);
 
-    uintptr_t addr = (uintptr_t) outputAux.draw.backbuffer;
-    size_t size = sizeof outputAux.draw.backbuffer;
+    uint8_t *image_bytes = reinterpret_cast<uint8_t*>(outputAux.draw.backbuffer);
+    size_t image_byte_count = sizeof outputAux.draw.backbuffer;
     unsigned width = RGBDraw::SCREEN_WIDTH;
     unsigned height = RGBDraw::SCREEN_HEIGHT;
-    val view = val::global("Uint8ClampedArray").new_(val::module_property("buffer"), addr, size);
-    val image = val::global("ImageData").new_(view, width, height);
+    val view = val(typed_memory_view(image_byte_count, image_bytes));
+
+    // The buffer view must be re-wrapped as Uint8ClampedArray for ImageData
+    size_t view_offset = view["byteOffset"].as<size_t>();
+    size_t view_size = view["byteLength"].as<size_t>();
+    val clamped_buffer = val::global("Uint8ClampedArray").new_(view["buffer"]);
+    val clamped_slice = clamped_buffer.call<val>("slice", view_offset, view_offset + view_size);
+    val image = val::global("ImageData").new_(clamped_slice, width, height);
     return image;
 }
 
