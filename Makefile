@@ -3,7 +3,7 @@ CC          := $(shell which em++)
 NODE        := $(shell which node)
 NPX         := $(shell which npx)
 
-CCFLAGS := -std=c++11 -Oz -flto --bind
+CCFLAGS := -std=c++11 -Oz -flto
 
 ZSTD_OPTS := ZSTD_LEGACY_SUPPORT=0 CFLAGS=-Oz
 
@@ -21,7 +21,8 @@ WASMFLAGS := \
 	-s NO_FILESYSTEM=1 \
 	-s ALLOW_MEMORY_GROWTH=0 \
 	-s NO_DYNAMIC_EXECUTION=1 \
-	--emit-symbol-map
+	--emit-symbol-map \
+	--bind
 
 INCLUDES := \
 	-I src/engine \
