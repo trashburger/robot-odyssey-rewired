@@ -5,7 +5,7 @@ set -e
 rsync -avz notes/htaccess robotodyssey.online:~/robotodyssey.online/.htaccess
 
 # Upload all the versioned resources
-rsync -avz `ls dist/* | egrep -v '^dist/(index\.html|sw\.js)$'` robotodyssey.online:~/robotodyssey.online/
+rsync -avz `ls dist/* | grep -Ev '^dist/(index\.html|sw\.js)$'` robotodyssey.online:~/robotodyssey.online/
 
 # Now the service worker (with its resource list)
 rsync -avz dist/sw.js robotodyssey.online:~/robotodyssey.online/
