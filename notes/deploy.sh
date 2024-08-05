@@ -1,15 +1,6 @@
 #!/bin/sh
 set -e
 
-git pull
-git checkout master
-git submodule update --init --recursive
-
-npm install
-
-make clean
-make
-
 # Might need to update server settings
 rsync -avz notes/htaccess robotodyssey.online:~/robotodyssey.online/.htaccess
 
