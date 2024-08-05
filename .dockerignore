@@ -1,6 +1,5 @@
 .DS_Store
 *.pyc
-/notes/
 /build/
 /dist/
 /.cache/
