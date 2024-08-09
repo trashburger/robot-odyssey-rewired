@@ -2,6 +2,26 @@
 // The game memory is broken up into the major regions (world, circuit, robots) which are each uint8 arrays.
 // For more information about the known structure of the data within, check "rodata.h" in the C++ source.
 
+// Hex editor for the "world" data
+{
+  var js = document.createElement("script");
+  var css = document.createElement("link");
+  css.setAttribute("rel", "stylesheet");
+  js.setAttribute("src", "https://cdn.jsdelivr.net/gh/dnlmlr/hexedit-js@0d313b87254bb60b8359d1608e617198ad603b61/src/hexedit.js");
+  css.setAttribute("href", "https://cdn.jsdelivr.net/gh/dnlmlr/hexedit-js@0d313b87254bb60b8359d1608e617198ad603b61/src/hexedit.css");
+  document.head.appendChild(css);
+  document.head.appendChild(js);
+}
+{
+  var el = document.createElement("div");
+  el.style = "position: absolute; top: 0; right: 0; font-size: 50%; height: 100%; overflow: scroll;";
+  document.getElementById("game_area").style.width = "70%";
+  document.body.insertBefore(el, document.body.children[0]);
+  var editor = new HexEditor(el);
+  editor.data = ROEngine.getGameMemory().world;
+  editor.renderDom();
+}
+
 // If you want to cheat your way through walls, this binds CTRL-Arrow keys to directly nudge the position of the player.
 // By holding down CTRL while navigating with the arrows, the nudge will override collision detection.
 
