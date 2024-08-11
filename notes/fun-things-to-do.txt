@@ -22,8 +22,8 @@
   editor.renderDom();
 }
 
-// If you want to cheat your way through walls, this binds CTRL-Arrow keys to directly nudge the position of the player.
-// By holding down CTRL while navigating with the arrows, the nudge will override collision detection.
+// If you want to cheat your way through walls a little, this binds CTRL-Arrow keys to directly nudge the position
+// of the player. By holding down CTRL while navigating with the arrows, the nudge will override collision detection.
 
 document.body.addEventListener('keydown', function (e) {
         if (e.ctrlKey && e.code === 'ArrowLeft') ROEngine.getGameMemory().world[0x400]--;
@@ -36,6 +36,12 @@ document.body.addEventListener('keydown', function (e) {
 // (This iterates over all items, but we could also have walked the room linked list)
 
 for (var o=0;o<0x100;o++) { if (world[0x300+o]==world[0x300]){ world[0x400+o]=world[0x400];world[0x500+o]=world[0x500]; }}
+
+// The game actually has an no-collision cheat built-in, if you want something a little heavier than the nudge.
+// This Javascript function writes an undocumented option to a file normally used for joystick configuration.
+// After it's set, you can reload/restart the game and use CTRL-E to disable or enable collision detection.
+
+ROEngine.setCheatsEnabled(true)
 
 // Save file screenshot testing
 
