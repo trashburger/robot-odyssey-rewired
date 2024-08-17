@@ -2,6 +2,11 @@
 // The game memory is broken up into the major regions (world, circuit, robots) which are each uint8 arrays.
 // For more information about the known structure of the data within, check "rodata.h" in the C++ source.
 
+// Minimal world file built from scratch in a hex editor, with empty sprites and with rooms labeled.
+// (Loads in Innovation Lab; change the last byte to load as a particular game level.)
+% echo https\://robotodyssey.online/\#$((echo -ne \\x11; cat minimal.lsv | zstd) | base64 -w0)
+https://robotodyssey.online/#ESi1L/0EWDUUAGQc/wIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl9gYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1+f4CBgoOEhYaHiImKi4yNjo+QkZKTlJWWl5iZmpucnZ6foKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr/AwcLDxMXGx8jJysvMzc7P0NHS09TV1tfY2drb3N3e3+Dh4uPk5ebn6Onq6+zt7u/w8fLz9PX29/j5+vv8/f7//wABAQcBP1AgMEBQYHCAoLDA0ODwEAgQGCAoMDhASFBYYGhweICIkJiYmJj/AgB/Qf8AAQQGFwEQcY4IgOg/GpACAAf/wP+AiJCYoKiwuMDI0Njg6PD4AAgQGCAoMDhASFBYYGhweDQfNBwdHlJvb20gMDAAMTIzNDU2Nzg5QUJDREVGMTAxMjM0NTY3ODlBQkNERUYyMDEyMzQ1Njc4OUFCQ0RFRjMwMTIzNDU2Nzg5QUJDREVGVG9vbGJveAf//////wAAHoCGqKHIF6QgtbY2A3CDJEkKHRJAEOCgCxICBGkQIsI/QoTniBOdasYFLP07QI0z47/JANie+w6AzRwgqBuAvgDVH9s/KuOq99J5427Pv97tOb0BoZU9UH5AAzrdYDzFnHKaX57yEODoTgpFygpY6X/PScj56/CCyUDu2WD3j8LqT9lIyRoU9D5aL3rLyaYrwSltc6wQjdEAZEnvkzHgs+P3wWcGSSdkWA3DwQ8WPfg76ve5+OjCG2x5AiP4kSrCziho
+
 // Hex editor for the "world" data
 {
   var js = document.createElement("script");
