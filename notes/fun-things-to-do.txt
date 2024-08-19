@@ -9,25 +9,29 @@ https://robotodyssey.online/#ESi1L/0EWDUUAGQc/wIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRo
 
 // Sound test.. this only works in GAME.EXE, I've hardcoded its addresses because the
 // compile-time pattern matching and symbol export doesn't have anything for sound yet.
-// The PC speaker engine uses an array of room-specific sound sources or channels, which
-// are typically filled from a table of canned effect parameters. Effect numbers, indexing
-// into these tables, are 0 through 27.
+// The PC speaker engine keeps a queue of room-specific pending sounds, which are usually
+// set up from a table of canned effect parameters. Effect numbers are 0 through 27.
 function soundTest(effect_id) {
   var world = ROEngine.getGameMemory().world;
   var current_room = world[0x300];
   var mem = ROEngine.getMemory();
-  var sound_source_id = --mem[0x4b6a];
   var sound_effect_mode = mem[0xd28b + effect_id];
   var sound_effect_duration = mem[0xd2a7 + effect_id];
   var sound_effect_sweep = mem[0xd2c3 + effect_id];
   var sound_effect_pitch = mem[0xd2df + effect_id];
-  mem[0x4b42 + sound_source_id] = sound_effect_duration;
-  mem[0x4b4a + sound_source_id] = sound_effect_sweep;
-  mem[0x4b52 + sound_source_id] = sound_effect_pitch;
-  mem[0x4b5a + sound_source_id] = sound_effect_mode;
-  mem[0x4b62 + sound_source_id] = current_room;
-  console.log("sound", { effect_id, sound_source_id, current_room,
-    sound_effect_mode, sound_effect_duration, sound_effect_sweep, sound_effect_pitch })
+  var sound_queue_slot = mem[0x4b6a];
+  if (sound_queue_slot > 0) {
+	mem[0x4b6a] = (sound_queue_slot -= 1);
+    mem[0x4b42 + sound_queue_slot] = sound_effect_duration;
+    mem[0x4b4a + sound_queue_slot] = sound_effect_sweep;
+    mem[0x4b52 + sound_queue_slot] = sound_effect_pitch;
+    mem[0x4b5a + sound_queue_slot] = sound_effect_mode;
+    mem[0x4b62 + sound_queue_slot] = current_room;
+  } else {
+    sound_queue_slot = null;
+  }
+  console.log("sound", { effect_id, sound_queue_slot, current_room,
+	sound_effect_mode, sound_effect_duration, sound_effect_sweep, sound_effect_pitch })
 }
 // Cycle through sounds in a loop
 {
