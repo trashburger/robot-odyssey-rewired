@@ -7,6 +7,38 @@
 % echo https\://robotodyssey.online/\#$((echo -ne \\x11; cat minimal.lsv | zstd) | base64 -w0)
 https://robotodyssey.online/#ESi1L/0EWDUUAGQc/wIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl9gYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1+f4CBgoOEhYaHiImKi4yNjo+QkZKTlJWWl5iZmpucnZ6foKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr/AwcLDxMXGx8jJysvMzc7P0NHS09TV1tfY2drb3N3e3+Dh4uPk5ebn6Onq6+zt7u/w8fLz9PX29/j5+vv8/f7//wABAQcBP1AgMEBQYHCAoLDA0ODwEAgQGCAoMDhASFBYYGhweICIkJiYmJj/AgB/Qf8AAQQGFwEQcY4IgOg/GpACAAf/wP+AiJCYoKiwuMDI0Njg6PD4AAgQGCAoMDhASFBYYGhweDQfNBwdHlJvb20gMDAAMTIzNDU2Nzg5QUJDREVGMTAxMjM0NTY3ODlBQkNERUYyMDEyMzQ1Njc4OUFCQ0RFRjMwMTIzNDU2Nzg5QUJDREVGVG9vbGJveAf//////wAAHoCGqKHIF6QgtbY2A3CDJEkKHRJAEOCgCxICBGkQIsI/QoTniBOdasYFLP07QI0z47/JANie+w6AzRwgqBuAvgDVH9s/KuOq99J5427Pv97tOb0BoZU9UH5AAzrdYDzFnHKaX57yEODoTgpFygpY6X/PScj56/CCyUDu2WD3j8LqT9lIyRoU9D5aL3rLyaYrwSltc6wQjdEAZEnvkzHgs+P3wWcGSSdkWA3DwQ8WPfg76ve5+OjCG2x5AiP4kSrCziho
 
+// Sound test.. this only works in GAME.EXE, I've hardcoded its addresses because the
+// compile-time pattern matching and symbol export doesn't have anything for sound yet.
+// The PC speaker engine uses an array of room-specific sound sources or channels, which
+// are typically filled from a table of canned effect parameters. Effect numbers, indexing
+// into these tables, are 0 through 27.
+function soundTest(effect_id) {
+  var world = ROEngine.getGameMemory().world;
+  var current_room = world[0x300];
+  var mem = ROEngine.getMemory();
+  var sound_source_id = --mem[0x4b6a];
+  var sound_effect_mode = mem[0xd28b + effect_id];
+  var sound_effect_duration = mem[0xd2a7 + effect_id];
+  var sound_effect_sweep = mem[0xd2c3 + effect_id];
+  var sound_effect_pitch = mem[0xd2df + effect_id];
+  mem[0x4b42 + sound_source_id] = sound_effect_duration;
+  mem[0x4b4a + sound_source_id] = sound_effect_sweep;
+  mem[0x4b52 + sound_source_id] = sound_effect_pitch;
+  mem[0x4b5a + sound_source_id] = sound_effect_mode;
+  mem[0x4b62 + sound_source_id] = current_room;
+  console.log("sound", { effect_id, sound_source_id, current_room,
+    sound_effect_mode, sound_effect_duration, sound_effect_sweep, sound_effect_pitch })
+}
+// Cycle through sounds in a loop
+{
+  var next_effect = 0;
+  const interval = 3000;
+  setInterval(() => {
+    soundTest(next_effect);
+    next_effect = (next_effect + 1) % 28;
+  }, interval);
+}
+
 // Innovation lab with square robots and round chip.
 // I used the reserved area reachable at sprite 0xD8 for the chip graphics.
 // If this area isn't actually unused, this will cause problems.
