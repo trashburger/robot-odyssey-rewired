@@ -33,6 +33,7 @@ Set up dependencies:
 - Place Robot Odyssey 1.1 for DOS game files in the "original" directory
 - git submodule update --init --recursive
 - npm install
+- python3 -m venv venv; source venv/bin/activate
 - pip3 install -r requirements.txt
 
 To build a static site into the `dist` directory:
