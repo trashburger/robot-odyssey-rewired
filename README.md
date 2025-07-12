@@ -14,8 +14,22 @@ Robot Odyssey was originally released for Apple II, with ports to DOS and Color 
 Notable differences include the "Robotropolis Preview" only available in Apple II, and the color palette differences. This port offers an extended color palette to emulate the Apple II or CGA palette styles, as well as palettes not possible with either system.
 
 
-Dependencies
-------------
+Build in a Container
+--------------------
+
+This is the recommended way to build currently.
+
+- Place Robot Odyssey 1.1 for DOS game files in the "original" directory
+- Run `notes/docker-build.sh` or something similar
+- The static site will be built into `dist`
+
+
+Without a Container
+-------------------
+
+This needs work for compatibility with current versions of node and emscripten.
+
+Install system dependencies:
 
 - make
 - git
@@ -24,11 +38,7 @@ Dependencies
 - python3
 - emscripten
 
-
-Build Instructions
-------------------
-
-Set up dependencies:
+Prepare the project directory:
 
 - Place Robot Odyssey 1.1 for DOS game files in the "original" directory
 - git submodule update --init --recursive
@@ -47,3 +57,4 @@ To run the development hot-reload server:
 Alternatively, you can just build the static site and serve it from `dist` without hot-reloading:
 
 - make distserve
+
