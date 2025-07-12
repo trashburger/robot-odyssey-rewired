@@ -1,6 +1,6 @@
 Random notes about the save file memory layout from GAME.EXE
 
-Loading function at CS:2CDC
+Loading function at CS:2ce2
 Filename at DS:2
 
 1. 0x3500 bytes, at DS:2ac
@@ -23,6 +23,8 @@ Filename at DS:2
    bytecode length, and the chip documentation page.
 
 4. 0x40 bytes, at DS:ac08
+
+   Chip pin directions? (8 pins * 8 chips)
 
 5. Five individual bytes:
 
