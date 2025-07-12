@@ -1,6 +1,7 @@
 #game_area {
     width: 100%;
     overflow: hidden;
+    user-select: none;
 }
 
 #game_area .width_sizer {

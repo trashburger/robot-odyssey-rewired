@@ -1,6 +1,7 @@
 #joystick {
     display: flex;
     margin: 6px 50px 10px 50px;
+    user-select: none;
 }
 
 #joystick_xy {
