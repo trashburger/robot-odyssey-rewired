@@ -23,7 +23,7 @@
     "idb": "^2.1.3",
     "intersection-observer": "^0.5.1",
     "jszip": "^3.10.1",
-    "nipplejs": "^0.6.8",
+    "nipplejs": "^0.10.2",
     "promise-file-reader": "^1.0.3",
     "relative-date": "^1.1.3"
   },
