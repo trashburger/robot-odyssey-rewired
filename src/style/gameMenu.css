@@ -89,11 +89,6 @@
     z-index: 9000; /* Must be > nipplejs, which uses z-index 999, sigh. */
     background: #000;
     transition: opacity 0.5s ease;
-    margin: 6px 0;
-}
-
-#modal_textbox {
-    padding: 2px;
 }
 
 #modal_textbox pre {
@@ -105,12 +100,11 @@
 .modal_border {
     background: #000;
     color: #ececec;
-    border: 8px solid #484848;
+    border: 20px solid #111;
     width: 100%;
     height: 100%;
-    padding: 14px;
-    margin: 2px;
-    border-radius: 14px;
+    padding: 20px;
+    border-radius: 20px;
     overflow-y: auto;
     overflow-x: visible;
     -webkit-overflow-scrolling: touch;
