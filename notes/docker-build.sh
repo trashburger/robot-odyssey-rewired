@@ -1,6 +1,7 @@
 #!/bin/sh
 set -e
 rm -Rf dist build
+git submodule update --init --recursive
 docker build .
 image=$(docker build -q .)
 container=$(docker create $image)
