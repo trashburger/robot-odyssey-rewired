@@ -66,5 +66,7 @@ button, select {
 
 #engine_controls {
     width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
     transition: opacity 1.5s;
 }
