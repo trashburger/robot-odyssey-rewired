@@ -213,6 +213,16 @@ export function init()
         });
     }
 
+    for (let button of document.getElementsByClassName('fullscreen_btn')) {
+        addButtonClick(button, async () => {
+            if (!document.fullscreenElement) {
+                document.body.requestFullscreen();
+            } else if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        });
+    }
+
     for (let button of document.getElementsByClassName('exec_btn')) {
         addButtonClick(button, async () => {
             // Go to the EXEC_LAUNCHING state, either via closing
