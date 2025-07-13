@@ -13,47 +13,48 @@ let autosave_timer = null;
 // create so many saves that it's just clutter.
 const autosave_delay = 10000;
 
-function doAutoSave()
+async function doAutoSave()
 {
-    const engine = EngineLoader.instance;
-    if (!engine.calledRun) {
-        return;
-    }
+    const engine = await EngineLoader.complete;
+    return await new Promise(function (resolve) {
 
-    // this is hacky... autosaves have a different
-    // completion action, and they shouldn't clobber
-    // the user's save buffer (it's especially annoying
-    // when loading chips), so I'm saving and restoring
-    // the callback and contents, for now. This could
-    // be improved by using a modified filename for the
-    // autosave, or otherwise asking the engine to use
-    // a different buffer than usual.
-    // fix me!
+        // this is hacky... autosaves have a different
+        // completion action, and they shouldn't clobber
+        // the user's save buffer (it's especially annoying
+        // when loading chips), so I'm saving and restoring
+        // the callback and contents, for now. This could
+        // be improved by using a modified filename for the
+        // autosave, or otherwise asking the engine to use
+        // a different buffer than usual.
+        // fix me!
 
-    const saved_contents = engine.getSaveFile().slice();
-    const saved_callback = engine.onSaveFileWrite;
-    engine.onSaveFileWrite = function () {};
+        const saved_contents = engine.getSaveFile().slice();
+        const saved_callback = engine.onSaveFileWrite;
+        engine.onSaveFileWrite = function () {};
 
-    try {
-        switch (engine.saveGame()) {
+        try {
+            const save_status = engine.saveGame();
+            switch (save_status) {
 
-        case engine.SaveStatus.OK:
-            storeAutoSave(engine);
-            break;
+            case engine.SaveStatus.OK:
+                storeAutoSave(engine);
+                break;
 
-        case engine.SaveStatus.BLOCKED:
-            return;
+            case engine.SaveStatus.BLOCKED:
+                break;
 
-        case engine.SaveStatus.NOT_SUPPORTED:
-            last_set_window_hash = '';
-            window.location.hash = '';
-            break;
+            case engine.SaveStatus.NOT_SUPPORTED:
+                last_set_window_hash = '';
+                window.location.hash = '';
+                break;
+            }
+            resolve(save_status);
+
+        } finally {
+            engine.onSaveFileWrite = saved_callback;
+            engine.setSaveFile(saved_contents, false);
         }
-
-    } finally {
-        engine.onSaveFileWrite = saved_callback;
-        engine.setSaveFile(saved_contents, false);
-    }
+    });
 }
 
 async function checkHashForAutoSave()
