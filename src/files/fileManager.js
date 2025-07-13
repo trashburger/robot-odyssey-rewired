@@ -56,7 +56,6 @@ export async function open(modes_str, next_state)
 
 export function refresh()
 {
-    // eslint-disable-next-line no-console
     if (modal_saved !== null) {
         refreshFileElements(modal_files, modal_saved.modes).then();
     }
