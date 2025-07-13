@@ -194,7 +194,6 @@ export function pressKey(ascii, scancode)
         // Engine gets keys only when it's in front
         engine.pressKey(ascii, scancode);
         engine.autoSave();
-
     }
 }
 
