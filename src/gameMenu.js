@@ -58,7 +58,6 @@ export function modal(message, onclick)
         if (modal_saved === null) {
             modal_saved = {
                 state: current_state,
-                speed: speed_selector.value,
             };
         }
 
@@ -84,7 +83,7 @@ export function exitModal()
     modal_saved = null;
 
     if (current_state === States.MODAL_TEXTBOX && saved) {
-        speed_selector.value = saved.speed;
+        speed_selector.value = '1';
         speed_selector.dispatchEvent(new Event('change'));
         setState(saved.state);
     }

@@ -60,7 +60,6 @@ export async function open(mode, next_state)
         // Activate the file selector modal
         modal_saved = {
             state: next_state || GameMenu.getState(),
-            speed: speed_selector.value,
         };
 
         // Pause
@@ -80,7 +79,7 @@ export function close(optionalStateOverride)
         modal_saved = null;
 
         GameMenu.setState(optionalStateOverride || saved.state);
-        speed_selector.value = saved.speed;
+        speed_selector.value = '1';
         speed_selector.dispatchEvent(new Event('change'));
         return true;
     }
