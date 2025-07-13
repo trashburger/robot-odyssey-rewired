@@ -158,6 +158,6 @@ async function filesStoredConfirmation(result, onclick)
         'Ok!\n\nThese files have been stored in your browser, on this device:\n\n' + files.join('\n')
         : 'Didn\'t find any supported files!\n\n' + FILE_TYPES;
 
-    FileManager.close();
+    FileManager.refresh();
     await GameMenu.modal(msg, onclick);
 }

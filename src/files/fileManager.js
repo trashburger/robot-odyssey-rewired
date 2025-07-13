@@ -32,33 +32,15 @@ async function clickedFile(file, loader)
     close(GameMenu.States.LOADING);
 }
 
-export async function open(mode, next_state)
+export async function open(modes_str, next_state)
 {
-    const file_elements = [];
-    const engine = EngineLoader.instance;
-    visitElements(modal_files, mode.split(' '), file_elements);
-
-    const result = await new Promise((resolve, reject) => {
-        // The returned promise indicates whether we successfully found
-        // any files (resolving on the first success) or if we made it
-        // to the end of the transaction without finding anything.
-
-        engine.files.listFiles((file) => {
-            // One file returned from the database
-            for (let element of file_elements) {
-                const mode = element.dataset.filemode;
-                if (filters[mode](file)) {
-                    // Mapped that file to a grid where it appears
-                    resolve(true);
-                    element.appendChild(fileView(file, mode));
-                }
-            }
-        }).then(() => resolve(false), reject);
-    });
+    const modes = modes_str.split(' ');
+    const result = await refreshFileElements(modal_files, modes);
 
     if (result) {
         // Activate the file selector modal
         modal_saved = {
+            modes,
             state: next_state || GameMenu.getState(),
         };
 
@@ -70,6 +52,14 @@ export async function open(mode, next_state)
     }
 
     return result;
+}
+
+export function refresh()
+{
+    // eslint-disable-next-line no-console
+    if (modal_saved !== null) {
+        refreshFileElements(modal_files, modal_saved.modes).then();
+    }
 }
 
 export function close(optionalStateOverride)
@@ -97,13 +87,35 @@ export function setChipId(chip_id)
     }
 }
 
-function visitElements(element, mode, file_elements)
+function refreshFileElements(modal_element, modes)
+{
+    const engine = EngineLoader.instance;
+    const file_elements = [];
+
+    visitElements(modal_element, modes, file_elements);
+
+    return new Promise((resolve, reject) => {
+        engine.files.listFiles((file) => {
+            // One file returned from the database
+            for (let element of file_elements) {
+                const mode = element.dataset.filemode;
+                if (filters[mode](file)) {
+                    // Mapped that file to a grid where it appears
+                    resolve(true);
+                    element.appendChild(fileView(file, mode));
+                }
+            }
+        }).then(() => resolve(false), reject);
+    });
+}
+
+function visitElements(element, modes, file_elements)
 {
     const data = element.dataset || {};
 
     // Control visibility based on the current mode
     if (data.filemode) {
-        if (mode.includes(data.filemode)) {
+        if (modes.includes(data.filemode)) {
             element.classList.remove('hidden');
         } else {
             element.classList.add('hidden');
@@ -115,7 +127,7 @@ function visitElements(element, mode, file_elements)
 
         var new_element = element.cloneNode(false);
         LazyScreenshot.disconnect();
-        if (mode.includes(data.filemode)) {
+        if (modes.includes(data.filemode)) {
             file_elements.push(new_element);
         }
         element.parentNode.replaceChild(new_element, element);
@@ -124,7 +136,7 @@ function visitElements(element, mode, file_elements)
         // Other: visit children
 
         for (let child of element.children) {
-            visitElements(child, mode, file_elements);
+            visitElements(child, modes, file_elements);
         }
     }
 }
