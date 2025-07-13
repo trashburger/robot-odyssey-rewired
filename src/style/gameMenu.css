@@ -89,6 +89,7 @@
     z-index: 9000; /* Must be > nipplejs, which uses z-index 999, sigh. */
     background: #000;
     transition: opacity 0.5s ease;
+    margin: 6px 0;
 }
 
 #modal_textbox {
@@ -108,6 +109,7 @@
     width: 100%;
     height: 100%;
     padding: 14px;
+    margin: 2px;
     border-radius: 14px;
     overflow-y: auto;
     overflow-x: visible;

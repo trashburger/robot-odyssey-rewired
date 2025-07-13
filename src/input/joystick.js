@@ -46,8 +46,7 @@ export function init()
         joystick = nipplejs.create({
             zone,
             mode: 'static',
-            size: 100,
-            threshold: 0.01,
+            size: 110,
             position: { left: '50%', top: '50%' }
         });
 

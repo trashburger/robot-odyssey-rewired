@@ -1,13 +1,14 @@
 #joystick {
     display: flex;
-    margin: 6px 50px 10px 50px;
+    margin: 20px 50px;
     user-select: none;
 }
 
 #joystick_xy {
     flex: 1 0 0;
     position: relative;
-    height: 110px;
+    height: 135px;
+    max-width: 270px;
     background: #111;
 }
 

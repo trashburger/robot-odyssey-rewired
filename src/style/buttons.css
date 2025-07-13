@@ -5,16 +5,16 @@ button, select {
     user-select: none;
     -webkit-user-select: none;
     background-color: #222;
-    font: 17px sans-serif;
+    font: 20px sans-serif;
     color: #888;
-    border: 1px solid #555;
-    border-radius: 2px;
+    border: 2px solid #333;
+    border-radius: 4px;
     margin: 2px;
-    padding: 8px;
+    padding: 4px;
     flex: 1 0 0;
     text-align: center;
     text-align-last: center;
-    min-height: 50px;
+    min-height: 58px;
 }
 
 .button_area {
@@ -57,7 +57,7 @@ button, select {
 
 .active_btn {
     background-color: #444440;
-    border-color: #777;
+    border-color: #666;
 }
 
 .keyboard_btn {
