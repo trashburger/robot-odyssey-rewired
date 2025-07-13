@@ -27,32 +27,16 @@ button, select {
     flex-wrap: wrap;
 }
 
-.keyboard_spacebar {
-    flex: 4 0 0;
-}
-
-.keyboard_enter {
+.keyboard_enter, .keyboard_esc, #palette_selector {
     flex: 2 0 0;
 }
 
-.keyboard_esc {
-    flex: 2 0 0;
-}
-
-.exec_btn {
-    flex: 4 0 0;
-}
-
-.filepicker_btn {
+.filepicker_btn, .savezip_btn {
     flex: 3 0 0;
 }
 
-.savezip_btn {
-    flex: 3 0 0;
-}
-
-#palette_selector {
-    flex: 2 0 0;
+.keyboard_spacebar, .exec_btn {
+    flex: 4 0 0;
 }
 
 .active_btn {
