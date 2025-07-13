@@ -10,6 +10,7 @@
 /original/*.PIN
 
 *.pyc
+*.kate-swp
 
 /build/
 /dist/
