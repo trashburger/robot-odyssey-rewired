@@ -165,6 +165,7 @@ const char *ROSavedGame::getProcessName()
             return "game.exe";
 
         case RO_WORLD_LAB:
+        case RO_WORLD_TUT7:
             return "lab.exe";
     }
     return 0;

@@ -3,6 +3,7 @@
 // API for world data on the C++ side, in roData.h
 
 const LAB_WORLD = 30;
+const TUT7_WORLD = 27;
 
 export function worldIdFromSaveData(bytes)
 {
@@ -37,6 +38,8 @@ export function filenameForSaveData(bytes, date)
     if (world !== null) {
         if (world === LAB_WORLD) {
             return `Saved Lab (${datestr}).lsv`;
+        } else if (world === TUT7_WORLD) {
+            return `Saved Chip Design Tutorial (${datestr}).lsv`;
         } else {
             return `Robotropolis, World ${world+1} (${datestr}).gsv`;
         }
@@ -53,7 +56,7 @@ export function filenameForAutosave(bytes, date)
     const datestr = date.toLocaleString().replace(/\//g,'-');
 
     if (world !== null) {
-        if (world === LAB_WORLD) {
+        if (world === LAB_WORLD || world === TUT7_WORLD) {
             return `Autosave (${datestr}).lsvz`;
         } else {
             return `Autosave (${datestr}).gsvz`;
