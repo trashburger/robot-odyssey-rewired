@@ -31,7 +31,7 @@ button, select {
     flex: 2 0 0;
 }
 
-.filepicker_btn, .savezip_btn, .fullscreen_btn {
+.filepicker_btn, .savezip_btn, .copy_url_btn, .fullscreen_btn {
     flex: 3 0 0;
 }
 

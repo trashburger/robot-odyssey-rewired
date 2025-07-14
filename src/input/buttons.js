@@ -2,6 +2,7 @@ import { audioContextSetup } from '../sound.js';
 import { mouseTrackingEnd } from './mouse.js';
 import * as GameMenu from '../gameMenu.js';
 import * as FileManager from '../files/fileManager.js';
+import * as AutoSave from '../files/autoSave.js';
 import * as EngineLoader from '../engineLoader.js';
 
 const canvas = document.getElementById('framebuffer');
@@ -210,6 +211,26 @@ export function init()
         addButtonClick(button, async () => {
             const engine = await EngineLoader.complete;
             engine.filePicker();
+        });
+    }
+
+    for (let button of document.getElementsByClassName('copy_url_btn')) {
+        addButtonClick(button, async () => {
+            const engine = await EngineLoader.complete;
+            const save_status = await AutoSave.doAutoSave();
+            const href = window.location.href;
+            switch (save_status) {
+            case engine.SaveStatus.OK:
+                await window.navigator.clipboard.writeText(href);
+                GameMenu.modal('Ok!\n\nGame copied to clipboard');
+                break;
+            case engine.SaveStatus.BLOCKED:
+                break;
+            case engine.SaveStatus.NOT_SUPPORTED:
+                await window.navigator.clipboard.writeText(href);
+                GameMenu.modal('Can\'t save game here, copied\n' + href);
+                break;
+            }
         });
     }
 

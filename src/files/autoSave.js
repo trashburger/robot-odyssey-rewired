@@ -13,7 +13,7 @@ let autosave_timer = null;
 // create so many saves that it's just clutter.
 const autosave_delay = 10000;
 
-async function doAutoSave()
+export async function doAutoSave()
 {
     const engine = await EngineLoader.complete;
     return await new Promise(function (resolve) {
