@@ -22,9 +22,6 @@ function renderer()
 
     const engine = EngineLoader.instance;
     const image = engine.screenshotSaveFile(file.data, isCompressed(file));
-
-    render_canvas.width = image.width;
-    render_canvas.height = image.height;
     render_canvas.getContext('2d').putImageData(image, 0, 0);
 
     element.src = render_canvas.toDataURL();
