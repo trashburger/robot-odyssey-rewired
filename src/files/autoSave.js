@@ -34,21 +34,12 @@ export async function doAutoSave()
 
         try {
             const save_status = engine.saveGame();
-            switch (save_status) {
-
-            case engine.SaveStatus.OK:
-                storeAutoSave(engine);
-                break;
-
-            case engine.SaveStatus.BLOCKED:
-                break;
-
-            case engine.SaveStatus.NOT_SUPPORTED:
+            const storage_status = save_status === engine.SaveStatus.OK ? storeAutoSave(engine) : save_status;
+            if (storage_status === engine.SaveStatus.NOT_SUPPORTED) {
                 last_set_window_hash = '';
                 window.location.hash = '';
-                break;
             }
-            resolve(save_status);
+            resolve(storage_status);
 
         } finally {
             engine.onSaveFileWrite = saved_callback;
@@ -100,9 +91,15 @@ function storeAutoSave(engine)
 
     const date = new Date();
     const name = filenameForAutosave(saveData, date);
+    if (!name) {
+        return engine.SaveStatus.NOT_SUPPORTED;
+    }
+
     engine.files.save(name, packed, date);
 
     const hash = base64.encode(packed);
     last_set_window_hash = hash;
     window.location.hash = hash;
+
+    return engine.SaveStatus.OK;
 }

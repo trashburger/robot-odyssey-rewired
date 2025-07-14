@@ -56,8 +56,10 @@ export function filenameForAutosave(bytes, date)
     const datestr = date.toLocaleString().replace(/\//g,'-');
 
     if (world !== null) {
-        if (world === LAB_WORLD || world === TUT7_WORLD) {
+        if (world === LAB_WORLD) {
             return `Autosave (${datestr}).lsvz`;
+        } else if (world === TUT7_WORLD) {
+            return null;
         } else {
             return `Autosave (${datestr}).gsvz`;
         }

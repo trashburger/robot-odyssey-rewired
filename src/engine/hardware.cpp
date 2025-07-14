@@ -81,7 +81,6 @@ SaveStatus Hardware::saveGame()
 
     if (!fs.save.asGame().getProcessName()) {
         // File isn't something we know how to load.
-        // (Tutorial 6 runs in LAB.EXE, which knows how to save, but we can't load those files.)
         return SaveStatus::NOT_SUPPORTED;
     }
 
