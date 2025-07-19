@@ -78,7 +78,7 @@ class OutputQueue : public OutputInterface
     static const unsigned MAX_BUFFERED_FRAMES = 128;
     static const unsigned MAX_BUFFERED_EVENTS = 16384;
 
- protected:
+ private:
     jm::circular_buffer<OutputItem, MAX_BUFFERED_EVENTS> items;
     jm::circular_buffer<CGAFramebuffer, MAX_BUFFERED_FRAMES> frames;
     uint32_t delay_remaining;

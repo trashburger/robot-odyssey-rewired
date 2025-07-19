@@ -45,7 +45,7 @@ class Hardware
     OutputInterface &output;
     SBTProcess *process;
 
- protected:
+ private:
     std::vector<SBTProcess*> process_vec;
     uint8_t port61;
     uint16_t keycode;

@@ -25,7 +25,7 @@ class InputBuffer
     uint16_t getKey();
     void pollJoystick(ROWorld *world, uint16_t &x, uint16_t &y, uint8_t &status);
 
- protected:
+ private:
     static constexpr unsigned KEY_BUFFER_SIZE = 32;
     static constexpr unsigned MOUSE_BUFFER_SIZE = 8;
     static constexpr unsigned MOUSE_DELAY_ON_ROOM_CHANGE = 4;
