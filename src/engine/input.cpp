@@ -56,7 +56,9 @@ void InputBuffer::clearJoystickAxes()
 
 void InputBuffer::setJoystickButton(bool button)
 {
-    mouse_buffer.clear();
+    if (!mouse_buffer.empty()) {
+        endMouseTracking();
+    }
     js_button_held = button;
     js_button_pressed = js_button_pressed || button;
 }
@@ -175,8 +177,7 @@ void InputBuffer::updateMouse(ROWorld *world)
     if (mouse_delay_timer) {
         mouse_delay_timer--;
         if (!mouse_buffer.empty()) {
-            mouse_buffer.clear();
-            clearJoystickAxes();
+            endMouseTracking();
         }
     }
 
