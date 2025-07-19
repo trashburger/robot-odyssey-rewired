@@ -22,8 +22,6 @@ public:
 private:
     ZSTD_CCtx *cctx;
     ZSTD_DCtx *dctx;
-    ZSTD_CDict *cdict;
-    ZSTD_DDict *ddict;
     std::vector<uint8_t> dict;
 
     void initDictionary();

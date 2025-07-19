@@ -22,32 +22,28 @@ TinySave::TinySave()
     : size(0)
 {
     initDictionary();
+
     cctx = ZSTD_createCCtx();
+    ZSTD_CCtx_loadDictionary_advanced(cctx, &dict[0], dict.size(), ZSTD_dlm_byRef, ZSTD_dct_rawContent);
+    ZSTD_CCtx_setParameter(cctx, ZSTD_c_contentSizeFlag, 0);
+    ZSTD_CCtx_setParameter(cctx, ZSTD_c_checksumFlag, 1);
+    ZSTD_CCtx_setParameter(cctx, ZSTD_c_dictIDFlag, 0);
+    ZSTD_CCtx_setParameter(cctx, ZSTD_c_compressionLevel, compress_level);
+
     dctx = ZSTD_createDCtx();
-    cdict = ZSTD_createCDict(&dict[0], dict.size(), compress_level);
-    ddict = ZSTD_createDDict(&dict[0], dict.size());
+    ZSTD_DCtx_loadDictionary_advanced(dctx, &dict[0], dict.size(), ZSTD_dlm_byRef, ZSTD_dct_rawContent);
 }
 
 TinySave::~TinySave()
 {
-    ZSTD_freeCDict(cdict);
-    ZSTD_freeDDict(ddict);
     ZSTD_freeCCtx(cctx);
     ZSTD_freeDCtx(dctx);
 }
 
 void TinySave::compress(const FileInfo& src)
 {
-    ZSTD_frameParameters fParams = {};
-    fParams.contentSizeFlag = 0;
-    fParams.checksumFlag = 1;
-    fParams.noDictIDFlag = 1;
-
     buffer[0] = CURRENT_SAVE_VERSION;
-    size_t result = ZSTD_compress_usingCDict_advanced(
-            cctx, buffer + 1, sizeof buffer - 1,
-            src.data, src.size, cdict, fParams);
-
+    size_t result = ZSTD_compress2(cctx, buffer + 1, sizeof buffer - 1, src.data, src.size);
     size = ZSTD_isError(result) ? 0 : 1 + result;
 }
 
@@ -62,8 +58,7 @@ bool TinySave::decompress(FileInfo& dest)
         return false;
     }
 
-    size_t result = ZSTD_decompress_usingDDict(dctx, (uint8_t*) dest.data,
-        DOSFilesystem::MAX_FILESIZE, buffer + 1, size - 1, ddict);
+    size_t result = ZSTD_decompressDCtx(dctx, (uint8_t*) dest.data, DOSFilesystem::MAX_FILESIZE, buffer + 1, size - 1);
 
     dest.size = ZSTD_isError(result) ? 0 : result;
     return !ZSTD_isError(result);
