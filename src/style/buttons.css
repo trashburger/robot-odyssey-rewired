@@ -4,7 +4,7 @@ button, select {
     appearance: none;
     user-select: none;
     -webkit-user-select: none;
-    background-color: #222;
+    background-color: #1c1c1c;
     font: 20px sans-serif;
     color: #888;
     border: 2px solid #333;
