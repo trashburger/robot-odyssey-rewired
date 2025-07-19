@@ -1,5 +1,5 @@
 #joystick {
-    margin: 2px 50px;
+    margin: 0 50px;
     display: flex;
     user-select: none;
     touch-action: none;
@@ -12,7 +12,7 @@
     max-width: 270px;
     background: #111;
     border-radius: 4px;
-    margin: 2px;
+    margin: 0 2px;
     padding: 4px;
 }
 
@@ -45,4 +45,5 @@
     flex: 1 0 0;
     border: none;
     padding: 4px;
+    margin: 0;
 }
