@@ -53,7 +53,7 @@ export function mouseLocationForEvent(e)
     const border = 2;
 
     const hotspot_x = 2;
-    const hotspot_y = 4;
+    const hotspot_y = 5;
     const sprite_width = 7;
     const sprite_height = 16;
 
