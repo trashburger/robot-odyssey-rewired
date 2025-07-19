@@ -79,7 +79,7 @@ export function mouseLocationForEvent(e)
     if (y <= doorway_border) y = -1;
     if (y >= game_height - sprite_height - doorway_border) y = game_height+1;
 
-    return { x, y };
+    return { x: Math.round(x), y: Math.round(y) };
 }
 
 export function init()
