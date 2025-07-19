@@ -11,6 +11,9 @@
     height: 135px;
     max-width: 270px;
     background: #111;
+    border-radius: 4px;
+    margin: 2px;
+    padding: 4px;
 }
 
 #joystick_thumb {
