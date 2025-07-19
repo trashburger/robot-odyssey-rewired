@@ -31,13 +31,20 @@ avoid canvas readback, to fix Tor browser
 - could go further and move screenshot rendering to a worker thread, instead of rate-limited rendering in the main loop
 
 use zstd for embedded data
+- filesystem (including dictionary builder)
+- sbt86 data segments
 
 allow setting a custom palette (stored in indexeddb or settings)
 
-additional ui:
-- import export palette
+feature requrests for file manager ui:
+- needs support for keyboard and gamepad/joystick navigation! most of the game is playable with an xbox 360 controller, but the file modal requires mouse or touch.
+- view more details about saved games. the browser could include thumbnails of robot interior, information about in-game items.
 - rename and delete files
-- remap buttons
+- export individual files
+
+additional ui:
+- import / export palette
+- remap controller / keyboard buttons
 
 draw bug: sprites clip against the top of screen, but in the original game sprites never clip. fix this or leave it?
 
