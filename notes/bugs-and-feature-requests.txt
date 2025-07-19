@@ -1,10 +1,5 @@
 add a port-specific controls tutorial?
 
-bug: offset input everywhere on firefox mobile after fullscreen while scrolled?
-- not sure i can reproduce
-
-bug: moving mouse very slowly will lead to tracking stuck on with a slow constant movement in some direction
-
 bug: when file import fails (for ex, non-secure context) there is no modal, the "Processing selected files..." stays up until dismissed manually.
 
 too much frameskip when walking fast w keyboard?
