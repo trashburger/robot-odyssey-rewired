@@ -12,6 +12,7 @@
 }
 
 #framebuffer {
+    z-index: 2;
     animation: 1.25s ease 0s 1 normal both running iris;
     background: #000;
 }
@@ -86,7 +87,7 @@
 }
 
 .modal {
-    z-index: 9000; /* Must be > nipplejs, which uses z-index 999, sigh. */
+    z-index: 3;
     background: #000;
     transition: opacity 0.5s ease;
 }
