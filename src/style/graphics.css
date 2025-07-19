@@ -9,7 +9,7 @@
 
 #game_area .width_sizer {
     max-width: 133vh;
-    margin: 0 auto;
+    margin: 0 auto 6px auto;
     width: 100%;
     height: 100%;
 }

@@ -1,6 +1,6 @@
 #joystick {
+    margin: 2px 50px;
     display: flex;
-    margin: 20px 50px;
     user-select: none;
     touch-action: none;
 }
@@ -41,6 +41,5 @@
 .joystick_btn {
     flex: 1 0 0;
     border: none;
-    margin: 0;
     padding: 4px;
 }

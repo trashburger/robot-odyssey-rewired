@@ -19,7 +19,7 @@ button, select {
 
 .button_area {
     display: flex;
-    margin: 0 50px 2px 50px;
+    margin: 2px 50px;
     user-select: none;
 }
 
@@ -53,4 +53,8 @@ button, select {
     max-width: 1200px;
     margin: 0 auto;
     transition: opacity 1.5s;
+}
+
+#engine_controls .spacer {
+    margin: 12px 0;
 }
