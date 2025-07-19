@@ -1,0 +1,74 @@
+add a port-specific controls tutorial?
+
+bug: offset input everywhere on firefox mobile after fullscreen while scrolled?
+- not sure i can reproduce
+
+bug: moving mouse very slowly will lead to tracking stuck on with a slow constant movement in some direction
+
+too much frameskip when walking fast w keyboard?
+
+fix keyboard mapper so it's possible to type in lowercase on chip documentation page
+
+need unit testing!
+
+cross browser testing!
+
+pause game when phone screen is off
+- engine uses setTimeout for most intervals now, likely also causes jank
+- switch to using RAF for most timing? calculate output timing using smoothed frame timing
+
+font addons for fullscreen icon, arrow keys
+
+size profiling
+
+cpu efficiency for rgba draw layer?
+- defer high-res render?
+
+avoid canvas readback, to fix Tor browser
+- i think it'd be worth including a small png library in the wasm.
+- this could be used to load palettes from PNG without going through canvas, fixing the tor browser bug
+- also could be used to implement an engine function to save thumbnails directly to PNG. would fix another tor browser bug, plus allow performance improvements for all browsers
+- could go further and move screenshot rendering to a worker thread, instead of rate-limited rendering in the main loop
+
+use zstd for embedded data
+
+allow setting a custom palette (stored in indexeddb or settings)
+
+additional ui:
+- import export palette
+- rename and delete files
+- remap buttons
+
+draw bug: sprites clip against the top of screen, but in the original game sprites never clip. fix this or leave it?
+
+can we automatically test compatibility with dos version?
+
+fix game bugs?:
+
+- is the "chip too complex" message broken? overcomplicated chips will usually crash the game.
+
+port robotropolis preview from apple?
+
+built-in editor?
+
+mod / user-script / add-on loader?
+
+fix tutorial bugs?:
+
+can't recharge dead robot in tut3. battery discharged but crystals wont recharge it
+- only affects tut3.
+- same as dos port
+- in 2.0 for Apple? no! drain and recharge work there.
+- anatomy tut1, charging works. crystal F7 does charge sparky, checkers.
+- wiring tut2, no crystal
+- sensors tut3, has bug. crystals F7, F8, F9. fails to charge sparky, scanner, checkers.
+- toolkit tut4, charging works
+- circuits tut5, charging works
+- teamwork tut6, charging works
+- chips tut7, charging works
+
+corruption after loading a chip: chip design tut7
+- same as dos port
+
+is there a way to have sbt86 separate the common engine code from the level-specific logic, to bring the tutorial/lab/game into the same engine?
+
