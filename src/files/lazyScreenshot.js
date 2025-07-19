@@ -2,6 +2,7 @@ import * as Graphics from '../graphics.js';
 import * as EngineLoader from '../engineLoader.js';
 import { isCompressed } from './storage.js';
 import ScreenshotLoadingImage from '../assets/screenshot-loading.gif';
+import ScreenshotBrokenImage from '../assets/screenshot-broken.png';
 
 const render_stack = [];
 
@@ -22,9 +23,12 @@ function renderer()
 
     const engine = EngineLoader.instance;
     const image = engine.screenshotSaveFile(file.data, isCompressed(file));
-    render_canvas.getContext('2d').putImageData(image, 0, 0);
-
-    element.src = render_canvas.toDataURL();
+    if (image) {
+        render_canvas.getContext('2d').putImageData(image, 0, 0);
+        element.src = render_canvas.toDataURL();
+    } else {
+        element.src = ScreenshotBrokenImage;
+    }
 }
 
 async function thumbnailIsVisible(element)
