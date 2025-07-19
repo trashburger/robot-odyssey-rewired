@@ -7,10 +7,6 @@
 
 #include "tinySave.h"
 
-// Compression level is a CPU and memory vs space tradeoff.
-// This can be changed without breaking format compatibility.
-static const int compress_level = 18;
-
 // Versioning the save files, so we can change the compression
 // or otherwise break compatibility later.
 enum SaveVersion {
@@ -25,10 +21,15 @@ TinySave::TinySave()
 
     cctx = ZSTD_createCCtx();
     ZSTD_CCtx_loadDictionary_advanced(cctx, &dict[0], dict.size(), ZSTD_dlm_byRef, ZSTD_dct_rawContent);
+
     ZSTD_CCtx_setParameter(cctx, ZSTD_c_contentSizeFlag, 0);
-    ZSTD_CCtx_setParameter(cctx, ZSTD_c_checksumFlag, 1);
+    ZSTD_CCtx_setParameter(cctx, ZSTD_c_checksumFlag, 0);
     ZSTD_CCtx_setParameter(cctx, ZSTD_c_dictIDFlag, 0);
-    ZSTD_CCtx_setParameter(cctx, ZSTD_c_compressionLevel, compress_level);
+
+    // Compression level is a CPU and memory vs space tradeoff.
+    // This can be changed without breaking format compatibility.
+    ZSTD_CCtx_setParameter(cctx, ZSTD_c_strategy, ZSTD_btultra2);
+    ZSTD_CCtx_setParameter(cctx, ZSTD_c_compressionLevel, 18);
 
     dctx = ZSTD_createDCtx();
     ZSTD_DCtx_loadDictionary_advanced(dctx, &dict[0], dict.size(), ZSTD_dlm_byRef, ZSTD_dct_rawContent);
