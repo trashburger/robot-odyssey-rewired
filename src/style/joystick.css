@@ -16,29 +16,26 @@
     padding: 4px;
 }
 
-#joystick_thumb {
-    position: absolute;
-    border-radius: 80px;
-    width: 80px;
-    height: 80px;
-    transform: translate(-40px, -40px);
-    transition: all 0.075s ease;
-}
-
-#joystick_thumb {
-    z-index: 1;
-    overflow: hidden;
-    left: 0;
-    top: 0;
-    color: #585858;
-}
-
 #joystick_center {
     position: absolute;
     left: 50%;
     top: 50%;
     width: 0;
     height: 0;
+}
+
+#joystick_thumb {
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 80px;
+    width: 80px;
+    height: 80px;
+    transform: translate(-40px, -40px);
+    transition: all 0.075s ease;
+    z-index: 1;
+    overflow: hidden;
+    color: #585858;
 }
 
 .joystick_btn {
