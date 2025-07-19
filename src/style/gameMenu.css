@@ -43,11 +43,9 @@
 @keyframes iris {
     0% {
         clip-path: circle(0% at center);
-        -webkit-clip-path: circle(0% at center);
     }
     100% {
         clip-path: circle(74% at center);
-        -webkit-clip-path: circle(74% at center);
     }
 }
 
@@ -107,5 +105,4 @@
     border-radius: 2vw;
     overflow-y: auto;
     overflow-x: visible;
-    -webkit-overflow-scrolling: touch;
 }

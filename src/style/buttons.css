@@ -1,9 +1,6 @@
 button, select {
-    -webkit-appearance: none;
-    -moz-appearance: none;
     appearance: none;
     user-select: none;
-    -webkit-user-select: none;
     background-color: #1c1c1c;
     font: 20px sans-serif;
     color: #888;

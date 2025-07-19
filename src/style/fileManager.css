@@ -23,7 +23,6 @@
     min-width: 330px;
     justify-content: space-around;
     user-select: none;
-    -webkit-user-select: none;
 }
 
 #modal_files .thumbnail {
@@ -41,10 +40,7 @@
     pointer-events: none;
     z-index: 4;
     user-select: none;
-    -webkit-user-select: none;
     user-drag: none;
-    -webkit-user-drag: none;
-    -moz-user-drag: none;
 }
 
 #modal_files .item:hover {

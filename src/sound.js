@@ -29,8 +29,10 @@ function renderSound(pcmData, rate)
 export function audioContextSetup()
 {
     if (context === null) {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        context = new AudioContext();
+        const AudioContext = window.AudioContext;
+        if (AudioContext) {
+            context = new AudioContext();
+        }
         if (!context) {
             return false;
         }
