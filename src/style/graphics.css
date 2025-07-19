@@ -1,4 +1,7 @@
 #game_area {
+    z-index: 2;
+    position: relative;
+    background: #000;
     width: 100%;
     overflow: hidden;
     user-select: none;

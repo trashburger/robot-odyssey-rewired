@@ -12,7 +12,6 @@
 }
 
 #framebuffer {
-    z-index: 2;
     animation: 1.25s ease 0s 1 normal both running iris;
     background: #000;
 }
