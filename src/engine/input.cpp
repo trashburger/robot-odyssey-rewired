@@ -1,5 +1,7 @@
+#include <algorithm>
 #include <stdio.h>
 #include <stdint.h>
+#include <math.h>
 #include "sbt86.h"
 #include "roData.h"
 #include "input.h"
@@ -9,7 +11,8 @@ InputBuffer::InputBuffer()
     : savedPlayerX(-1),
       savedPlayerY(-1),
       savedPlayerRoom(RO_ROOM_NONE),
-      mouse_delay_timer(0)
+      mouse_delay_timer(0),
+      mouse_virtual_move_timer(0)
 {
     clear();
 }
@@ -18,12 +21,10 @@ void InputBuffer::clear()
 {
     key_buffer.clear();
     mouse_buffer.clear();
-    js_x = 0.0f;
-    js_y = 0.0f;
-    js_residual_x = 0.0f;
-    js_residual_y = 0.0f;
+    clearJoystickAxes();
     js_button_pressed = false;
     js_button_held = false;
+    mouse_virtual_move_timer = 0;
 }
 
 bool InputBuffer::checkForInputBacklog()
@@ -41,8 +42,16 @@ void InputBuffer::pressKey(uint8_t ascii, uint8_t scancode)
 void InputBuffer::setJoystickAxes(float x, float y)
 {
     mouse_buffer.clear();
-    js_x = std::max(-1.0f, std::min(1.0f, x)) * JOYSTICK_RANGE_MAX;
-    js_y = std::max(-1.0f, std::min(1.0f, y)) * JOYSTICK_RANGE_MAX * JOYSTICK_ASPECT_CORRECTION;
+    js_x = x;
+    js_y = y;
+}
+
+void InputBuffer::clearJoystickAxes()
+{
+    js_x = 0.0f;
+    js_y = 0.0f;
+    js_residual_x = 0.0f;
+    js_residual_y = 0.0f;
 }
 
 void InputBuffer::setJoystickButton(bool button)
@@ -84,8 +93,7 @@ void InputBuffer::setMouseButton(bool button)
 void InputBuffer::endMouseTracking()
 {
     mouse_buffer.clear();
-    js_x = 0.0f;
-    js_y = 0.0f;
+    clearJoystickAxes();
     js_button_pressed = false;
     js_button_held = false;
 }
@@ -106,6 +114,24 @@ uint16_t InputBuffer::getKey()
     }
 }
 
+void InputBuffer::quantizeJoystickAxis(float input, float &residual, uint16_t &output, float axis_scale)
+{
+    const float total = std::min(1.f, std::max(-1.f, input + residual));
+    const float range = axis_scale * float(JOYSTICK_RANGE_MAX - JOYSTICK_RANGE_MIN);
+    const float quantized = roundf(total * range);
+
+    residual = total - (1.f / range * quantized);
+
+    const int center = ROJoyfile::DEFAULT_JOYSTICK_CENTER;
+    if (quantized > 0.f) {
+        output = std::min(center * 2, center + int(JOYSTICK_RANGE_MIN) + int(quantized));
+    } else if (quantized < 0.f) {
+        output = std::max(0, center - int(JOYSTICK_RANGE_MIN) + int(quantized));
+    } else {
+        output = center;
+    }
+}
+
 void InputBuffer::pollJoystick(ROWorld *world, uint16_t &x, uint16_t &y, uint8_t &status)
 {
     // Optional mouse tracking will use the joystick input to move the player
@@ -113,18 +139,12 @@ void InputBuffer::pollJoystick(ROWorld *world, uint16_t &x, uint16_t &y, uint8_t
 
     updateMouse(world);
 
-    // Dither joystick motion so we can go slower than the game normally provides for
+    // Convert a floating point joystick in the range [-1, +1] to a quantized value subject
+    // to the game's supported range, and save the residual. This removes the game's deadzone
+    // correction, allowing it to be re-applied as appropriate for specific input devices.
 
-    float total_x = js_x + js_residual_x;
-    float total_y = js_y + js_residual_y;
-
-    int quantized_x = total_x;
-    int quantized_y = total_y;
-    if (quantized_x < JOYSTICK_RANGE_MIN && quantized_x > -JOYSTICK_RANGE_MIN) quantized_x = 0;
-    if (quantized_y < JOYSTICK_RANGE_MIN && quantized_y > -JOYSTICK_RANGE_MIN) quantized_y = 0;
-
-    js_residual_x = total_x - quantized_x;
-    js_residual_y = total_y - quantized_y;
+    quantizeJoystickAxis(js_x, js_residual_x, x, 1.f);
+    quantizeJoystickAxis(js_y, js_residual_y, y, JOYSTICK_ASPECT_CORRECTION);
 
     // Button presses must not be missed if they end before the next poll.
     // Clear the button press latch here.
@@ -137,10 +157,7 @@ void InputBuffer::pollJoystick(ROWorld *world, uint16_t &x, uint16_t &y, uint8_t
     // active low. The byte includes data for two joysticks, and
     // we only emulate one.
 
-    int center = ROJoyfile::DEFAULT_JOYSTICK_CENTER;
     status = 0xFC ^ (button ? 0x10 : 0);
-    x = std::max(0, std::min(center * 2, quantized_x + center));
-    y = std::max(0, std::min(center * 2, quantized_y + center));
 }
 
 void InputBuffer::updateMouse(ROWorld *world)
@@ -158,7 +175,8 @@ void InputBuffer::updateMouse(ROWorld *world)
     if (mouse_delay_timer) {
         mouse_delay_timer--;
         if (!mouse_buffer.empty()) {
-            setJoystickAxes(0, 0);
+            mouse_buffer.clear();
+            clearJoystickAxes();
         }
     }
 
@@ -167,13 +185,14 @@ void InputBuffer::updateMouse(ROWorld *world)
         return;
     }
 
-    struct MouseEvent &evt = mouse_buffer.front();
+    const struct MouseEvent &evt = mouse_buffer.front();
     switch (evt.type) {
 
         case EVT_POS:
             // Position events last until the requested position has been reached
             if (virtualMouseToPosition(world, evt.x, evt.y)) {
                 mouse_buffer.pop_front();
+                clearJoystickAxes();
             }
             break;
 
@@ -195,6 +214,9 @@ bool InputBuffer::virtualMouseToPosition(ROWorld *world, int x, int y)
         // for, like the main menu. For now, this means position events
         // resolve immediately and do nothing, but button events work.
 
+        savedPlayerX = -1;
+        savedPlayerY = -1;
+        mouse_virtual_move_timer = 0;
         return true;
     }
 
@@ -203,22 +225,8 @@ bool InputBuffer::virtualMouseToPosition(ROWorld *world, int x, int y)
 
     int xdiff = x - playerX;
     int ydiff = -(y - playerY);
-
-    if (xdiff > 0) {
-        js_x = std::min<int>(JOYSTICK_RANGE_MAX, JOYSTICK_RANGE_MIN + MOUSE_GAIN * (xdiff - 1));
-    } else if (xdiff < 0) {
-        js_x = -std::min<int>(JOYSTICK_RANGE_MAX, JOYSTICK_RANGE_MIN - MOUSE_GAIN * (xdiff + 1));
-    } else {
-        js_x = 0;
-    }
-
-    if (ydiff > 0) {
-        js_y = std::min<int>(JOYSTICK_RANGE_MAX, JOYSTICK_RANGE_MIN + MOUSE_GAIN * (ydiff - 1));
-    } else if (ydiff < 0) {
-        js_y = -std::min<int>(JOYSTICK_RANGE_MAX, JOYSTICK_RANGE_MIN - MOUSE_GAIN * (ydiff + 1));
-    } else {
-        js_y = 0;
-    }
+    js_x = MOUSE_GAIN * float(xdiff);
+    js_y = (MOUSE_GAIN / JOYSTICK_ASPECT_CORRECTION) * float(ydiff);
 
     // Are we there yet?
     if (xdiff == 0 && ydiff == 0) {
@@ -226,6 +234,7 @@ bool InputBuffer::virtualMouseToPosition(ROWorld *world, int x, int y)
 
         savedPlayerX = -1;
         savedPlayerY = -1;
+        mouse_virtual_move_timer = 0;
         return true;
 
     } else {
@@ -236,6 +245,15 @@ bool InputBuffer::virtualMouseToPosition(ROWorld *world, int x, int y)
         int lastY = savedPlayerY;
         savedPlayerX = playerX;
         savedPlayerY = playerY;
-        return lastX == savedPlayerX && lastY == savedPlayerY;
+        if (lastX == savedPlayerX && lastY == savedPlayerY) {
+            if (++mouse_virtual_move_timer >= MOUSE_VIRTUAL_MOVE_TIMEOUT) {
+                mouse_virtual_move_timer = 0;
+                return true;
+            }
+        } else {
+            mouse_virtual_move_timer = 0;
+        }
     }
+
+    return false;
 }

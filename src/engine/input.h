@@ -29,10 +29,11 @@ class InputBuffer
     static constexpr unsigned KEY_BUFFER_SIZE = 32;
     static constexpr unsigned MOUSE_BUFFER_SIZE = 8;
     static constexpr unsigned MOUSE_DELAY_ON_ROOM_CHANGE = 4;
-    static constexpr float MOUSE_GAIN = 0.5;
+    static constexpr unsigned MOUSE_VIRTUAL_MOVE_TIMEOUT = 4;
+    static constexpr float MOUSE_GAIN = 0.07f;
     static constexpr unsigned JOYSTICK_RANGE_MIN = 3;
     static constexpr unsigned JOYSTICK_RANGE_MAX = 10;
-    static constexpr float JOYSTICK_ASPECT_CORRECTION = 0.8;
+    static constexpr float JOYSTICK_ASPECT_CORRECTION = 0.8f;
 
     enum MouseEventType {
         EVT_POS,
@@ -54,7 +55,10 @@ class InputBuffer
     int savedPlayerX, savedPlayerY;
     RORoomId savedPlayerRoom;
     unsigned mouse_delay_timer;
+    unsigned mouse_virtual_move_timer;
 
     void updateMouse(ROWorld *world);
+    void clearJoystickAxes();
     bool virtualMouseToPosition(ROWorld *world, int x, int y);
+    void quantizeJoystickAxis(float input, float &residual, uint16_t &output, float axis_scale);
 };
