@@ -16,8 +16,8 @@ static double engine_speed = 1.0;
 static TinySave tinySave;
 
 #define TIMESTAMP_FILTER_MAX_SAMPLES 128
-#define TIMESTAMP_FILTER_MIN_SAMPLES 16
-#define TIMESTAMP_DISCONTINUITY_LIMIT 500.0
+#define TIMESTAMP_FILTER_MIN_SAMPLES 3
+#define TIMESTAMP_DISCONTINUITY_LIMIT 290.0
 static jm::circular_buffer<double, TIMESTAMP_FILTER_MAX_SAMPLES> timestamp_filter;
 
 SBT_DECL_PROCESS(ShowEXE);
