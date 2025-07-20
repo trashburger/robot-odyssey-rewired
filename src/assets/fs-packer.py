@@ -41,7 +41,7 @@ def write_file_data(cpp, name, data):
         % (varname_for_file(name), to_hex(data))
     )
     cpp.write(
-        '\nconst extern struct FileInfo %s = {\n\t"%s", %s_bytes, %d\n};\n'
+        '\nstatic const struct FileInfo %s = {\n\t"%s", %s_bytes, %d\n};\n'
         % (varname_for_file(name), name, varname_for_file(name), len(data))
     )
 

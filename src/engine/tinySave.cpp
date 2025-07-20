@@ -70,53 +70,58 @@ const std::vector<uint8_t>& TinySave::getCompressionDictionary()
     return dict;
 }
 
-static void addFileToDict(std::vector<uint8_t> &dict, const FileInfo &file)
-{
-    // Trim trailing zeroes
-    uint32_t size = file.size;
-    while (size && file.data[size - 1] == 0) size--;
-
-    // Append to dict
-    dict.insert(dict.end(), file.data, file.data + size);
-}
-
 void TinySave::initDictionary()
 {
     // The contents of the dictionary must not change at all,
-    // or we break savegame compatibility completely!
+    // or we break savegame compatibility completely! If we want
+    // to use a new dictionary later, we could bump SaveVersion.
+
+    const size_t total_expected_size = 57791;
+
+    static const char *files[] = {
+        // Built-in loadable chips
+        "4bitcntr.csv",
+        "stereo.csv",
+        "rsflop.csv",
+        "oneshot.csv",
+        "countton.csv",
+        "adder.csv",
+        "clock.csv",
+        "delay.csv",
+        "bus.csv",
+        "wallhug.csv",
+
+        // World overlays for the game
+        "street.wld",
+        "subway.wld",
+        "town.wld",
+        "comp.wld",
+
+        // Chips used in initial game world
+        "countton.chp",
+        "wallhug.chp",
+        "countton.pin",
+        "wallhug.pin",
+
+        // Initial world for the lab
+        "lab.wor",
+
+        // Initial world for the game
+        "sewer.wor",
+        "sewer.cir",
+    };
 
     assert(dict.empty());
+    for (size_t i = 0; i < sizeof files / sizeof files[0]; ++i) {
+        const FileInfo *file = FileInfo::lookup(files[i]);
+        assert(file);
 
-    // Built-in loadable chips
-    extern const FileInfo file_4bitcntr_csv;  addFileToDict(dict, file_4bitcntr_csv);
-    extern const FileInfo file_stereo_csv;    addFileToDict(dict, file_stereo_csv);
-    extern const FileInfo file_rsflop_csv;    addFileToDict(dict, file_rsflop_csv);
-    extern const FileInfo file_oneshot_csv;   addFileToDict(dict, file_oneshot_csv);
-    extern const FileInfo file_countton_csv;  addFileToDict(dict, file_countton_csv);
-    extern const FileInfo file_adder_csv;     addFileToDict(dict, file_adder_csv);
-    extern const FileInfo file_clock_csv;     addFileToDict(dict, file_clock_csv);
-    extern const FileInfo file_delay_csv;     addFileToDict(dict, file_delay_csv);
-    extern const FileInfo file_bus_csv;       addFileToDict(dict, file_bus_csv);
-    extern const FileInfo file_wallhug_csv;   addFileToDict(dict, file_wallhug_csv);
+        // Trim trailing zeroes
+        uint32_t size = file->size;
+        while (size && file->data[size - 1] == 0) size--;
 
-    // World overlays for the game
-    extern const FileInfo file_street_wld;    addFileToDict(dict, file_street_wld);
-    extern const FileInfo file_subway_wld;    addFileToDict(dict, file_subway_wld);
-    extern const FileInfo file_town_wld;      addFileToDict(dict, file_town_wld);
-    extern const FileInfo file_comp_wld;      addFileToDict(dict, file_comp_wld);
-
-    // Chips used in initial game world
-    extern const FileInfo file_countton_chp;  addFileToDict(dict, file_countton_chp);
-    extern const FileInfo file_wallhug_chp;   addFileToDict(dict, file_wallhug_chp);
-    extern const FileInfo file_countton_pin;  addFileToDict(dict, file_countton_pin);
-    extern const FileInfo file_wallhug_pin;   addFileToDict(dict, file_wallhug_pin);
-
-    // Initial world for the lab
-    extern const FileInfo file_lab_wor;       addFileToDict(dict, file_lab_wor);
-
-    // Initial world for the game
-    extern const FileInfo file_sewer_wor;     addFileToDict(dict, file_sewer_wor);
-    extern const FileInfo file_sewer_cir;     addFileToDict(dict, file_sewer_cir);
-
-    assert(dict.size() == 57791);
+        // Append to dict
+        dict.insert(dict.end(), file->data, file->data + size);
+    }
+    assert(dict.size() == total_expected_size);
 }
