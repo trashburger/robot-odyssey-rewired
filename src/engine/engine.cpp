@@ -17,6 +17,7 @@ static TinySave tinySave;
 
 #define TIMESTAMP_FILTER_MAX_SAMPLES 128
 #define TIMESTAMP_FILTER_MIN_SAMPLES 16
+#define TIMESTAMP_DISCONTINUITY_LIMIT 500.0
 static jm::circular_buffer<double, TIMESTAMP_FILTER_MAX_SAMPLES> timestamp_filter;
 
 SBT_DECL_PROCESS(ShowEXE);
@@ -50,6 +51,14 @@ static int frameCallback(double loop_timestamp, void *)
         return false;
     }
 
+    // If we detect any single discontinuity over the limit, reset the filter.
+    if (!timestamp_filter.empty()) {
+        const double last_timestamp = timestamp_filter.back();
+        if (loop_timestamp < last_timestamp || (loop_timestamp - last_timestamp) > TIMESTAMP_DISCONTINUITY_LIMIT) {
+            timestamp_filter.clear();
+        }
+    }
+
     // Finite impulse response sliding window filter for per-callback timestamps
     timestamp_filter.push_back(loop_timestamp);
     if (timestamp_filter.size() < TIMESTAMP_FILTER_MIN_SAMPLES) {
@@ -57,7 +66,7 @@ static int frameCallback(double loop_timestamp, void *)
         return true;
     }
     const double filtered_interval = (timestamp_filter.back() - timestamp_filter.front()) / double(timestamp_filter.size());
-    if (!(filtered_interval > 0. && filtered_interval < 500.)) {
+    if (!(filtered_interval > 0. && filtered_interval < TIMESTAMP_DISCONTINUITY_LIMIT)) {
         // Wait for a realistic filter output
         return true;
     }
