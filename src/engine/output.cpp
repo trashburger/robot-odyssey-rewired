@@ -46,7 +46,8 @@ void OutputMinimal::pushSpeakerTimestamp(uint32_t timestamp)
 OutputQueue::OutputQueue(ColorTable &colorTable)
     : OutputInterface(colorTable),
       frameskip_value(0),
-      frameskip_counter(0)
+      frameskip_counter(0),
+      frame_counter(0)
 {
     clear();
 }
@@ -99,6 +100,7 @@ void OutputQueue::drawFrameRGB()
         EM_ASM_({
            Module.onRenderFrame(HEAPU8.subarray($0, $1));
         }, draw.backbuffer, sizeof draw.backbuffer + (uintptr_t)draw.backbuffer);
+        frame_counter++;
     }
 }
 

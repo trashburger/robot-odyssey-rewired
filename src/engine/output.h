@@ -78,12 +78,18 @@ class OutputQueue : public OutputInterface
     static const unsigned MAX_BUFFERED_FRAMES = 128;
     static const unsigned MAX_BUFFERED_EVENTS = 16384;
 
+    uint32_t getFrameCount()
+    {
+        return frame_counter;
+    }
+
  private:
     jm::circular_buffer<OutputItem, MAX_BUFFERED_EVENTS> items;
     jm::circular_buffer<CGAFramebuffer, MAX_BUFFERED_FRAMES> frames;
     uint32_t delay_remaining;
     uint32_t frameskip_value;
     uint32_t frameskip_counter;
+    uint32_t frame_counter;
 
     void dequeueCGAFrame();
     uint32_t renderSoundEffect(uint32_t first_timestamp);

@@ -1,16 +1,23 @@
+#include <cmath>
 #include <stdint.h>
 #include <emscripten.h>
 #include <emscripten/bind.h>
+#include <emscripten/html5.h>
 #include <algorithm>
 #include <vector>
+#include <circular_buffer.hpp>
 #include "hardware.h"
 #include "tinySave.h"
 
 using namespace emscripten;
 
-static bool has_main_loop = false;
-static float engine_speed = 1.0f;
+static bool has_frame_callback = false;
+static double engine_speed = 1.0;
 static TinySave tinySave;
+
+#define TIMESTAMP_FILTER_MAX_SAMPLES 128
+#define TIMESTAMP_FILTER_MIN_SAMPLES 16
+static jm::circular_buffer<double, TIMESTAMP_FILTER_MAX_SAMPLES> timestamp_filter;
 
 SBT_DECL_PROCESS(ShowEXE);
 SBT_DECL_PROCESS(Show2EXE);
@@ -34,47 +41,74 @@ static Hardware hwAux(outputAux);
 SBT_STATIC_PROCESS(hwAux, LabEXE);
 SBT_STATIC_PROCESS(hwAux, GameEXE);
 
-
-static void loop()
+static int frameCallback(double loop_timestamp, void *)
 {
-    // Run the main hardware instance until the next queued delay
-
-    unsigned delay_accum = 0;
-    const float speed = engine_speed;
-    const unsigned minimum_delay_milliseconds = 10;
-
-    if (!(speed > 0.0f)) {
-        // Engine paused via speed control
-        emscripten_pause_main_loop();
-        return;
+    // Check the speed control, pause callbacks if the engine is paused
+    const double speed = engine_speed;
+    if (!(speed > 0.0)) {
+        has_frame_callback = false;
+        return false;
     }
 
-    while (true) {
-        unsigned queue_delay = outputQueue.run();
+    // Finite impulse response sliding window filter for per-callback timestamps
+    timestamp_filter.push_back(loop_timestamp);
+    if (timestamp_filter.size() < TIMESTAMP_FILTER_MIN_SAMPLES) {
+        // Wait for more samples
+        return true;
+    }
+    const double filtered_interval = (timestamp_filter.back() - timestamp_filter.front()) / double(timestamp_filter.size());
+    if (!(filtered_interval > 0. && filtered_interval < 500.)) {
+        // Wait for a realistic filter output
+        return true;
+    }
 
-        if (queue_delay == 0) {
-            if (hw.process) {
-                hw.process->run();
-            } else {
-                // Engine paused until exec
-                emscripten_pause_main_loop();
-                return;
+    // Accumulator increases when time passes, decreases when we pass delays in the output queue
+    static double delay_accumulator = 0.;
+
+    if (delay_accumulator < 0. && hw.input.checkForInputBacklog()) {
+        // Speed up for keyboard input backlog
+        delay_accumulator = 0.;
+    }
+
+    delay_accumulator += filtered_interval * speed;
+
+    uint32_t saved_frame_count = outputQueue.getFrameCount();
+
+    while (delay_accumulator >= 0.) {
+        // Run the engine until we hit a delay instruction in its output queue,
+        // cancelling into a pause if the process ends or was never set.
+        while (true) {
+            uint32_t queue_delay = outputQueue.run();
+            if (queue_delay == 0) {
+                if (hw.process) {
+                    hw.process->run();
+                    continue;
+                } else {
+                    has_frame_callback = false;
+                    return false;
+                }
             }
+            delay_accumulator -= double(queue_delay);
+            break;
         }
-
-        delay_accum += queue_delay;
-        unsigned adjusted_delay = delay_accum / engine_speed;
-
-        if (adjusted_delay >= minimum_delay_milliseconds) {
-            if (hw.input.checkForInputBacklog()) {
-                // Speed up for keyboard input backlog
-                emscripten_set_main_loop_timing(EM_TIMING_RAF, 1);
-            } else {
-                // Millisecond-based timing, with optional modifier
-                emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, adjusted_delay);
+        if (saved_frame_count != outputQueue.getFrameCount()) {
+            // Don't call onRenderFrame() more than once per requestAnimationFrame, add an extra delay if we are running fast.
+            if (delay_accumulator >= 0.) {
+                delay_accumulator = 0.;
             }
-            return;
+            break;
         }
+    }
+
+    return true;
+}
+
+static void resumeFrameCallbacks(void)
+{
+    if (!has_frame_callback) {
+        has_frame_callback = true;
+        timestamp_filter.clear();
+        emscripten_request_animation_frame_loop(frameCallback, nullptr);
     }
 }
 
@@ -84,8 +118,7 @@ int main()
     // for example when loading a game as soon as the engine loads. So this isn't
     // used for initialization, just for setting up the main loop.
 
-    emscripten_set_main_loop(loop, 0, false);
-    has_main_loop = true;
+    resumeFrameCallbacks();
     return 0;
 }
 
@@ -93,22 +126,20 @@ static void exec(const std::string &process, const std::string &arg)
 {
     outputQueue.clear();
     hw.exec(process.c_str(), arg.c_str());
-    if (has_main_loop) {
-        emscripten_resume_main_loop();
-    }
+    resumeFrameCallbacks();
 }
 
-static void setSpeed(float speed)
+static void setSpeed(double speed)
 {
     // Stored speed for delay calculations, used on each main loop iter
     engine_speed = speed;
 
     // Update frameskip so we can fast-forward without being limited by draw speed
-    outputQueue.setFrameSkip((unsigned) std::max(0.0f, speed / 8.0f));
+    outputQueue.setFrameSkip((unsigned) std::max(0.0, speed / 8.0));
 
     // This may restart a paused main loop
-    if (has_main_loop && speed > 0.0f) {
-        emscripten_resume_main_loop();
+    if (speed > 0.0) {
+        resumeFrameCallbacks();
     }
 }
 
@@ -163,9 +194,7 @@ static bool loadGame()
 {
     if (hw.loadGame()) {
         outputQueue.clear();
-        if (has_main_loop) {
-            emscripten_resume_main_loop();
-        }
+        resumeFrameCallbacks();
         return true;
     }
     return false;

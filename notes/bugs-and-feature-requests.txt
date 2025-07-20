@@ -2,17 +2,11 @@ add a port-specific controls tutorial?
 
 bug: when file import fails (for ex, non-secure context) there is no modal, the "Processing selected files..." stays up until dismissed manually.
 
-too much frameskip when walking fast w keyboard?
-
 fix keyboard mapper so it's possible to type in lowercase on chip documentation page
 
 need unit testing!
 
 cross browser testing!
-
-pause game when phone screen is off
-- engine uses setTimeout for most intervals now, likely also causes jank
-- switch to using RAF for most timing? calculate output timing using smoothed frame timing
 
 add custom characters to the web font, beyond the ones in the original game font:
 - full-screen icon
