@@ -24,10 +24,6 @@ avoid canvas readback, to fix Tor browser
 - also could be used to implement an engine function to save thumbnails directly to PNG. would fix another tor browser bug, plus allow performance improvements for all browsers
 - could go further and move screenshot rendering to a worker thread, instead of rate-limited rendering in the main loop
 
-use zstd for embedded data
-- filesystem (including dictionary builder)
-- sbt86 data segments
-
 allow setting a custom palette (stored in indexeddb or settings)
 
 feature requrests for file manager ui:

@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-import sys
-import os
-import re
+import sys, os, re, zstd
 
 
 def collect_files(in_dir):
@@ -17,6 +15,15 @@ def collect_files(in_dir):
 
 def varname_for_file(name):
     return "file_%s" % name.lower().replace(".", "_")
+
+
+def combine_files(fs):
+    index = []
+    blob = b''
+    for name in sorted(fs.keys()):
+        index.append('\t{ .name = "%s", .offset = %d, .size = %d },' % (name, len(blob), len(fs[name])))
+        blob += fs[name]
+    return (index, blob)
 
 
 def to_hex(seq):
@@ -34,32 +41,29 @@ def write_header(cpp):
     )
 
 
-def write_file_data(cpp, name, data):
-    # Note, file contents can be static but FileInfo must be visible from tinySave.
-    cpp.write(
-        "\nstatic const uint8_t %s_bytes[] = {\n%s\n};\n"
-        % (varname_for_file(name), to_hex(data))
-    )
-    cpp.write(
-        '\nstatic const struct FileInfo %s = {\n\t"%s", %s_bytes, %d\n};\n'
-        % (varname_for_file(name), name, varname_for_file(name), len(data))
-    )
+def write_blob(cpp, blob):
+    compressed = zstd.compress(blob, 22)
+    cpp.write("\nstatic const uint8_t fs_pack[] = {\n%s\n};\n" % (to_hex(compressed),))
+    cpp.write("static uint8_t fs_unpacked[%d];\n" % len(blob))
+    cpp.write("const uint8_t* const CompressedFileInfo::packed = fs_pack;\n")
+    cpp.write("uint8_t* const CompressedFileInfo::unpacked = fs_unpacked;\n")
+    cpp.write("const uint32_t CompressedFileInfo::packed_size = %d;\n" % len(compressed))
+    cpp.write("const uint32_t CompressedFileInfo::unpacked_size = %d;\n" % len(blob))
 
 
-def write_index(cpp, names):
-    cpp.write("\nconst FileInfo* FileInfo::index[] = {\n")
-    for name in names:
-        cpp.write("\t&%s,\n" % varname_for_file(name))
-    cpp.write("\t0,\n" "};\n")
+def write_index(cpp, index):
+    cpp.write("\nstatic const CompressedFileInfo fs_index[%d] = {\n%s\n\t{0}\n};\n" % (len(index) + 1, '\n'.join(index),))
+    cpp.write("static FileInfo fs_cache[%d];\n" % (len(index) + 1,))
+    cpp.write("const CompressedFileInfo* const CompressedFileInfo::index = fs_index;\n")
+    cpp.write("FileInfo* const CompressedFileInfo::cache = fs_cache;\n")
 
 
 def main(in_dir, out_file):
-    fs = collect_files(in_dir)
     cpp = open(out_file, "w")
     write_header(cpp)
-    for name, data in fs.items():
-        write_file_data(cpp, name, data)
-    write_index(cpp, fs.keys())
+    index, blob = combine_files(collect_files(in_dir))
+    write_blob(cpp, blob)
+    write_index(cpp, index)
     cpp.close()
 
 

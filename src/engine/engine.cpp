@@ -218,9 +218,8 @@ static val getStaticFiles()
 {
     val files = val::object();
 
-    for (const FileInfo **iter = FileInfo::index; *iter; iter++) {
-        const FileInfo &file = **iter;
-        files.set(file.name, getFile(file));
+    for (const FileInfo *info = FileInfo::getAllFiles(); info->name; info++) {
+        files.set(info->name, getFile(*info));
     }
 
     return files;

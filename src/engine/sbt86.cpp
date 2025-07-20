@@ -1,43 +1,12 @@
 #include <string.h>
 #include <stdio.h>
+#include <zstd.h>
 #include "sbt86.h"
 #include "hardware.h"
 
 static const bool full_stack_trace = false;
 static const uint32_t total_calls_threshold = 100000;
 
-
-static void decompressRLE(uint8_t *dest, uint8_t *limit, const uint8_t *src, uint32_t srcLength)
-{
-    /*
-     * Decompress our very simple RLE format. Runs of 2 or more zeroes
-     * are replaced with 2 zeroes plus a 16-bit count of the omitted
-     * zeroes. We assume the output buffer has already been
-     * zero-filled, so the zero runs are simply skipped.
-     */
-
-    int zeroes = 0;
-
-    while (srcLength) {
-        uint8_t byte = *(src++);
-        assert(dest < limit && "Overflow in decompressRLE");
-        *(dest++) = byte;
-        srcLength--;
-
-        if (byte) {
-            zeroes = 0;
-        } else {
-            zeroes++;
-
-            if (zeroes == 2) {
-                zeroes = 0;
-                dest += src[0] + (src[1] << 8);
-                src += 2;
-                srcLength -= 2;
-            }
-        }
-    }
-}
 
 void SBTProcess::exec(const char *cmdLine)
 {
@@ -60,7 +29,7 @@ void SBTProcess::exec(const char *cmdLine)
     memset(data_segment, 0, end_of_mem - data_segment);
 
     // Decompress nonzero data
-    decompressRLE(data_segment, end_of_mem, getData(), getDataLen());
+    ZSTD_decompress(data_segment, end_of_mem - data_segment, getData(), getDataLen());
 
     /*
      * Program Segment Prefix. Locate it just before the beginning of

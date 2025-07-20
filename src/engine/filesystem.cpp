@@ -1,7 +1,10 @@
 #include <emscripten.h>
 #include <algorithm>
+#include <vector>
+#include <stdint.h>
 #include <string.h>
 #include <stdio.h>
+#include <zstd.h>
 #include "sbt86.h"
 #include "filesystem.h"
 
@@ -156,12 +159,37 @@ uint16_t DOSFilesystem::allocateFD()
     return fd;
 }
 
-const FileInfo* FileInfo::lookup(const char* name)
+const FileInfo* CompressedFileInfo::lazyDecompress()
 {
-    for (unsigned i = 0; index[i]; i++) {
-        if (!strcasecmp(name, index[i]->name)) {
-            return index[i];
+    // Decompress files on first access
+    if (!cache->name) {
+        size_t result = ZSTD_decompress(unpacked, unpacked_size, packed, packed_size);
+        assert(result == unpacked_size);
+
+        const CompressedFileInfo *index_item = index;
+        FileInfo *cache_item = cache;
+        while (index_item->name) {
+            cache_item->name = index_item->name;
+            cache_item->data = unpacked + index_item->offset;
+            cache_item->size = index_item->size;
+            cache_item++;
+            index_item++;
         }
     }
-    return 0;
+    return cache;
+}
+
+const FileInfo* FileInfo::lookup(const char* name)
+{
+    for (const FileInfo *cached = getAllFiles(); cached->name; cached++) {
+        if (!strcasecmp(name, cached->name)) {
+            return cached;
+        }
+    }
+    return nullptr;
+}
+
+const FileInfo* FileInfo::getAllFiles()
+{
+    return CompressedFileInfo::lazyDecompress();
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 #include "roData.h"
 
 struct FileInfo {
@@ -6,8 +7,25 @@ struct FileInfo {
     const uint8_t *data;
     uint32_t size;
 
-    static const FileInfo* index[];
     static const FileInfo* lookup(const char* name);
+    static const FileInfo* getAllFiles();
+};
+
+struct CompressedFileInfo {
+    const char *name;
+    uint32_t offset;
+    uint32_t size;
+
+    static const FileInfo* lazyDecompress();
+
+private:
+    static const uint8_t* const packed;
+    static uint8_t* const unpacked;
+    static const uint32_t packed_size;
+    static const uint32_t unpacked_size;
+
+    static const CompressedFileInfo * const index;
+    static FileInfo * const cache;
 };
 
 class DOSFilesystem

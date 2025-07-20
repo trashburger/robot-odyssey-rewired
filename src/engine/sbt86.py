@@ -58,6 +58,7 @@ import re
 import binascii
 import tempfile
 import io
+import zstd
 
 
 def log(msg):
@@ -1651,41 +1652,13 @@ class BinaryData:
         """Convert compressed binary data to a list of hexadecimal values
         suitable for including in a C array.
         """
+        compressed = zstd.compress(bytes(self.data), 22)
         return "".join(
             [
                 "0x%02x,%s" % (b, "\n"[: (i & 15) == 15])
-                for i, b in enumerate(self.compressRLE())
+                for i, b in enumerate(compressed)
             ]
         )
-
-    def compressRLE(self):
-        """Compress a byte list using a simple form of RLE which
-        is optimized for eliminating long runs of zeroes. This
-        is used to automatically avoid storing zeroed portions
-        of the data segment.
-
-        In the resulting binary, any run of two consecutive zeroes is
-        followed by a 16-bit value (little endian) which indicates how
-        many more zeroes have been omitted afterwards.
-
-        Trailing zeroes in the data are ignored.
-        """
-        output = []
-        zeroes = []
-        for byte in self.data:
-            if byte == 0:
-                zeroes.append(byte)
-            elif not zeroes:
-                output.append(byte)
-            elif len(zeroes) == 1:
-                output.append(0)
-                output.append(byte)
-                zeroes = []
-            else:
-                output.extend(list(b"\0\0" + struct.pack("<H", len(zeroes) - 2)))
-                output.append(byte)
-                zeroes = []
-        return output
 
 
 class DOSBinary(BinaryImage):
