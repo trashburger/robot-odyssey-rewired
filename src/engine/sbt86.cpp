@@ -7,7 +7,7 @@ static const bool full_stack_trace = false;
 static const uint32_t total_calls_threshold = 100000;
 
 
-static void decompressRLE(uint8_t *dest, uint8_t *limit, uint8_t *src, uint32_t srcLength)
+static void decompressRLE(uint8_t *dest, uint8_t *limit, const uint8_t *src, uint32_t srcLength)
 {
     /*
      * Decompress our very simple RLE format. Runs of 2 or more zeroes

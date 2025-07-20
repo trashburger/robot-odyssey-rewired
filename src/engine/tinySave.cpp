@@ -88,35 +88,35 @@ void TinySave::initDictionary()
     assert(dict.empty());
 
     // Built-in loadable chips
-    extern FileInfo file_4bitcntr_csv;  addFileToDict(dict, file_4bitcntr_csv);
-    extern FileInfo file_stereo_csv;    addFileToDict(dict, file_stereo_csv);
-    extern FileInfo file_rsflop_csv;    addFileToDict(dict, file_rsflop_csv);
-    extern FileInfo file_oneshot_csv;   addFileToDict(dict, file_oneshot_csv);
-    extern FileInfo file_countton_csv;  addFileToDict(dict, file_countton_csv);
-    extern FileInfo file_adder_csv;     addFileToDict(dict, file_adder_csv);
-    extern FileInfo file_clock_csv;     addFileToDict(dict, file_clock_csv);
-    extern FileInfo file_delay_csv;     addFileToDict(dict, file_delay_csv);
-    extern FileInfo file_bus_csv;       addFileToDict(dict, file_bus_csv);
-    extern FileInfo file_wallhug_csv;   addFileToDict(dict, file_wallhug_csv);
+    extern const FileInfo file_4bitcntr_csv;  addFileToDict(dict, file_4bitcntr_csv);
+    extern const FileInfo file_stereo_csv;    addFileToDict(dict, file_stereo_csv);
+    extern const FileInfo file_rsflop_csv;    addFileToDict(dict, file_rsflop_csv);
+    extern const FileInfo file_oneshot_csv;   addFileToDict(dict, file_oneshot_csv);
+    extern const FileInfo file_countton_csv;  addFileToDict(dict, file_countton_csv);
+    extern const FileInfo file_adder_csv;     addFileToDict(dict, file_adder_csv);
+    extern const FileInfo file_clock_csv;     addFileToDict(dict, file_clock_csv);
+    extern const FileInfo file_delay_csv;     addFileToDict(dict, file_delay_csv);
+    extern const FileInfo file_bus_csv;       addFileToDict(dict, file_bus_csv);
+    extern const FileInfo file_wallhug_csv;   addFileToDict(dict, file_wallhug_csv);
 
     // World overlays for the game
-    extern FileInfo file_street_wld;    addFileToDict(dict, file_street_wld);
-    extern FileInfo file_subway_wld;    addFileToDict(dict, file_subway_wld);
-    extern FileInfo file_town_wld;      addFileToDict(dict, file_town_wld);
-    extern FileInfo file_comp_wld;      addFileToDict(dict, file_comp_wld);
+    extern const FileInfo file_street_wld;    addFileToDict(dict, file_street_wld);
+    extern const FileInfo file_subway_wld;    addFileToDict(dict, file_subway_wld);
+    extern const FileInfo file_town_wld;      addFileToDict(dict, file_town_wld);
+    extern const FileInfo file_comp_wld;      addFileToDict(dict, file_comp_wld);
 
     // Chips used in initial game world
-    extern FileInfo file_countton_chp;  addFileToDict(dict, file_countton_chp);
-    extern FileInfo file_wallhug_chp;   addFileToDict(dict, file_wallhug_chp);
-    extern FileInfo file_countton_pin;  addFileToDict(dict, file_countton_pin);
-    extern FileInfo file_wallhug_pin;   addFileToDict(dict, file_wallhug_pin);
+    extern const FileInfo file_countton_chp;  addFileToDict(dict, file_countton_chp);
+    extern const FileInfo file_wallhug_chp;   addFileToDict(dict, file_wallhug_chp);
+    extern const FileInfo file_countton_pin;  addFileToDict(dict, file_countton_pin);
+    extern const FileInfo file_wallhug_pin;   addFileToDict(dict, file_wallhug_pin);
 
     // Initial world for the lab
-    extern FileInfo file_lab_wor;       addFileToDict(dict, file_lab_wor);
+    extern const FileInfo file_lab_wor;       addFileToDict(dict, file_lab_wor);
 
     // Initial world for the game
-    extern FileInfo file_sewer_wor;     addFileToDict(dict, file_sewer_wor);
-    extern FileInfo file_sewer_cir;     addFileToDict(dict, file_sewer_cir);
+    extern const FileInfo file_sewer_wor;     addFileToDict(dict, file_sewer_wor);
+    extern const FileInfo file_sewer_cir;     addFileToDict(dict, file_sewer_cir);
 
     assert(dict.size() == 57791);
 }

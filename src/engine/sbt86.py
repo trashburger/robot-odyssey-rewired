@@ -1606,7 +1606,7 @@ class Subroutine:
                 )
             )
         return """
-void
+static void
 %(name)s(void)
 {
   ProcessLocals& g = gProcessLocals;
@@ -1727,7 +1727,7 @@ struct ProcessLocals {
 };
 static ProcessLocals gProcessLocals = {};
 
-static uint8_t dataImage[] = {
+static const uint8_t dataImage[] = {
 %(dataImage)s};
 
 %(subDecls)s
@@ -1737,14 +1737,14 @@ static uint8_t dataImage[] = {
 
 %(subCode)s
 
-uint8_t *%(className)s::getData()
+const uint8_t *%(className)s::getData()
 {
     return dataImage;
 }
 
 uint32_t %(className)s::getDataLen()
 {
-    return sizeof(dataImage);
+    return sizeof dataImage;
 }
 
 uint16_t %(className)s::getRelocSegment()

@@ -35,12 +35,13 @@ def write_header(cpp):
 
 
 def write_file_data(cpp, name, data):
+    # Note, file contents can be static but FileInfo must be visible from tinySave.
     cpp.write(
         "\nstatic const uint8_t %s_bytes[] = {\n%s\n};\n"
         % (varname_for_file(name), to_hex(data))
     )
     cpp.write(
-        '\nstruct FileInfo %s = {\n\t"%s", %s_bytes, %d\n};\n'
+        '\nconst extern struct FileInfo %s = {\n\t"%s", %s_bytes, %d\n};\n'
         % (varname_for_file(name), name, varname_for_file(name), len(data))
     )
 
