@@ -19,12 +19,22 @@ function joystickAxes(x, y)
         thumb.style.top = scale * y + 'px';
     }
 
+    // Apply a nonlinear speed curve here, to make slow-speed control easier.
+    // The Engine and GameMenu both try to offer linear speed mapping with no deadzone.
+
+    const JOYSTICK_CURVE_EXP = 1.8;
+
+    const angle = Math.atan2(y, x);
+    const speed = Math.pow(x*x + y*y, 0.5 * JOYSTICK_CURVE_EXP);
+    const cx = Math.cos(angle) * speed;
+    const cy = Math.sin(angle) * speed;
+
     if (engine.calledRun) {
-        engine.setJoystickAxes(x, y);
+        engine.setJoystickAxes(cx, cy);
         engine.autoSave();
     }
 
-    GameMenu.setJoystickAxes(x, y);
+    GameMenu.setJoystickAxes(cx, cy);
 }
 
 function joystickButton(b)
