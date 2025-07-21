@@ -56,21 +56,11 @@ void OutputQueue::clear()
 {
     items.clear();
     frames.clear();
-    skipDelay();
 }
 
 void OutputQueue::setFrameSkip(uint32_t frameskip)
 {
     frameskip_value = frameskip;
-}
-
-
-void OutputQueue::skipDelay()
-{
-    delay_remaining = 0;
-    while (!items.empty() && items.front().otype == OUT_DELAY) {
-        items.pop_front();
-    }
 }
 
 void OutputQueue::pushFrameCGA(SBTStack *stack, uint8_t *framebuffer)
@@ -207,22 +197,10 @@ uint32_t OutputQueue::run()
     // Generate output until the queue is empty (returning zero) or
     // a delay (returning a nonzero number of milliseconds)
 
-    while (true) {
-        // Split up large delays
-        static const uint32_t max_delay_per_step = 100;
-        if (delay_remaining > 0) {
-            uint32_t delay = std::min(delay_remaining, max_delay_per_step);
-            delay_remaining -= delay;
-            return delay;
-        }
-
-        // No more delay.. now we need more output, make sure the queue has items
-        if (items.empty()) {
-            return 0;
-        }
-
+    while (!items.empty()) {
         OutputItem item = items.front();
         items.pop_front();
+        uint32_t delay = 0;
 
         switch (item.otype) {
 
@@ -232,12 +210,16 @@ uint32_t OutputQueue::run()
                 break;
 
             case OUT_DELAY:
-                delay_remaining += item.u.delay;
+                delay = item.u.delay;
                 break;
 
             case OUT_SPEAKER_TIMESTAMP:
-                delay_remaining += renderSoundEffect(item.u.timestamp);
+                delay = renderSoundEffect(item.u.timestamp);
                 break;
         }
+        if (delay > 0) {
+            return delay;
+        }
     }
+    return 0;
 }

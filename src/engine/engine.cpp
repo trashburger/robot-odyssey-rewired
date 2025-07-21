@@ -154,7 +154,6 @@ static void setSpeed(double speed)
 
 static void pressKey(uint8_t ascii, uint8_t scancode)
 {
-    outputQueue.skipDelay();
     hw.input.pressKey(ascii, scancode);
 }
 
@@ -165,9 +164,6 @@ static void setJoystickAxes(float x, float y)
 
 static void setJoystickButton(bool button)
 {
-    if (button) {
-        outputQueue.skipDelay();
-    }
     hw.input.setJoystickButton(button);
 }
 
@@ -178,9 +174,6 @@ static void setMouseTracking(int x, int y)
 
 static void setMouseButton(bool button)
 {
-    if (button) {
-        outputQueue.skipDelay();
-    }
     hw.input.setMouseButton(button);
 }
 
