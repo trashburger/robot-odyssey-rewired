@@ -2,6 +2,10 @@ add a port-specific controls tutorial?
 
 bug: when file import fails (for ex, non-secure context) there is no modal, the "Processing selected files..." stays up until dismissed manually.
 
+I'm still not happy with cutscene timing.
+This is tricky because the original timing was not great, plus it was a combination of explicitly coded delays and time taken by sound/graphics/loading routines.
+Presently this code tries to rely on framebuffer traces for transition effects, patches for complete frames, patches for explicit delays, and CPU clock for smaller delays and sound-related delays. This is mostly working but I think we are still missing some traces, especially in the end cutscene.
+
 fix keyboard mapper so it's possible to type in lowercase on chip documentation page
 
 need unit testing!
