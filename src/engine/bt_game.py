@@ -52,6 +52,7 @@ for call_site in [
     b.patchAndHook(
         call_site,
         "ret",
+        "g.hw->output.pushDelayFromElapsedCpu(g.clock);"
         "g.hw->output.pushDelay(20);"
         "g.proc->continueFrom(r, &sub_%X);" % continue_at.linear,
     )
@@ -73,7 +74,10 @@ for call_site in [
     subroutine = b.jumpTarget(call_site)
     assert subroutine.linear == video_blit_frame.linear
     b.patchAndHook(
-        call_site, "ret", "g.proc->continueFrom(r, &sub_%X);" % continue_at.linear
+        call_site,
+        "ret",
+        "g.hw->output.pushDelayFromElapsedCpu(g.clock);"
+        "g.proc->continueFrom(r, &sub_%X);" % continue_at.linear,
     )
     b.patch(continue_at, "call 0x%04x" % subroutine.offset, length=2)
     b.markSubroutine(continue_at)

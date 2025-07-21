@@ -10,6 +10,21 @@ OutputInterface::OutputInterface(ColorTable &colorTable)
     : draw(colorTable)
 {}
 
+void OutputInterface::resetElapsedCpu(uint32_t cpu_clock)
+{
+    reference_cpu_clock = cpu_clock;
+}
+
+void OutputInterface::pushDelayFromElapsedCpu(uint32_t cpu_clock)
+{
+    const uint32_t elapsed = cpu_clock - reference_cpu_clock;
+    constexpr uint32_t clocks_per_msec = (CPU_CLOCK_HZ + 500) / 1000;
+    const uint32_t delay_msec = (elapsed + clocks_per_msec / 2) / clocks_per_msec;
+    const uint32_t quantized_clocks = delay_msec * clocks_per_msec;
+    reference_cpu_clock += quantized_clocks;
+    pushDelay(delay_msec);
+}
+
 OutputMinimal::OutputMinimal(ColorTable &colorTable)
     : OutputInterface(colorTable)
 {
@@ -96,7 +111,7 @@ void OutputQueue::drawFrameRGB()
 
 void OutputQueue::pushDelay(uint32_t millis)
 {
-    if (!items.full()) {
+    if (millis && !items.full()) {
         OutputItem item;
         item.otype = OUT_DELAY;
         item.u.delay = millis;
@@ -149,7 +164,7 @@ void OutputQueue::dequeueCGAFrame()
     frames.pop_front();
 }
 
-uint32_t OutputQueue::renderSoundEffect(uint32_t first_timestamp)
+void OutputQueue::renderSoundEffect(uint32_t first_timestamp)
 {
     // Starting at the indicated timestamp and from the current output
     // queue position, slurp up all subsequent audio events and generate
@@ -187,9 +202,6 @@ uint32_t OutputQueue::renderSoundEffect(uint32_t first_timestamp)
     EM_ASM_({
         Module.onRenderSound(HEAP8.subarray($0, $0 + $1), $2);
     }, pcm_samples, sample_count, AUDIO_HZ);
-
-    // Return a corresponding delay in milliseconds, rounding up.
-    return (sample_count * 1000 + AUDIO_HZ - 1) / AUDIO_HZ;
 }
 
 uint32_t OutputQueue::run()
@@ -200,7 +212,6 @@ uint32_t OutputQueue::run()
     while (!items.empty()) {
         OutputItem item = items.front();
         items.pop_front();
-        uint32_t delay = 0;
 
         switch (item.otype) {
 
@@ -210,15 +221,12 @@ uint32_t OutputQueue::run()
                 break;
 
             case OUT_DELAY:
-                delay = item.u.delay;
-                break;
+                assert(item.u.delay > 0);
+                return item.u.delay;
 
             case OUT_SPEAKER_TIMESTAMP:
-                delay = renderSoundEffect(item.u.timestamp);
+                renderSoundEffect(item.u.timestamp);
                 break;
-        }
-        if (delay > 0) {
-            return delay;
         }
     }
     return 0;

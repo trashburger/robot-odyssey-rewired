@@ -32,6 +32,7 @@ def patch(b):
         b.patchAndHook(
             loopJumpAddr,
             "ret",
+            "g.hw->output.pushDelayFromElapsedCpu(g.clock);"
             "g.proc->continueFrom(r, &sub_%X, true);" % loopEntry.linear,
         )
         b.markSubroutine(loopEntry)
@@ -176,7 +177,7 @@ def patch(b):
     b.publishAddress("SBTADDR_WORLD_DATA", b.peek16(worldPtr))
 
 
-def patchFramebufferTrace(b, interval=512, delay=1e3 / 30):
+def patchFramebufferTrace(b, interval=512):
     # Trace the framebuffer to emit frames periodically during animated transitions
     b.decl("#include <stdio.h>")
     b.decl("static bool enable_framebuffer_trace;")
@@ -191,12 +192,12 @@ def patchFramebufferTrace(b, interval=512, delay=1e3 / 30):
             hit++;
             if (hit == %d) {
                 hit = 0;
+                g.hw->output.pushDelayFromElapsedCpu(g.clock);
                 g.hw->output.pushFrameCGA(g.stack, g.proc->memSeg(0xB800));
-                g.hw->output.pushDelay(%d);
             }
         }
     """
-        % (interval, delay),
+        % interval,
     )
 
 
@@ -361,6 +362,7 @@ def patchVideoBlit(b, code):
         """
         if (!noBlit) {
             %s
+            g.hw->output.pushDelayFromElapsedCpu(g.clock);
             g.hw->output.pushDelay(%d);
         }
     """
@@ -393,6 +395,7 @@ def patchVideoBackbuffer(b):
         b,
         """
         uint8_t *src = g.proc->memSeg(g.proc->peek16(r.ds, 0x3AD5));
+        g.hw->output.pushDelayFromElapsedCpu(g.clock);
         g.hw->output.pushFrameCGA(g.stack, src);
     """,
     )
@@ -539,4 +542,64 @@ def patchVideoHighLevel(b, trace_debug=False):
     )
 
     # Blit from backbuffer
-    patchVideoBlit(b, "g.hw->output.drawFrameRGB();")
+    patchVideoBlit(
+        b,
+        """
+            g.hw->output.pushDelayFromElapsedCpu(g.clock);
+            g.hw->output.drawFrameRGB();
+    """,
+    )
+
+
+def patchShowKeyboardDelays(b, call_site_and_delay_list):
+    # Split up delays.
+    # Keyboard input will skip the delay, so flush any queued keystrokes after we come back.
+    for call_site, delay in call_site_and_delay_list:
+        call_site = sbt86.Addr16(str=call_site)
+        continue_at = call_site.add(3)
+
+        b.patchAndHook(
+            call_site,
+            "ret",
+            "g.hw->output.pushDelayFromElapsedCpu(g.clock);"
+            "g.hw->output.pushFrameCGA(g.stack, g.proc->memSeg(0xB800));"
+            "g.hw->output.pushDelay(%d);"
+            "g.proc->continueFrom(r, &sub_%X);" % (delay, continue_at.linear),
+        )
+        b.markSubroutine(continue_at)
+        b.hook(continue_at, "g.hw->input.clear();")
+
+
+def patchShowSfxInterruptible(
+    b, show_sfx_interruptible, call_site_list, extra_delay_msec
+):
+    # The cutscenes use a function I'm calling show_sfx_interruptible, which
+    # polls for keyboard input while playing a buffer of sound effects.
+    # Wrap each call site with some code that inserts a delay and breaks control flow.
+    # (Each invocation would include a joystick and DOS input poll, which takes
+    # some time)
+    #
+    # The corresponding output delays vary.
+    # Try to measure it using the CPU clock.
+
+    show_sfx_interruptible = sbt86.Addr16(str=show_sfx_interruptible)
+    for call_site in call_site_list:
+        call_site = sbt86.Addr16(str=call_site)
+
+        target = b.jumpTarget(call_site)
+        assert target.linear == show_sfx_interruptible.linear
+        continue_at = call_site.add(3)
+        b.markSubroutine(continue_at)
+        b.markSubroutine(target)
+
+        b.patchAndHook(
+            call_site,
+            "ret",
+            "g.hw->output.pushDelayFromElapsedCpu(g.clock);"
+            "g.hw->output.pushFrameCGA(g.stack, g.proc->memSeg(0xB800));"
+            "sub_%X();"
+            "g.hw->output.pushDelayFromElapsedCpu(g.clock);"
+            "g.hw->output.pushDelay(%d);"
+            "g.proc->continueFrom(r, &sub_%X);"
+            % (target.linear, extra_delay_msec, continue_at.linear),
+        )

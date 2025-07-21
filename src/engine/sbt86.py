@@ -1743,6 +1743,7 @@ void %(className)s::loadEnvironment(SBTStack *stack, SBTRegs reg)
     g.proc = this;
     g.hw = hardware;
     g.s.load(g.proc, g.r);
+    g.hw->output.resetElapsedCpu(g.clock);
 }
 
 SBTProcess::continue_func_t %(className)s::getFunction(SBTAddressId id)

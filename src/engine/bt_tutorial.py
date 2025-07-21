@@ -30,6 +30,7 @@ for call_site in [
     b.patchAndHook(
         call_site,
         "ret",
+        "g.hw->output.pushDelayFromElapsedCpu(g.clock);"
         "g.hw->output.pushDelay(20);"
         "g.proc->continueFrom(r, &sub_%X);" % continue_at.linear,
     )
@@ -43,7 +44,10 @@ for call_site in ["0A8F:54CE"]:
     continue_at = call_site.add(1)
     subroutine = b.jumpTarget(call_site)
     b.patchAndHook(
-        call_site, "ret", "g.proc->continueFrom(r, &sub_%X);" % continue_at.linear
+        call_site,
+        "ret",
+        "g.hw->output.pushDelayFromElapsedCpu(g.clock);"
+        "g.proc->continueFrom(r, &sub_%X);" % continue_at.linear,
     )
     b.patch(continue_at, "call 0x%04x" % subroutine.offset, length=2)
     b.markSubroutine(continue_at)

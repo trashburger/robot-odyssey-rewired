@@ -53,61 +53,38 @@ b.markSubroutine(final_loop)
 b.patchAndHook(
     final_loop,
     "ret",
+    "g.hw->output.pushDelayFromElapsedCpu(g.clock);"
     "g.hw->output.pushFrameCGA(g.stack, g.proc->memSeg(0xB800));"
     "g.hw->output.pushDelay(1000);"
     "g.proc->continueFrom(r, &sub_%X);" % final_loop.linear,
 )
 
-# Split up delays.
-# Keyboard input will skip the delay, so flush any queued keystrokes after we come back.
-for call_site, delay in [
-    ("019E:018B", 2000),
-    ("019E:0204", 3000),
-    ("019E:0218", 3000),
-]:
-    call_site = sbt86.Addr16(str=call_site)
-    continue_at = call_site.add(3)
+# Split up keyboard input delays.
+bt_common.patchShowKeyboardDelays(
+    b,
+    [
+        ("019E:018B", 2000),
+        ("019E:0204", 2000),
+        ("019E:0218", 2000),
+    ],
+)
 
-    b.patchAndHook(
-        call_site,
-        "ret",
-        "g.hw->output.pushFrameCGA(g.stack, g.proc->memSeg(0xB800));"
-        "g.hw->output.pushDelay(%d);"
-        "g.proc->continueFrom(r, &sub_%X);" % (delay, continue_at.linear),
-    )
-    b.markSubroutine(continue_at)
-    b.hook(continue_at, "g.hw->input.clear();")
-
-# The cutscenes use a function I'm calling show_sfx_interruptible, which
-# polls for keyboard input while playing a buffer of sound effects.
-# Wrap each call site with some code that inserts a delay and breaks control flow.
-# (Each invocation would include a joystick and DOS input poll, which takes
-# some time)
-show_sfx_interruptible = sbt86.Addr16(str="019E:0665")
-for call_site in [
-    "019E:0196",
-    "019E:01A4",
-    "019E:01B2",
-    "019E:01C3",
-    "019E:01D1",
-    "019E:01DF",
-    "019E:01ED",
-    "019E:01FE",
-    "019E:0212",
-]:
-    call_site = sbt86.Addr16(str=call_site)
-    target = b.jumpTarget(call_site)
-    assert target.linear == show_sfx_interruptible.linear
-    continue_at = call_site.add(3)
-    b.markSubroutine(continue_at)
-    b.markSubroutine(target)
-    b.patchAndHook(
-        call_site,
-        "ret",
-        "g.hw->output.pushFrameCGA(g.stack, g.proc->memSeg(0xB800));"
-        "g.hw->output.pushDelay(125);"
-        "sub_%X();"
-        "g.proc->continueFrom(r, &sub_%X);" % (target.linear, continue_at.linear),
-    )
+# Patch control flow around show_sfx_interruptible calls
+bt_common.patchShowSfxInterruptible(
+    b,
+    "019E:0665",
+    [
+        "019E:0196",
+        "019E:01A4",
+        "019E:01B2",
+        "019E:01C3",
+        "019E:01D1",
+        "019E:01DF",
+        "019E:01ED",
+        "019E:01FE",
+        "019E:0212",
+    ],
+    extra_delay_msec=100,
+)
 
 b.writeCodeToFile(os.path.join(basedir, "bt_show2.cpp"), "Show2EXE")

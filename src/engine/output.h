@@ -25,6 +25,10 @@ struct OutputItem
 class OutputInterface
 {
  public:
+    static const int CPU_CLOCK_HZ = 4770000;
+    static const unsigned CPU_CLOCKS_PER_SAMPLE = 200;
+    static const unsigned AUDIO_HZ = CPU_CLOCK_HZ / CPU_CLOCKS_PER_SAMPLE;
+
     OutputInterface(ColorTable &colorTable);
 
     virtual void pushFrameCGA(SBTStack *stack, uint8_t *framebuffer) = 0;
@@ -32,7 +36,13 @@ class OutputInterface
     virtual void pushDelay(uint32_t millis) = 0;
     virtual void pushSpeakerTimestamp(uint32_t timestamp) = 0;
 
+    void resetElapsedCpu(uint32_t cpu_clock);
+    void pushDelayFromElapsedCpu(uint32_t cpu_clock);
+
     RGBDraw draw;
+
+ private:
+    uint32_t reference_cpu_clock;
 };
 
 class OutputMinimal : public OutputInterface
@@ -66,9 +76,6 @@ class OutputQueue : public OutputInterface
     virtual void pushDelay(uint32_t millis);
     virtual void pushSpeakerTimestamp(uint32_t timestamp);
 
-    static const int CPU_CLOCK_HZ = 4770000;
-    static const unsigned CPU_CLOCKS_PER_SAMPLE = 200;
-    static const unsigned AUDIO_HZ = CPU_CLOCK_HZ / CPU_CLOCKS_PER_SAMPLE;
     static const unsigned AUDIO_BUFFER_SECONDS = 10;
     static const unsigned AUDIO_BUFFER_SAMPLES = AUDIO_HZ * AUDIO_BUFFER_SECONDS;
 
@@ -90,5 +97,5 @@ class OutputQueue : public OutputInterface
     uint32_t frame_counter;
 
     void dequeueCGAFrame();
-    uint32_t renderSoundEffect(uint32_t first_timestamp);
+    void renderSoundEffect(uint32_t first_timestamp);
 };

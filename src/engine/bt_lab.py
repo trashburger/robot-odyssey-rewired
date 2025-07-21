@@ -40,6 +40,7 @@ for call_site in [
     b.patchAndHook(
         call_site,
         "ret",
+        "g.hw->output.pushDelayFromElapsedCpu(g.clock);"
         "g.hw->output.pushDelay(20);"
         "g.proc->continueFrom(r, &sub_%X);" % continue_at.linear,
     )
