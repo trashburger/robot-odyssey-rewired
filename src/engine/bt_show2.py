@@ -61,9 +61,9 @@ b.patchAndHook(
 # Split up delays.
 # Keyboard input will skip the delay, so flush any queued keystrokes after we come back.
 for call_site, delay in [
-    ("019E:018B", 1000),
-    ("019E:0204", 1500),
-    ("019E:0218", 1500),
+    ("019E:018B", 2000),
+    ("019E:0204", 3000),
+    ("019E:0218", 3000),
 ]:
     call_site = sbt86.Addr16(str=call_site)
     continue_at = call_site.add(3)
