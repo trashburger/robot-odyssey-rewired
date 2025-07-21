@@ -105,7 +105,7 @@ for call_site in [
         call_site,
         "ret",
         "g.hw->output.pushFrameCGA(g.stack, g.proc->memSeg(0xB800));"
-        "g.hw->output.pushDelay(50);"
+        "g.hw->output.pushDelay(125);"
         "sub_%X();"
         "g.proc->continueFrom(r, &sub_%X);" % (target.linear, continue_at.linear),
     )
