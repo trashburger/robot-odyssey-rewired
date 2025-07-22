@@ -351,7 +351,7 @@ static SBT_INLINE void write16(uint8_t *ptr, uint16_t x) {
 }
 
 #define SBT_DECL_PROCESS(name) \
-    class name : public SBTProcess \
+    class name final : public SBTProcess \
     { \
     public: \
         name(Hardware *hardware); \
