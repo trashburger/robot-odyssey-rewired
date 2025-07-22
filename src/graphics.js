@@ -9,10 +9,9 @@ export const HEIGHT = 400;
 export const VISIBLE_HEIGHT = 384;
 export const BORDER = 2;
 
-export function init()
-{
-    canvas.width = WIDTH + BORDER*2;
-    canvas.height = VISIBLE_HEIGHT + BORDER*2;
+export function init() {
+    canvas.width = WIDTH + BORDER * 2;
+    canvas.height = VISIBLE_HEIGHT + BORDER * 2;
 
     const context = canvas.getContext('2d');
     const image = context.createImageData(WIDTH, HEIGHT);
@@ -54,8 +53,7 @@ export function init()
     canvas.focus();
 }
 
-async function initAsync()
-{
+async function initAsync() {
     // Let the engine load before we go farther
     const engine = await EngineLoader.complete;
 
@@ -66,23 +64,20 @@ async function initAsync()
     const SCREEN_TILE_SIZE = engine.SCREEN_TILE_SIZE;
     const PATTERN_SIZE = SCREEN_TILE_SIZE * SCREEN_TILE_SIZE;
 
-    engine.setEmulatedCGAPalette = function(colors)
-    {
+    engine.setEmulatedCGAPalette = function (colors) {
         cga.set(colors);
     };
 
-    engine.setSolidColor = function(slot, rgb)
-    {
-        patterns.fill(rgb, slot*PATTERN_SIZE, (slot+1)*PATTERN_SIZE);
+    engine.setSolidColor = function (slot, rgb) {
+        patterns.fill(rgb, slot * PATTERN_SIZE, (slot + 1) * PATTERN_SIZE);
     };
 
-    engine.setColorTilesFromImage = function(img_src, first_slot)
-    {
+    engine.setColorTilesFromImage = function (img_src, first_slot) {
         return new Promise(function (ok) {
             first_slot = first_slot || 0;
             const img = document.createElement('img');
 
-            img.onload = function() {
+            img.onload = function () {
                 const canvas = document.createElement('canvas');
                 canvas.width = img.width;
                 canvas.height = img.height;
@@ -102,12 +97,14 @@ async function initAsync()
         });
     };
 
-    engine.saveColorTilesToImage = function(first_slot, num_slots)
-    {
+    engine.saveColorTilesToImage = function (first_slot, num_slots) {
         const total_patterns = (patterns.length / PATTERN_SIZE) | 0;
         first_slot = first_slot || 0;
-        num_slots = num_slots || (total_patterns - first_slot);
-        const src_words = patterns.subarray(first_slot * PATTERN_SIZE, (first_slot + num_slots) * PATTERN_SIZE);
+        num_slots = num_slots || total_patterns - first_slot;
+        const src_words = patterns.subarray(
+            first_slot * PATTERN_SIZE,
+            (first_slot + num_slots) * PATTERN_SIZE,
+        );
 
         const canvas = document.createElement('canvas');
         canvas.width = SCREEN_TILE_SIZE;
@@ -120,57 +117,60 @@ async function initAsync()
         ctx.putImageData(idata, 0, 0);
 
         return new Promise(function (resolve) {
-            canvas.toBlob( function (blob) {
+            canvas.toBlob(function (blob) {
                 resolve(blob);
             });
         });
     };
 
-    engine.setCheckerboardColor = function(slot, rgb1, rgb2, size)
-    {
+    engine.setCheckerboardColor = function (slot, rgb1, rgb2, size) {
         size = size || 2;
-        const pattern = patterns.subarray(slot * PATTERN_SIZE, (slot+1) * PATTERN_SIZE);
+        const pattern = patterns.subarray(
+            slot * PATTERN_SIZE,
+            (slot + 1) * PATTERN_SIZE,
+        );
         const tile_size = SCREEN_TILE_SIZE;
         let i = 0;
         for (let y = 0; y < tile_size; y++) {
             for (let x = 0; x < tile_size; x++) {
-                pattern[i++] = ((x^y) & size) ? rgb2 : rgb1;
+                pattern[i++] = (x ^ y) & size ? rgb2 : rgb1;
             }
         }
     };
 
-    engine.setStripedColor = function(slot, rgb1, rgb2, size)
-    {
+    engine.setStripedColor = function (slot, rgb1, rgb2, size) {
         size = size || 2;
-        const pattern = patterns.subarray(slot * PATTERN_SIZE, (slot+1) * PATTERN_SIZE);
+        const pattern = patterns.subarray(
+            slot * PATTERN_SIZE,
+            (slot + 1) * PATTERN_SIZE,
+        );
         const tile_size = SCREEN_TILE_SIZE;
         let i = 0;
         for (let y = 0; y < tile_size; y++) {
             for (let x = 0; x < tile_size; x++) {
-                pattern[i++] = (x & size) ? rgb2 : rgb1;
+                pattern[i++] = x & size ? rgb2 : rgb1;
             }
         }
     };
 
-    engine.setHGRColors = function(color_table)
-    {
+    engine.setHGRColors = function (color_table) {
         // Original colors available in HGR mode
         const hgr = color_table || [
-            0xff000000,  // Black (0)
-            0xfffe3bb9,  // Purple (1)
-            0xff00ca40,  // Green (2)
-            0xffd8a909,  // Blue (3)
-            0xff317aed,  // Orange (4)
-            0xffffffff,  // White (5)
+            0xff000000, // Black (0)
+            0xfffe3bb9, // Purple (1)
+            0xff00ca40, // Green (2)
+            0xffd8a909, // Blue (3)
+            0xff317aed, // Orange (4)
+            0xffffffff, // White (5)
         ];
 
         // Chosen colors for the CGA emulation in cutscenes;
         // compromise between the 4-color look and the HGR palette.
         engine.setEmulatedCGAPalette([
-            hgr[0],      // Black (0)
-            hgr[3],      // Cyan -> Blue (3)
-            hgr[4],      // Magenta -> Orange (4)
-            hgr[5],      // White (3)
+            hgr[0], // Black (0)
+            hgr[3], // Cyan -> Blue (3)
+            hgr[4], // Magenta -> Orange (4)
+            hgr[5], // White (3)
         ]);
 
         // Sprite colors for the main game
@@ -178,7 +178,7 @@ async function initAsync()
         engine.setSolidColor(0x01, hgr[2]);
         engine.setSolidColor(0x02, hgr[1]);
         engine.setSolidColor(0x03, hgr[5]);
-        engine.setSolidColor(0x04, 0);      // Transparent black
+        engine.setSolidColor(0x04, 0); // Transparent black
         engine.setSolidColor(0x05, hgr[4]);
         engine.setSolidColor(0x06, hgr[3]);
         engine.setSolidColor(0x07, hgr[5]);
@@ -214,7 +214,6 @@ async function initAsync()
         // Any pattern slots we have a specific use for can be overwritten later.
 
         for (let slot = 0x16; slot < 0x100; slot++) {
-
             if (slot === 0x87) {
                 // The game actually uses this slot!
 
@@ -225,32 +224,37 @@ async function initAsync()
                 // interference color. If the pixels are numbered left to right, an orange band
                 // appears between the 2nd and 3rd, a pink band between the 5th and 6th.
                 for (let x = 0; x < SCREEN_TILE_SIZE; x++) {
-                    const x16 = (x / (SCREEN_TILE_SIZE / 16))|0;
+                    const x16 = (x / (SCREEN_TILE_SIZE / 16)) | 0;
                     let rgb = 0xff000000;
                     if (x16 >= 3 && x16 <= 4) rgb = 0xff4ba7bf;
                     if (x16 >= 9 && x16 <= 10) rgb = 0xffd481d5;
                     for (let y = 0; y < SCREEN_TILE_SIZE; y++) {
-                        patterns[slot*PATTERN_SIZE + y*SCREEN_TILE_SIZE + x] = rgb;
+                        patterns[
+                            slot * PATTERN_SIZE + y * SCREEN_TILE_SIZE + x
+                        ] = rgb;
                     }
                 }
-
             } else {
                 // Junk binary stripes
 
                 let stripe = (slot % 35) + 1;
-                engine.setStripedColor(slot, hgr[(stripe % 6)|0], hgr[(stripe / 6)|0], slot >> 1);
+                engine.setStripedColor(
+                    slot,
+                    hgr[stripe % 6 | 0],
+                    hgr[(stripe / 6) | 0],
+                    slot >> 1,
+                );
             }
         }
     };
 
-    engine.setCGAColors = function(color_table)
-    {
+    engine.setCGAColors = function (color_table) {
         // Original CGA colors
         const cga = color_table || [
-            0xff000000,  // Black (0)
-            0xffffff55,  // Cyan (1)
-            0xffff55ff,  // Magenta (2)
-            0xffffffff,  // White (3)
+            0xff000000, // Black (0)
+            0xffffff55, // Cyan (1)
+            0xffff55ff, // Magenta (2)
+            0xffffffff, // White (3)
         ];
 
         // Emulated colors for CGA menus/cutscenes
@@ -261,7 +265,7 @@ async function initAsync()
         engine.setStripedColor(0x01, cga[1], cga[0]);
         engine.setStripedColor(0x02, cga[1], cga[2]);
         engine.setStripedColor(0x03, cga[3], cga[3]);
-        engine.setSolidColor(0x04, 0);      // Transparent black
+        engine.setSolidColor(0x04, 0); // Transparent black
         engine.setStripedColor(0x05, cga[2], cga[0]);
         engine.setStripedColor(0x06, cga[1], cga[1]);
         engine.setStripedColor(0x07, cga[3], cga[3]);
@@ -295,7 +299,6 @@ async function initAsync()
         // Any pattern slots we have a specific use for can be overwritten later.
 
         for (let slot = 0x16; slot < 0x100; slot++) {
-
             if (slot === 0x87) {
                 // The game actually uses this slot!
 
@@ -309,18 +312,21 @@ async function initAsync()
                 // matches the one used on Apple II but produces different and arbitrary results.
 
                 engine.setStripedColor(slot, cga[1], cga[0], 4);
-
             } else {
                 // Junk binary stripes
 
                 let stripe = (slot % 15) + 1;
-                engine.setStripedColor(slot, cga[stripe & 3], cga[stripe >> 2], slot >> 1);
+                engine.setStripedColor(
+                    slot,
+                    cga[stripe & 3],
+                    cga[stripe >> 2],
+                    slot >> 1,
+                );
             }
         }
     };
 
-    engine.setNamedPalette = function(name)
-    {
+    engine.setNamedPalette = function (name) {
         if (name === 'hgr') {
             engine.setHGRColors();
         } else if (name === 'cga') {

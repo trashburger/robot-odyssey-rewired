@@ -7,8 +7,7 @@ let end_tracking_timer = null;
 const canvas = document.getElementById('framebuffer');
 const game_area = document.getElementById('game_area');
 
-export function mouseTrackingEnd(afterDelay)
-{
+export function mouseTrackingEnd(afterDelay) {
     // After an optional delay, prevent automatic mouse tracking
     // without an explicit unlock click.
 
@@ -25,8 +24,7 @@ export function mouseTrackingEnd(afterDelay)
     }, afterDelay || 0);
 }
 
-function mouseTrackingContinue()
-{
+function mouseTrackingContinue() {
     // Don't start tracking if we aren't already, but prevent
     // tracking from being stopped if an end is scheduled.
 
@@ -36,16 +34,14 @@ function mouseTrackingContinue()
     }
 }
 
-function mouseTrackingBegin()
-{
+function mouseTrackingBegin() {
     // Start tracking the mouse because of an explicit click.
 
     mouseTrackingContinue();
     mouse_tracking_unlocked = true;
 }
 
-export function mouseLocationForEvent(e)
-{
+export function mouseLocationForEvent(e) {
     const canvas_width = canvas.width;
     const canvas_height = canvas.height;
 
@@ -63,8 +59,10 @@ export function mouseLocationForEvent(e)
 
     const doorway_border = 8;
 
-    const canvasX = (e.clientX - canvasRect.left) * canvas_width / canvasRect.width;
-    const canvasY = (e.clientY - canvasRect.top) * canvas_height / canvasRect.height;
+    const canvasX =
+        ((e.clientX - canvasRect.left) * canvas_width) / canvasRect.width;
+    const canvasY =
+        ((e.clientY - canvasRect.top) * canvas_height) / canvasRect.height;
     const framebufferX = canvasX - border;
     const framebufferY = canvasY - border;
 
@@ -75,19 +73,17 @@ export function mouseLocationForEvent(e)
     // Make it easier to get through doorways; if the cursor
     // is near a screen border, push it past the border.
     if (x <= doorway_border) x = -1;
-    if (x >= game_width - sprite_width - doorway_border) x = game_width+1;
+    if (x >= game_width - sprite_width - doorway_border) x = game_width + 1;
     if (y <= doorway_border) y = -1;
-    if (y >= game_height - sprite_height - doorway_border) y = game_height+1;
+    if (y >= game_height - sprite_height - doorway_border) y = game_height + 1;
 
     return { x: Math.round(x), y: Math.round(y) };
 }
 
-export function init()
-{
+export function init() {
     const engine = EngineLoader.instance;
 
-    game_area.addEventListener('mousemove', function (e)
-    {
+    game_area.addEventListener('mousemove', function (e) {
         if (mouse_tracking_unlocked && engine.calledRun) {
             const loc = mouseLocationForEvent(e);
             engine.setMouseTracking(loc.x, loc.y);
@@ -96,8 +92,7 @@ export function init()
         }
     });
 
-    game_area.addEventListener('mousedown', function (e)
-    {
+    game_area.addEventListener('mousedown', function (e) {
         if (e.button === 0 && engine.calledRun) {
             e.preventDefault();
             if (mouse_tracking_unlocked) {
@@ -115,8 +110,7 @@ export function init()
         canvas.focus();
     });
 
-    game_area.addEventListener('mouseup', function (e)
-    {
+    game_area.addEventListener('mouseup', function (e) {
         if (e.button === 0 && engine.calledRun) {
             e.preventDefault();
             if (mouse_tracking_unlocked) {
@@ -140,8 +134,7 @@ export function init()
         }
     };
 
-    canvas.addEventListener('touchstart', function (e)
-    {
+    canvas.addEventListener('touchstart', function (e) {
         stopTouchTimer();
         if (engine.calledRun) {
             const loc = mouseLocationForEvent(e.targetTouches[0]);
@@ -159,8 +152,7 @@ export function init()
         canvas.focus();
     });
 
-    canvas.addEventListener('touchmove', function (e)
-    {
+    canvas.addEventListener('touchmove', function (e) {
         if (engine.calledRun) {
             const loc = mouseLocationForEvent(e.targetTouches[0]);
             engine.setMouseTracking(loc.x, loc.y);
@@ -168,8 +160,7 @@ export function init()
         e.preventDefault();
     });
 
-    canvas.addEventListener('touchend', function (e)
-    {
+    canvas.addEventListener('touchend', function (e) {
         stopTouchTimer();
         if (engine.calledRun) {
             engine.setMouseButton(false);
@@ -178,8 +169,7 @@ export function init()
         e.preventDefault();
     });
 
-    canvas.addEventListener('touchcancel', function (e)
-    {
+    canvas.addEventListener('touchcancel', function (e) {
         stopTouchTimer();
         mouseTrackingEnd();
         e.preventDefault();

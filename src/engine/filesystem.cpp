@@ -1,19 +1,18 @@
-#include <emscripten.h>
-#include <algorithm>
-#include <vector>
-#include <stdint.h>
-#include <string.h>
-#include <stdio.h>
-#include <zstd.h>
-#include "sbt86.h"
 #include "filesystem.h"
+#include "sbt86.h"
+#include <algorithm>
+#include <emscripten.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include <vector>
+#include <zstd.h>
 
 static const bool verbose_filesystem_info = false;
 
-DOSFilesystem::DOSFilesystem()
-{
+DOSFilesystem::DOSFilesystem() {
     // ROJoyfile constructor sets up a default configuration
-    config.file.data = (uint8_t*) &config.joyfile;
+    config.file.data = (uint8_t *)&config.joyfile;
     config.file.size = sizeof config.joyfile;
 
     memset(&save, 0, sizeof save);
@@ -22,13 +21,9 @@ DOSFilesystem::DOSFilesystem()
     reset();
 }
 
-void DOSFilesystem::reset()
-{
-    memset(openFiles, 0, sizeof openFiles);
-}
+void DOSFilesystem::reset() { memset(openFiles, 0, sizeof openFiles); }
 
-int DOSFilesystem::open(const char *name)
-{
+int DOSFilesystem::open(const char *name) {
     int fd = allocateFD();
     const FileInfo *file;
 
@@ -68,8 +63,7 @@ int DOSFilesystem::open(const char *name)
     return fd;
 }
 
-int DOSFilesystem::create(const char *name)
-{
+int DOSFilesystem::create(const char *name) {
     int fd = allocateFD();
     const FileInfo *file;
 
@@ -93,20 +87,18 @@ int DOSFilesystem::create(const char *name)
     return fd;
 }
 
-void DOSFilesystem::close(uint16_t fd)
-{
+void DOSFilesystem::close(uint16_t fd) {
     assert(fd < MAX_OPEN_FILES && "Closing an invalid file descriptor");
     assert(openFiles[fd] && "Closing a file which is not open");
 
     if (openFiles[fd] == &save.file && save.openForWrite) {
-        EM_ASM( Module.onSaveFileWrite(); );
+        EM_ASM(Module.onSaveFileWrite(););
     }
 
     openFiles[fd] = 0;
 }
 
-uint16_t DOSFilesystem::read(uint16_t fd, void *buffer, uint16_t length)
-{
+uint16_t DOSFilesystem::read(uint16_t fd, void *buffer, uint16_t length) {
     const FileInfo *file = openFiles[fd];
 
     assert(fd < MAX_OPEN_FILES && "Reading an invalid file descriptor");
@@ -116,7 +108,8 @@ uint16_t DOSFilesystem::read(uint16_t fd, void *buffer, uint16_t length)
     uint16_t actual_length = std::min<unsigned>(length, file->size - offset);
 
     if (verbose_filesystem_info) {
-        printf("FILE, read %d(%d) bytes at %d\n", length, actual_length, offset);
+        printf("FILE, read %d(%d) bytes at %d\n", length, actual_length,
+               offset);
     }
     memcpy(buffer, file->data + offset, actual_length);
 
@@ -124,19 +117,22 @@ uint16_t DOSFilesystem::read(uint16_t fd, void *buffer, uint16_t length)
     return actual_length;
 }
 
-uint16_t DOSFilesystem::write(uint16_t fd, const void *buffer, uint16_t length)
-{
+uint16_t DOSFilesystem::write(uint16_t fd, const void *buffer,
+                              uint16_t length) {
     const FileInfo *file = openFiles[fd];
 
     assert(fd < MAX_OPEN_FILES && "Writing an invalid file descriptor");
     assert(file && "Writing a file which is not open");
-    assert(file == &save.file && "Writing a file that isn't the saved game file");
+    assert(file == &save.file &&
+           "Writing a file that isn't the saved game file");
 
     uint32_t offset = std::min<unsigned>(sizeof save.buffer, fileOffsets[fd]);
-    uint16_t actual_length = std::min<unsigned>(length, sizeof save.buffer - offset);
+    uint16_t actual_length =
+        std::min<unsigned>(length, sizeof save.buffer - offset);
 
     if (verbose_filesystem_info) {
-        printf("FILE, write %d(%d) bytes at %d\n", length, actual_length, offset);
+        printf("FILE, write %d(%d) bytes at %d\n", length, actual_length,
+               offset);
     }
     memcpy(save.buffer + offset, buffer, actual_length);
 
@@ -145,8 +141,7 @@ uint16_t DOSFilesystem::write(uint16_t fd, const void *buffer, uint16_t length)
     return actual_length;
 }
 
-uint16_t DOSFilesystem::allocateFD()
-{
+uint16_t DOSFilesystem::allocateFD() {
     uint16_t fd = 0;
 
     while (openFiles[fd]) {
@@ -159,11 +154,11 @@ uint16_t DOSFilesystem::allocateFD()
     return fd;
 }
 
-const FileInfo* CompressedFileInfo::lazyDecompress()
-{
+const FileInfo *CompressedFileInfo::lazyDecompress() {
     // Decompress files on first access
     if (!cache->name) {
-        size_t result = ZSTD_decompress(unpacked, unpacked_size, packed, packed_size);
+        size_t result =
+            ZSTD_decompress(unpacked, unpacked_size, packed, packed_size);
         assert(result == unpacked_size);
 
         const CompressedFileInfo *index_item = index;
@@ -179,8 +174,7 @@ const FileInfo* CompressedFileInfo::lazyDecompress()
     return cache;
 }
 
-const FileInfo* FileInfo::lookup(const char* name)
-{
+const FileInfo *FileInfo::lookup(const char *name) {
     for (const FileInfo *cached = getAllFiles(); cached->name; cached++) {
         if (!strcasecmp(name, cached->name)) {
             return cached;
@@ -189,7 +183,6 @@ const FileInfo* FileInfo::lookup(const char* name)
     return nullptr;
 }
 
-const FileInfo* FileInfo::getAllFiles()
-{
+const FileInfo *FileInfo::getAllFiles() {
     return CompressedFileInfo::lazyDecompress();
 }

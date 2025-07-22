@@ -1,15 +1,13 @@
-#include <string.h>
-#include <stdio.h>
-#include <zstd.h>
 #include "sbt86.h"
 #include "hardware.h"
+#include <stdio.h>
+#include <string.h>
+#include <zstd.h>
 
 static const bool full_stack_trace = false;
 static const uint32_t total_calls_threshold = 100000;
 
-
-void SBTProcess::exec(const char *cmdLine)
-{
+void SBTProcess::exec(const char *cmdLine) {
     // Initialize registers
     memset(&reg, 0, sizeof reg);
 
@@ -29,7 +27,8 @@ void SBTProcess::exec(const char *cmdLine)
     memset(data_segment, 0, end_of_mem - data_segment);
 
     // Decompress nonzero data
-    ZSTD_decompress(data_segment, end_of_mem - data_segment, getData(), getDataLen());
+    ZSTD_decompress(data_segment, end_of_mem - data_segment, getData(),
+                    getDataLen());
 
     /*
      * Program Segment Prefix. Locate it just before the beginning of
@@ -40,16 +39,16 @@ void SBTProcess::exec(const char *cmdLine)
     memset(psp, 0, 0x80);
     psp[0x80] = strlen(cmdLine);
     memset(&psp[0x81], 0x0D, 0x7f);
-    strncpy((char*) &psp[0x81], cmdLine, 0x7e);
+    strncpy((char *)&psp[0x81], cmdLine, 0x7e);
 
     // Capture current state for future re-entry
     default_func = continue_func;
     default_reg = reg;
 }
 
-void SBTProcess::run(void)
-{
-    assert(hardware != NULL && "Hardware environment must be defined before running a process");
+void SBTProcess::run(void) {
+    assert(hardware != NULL &&
+           "Hardware environment must be defined before running a process");
 
     SBTStack stack;
     loadEnvironment(&stack, reg);
@@ -65,19 +64,16 @@ void SBTProcess::run(void)
     flushOutput();
 }
 
-bool SBTProcess::isWaitingInMainLoop()
-{
-    return continue_func == default_func && continue_func != getFunction(SBTADDR_ENTRY_FUNC);
+bool SBTProcess::isWaitingInMainLoop() {
+    return continue_func == default_func &&
+           continue_func != getFunction(SBTADDR_ENTRY_FUNC);
 }
 
-bool SBTProcess::hasFunction(SBTAddressId id)
-{
-    return getFunction(id) != 0;
-}
+bool SBTProcess::hasFunction(SBTAddressId id) { return getFunction(id) != 0; }
 
-void SBTProcess::call(SBTAddressId id, SBTRegs call_regs)
-{
-    assert(hardware != NULL && "Hardware environment must be defined before running a process");
+void SBTProcess::call(SBTAddressId id, SBTRegs call_regs) {
+    assert(hardware != NULL &&
+           "Hardware environment must be defined before running a process");
 
     continue_func_t fn = getFunction(id);
     assert(fn);
@@ -90,18 +86,14 @@ void SBTProcess::call(SBTAddressId id, SBTRegs call_regs)
     }
 }
 
-static void continue_after_exit()
-{
+static void continue_after_exit() {
     assert(0 && "Continuing to run an exited SBTProcess");
 }
 
-void SBTProcess::exit()
-{
-    continueFrom(reg, continue_after_exit);
-}
+void SBTProcess::exit() { continueFrom(reg, continue_after_exit); }
 
-void SBTProcess::continueFrom(SBTRegs regs, continue_func_t fn, bool default_entry)
-{
+void SBTProcess::continueFrom(SBTRegs regs, continue_func_t fn,
+                              bool default_entry) {
     // Does not return
 
     assert(fn != 0);
@@ -114,14 +106,13 @@ void SBTProcess::continueFrom(SBTRegs regs, continue_func_t fn, bool default_ent
     longjmp(jmp_yield, 1);
 }
 
-void SBTProcess::failedDynamicBranch(uint16_t cs, uint16_t ip, uint32_t value)
-{
-    fprintf(stderr, "SBT86, failed dynamic branch at %04x:%04x, to %x\n", cs, ip, value);
+void SBTProcess::failedDynamicBranch(uint16_t cs, uint16_t ip, uint32_t value) {
+    fprintf(stderr, "SBT86, failed dynamic branch at %04x:%04x, to %x\n", cs,
+            ip, value);
     assert(0 && "Failed dynamic branch");
 }
 
-uint8_t *SBTProcess::memSeg(uint16_t seg)
-{
+uint8_t *SBTProcess::memSeg(uint16_t seg) {
     /*
      * The highest normal segment we can support.  Any segments over
      * MAX_SEGMENT get remapped to MAX_SEGMENT. This serves two
@@ -131,11 +122,13 @@ uint8_t *SBTProcess::memSeg(uint16_t seg)
      *   2. It puts the CGA framebuffer in range of the emulated memory.
      *
      * Padding is set to 0x20000 to give us room for two full 16-bit additions,
-     * allowing 16-bit offsets to buffers with 16-bit sizes without further checks.
+     * allowing 16-bit offsets to buffers with 16-bit sizes without further
+     * checks.
      */
 
     static const uint32_t SEGMENT_PADDING = 0x20000;
-    static const uint32_t MAX_SEGMENT = (Hardware::MEM_SIZE - SEGMENT_PADDING) >> 4;
+    static const uint32_t MAX_SEGMENT =
+        (Hardware::MEM_SIZE - SEGMENT_PADDING) >> 4;
 
     if (seg > MAX_SEGMENT) {
         seg = MAX_SEGMENT;
@@ -143,73 +136,63 @@ uint8_t *SBTProcess::memSeg(uint16_t seg)
     return hardware->mem + (((uint32_t)seg) << 4);
 }
 
-uint8_t SBTProcess::peek8(uint16_t seg, uint16_t off)
-{
+uint8_t SBTProcess::peek8(uint16_t seg, uint16_t off) {
     return memSeg(seg)[off];
 }
 
-void SBTProcess::poke8(uint16_t seg, uint16_t off, uint8_t value)
-{
+void SBTProcess::poke8(uint16_t seg, uint16_t off, uint8_t value) {
     memSeg(seg)[off] = value;
 }
 
-uint16_t SBTProcess::peek16(uint16_t seg, uint16_t off)
-{
+uint16_t SBTProcess::peek16(uint16_t seg, uint16_t off) {
     return read16(memSeg(seg) + off);
 }
 
-void SBTProcess::poke16(uint16_t seg, uint16_t off, uint16_t value)
-{
+void SBTProcess::poke16(uint16_t seg, uint16_t off, uint16_t value) {
     write16(memSeg(seg) + off, value);
 }
 
-SBTStack::SBTStack()
-{
-    reset();
-}
+SBTStack::SBTStack() { reset(); }
 
-void SBTStack::reset()
-{
+void SBTStack::reset() {
     top = 0;
     total_calls_made = 0;
 }
 
-void SBTStack::trace()
-{
+void SBTStack::trace() {
     fprintf(stderr, "--- Stack trace:\n");
     for (unsigned addr = 0; addr < top; addr++) {
         fprintf(stderr, "[%d] ", addr);
         switch (tags[addr]) {
-            case STACK_TAG_INVALID:
-                fprintf(stderr, "INVALID\n");
-                break;
-            case STACK_TAG_WORD:
-                fprintf(stderr, "word %04x\n", words[addr]);
-                break;
-            case STACK_TAG_FLAGS:
-                fprintf(stderr, "flags u=%08x s=%08x\n", flags[addr].uresult, flags[addr].sresult);
-                break;
-            case STACK_TAG_RETADDR:
-                fprintf(stderr, "ret fn=%04x\n", fn_addrs[addr]);
-                break;
-            default:
-                fprintf(stderr, "BAD TAG %x\n", tags[addr]);
-                break;
+        case STACK_TAG_INVALID:
+            fprintf(stderr, "INVALID\n");
+            break;
+        case STACK_TAG_WORD:
+            fprintf(stderr, "word %04x\n", words[addr]);
+            break;
+        case STACK_TAG_FLAGS:
+            fprintf(stderr, "flags u=%08x s=%08x\n", flags[addr].uresult,
+                    flags[addr].sresult);
+            break;
+        case STACK_TAG_RETADDR:
+            fprintf(stderr, "ret fn=%04x\n", fn_addrs[addr]);
+            break;
+        default:
+            fprintf(stderr, "BAD TAG %x\n", tags[addr]);
+            break;
         }
     }
     fprintf(stderr, "---\n");
 }
 
-void SBTStack::pushw(uint16_t word)
-{
+void SBTStack::pushw(uint16_t word) {
     assert(top < STACK_SIZE && "SBT86 stack overflow");
     words[top] = word;
     tags[top] = STACK_TAG_WORD;
     top++;
 }
 
-void SBTStack::pushf(SBTRegs reg)
-{
+void SBTStack::pushf(SBTRegs reg) {
     assert(top < STACK_SIZE && "SBT86 stack overflow");
     flags[top].uresult = reg.uresult;
     flags[top].sresult = reg.sresult;
@@ -217,15 +200,15 @@ void SBTStack::pushf(SBTRegs reg)
     top++;
 }
 
-void SBTStack::pushret(uint16_t fn)
-{
+void SBTStack::pushret(uint16_t fn) {
     if (full_stack_trace) {
         fprintf(stderr, "+%04x\n", fn);
     }
 
     total_calls_made++;
     if (total_calls_made > total_calls_threshold) {
-        fprintf(stderr, "SBT86, over %d calls since entry, infinite loop?\n", total_calls_threshold);
+        fprintf(stderr, "SBT86, over %d calls since entry, infinite loop?\n",
+                total_calls_threshold);
         trace();
         assert(0 && "loop detected");
     }
@@ -236,15 +219,13 @@ void SBTStack::pushret(uint16_t fn)
     top++;
 }
 
-uint16_t SBTStack::popw()
-{
+uint16_t SBTStack::popw() {
     top--;
     assert(tags[top] == STACK_TAG_WORD && "SBT86 stack tag mismatch");
     return words[top];
 }
 
-SBTRegs SBTStack::popf(SBTRegs reg)
-{
+SBTRegs SBTStack::popf(SBTRegs reg) {
     top--;
     assert(tags[top] == STACK_TAG_FLAGS && "SBT86 stack tag mismatch");
     reg.uresult = flags[top].uresult;
@@ -252,8 +233,7 @@ SBTRegs SBTStack::popf(SBTRegs reg)
     return reg;
 }
 
-void SBTStack::popret(uint16_t fn)
-{
+void SBTStack::popret(uint16_t fn) {
     top--;
     assert(tags[top] == STACK_TAG_RETADDR && "SBT86 stack tag mismatch");
     if (full_stack_trace) {
@@ -280,16 +260,15 @@ void SBTStack::popret(uint16_t fn)
  * converts the top of stack back to a RETADDR.
  */
 
-void SBTStack::preSaveRet()
-{
+void SBTStack::preSaveRet() {
     assert(tags[top - 1] == STACK_TAG_RETADDR && "SBT86 stack tag mismatch");
     words[top - 1] = RET_VERIFICATION;
     tags[top - 1] = STACK_TAG_WORD;
 }
 
-void SBTStack::postRestoreRet()
-{
+void SBTStack::postRestoreRet() {
     assert(tags[top - 1] == STACK_TAG_WORD && "SBT86 stack tag mismatch");
-    assert(words[top - 1] == RET_VERIFICATION && "SBT86 stack retaddr mismatch");
+    assert(words[top - 1] == RET_VERIFICATION &&
+           "SBT86 stack retaddr mismatch");
     tags[top - 1] = STACK_TAG_RETADDR;
 }

@@ -8,14 +8,14 @@ const zone = document.getElementById('joystick_zone');
 const center = document.getElementById('joystick_center');
 const thumb = document.getElementById('joystick_thumb');
 
-function joystickAxes(x, y)
-{
+function joystickAxes(x, y) {
     const engine = EngineLoader.instance;
 
     if (zone && thumb) {
         const zone_rect = zone.getBoundingClientRect();
         const scale = 0.5 * zone_rect.height;
-        thumb.style.transform = 'translate(' + (scale * x) + 'px, ' + (scale * y) + 'px)';
+        thumb.style.transform =
+            'translate(' + scale * x + 'px, ' + scale * y + 'px)';
     }
 
     // Apply a nonlinear speed curve here, to make slow-speed control easier.
@@ -24,7 +24,7 @@ function joystickAxes(x, y)
     const JOYSTICK_CURVE_EXP = 1.8;
 
     const angle = Math.atan2(y, x);
-    const speed = Math.pow(x*x + y*y, 0.5 * JOYSTICK_CURVE_EXP);
+    const speed = Math.pow(x * x + y * y, 0.5 * JOYSTICK_CURVE_EXP);
     const cx = Math.cos(angle) * speed;
     const cy = Math.sin(angle) * speed;
 
@@ -36,8 +36,7 @@ function joystickAxes(x, y)
     GameMenu.setJoystickAxes(cx, cy);
 }
 
-function joystickButton(b)
-{
+function joystickButton(b) {
     const engine = EngineLoader.instance;
 
     if (engine.calledRun) {
@@ -48,22 +47,22 @@ function joystickButton(b)
     GameMenu.setJoystickButton(b);
 }
 
-function onMove(e)
-{
+function onMove(e) {
     if (center && zone) {
         const zone_rect = zone.getBoundingClientRect();
         const center_rect = center.getBoundingClientRect();
         const scale = 2.0 / zone_rect.height;
         const x = (e.clientX - center_rect.x) * scale;
         const y = (e.clientY - center_rect.y) * scale;
-        joystickAxes(Math.max(-1, Math.min(1, x)),
-            Math.max(-1, Math.min(1, y)));
+        joystickAxes(
+            Math.max(-1, Math.min(1, x)),
+            Math.max(-1, Math.min(1, y)),
+        );
         e.preventDefault();
     }
 }
 
-function onBegin(e)
-{
+function onBegin(e) {
     mouseTrackingEnd();
     audioContextSetup();
     if (thumb && zone) {
@@ -74,8 +73,7 @@ function onBegin(e)
     onMove(e);
 }
 
-function onEnd(e)
-{
+function onEnd(e) {
     joystickAxes(0, 0);
     if (thumb && zone) {
         thumb.classList.remove('active_btn');
@@ -85,8 +83,7 @@ function onEnd(e)
     e.preventDefault();
 }
 
-export function init()
-{
+export function init() {
     const engine = EngineLoader.instance;
 
     if (thumb && zone) {
@@ -96,23 +93,26 @@ export function init()
     }
 
     for (let button of document.getElementsByClassName('joystick_btn')) {
-        Buttons.addButtonEvents(button, () => {
-            button.classList.add('active_btn');
-            joystickButton(true);
-        }, () => {
-            button.classList.remove('active_btn');
-            joystickButton(false);
-        });
+        Buttons.addButtonEvents(
+            button,
+            () => {
+                button.classList.add('active_btn');
+                joystickButton(true);
+            },
+            () => {
+                button.classList.remove('active_btn');
+                joystickButton(false);
+            },
+        );
     }
 
     // to do: preferences system, configurable joystick mapping
     engine.gamepadInvertYAxis = false;
     engine.gamepadDeadzone = 0.11;
 
-    function gamepadPoll(gamepad, last_axes, last_pressed)
-    {
+    function gamepadPoll(gamepad, last_axes, last_pressed) {
         if (gamepad && gamepad.connected) {
-            const pressed = gamepad.buttons.map(b => b.pressed);
+            const pressed = gamepad.buttons.map((b) => b.pressed);
             var axes = gamepad.axes;
 
             // If the controller is nearly centered, assume it's centered.
@@ -121,13 +121,12 @@ export function init()
             // virtual joystick input.
 
             const deadzone = engine.gamepadDeadzone;
-            if (axes[0]*axes[0] + axes[1]*axes[1] <= deadzone*deadzone) {
-                axes = [0,0];
+            if (axes[0] * axes[0] + axes[1] * axes[1] <= deadzone * deadzone) {
+                axes = [0, 0];
             }
 
             // Poll gamepads on every frame, to animate the virtual joystick
             window.requestAnimationFrame(() => {
-
                 // Must call getGamepads() to refresh the state snapshot.
                 // Game pads can disappear unpredictably, and Firefox
                 // seems to be going so far as making 'gamepad' from the
@@ -156,11 +155,14 @@ export function init()
 
     // Begin polling gamepads if a new one appears
     window.addEventListener('gamepadconnected', (e) => {
-        gamepadPoll(e.gamepad, [0,0], []);
+        gamepadPoll(e.gamepad, [0, 0], []);
 
         // This is a hack for a specific gamepad that needs Y axis inversion really.
         // Replace this with more explicit preferences.
-        if (e.gamepad.mapping !== 'standard' && e.gamepad.id.includes('Nimbus')) {
+        if (
+            e.gamepad.mapping !== 'standard' &&
+            e.gamepad.id.includes('Nimbus')
+        ) {
             engine.gamepadInvertYAxis = true;
         }
     });

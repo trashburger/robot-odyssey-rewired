@@ -6,14 +6,13 @@ import * as FileManager from './fileManager.js';
 import * as EngineLoader from '../engineLoader.js';
 
 const FILE_TYPES =
-    ' ^ GSV - Game Save\n'+
-    ' ^ LSV - Lab Save\n'+
-    ' ^ CSV - Chip Save\n\n'+
-    ' ^ GSVZ, LSVZ - Compressed Game/Lab Save\n\n'+
+    ' ^ GSV - Game Save\n' +
+    ' ^ LSV - Lab Save\n' +
+    ' ^ CSV - Chip Save\n\n' +
+    ' ^ GSVZ, LSVZ - Compressed Game/Lab Save\n\n' +
     ' ^ ZIP files with any combination of the above\n';
 
-export function init()
-{
+export function init() {
     const engine = EngineLoader.instance;
 
     var drag_timer = null;
@@ -84,8 +83,7 @@ export function init()
     };
 
     // Request a picker for uploading native files
-    engine.filePicker = function ()
-    {
+    engine.filePicker = function () {
         return new Promise((resolve) => {
             const input = document.createElement('input');
             input.type = 'file';
@@ -106,30 +104,34 @@ export function init()
         });
     };
 
-    engine.downloadRAMSnapshot = function (filename)
-    {
-        downloadjs(engine.getMemory(), filename || 'ram-snapshot.bin', 'application/octet-stream');
+    engine.downloadRAMSnapshot = function (filename) {
+        downloadjs(
+            engine.getMemory(),
+            filename || 'ram-snapshot.bin',
+            'application/octet-stream',
+        );
         return true;
     };
 
-    engine.downloadCompressionDictionary = function (filename)
-    {
-        downloadjs(engine.getCompressionDictionary(), filename || 'dictionary.bin', 'application/octet-stream');
+    engine.downloadCompressionDictionary = function (filename) {
+        downloadjs(
+            engine.getCompressionDictionary(),
+            filename || 'dictionary.bin',
+            'application/octet-stream',
+        );
         return true;
     };
 
-    engine.downloadColorTileImage = async function(first_slot, num_slots)
-    {
+    engine.downloadColorTileImage = async function (first_slot, num_slots) {
         const engine = await EngineLoader.complete;
         const blob = await engine.saveColorTilesToImage(first_slot, num_slots);
         downloadjs(blob, 'color-tiles.png', 'image/png');
         return true;
     };
 
-    engine.downloadArchive = async function()
-    {
+    engine.downloadArchive = async function () {
         const date = new Date();
-        const datestr = date.toLocaleString().replace(/\//g,'-');
+        const datestr = date.toLocaleString().replace(/\//g, '-');
 
         const promise = engine.files.createZipBlob();
         GameMenu.modalDuringPromise(promise, 'Preparing ZIP file...');
@@ -140,8 +142,7 @@ export function init()
     };
 }
 
-async function filesStoredConfirmation(result, onclick)
-{
+async function filesStoredConfirmation(result, onclick) {
     const files = [];
     const flatten = (l) => {
         for (let i of l) {
@@ -154,9 +155,10 @@ async function filesStoredConfirmation(result, onclick)
     };
     flatten(result);
 
-    const msg = files.length ?
-        'Ok!\n\nThese files have been stored in your browser, on this device:\n\n' + files.join('\n')
-        : 'Didn\'t find any supported files!\n\n' + FILE_TYPES;
+    const msg = files.length
+        ? 'Ok!\n\nThese files have been stored in your browser, on this device:\n\n' +
+          files.join('\n')
+        : "Didn't find any supported files!\n\n" + FILE_TYPES;
 
     FileManager.refresh();
     await GameMenu.modal(msg, onclick);

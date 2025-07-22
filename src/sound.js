@@ -2,13 +2,11 @@ import * as EngineLoader from './engineLoader.js';
 
 let context = null;
 
-export function init()
-{
+export function init() {
     EngineLoader.instance.onRenderSound = renderSound;
 }
 
-function renderSound(pcmData, rate)
-{
+function renderSound(pcmData, rate) {
     // TO DO: Volume control
     const volume = 0.1;
 
@@ -26,8 +24,7 @@ function renderSound(pcmData, rate)
     }
 }
 
-export function audioContextSetup()
-{
+export function audioContextSetup() {
     if (context === null) {
         const AudioContext = window.AudioContext;
         if (AudioContext) {

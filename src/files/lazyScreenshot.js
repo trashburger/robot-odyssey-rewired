@@ -10,8 +10,7 @@ const render_canvas = document.createElement('canvas');
 render_canvas.width = Graphics.WIDTH;
 render_canvas.height = Graphics.VISIBLE_HEIGHT;
 
-function renderer()
-{
+function renderer() {
     // Limit of one render per frame; keep coming back while the queue has work.
     if (render_stack.length > 1) {
         requestAnimationFrame(renderer);
@@ -31,8 +30,7 @@ function renderer()
     }
 }
 
-async function thumbnailIsVisible(element)
-{
+async function thumbnailIsVisible(element) {
     // Wait for the file contents to load from indexedDb
     const data = element._screenshot_data;
     data.loadedFile = await data.file.load();
@@ -45,8 +43,7 @@ async function thumbnailIsVisible(element)
     }
 }
 
-function callback(entries)
-{
+function callback(entries) {
     for (let entry of entries) {
         const element = entry.target;
         if (entry.isIntersecting) {
@@ -57,13 +54,11 @@ function callback(entries)
     }
 }
 
-export function disconnect()
-{
+export function disconnect() {
     observer.disconnect();
 }
 
-export function add(file, element)
-{
+export function add(file, element) {
     element._screenshot_data = { file };
     element.src = ScreenshotLoadingImage;
     observer.observe(element);

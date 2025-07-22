@@ -3,15 +3,15 @@ import * as EngineLoader from './engineLoader.js';
 import { mouseTrackingEnd } from './input/mouse.js';
 
 export const States = {
-    SPLASH:             'SPLASH',
-    MENU_TRANSITION:    'MENU_TRANSITION',
-    MENU_ACTIVE:        'MENU_ACTIVE',
-    EXEC_LAUNCHING:     'EXEC_LAUNCHING',
-    EXEC:               'EXEC',
-    LOADING:            'LOADING',
-    MODAL_TEXTBOX:      'MODAL_TEXTBOX',
-    MODAL_FILES:        'MODAL_FILES',
-    ERROR_HALT:         'ERROR_HALT',
+    SPLASH: 'SPLASH',
+    MENU_TRANSITION: 'MENU_TRANSITION',
+    MENU_ACTIVE: 'MENU_ACTIVE',
+    EXEC_LAUNCHING: 'EXEC_LAUNCHING',
+    EXEC: 'EXEC',
+    LOADING: 'LOADING',
+    MODAL_TEXTBOX: 'MODAL_TEXTBOX',
+    MODAL_FILES: 'MODAL_FILES',
+    ERROR_HALT: 'ERROR_HALT',
 };
 
 const engine_controls = document.getElementById('engine_controls');
@@ -32,8 +32,7 @@ let menu_joystick_y = 0;
 let menu_joystick_accum = 0;
 let modal_saved = null;
 
-export function showError(e)
-{
+export function showError(e) {
     // This error handler should be callable at any time, even before init()
 
     e = e.toString();
@@ -48,13 +47,11 @@ export function showError(e)
     modal(e);
     setState(States.ERROR_HALT);
 
-    throw e;    // In case we have a debugger attached
+    throw e; // In case we have a debugger attached
 }
 
-export function modal(message, onclick)
-{
+export function modal(message, onclick) {
     return new Promise((resolve) => {
-
         if (modal_saved === null) {
             modal_saved = {
                 state: current_state,
@@ -77,8 +74,7 @@ export function modal(message, onclick)
     });
 }
 
-export function exitModal()
-{
+export function exitModal() {
     const saved = modal_saved;
     modal_saved = null;
 
@@ -92,24 +88,28 @@ export function exitModal()
     saved.resolve();
 }
 
-export function modalDuringPromise(promise, message)
-{
+export function modalDuringPromise(promise, message) {
     var end = exitModal;
     const nop = () => {};
-    const finish = () => { end = nop; };
+    const finish = () => {
+        end = nop;
+    };
     modal(message, nop).then(finish);
 
     const minimumDuration = 750;
-    setTimeout(() => { promise.then(() => end(), () => end()); }, minimumDuration);
+    setTimeout(() => {
+        promise.then(
+            () => end(),
+            () => end(),
+        );
+    }, minimumDuration);
 }
 
-export function getState()
-{
+export function getState() {
     return current_state;
 }
 
-export function init()
-{
+export function init() {
     // Handle asynchronous errors in loading the engine
     EngineLoader.complete.then(null, showError);
 
@@ -146,7 +146,10 @@ export function init()
 
     // Back to the menu when a game binary exits
     EngineLoader.instance.onProcessExit = function () {
-        if (current_state === States.EXEC || current_state === States.EXEC_LAUNCHING) {
+        if (
+            current_state === States.EXEC ||
+            current_state === States.EXEC_LAUNCHING
+        ) {
             setState(States.MENU_TRANSITION);
         }
     };
@@ -155,41 +158,35 @@ export function init()
     setState(States.SPLASH);
 }
 
-export function pressKey(ascii, scancode)
-{
+export function pressKey(ascii, scancode) {
     const engine = EngineLoader.instance;
 
     if (current_state === States.SPLASH) {
-        if (ascii === 0x0D || ascii === 0x20) {
+        if (ascii === 0x0d || ascii === 0x20) {
             // Enter or space
             setState(States.MENU_TRANSITION);
         }
-
     } else if (current_state === States.MENU_ACTIVE) {
-
         if (scancode === 0x50 || ascii === 0x20) {
             // Down or Space
             setMenuChoice(current_menu_choice + 1);
         } else if (scancode === 0x48) {
             // Up
             setMenuChoice(current_menu_choice - 1);
-        } else if (ascii === 0x0D) {
+        } else if (ascii === 0x0d) {
             // Enter
             invokeMenuChoice();
         }
-
     } else if (current_state === States.MODAL_TEXTBOX) {
-        if (ascii === 0x0D || ascii === 0x20 || ascii === 0x1B) {
+        if (ascii === 0x0d || ascii === 0x20 || ascii === 0x1b) {
             // Enter, space, escape
             modal_textbox.onclick();
         }
-
     } else if (current_state === States.MODAL_FILES) {
-        if (ascii === 0x1B) {
+        if (ascii === 0x1b) {
             // Escape
             FileManager.close();
         }
-
     } else if (current_state === States.EXEC && engine.calledRun) {
         // Engine gets keys only when it's in front
         engine.pressKey(ascii, scancode);
@@ -197,26 +194,26 @@ export function pressKey(ascii, scancode)
     }
 }
 
-function joystickIntervalFunc()
-{
-    var rate = 0.25;  // Max menu ticks per interval
+function joystickIntervalFunc() {
+    var rate = 0.25; // Max menu ticks per interval
 
     // Make rollover at the edges slower
-    if ((current_menu_choice === 0 && menu_joystick_y < 0) ||
-        (current_menu_choice === choices.length-1 && menu_joystick_y > 0)) {
+    if (
+        (current_menu_choice === 0 && menu_joystick_y < 0) ||
+        (current_menu_choice === choices.length - 1 && menu_joystick_y > 0)
+    ) {
         rate *= 0.3;
     }
 
     menu_joystick_accum += rate * menu_joystick_y;
-    let intpart = menu_joystick_accum|0;
+    let intpart = menu_joystick_accum | 0;
     if (intpart !== 0) {
         menu_joystick_accum -= intpart;
         setMenuChoice(current_menu_choice + intpart);
     }
 }
 
-export function setJoystickAxes(x, y)
-{
+export function setJoystickAxes(x, y) {
     if (current_state === States.MENU_ACTIVE) {
         menu_joystick_y = Math.max(-1, Math.min(1, y));
         if (y === 0) {
@@ -225,7 +222,6 @@ export function setJoystickAxes(x, y)
                 clearInterval(menu_joystick_interval);
                 menu_joystick_interval = null;
             }
-
         } else {
             // Immediate response + variable repeat rate
             if (!menu_joystick_interval) {
@@ -237,8 +233,7 @@ export function setJoystickAxes(x, y)
     }
 }
 
-export function setJoystickButton(b)
-{
+export function setJoystickButton(b) {
     if (b && current_state === States.SPLASH) {
         setState(States.MENU_TRANSITION);
     } else if (b && current_state === States.MODAL_TEXTBOX) {
@@ -248,8 +243,7 @@ export function setJoystickButton(b)
     }
 }
 
-function getLastSplashImage()
-{
+function getLastSplashImage() {
     let result = null;
     for (let child of splash.children) {
         if (child.nodeName === 'IMG') {
@@ -259,8 +253,7 @@ function getLastSplashImage()
     return result;
 }
 
-export async function afterLoadingState()
-{
+export async function afterLoadingState() {
     const engine = EngineLoader.instance;
     if (engine.calledRun) {
         // Already loaded
@@ -271,8 +264,7 @@ export async function afterLoadingState()
     return await EngineLoader.complete;
 }
 
-export function setState(s)
-{
+export function setState(s) {
     if (s === current_state) {
         return;
     }
@@ -335,7 +327,12 @@ export function setState(s)
 
     if (s === States.EXEC_LAUNCHING || s === States.LOADING) {
         game_menu.classList.add('fadeout');
-    } else if (s !== States.EXEC && s !== States.LOADING && s !== States.MODAL_FILES && s !== States.MODAL_TEXTBOX) {
+    } else if (
+        s !== States.EXEC &&
+        s !== States.LOADING &&
+        s !== States.MODAL_FILES &&
+        s !== States.MODAL_TEXTBOX
+    ) {
         game_menu.classList.remove('fadeout');
     }
 
@@ -351,13 +348,16 @@ export function setState(s)
 
     if (s === States.EXEC) {
         framebuffer.classList.remove('hidden');
-    } else if (s === States.MENU_TRANSITION || s === States.MENU_ACTIVE || s === States.SPLASH) {
+    } else if (
+        s === States.MENU_TRANSITION ||
+        s === States.MENU_ACTIVE ||
+        s === States.SPLASH
+    ) {
         framebuffer.classList.add('hidden');
     }
 }
 
-function setMenuChoice(c)
-{
+function setMenuChoice(c) {
     c %= choices.length;
     if (c < 0) c += choices.length;
 
@@ -370,12 +370,12 @@ function setMenuChoice(c)
 
     let element = choices[c];
     let to_percent = 100 / element.offsetParent.offsetHeight;
-    let offset_percent = (element.offsetTop - choices[0].offsetTop) * to_percent;
+    let offset_percent =
+        (element.offsetTop - choices[0].offsetTop) * to_percent;
     game_menu_cursor.style.top = offset_percent + '%';
 }
 
-async function invokeMenuChoice()
-{
+async function invokeMenuChoice() {
     const choice = choices[current_menu_choice].dataset;
     const engine = await afterLoadingState();
 

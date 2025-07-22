@@ -1,14 +1,12 @@
 #pragma once
 
-#include <stdint.h>
-#include <circular_buffer.hpp>
-#include "sbt86.h"
 #include "roData.h"
+#include "sbt86.h"
+#include <circular_buffer.hpp>
+#include <stdint.h>
 
-
-class InputBuffer
-{
- public:
+class InputBuffer {
+  public:
     InputBuffer();
 
     void pressKey(uint8_t ascii, uint8_t scancode = 0);
@@ -23,9 +21,10 @@ class InputBuffer
     bool checkForInputBacklog();
     uint16_t checkForKey();
     uint16_t getKey();
-    void pollJoystick(ROWorld *world, uint16_t &x, uint16_t &y, uint8_t &status);
+    void pollJoystick(ROWorld *world, uint16_t &x, uint16_t &y,
+                      uint8_t &status);
 
- private:
+  private:
     static constexpr unsigned KEY_BUFFER_SIZE = 32;
     static constexpr unsigned MOUSE_BUFFER_SIZE = 8;
     static constexpr unsigned MOUSE_DELAY_ON_ROOM_CHANGE = 4;
@@ -60,5 +59,6 @@ class InputBuffer
     void updateMouse(ROWorld *world);
     void clearJoystickAxes();
     bool virtualMouseToPosition(ROWorld *world, int x, int y);
-    void quantizeJoystickAxis(float input, float &residual, uint16_t &output, float axis_scale);
+    void quantizeJoystickAxis(float input, float &residual, uint16_t &output,
+                              float axis_scale);
 };

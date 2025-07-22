@@ -9,27 +9,28 @@ const canvas = document.getElementById('framebuffer');
 const speed_selector = document.getElementById('speed_selector');
 const gamepad_button_mappings = [];
 
-export function updateMappedGamepadButton(pressed, index)
-{
+export function updateMappedGamepadButton(pressed, index) {
     const handler = gamepad_button_mappings[index];
     if (handler) {
         handler(pressed, index);
     }
 }
 
-export function addButtonClick(button_element, click)
-{
-    addButtonEvents(button_element, () => {
-        button_element.classList.add('active_btn');
-    }, () => {
-        button_element.classList.remove('active_btn');
-    }, click);
+export function addButtonClick(button_element, click) {
+    addButtonEvents(
+        button_element,
+        () => {
+            button_element.classList.add('active_btn');
+        },
+        () => {
+            button_element.classList.remove('active_btn');
+        },
+        click,
+    );
 }
 
-export function addButtonEvents(button_element, down, up, click)
-{
-    const down_wrapper = function (e)
-    {
+export function addButtonEvents(button_element, down, up, click) {
+    const down_wrapper = function (e) {
         mouseTrackingEnd();
         audioContextSetup();
         if (!click) {
@@ -40,8 +41,7 @@ export function addButtonEvents(button_element, down, up, click)
         }
     };
 
-    const up_wrapper = function (e)
-    {
+    const up_wrapper = function (e) {
         if (!click) {
             e.preventDefault();
         }
@@ -53,7 +53,7 @@ export function addButtonEvents(button_element, down, up, click)
     };
 
     const options = {
-        passive: !!click
+        passive: !!click,
     };
 
     button_element.addEventListener('mousedown', down_wrapper, options);
@@ -83,24 +83,23 @@ export function addButtonEvents(button_element, down, up, click)
     }
 }
 
-function controlCode(key)
-{
-    return String.fromCharCode(key.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0) + 1);
+function controlCode(key) {
+    return String.fromCharCode(
+        key.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0) + 1,
+    );
 }
 
-export function init()
-{
-    function keycode(ascii, scancode)
-    {
-        if (typeof(ascii) !== typeof(0)) {
-            ascii = ascii.length === 1 ? ascii.charCodeAt(0) : parseInt(ascii, 0);
+export function init() {
+    function keycode(ascii, scancode) {
+        if (typeof ascii !== typeof 0) {
+            ascii =
+                ascii.length === 1 ? ascii.charCodeAt(0) : parseInt(ascii, 0);
         }
         GameMenu.pressKey(ascii, scancode);
         audioContextSetup();
     }
 
-    document.body.addEventListener('keydown', function (e)
-    {
+    document.body.addEventListener('keydown', function (e) {
         const code = e.code || e.key || '';
         const key = e.key || '';
         const shift = e.shiftKey;
@@ -114,18 +113,17 @@ export function init()
             mouseTrackingEnd();
         }
 
-        if (code === 'ArrowUp' && !shift)         keycode(0, 0x48);
-        else if (code === 'ArrowUp' && shift)     keycode('8', 0x48);
-        else if (code === 'ArrowDown' && !shift)  keycode(0, 0x50);
-        else if (code === 'ArrowDown' && shift)   keycode('2', 0x50);
-        else if (code === 'ArrowLeft' && !shift)  keycode(0, 0x4B);
-        else if (code === 'ArrowLeft' && shift)   keycode('4', 0x4B);
-        else if (code === 'ArrowRight' && !shift) keycode(0, 0x4D);
-        else if (code === 'ArrowRight' && shift)  keycode('6', 0x4D);
-        else if (code === 'Backspace' && plain)   keycode('\x08', 0);
-        else if (code === 'Enter' && plain)       keycode('\x0D', 0x1C);
-        else if (code === 'Escape' && plain)      keycode('\x1b', 0x01);
-
+        if (code === 'ArrowUp' && !shift) keycode(0, 0x48);
+        else if (code === 'ArrowUp' && shift) keycode('8', 0x48);
+        else if (code === 'ArrowDown' && !shift) keycode(0, 0x50);
+        else if (code === 'ArrowDown' && shift) keycode('2', 0x50);
+        else if (code === 'ArrowLeft' && !shift) keycode(0, 0x4b);
+        else if (code === 'ArrowLeft' && shift) keycode('4', 0x4b);
+        else if (code === 'ArrowRight' && !shift) keycode(0, 0x4d);
+        else if (code === 'ArrowRight' && shift) keycode('6', 0x4d);
+        else if (code === 'Backspace' && plain) keycode('\x08', 0);
+        else if (code === 'Enter' && plain) keycode('\x0D', 0x1c);
+        else if (code === 'Escape' && plain) keycode('\x1b', 0x01);
         else if (key.length === 1 && plain) {
             // Letter keys
             keycode(key.toUpperCase(), 0);
@@ -143,8 +141,7 @@ export function init()
 
     let delay = null;
     let repeater = null;
-    function stopRepeat()
-    {
+    function stopRepeat() {
         if (delay !== null) {
             clearTimeout(delay);
             delay = null;
@@ -158,23 +155,33 @@ export function init()
     for (let button of document.getElementsByClassName('keyboard_btn')) {
         const press = () => {
             delay = null;
-            keycode(button.dataset.ascii || '0x00', parseInt(button.dataset.scancode || '0', 0));
+            keycode(
+                button.dataset.ascii || '0x00',
+                parseInt(button.dataset.scancode || '0', 0),
+            );
         };
 
-        addButtonEvents(button, () => {
-            button.classList.add('active_btn');
-            press();
-            stopRepeat();
-            if (button.dataset.rdelay && button.dataset.rrate) {
-                delay = setTimeout(() => {
-                    stopRepeat();
-                    repeater = setInterval(press, parseInt(button.dataset.rrate));
-                }, parseInt(button.dataset.rdelay));
-            }
-        }, () => {
-            button.classList.remove('active_btn');
-            stopRepeat();
-        });
+        addButtonEvents(
+            button,
+            () => {
+                button.classList.add('active_btn');
+                press();
+                stopRepeat();
+                if (button.dataset.rdelay && button.dataset.rrate) {
+                    delay = setTimeout(() => {
+                        stopRepeat();
+                        repeater = setInterval(
+                            press,
+                            parseInt(button.dataset.rrate),
+                        );
+                    }, parseInt(button.dataset.rdelay));
+                }
+            },
+            () => {
+                button.classList.remove('active_btn');
+                stopRepeat();
+            },
+        );
     }
 
     speed_selector.addEventListener('change', async (e) => {
@@ -187,17 +194,23 @@ export function init()
     });
 
     for (let button of document.getElementsByClassName('speed_adjust_btn')) {
-        addButtonEvents(button, async () => {
-            let i = speed_selector.selectedIndex + parseInt(button.dataset.value);
-            if (i >= 0 && i < speed_selector.length) {
-                speed_selector.selectedIndex = i;
-                const engine = await EngineLoader.complete;
-                engine.setSpeed(parseFloat(speed_selector.value));
-                button.classList.add('active_btn');
-            }
-        }, () => {
-            button.classList.remove('active_btn');
-        });
+        addButtonEvents(
+            button,
+            async () => {
+                let i =
+                    speed_selector.selectedIndex +
+                    parseInt(button.dataset.value);
+                if (i >= 0 && i < speed_selector.length) {
+                    speed_selector.selectedIndex = i;
+                    const engine = await EngineLoader.complete;
+                    engine.setSpeed(parseFloat(speed_selector.value));
+                    button.classList.add('active_btn');
+                }
+            },
+            () => {
+                button.classList.remove('active_btn');
+            },
+        );
     }
 
     for (let button of document.getElementsByClassName('savezip_btn')) {
@@ -220,16 +233,16 @@ export function init()
             const save_status = await AutoSave.doAutoSave();
             const href = window.location.href;
             switch (save_status) {
-            case engine.SaveStatus.OK:
-                await window.navigator.clipboard.writeText(href);
-                GameMenu.modal('Ok!\n\nGame copied to clipboard');
-                break;
-            case engine.SaveStatus.BLOCKED:
-                break;
-            case engine.SaveStatus.NOT_SUPPORTED:
-                await window.navigator.clipboard.writeText(href);
-                GameMenu.modal('Can\'t save game here, copied\n' + href);
-                break;
+                case engine.SaveStatus.OK:
+                    await window.navigator.clipboard.writeText(href);
+                    GameMenu.modal('Ok!\n\nGame copied to clipboard');
+                    break;
+                case engine.SaveStatus.BLOCKED:
+                    break;
+                case engine.SaveStatus.NOT_SUPPORTED:
+                    await window.navigator.clipboard.writeText(href);
+                    GameMenu.modal("Can't save game here, copied\n" + href);
+                    break;
             }
         });
     }

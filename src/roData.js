@@ -5,21 +5,19 @@
 const LAB_WORLD = 30;
 const TUT7_WORLD = 27;
 
-export function worldIdFromSaveData(bytes)
-{
+export function worldIdFromSaveData(bytes) {
     if (bytes.length === 24389) {
         return bytes[bytes.length - 1];
     }
     return null;
 }
 
-export function chipNameFromSaveData(bytes)
-{
+export function chipNameFromSaveData(bytes) {
     if (bytes.length === 1333) {
         let name = '';
-        const nameField = bytes.slice(0x40A, 0x41C);
+        const nameField = bytes.slice(0x40a, 0x41c);
         for (let byte of nameField) {
-            if (byte < 0x20 || byte > 0x7F) {
+            if (byte < 0x20 || byte > 0x7f) {
                 break;
             }
             name += String.fromCharCode(byte);
@@ -29,11 +27,10 @@ export function chipNameFromSaveData(bytes)
     return null;
 }
 
-export function filenameForSaveData(bytes, date)
-{
+export function filenameForSaveData(bytes, date) {
     const world = worldIdFromSaveData(bytes);
     const chip = chipNameFromSaveData(bytes);
-    const datestr = date.toLocaleString().replace(/\//g,'-');
+    const datestr = date.toLocaleString().replace(/\//g, '-');
 
     if (world !== null) {
         if (world === LAB_WORLD) {
@@ -41,19 +38,18 @@ export function filenameForSaveData(bytes, date)
         } else if (world === TUT7_WORLD) {
             return `Saved Chip Design Tutorial (${datestr}).lsv`;
         } else {
-            return `Robotropolis, World ${world+1} (${datestr}).gsv`;
+            return `Robotropolis, World ${world + 1} (${datestr}).gsv`;
         }
     }
-    if (chip !==  null) {
+    if (chip !== null) {
         return `${chip} (${datestr}).csv`;
     }
     return `${datestr}.bin`;
 }
 
-export function filenameForAutosave(bytes, date)
-{
+export function filenameForAutosave(bytes, date) {
     const world = worldIdFromSaveData(bytes);
-    const datestr = date.toLocaleString().replace(/\//g,'-');
+    const datestr = date.toLocaleString().replace(/\//g, '-');
 
     if (world !== null) {
         if (world === LAB_WORLD) {

@@ -6,8 +6,7 @@ import EngineWasm from '../build/engine.wasm';
 export var instance = null;
 export var complete = null;
 
-export function init()
-{
+export function init() {
     instance = {
         locateFile: () => EngineWasm,
     };

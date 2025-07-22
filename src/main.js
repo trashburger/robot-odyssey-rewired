@@ -40,7 +40,6 @@ try {
     // Autosave should be last, it may try to launch a saved game
     // and the other subsystems should be installed by then.
     AutoSave.init();
-
 } catch (e) {
     GameMenu.showError(e);
 }

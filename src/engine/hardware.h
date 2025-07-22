@@ -1,12 +1,11 @@
 #pragma once
 
-#include <vector>
-#include <list>
-#include "sbt86.h"
 #include "filesystem.h"
-#include "output.h"
 #include "input.h"
-
+#include "output.h"
+#include "sbt86.h"
+#include <list>
+#include <vector>
 
 enum class SaveStatus {
     OK,
@@ -14,9 +13,8 @@ enum class SaveStatus {
     BLOCKED,
 };
 
-class Hardware
-{
- public:
+class Hardware {
+  public:
     Hardware(OutputInterface &output);
 
     void registerProcess(SBTProcess *p);
@@ -45,8 +43,8 @@ class Hardware
     OutputInterface &output;
     SBTProcess *process;
 
- private:
-    std::vector<SBTProcess*> process_vec;
+  private:
+    std::vector<SBTProcess *> process_vec;
     uint8_t port61;
     uint16_t keycode;
     int js_x, js_y;

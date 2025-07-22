@@ -13,11 +13,9 @@ let autosave_timer = null;
 // create so many saves that it's just clutter.
 const autosave_delay = 10000;
 
-export async function doAutoSave()
-{
+export async function doAutoSave() {
     const engine = await EngineLoader.complete;
     return await new Promise(function (resolve) {
-
         // this is hacky... autosaves have a different
         // completion action, and they shouldn't clobber
         // the user's save buffer (it's especially annoying
@@ -34,13 +32,15 @@ export async function doAutoSave()
 
         try {
             const save_status = engine.saveGame();
-            const storage_status = save_status === engine.SaveStatus.OK ? storeAutoSave(engine) : save_status;
+            const storage_status =
+                save_status === engine.SaveStatus.OK
+                    ? storeAutoSave(engine)
+                    : save_status;
             if (storage_status === engine.SaveStatus.NOT_SUPPORTED) {
                 last_set_window_hash = '';
                 window.location.hash = '';
             }
             resolve(storage_status);
-
         } finally {
             engine.onSaveFileWrite = saved_callback;
             engine.setSaveFile(saved_contents, false);
@@ -48,8 +48,7 @@ export async function doAutoSave()
     });
 }
 
-async function checkHashForAutoSave()
-{
+async function checkHashForAutoSave() {
     const hash = window.location.hash;
     if (hash && hash[0] === '#') {
         let s = hash.slice(1);
@@ -68,10 +67,8 @@ async function checkHashForAutoSave()
     return false;
 }
 
-export function init()
-{
-    EngineLoader.instance.autoSave = function ()
-    {
+export function init() {
+    EngineLoader.instance.autoSave = function () {
         if (autosave_timer) {
             clearTimeout(autosave_timer);
         }
@@ -84,8 +81,7 @@ export function init()
     checkHashForAutoSave();
 }
 
-function storeAutoSave(engine)
-{
+function storeAutoSave(engine) {
     const saveData = engine.getSaveFile();
     const packed = engine.packSaveFile();
 

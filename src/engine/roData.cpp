@@ -1,11 +1,9 @@
+#include "roData.h"
 #include <assert.h>
 #include <string.h>
 #include <vector>
-#include "roData.h"
 
-
-void ROWorld::clear()
-{
+void ROWorld::clear() {
     memset(this, 0, sizeof *this);
     memset(objects.nextInRoom, RO_OBJ_NONE, sizeof objects.nextInRoom);
     memset(objects.room, RO_ROOM_NONE, sizeof objects.room);
@@ -13,38 +11,34 @@ void ROWorld::clear()
     memset(text.room, RO_ROOM_NONE, sizeof text.room);
 }
 
-ROWorld *ROWorld::fromProcess(SBTProcess *proc)
-{
+ROWorld *ROWorld::fromProcess(SBTProcess *proc) {
     int addr = proc->getAddress(SBTADDR_WORLD_DATA);
-    return addr < 0 ? 0 : reinterpret_cast<ROWorld*>(proc->memSeg(proc->reg.ds) + addr);
+    return addr < 0
+               ? 0
+               : reinterpret_cast<ROWorld *>(proc->memSeg(proc->reg.ds) + addr);
 }
 
-RORoomId ROWorld::getObjectRoom(ROObjectId obj)
-{
-    return (RORoomId) objects.room[obj];
+RORoomId ROWorld::getObjectRoom(ROObjectId obj) {
+    return (RORoomId)objects.room[obj];
 }
 
-void ROWorld::getObjectXY(ROObjectId obj, int &x, int &y)
-{
+void ROWorld::getObjectXY(ROObjectId obj, int &x, int &y) {
     x = objects.x[obj];
     y = objects.y[obj];
 }
 
-void ROWorld::setObjectRoom(ROObjectId obj, RORoomId room)
-{
+void ROWorld::setObjectRoom(ROObjectId obj, RORoomId room) {
     removeObjectFromRoom(obj, getObjectRoom(obj));
     objects.room[obj] = room;
     addObjectToRoom(obj, room);
 }
 
-void ROWorld::setObjectXY(ROObjectId obj, int x, int y)
-{
+void ROWorld::setObjectXY(ROObjectId obj, int x, int y) {
     objects.x[obj] = x;
     objects.y[obj] = y;
 }
 
-void ROWorld::removeObjectFromRoom(ROObjectId obj, RORoomId room)
-{
+void ROWorld::removeObjectFromRoom(ROObjectId obj, RORoomId room) {
     /*
      * Remove an object from a room's linked list.  If 'room' is
      * RO_ROOM_NONE or the object isn't found, has no effect.
@@ -79,8 +73,7 @@ void ROWorld::removeObjectFromRoom(ROObjectId obj, RORoomId room)
     }
 }
 
-void ROWorld::addObjectToRoom(ROObjectId obj, RORoomId room)
-{
+void ROWorld::addObjectToRoom(ROObjectId obj, RORoomId room) {
     /*
      * Add an object to a room's linked list.
      * If 'room' is RO_ROOM_NONE, has no effect.
@@ -94,85 +87,90 @@ void ROWorld::addObjectToRoom(ROObjectId obj, RORoomId room)
     rooms.objectListHead[room] = obj;
 }
 
-void ROWorld::setRobotRoom(ROObjectId obj, RORoomId room)
-{
+void ROWorld::setRobotRoom(ROObjectId obj, RORoomId room) {
     /*
      * Robots come in two halves. Set both of them to the same room.
      */
 
-    ROObjectId left = (ROObjectId) (obj & ~1);
-    ROObjectId right = (ROObjectId) (left + 1);
+    ROObjectId left = (ROObjectId)(obj & ~1);
+    ROObjectId right = (ROObjectId)(left + 1);
 
     setObjectRoom(left, room);
     setObjectRoom(right, room);
 }
 
-void ROWorld::setRobotXY(ROObjectId obj, int x, int y)
-{
+void ROWorld::setRobotXY(ROObjectId obj, int x, int y) {
     /*
      * Robots come in two halves. Set the left one to the given
      * position, and the right one needs to be 5 pixels away from the
      * left one.
      */
 
-    ROObjectId left = (ROObjectId) (obj & ~1);
-    ROObjectId right = (ROObjectId) (left + 1);
+    ROObjectId left = (ROObjectId)(obj & ~1);
+    ROObjectId right = (ROObjectId)(left + 1);
 
     setObjectXY(left, x, y);
     setObjectXY(right, x + 5, y);
 }
 
-ROCircuit *ROCircuit::fromProcess(SBTProcess *proc)
-{
+ROCircuit *ROCircuit::fromProcess(SBTProcess *proc) {
     int addr = proc->getAddress(SBTADDR_CIRCUIT_DATA);
-    return addr < 0 ? 0 : reinterpret_cast<ROCircuit*>(proc->memSeg(proc->reg.ds) + addr);
+    return addr < 0 ? 0
+                    : reinterpret_cast<ROCircuit *>(proc->memSeg(proc->reg.ds) +
+                                                    addr);
 }
 
-RORobot *RORobot::fromProcess(SBTProcess *proc)
-{
+RORobot *RORobot::fromProcess(SBTProcess *proc) {
     int addr = proc->getAddress(SBTADDR_ROBOT_DATA_MAIN);
-    return addr < 0 ? 0 : reinterpret_cast<RORobot*>(proc->memSeg(proc->reg.ds) + addr);
+    return addr < 0
+               ? 0
+               : reinterpret_cast<RORobot *>(proc->memSeg(proc->reg.ds) + addr);
 }
 
-RORobotGrabber *RORobotGrabber::fromProcess(SBTProcess *proc)
-{
+RORobotGrabber *RORobotGrabber::fromProcess(SBTProcess *proc) {
     int addr = proc->getAddress(SBTADDR_ROBOT_DATA_GRABBER);
-    return addr < 0 ? 0 : reinterpret_cast<RORobotGrabber*>(proc->memSeg(proc->reg.ds) + addr);
+    return addr < 0 ? 0
+                    : reinterpret_cast<RORobotGrabber *>(
+                          proc->memSeg(proc->reg.ds) + addr);
 }
 
-const char *ROSavedGame::getWorldName()
-{
+const char *ROSavedGame::getWorldName() {
     switch (worldId) {
-        case RO_WORLD_SEWER:   return "City Sewer";
-        case RO_WORLD_SUBWAY:  return "The Subway";
-        case RO_WORLD_TOWN:    return "Streets of Robotropolis";
-        case RO_WORLD_COMP:    return "Master Computer Center";
-        case RO_WORLD_STREET:  return "The Skyways";
-        case RO_WORLD_LAB:     return "Saved Lab";
-        default:               return "(Unknown)";
+    case RO_WORLD_SEWER:
+        return "City Sewer";
+    case RO_WORLD_SUBWAY:
+        return "The Subway";
+    case RO_WORLD_TOWN:
+        return "Streets of Robotropolis";
+    case RO_WORLD_COMP:
+        return "Master Computer Center";
+    case RO_WORLD_STREET:
+        return "The Skyways";
+    case RO_WORLD_LAB:
+        return "Saved Lab";
+    default:
+        return "(Unknown)";
     }
 }
 
-const char *ROSavedGame::getProcessName()
-{
+const char *ROSavedGame::getProcessName() {
     // Which process do we load this world as?
     switch (worldId) {
-        case RO_WORLD_SEWER:
-        case RO_WORLD_SUBWAY:
-        case RO_WORLD_TOWN:
-        case RO_WORLD_COMP:
-        case RO_WORLD_STREET:
-            return "game.exe";
+    case RO_WORLD_SEWER:
+    case RO_WORLD_SUBWAY:
+    case RO_WORLD_TOWN:
+    case RO_WORLD_COMP:
+    case RO_WORLD_STREET:
+        return "game.exe";
 
-        case RO_WORLD_LAB:
-        case RO_WORLD_TUT7:
-            return "lab.exe";
+    case RO_WORLD_LAB:
+    case RO_WORLD_TUT7:
+        return "lab.exe";
     }
     return 0;
 }
 
-bool ROData::fromProcess(SBTProcess *proc)
-{
+bool ROData::fromProcess(SBTProcess *proc) {
     world = ROWorld::fromProcess(proc);
     circuit = ROCircuit::fromProcess(proc);
     robots.state = RORobot::fromProcess(proc);
@@ -191,10 +189,11 @@ bool ROData::fromProcess(SBTProcess *proc)
      * termination byte just after the end of the RORobot table.
      */
 
-    robots.count = (RORobotGrabber*)robots.state - robots.grabbers;
-    assert((robots.count == 3 || robots.count == 4) && "Robot table sanity check failed");
+    robots.count = (RORobotGrabber *)robots.state - robots.grabbers;
+    assert((robots.count == 3 || robots.count == 4) &&
+           "Robot table sanity check failed");
 
-    uint8_t *endOfTable = (uint8_t*)&robots.state[robots.count];
+    uint8_t *endOfTable = (uint8_t *)&robots.state[robots.count];
     assert(*endOfTable == 0xFF && "End of robot table not found");
 
     /*
@@ -202,13 +201,12 @@ bool ROData::fromProcess(SBTProcess *proc)
      * robot battery accumulators.
      */
 
-    robots.batteryAcc = (RORobotBatteryAcc*) (endOfTable + 1);
+    robots.batteryAcc = (RORobotBatteryAcc *)(endOfTable + 1);
 
     return true;
 }
 
-void ROData::copyFrom(ROData *source)
-{
+void ROData::copyFrom(ROData *source) {
     /*
      * Copy all world data from another process.
      */
@@ -217,8 +215,9 @@ void ROData::copyFrom(ROData *source)
         return;
     }
 
-    const int copyRobots = robots.count < source->robots.count ?
-                           robots.count : source->robots.count;
+    const int copyRobots = robots.count < source->robots.count
+                               ? robots.count
+                               : source->robots.count;
 
     memcpy(world, source->world, sizeof *world);
     memcpy(circuit, source->circuit, sizeof *circuit);
@@ -245,16 +244,18 @@ void ROData::copyFrom(ROData *source)
     } else if (robots.count == 3 && source->robots.count == 4) {
         /* Convert sprites from GAME to TUT/LAB IDs */
         memcpy(&world->sprites[RO_SPR_GRABBER_UP],
-               &source->world->sprites[RO_SPR_GAME_GRABBER_UP], sizeof(ROSprite));
+               &source->world->sprites[RO_SPR_GAME_GRABBER_UP],
+               sizeof(ROSprite));
         memcpy(&world->sprites[RO_SPR_GRABBER_RIGHT],
-               &source->world->sprites[RO_SPR_GAME_GRABBER_RIGHT], sizeof(ROSprite));
+               &source->world->sprites[RO_SPR_GAME_GRABBER_RIGHT],
+               sizeof(ROSprite));
         memcpy(&world->sprites[RO_SPR_GRABBER_LEFT],
-               &source->world->sprites[RO_SPR_GAME_GRABBER_LEFT], sizeof(ROSprite));
+               &source->world->sprites[RO_SPR_GAME_GRABBER_LEFT],
+               sizeof(ROSprite));
     }
 }
 
-ROJoyfile::ROJoyfile()
-{
+ROJoyfile::ROJoyfile() {
     // Start out empty
     memset(this, 0, sizeof *this);
 
@@ -270,7 +271,6 @@ ROJoyfile::ROJoyfile()
     xminus_divisor = yminus_divisor = DEFAULT_JOYSTICK_DIVISOR;
 }
 
-void ROJoyfile::setCheatsEnabled(bool enable)
-{
+void ROJoyfile::setCheatsEnabled(bool enable) {
     cheat_control = enable ? CHEATS_ENABLED : 0;
 }

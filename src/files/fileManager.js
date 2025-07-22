@@ -19,8 +19,7 @@ const onclick = {
     lab: (file) => clickedFile(file, (engine) => engine.loadGame()),
 };
 
-async function clickedFile(file, loader)
-{
+async function clickedFile(file, loader) {
     const engine = await EngineLoader.complete;
     const loadedFile = await file.load();
     if (!engine.setSaveFile(loadedFile.data, isCompressed(loadedFile))) {
@@ -32,8 +31,7 @@ async function clickedFile(file, loader)
     close(GameMenu.States.LOADING);
 }
 
-export async function open(modes_str, next_state)
-{
+export async function open(modes_str, next_state) {
     const modes = modes_str.split(' ');
     const result = await refreshFileElements(modal_files, modes);
 
@@ -54,15 +52,13 @@ export async function open(modes_str, next_state)
     return result;
 }
 
-export function refresh()
-{
+export function refresh() {
     if (modal_saved !== null) {
         refreshFileElements(modal_files, modal_saved.modes).then();
     }
 }
 
-export function close(optionalStateOverride)
-{
+export function close(optionalStateOverride) {
     const saved = modal_saved;
     if (saved !== null && GameMenu.getState() === GameMenu.States.MODAL_FILES) {
         modal_saved = null;
@@ -75,41 +71,41 @@ export function close(optionalStateOverride)
     return false;
 }
 
-export function setChipId(chip_id)
-{
+export function setChipId(chip_id) {
     // Set the click handler to load the correct chip slot and go back to the game
-    onclick.chip = (file) => clickedFile(file, (engine) => engine.loadChip(chip_id));
+    onclick.chip = (file) =>
+        clickedFile(file, (engine) => engine.loadChip(chip_id));
 
     // Update UI to show the correct chip number
     for (let element of modal_files.getElementsByClassName('chip_id')) {
-        element.innerText = (1+chip_id).toString();
+        element.innerText = (1 + chip_id).toString();
     }
 }
 
-function refreshFileElements(modal_element, modes)
-{
+function refreshFileElements(modal_element, modes) {
     const engine = EngineLoader.instance;
     const file_elements = [];
 
     visitElements(modal_element, modes, file_elements);
 
     return new Promise((resolve, reject) => {
-        engine.files.listFiles((file) => {
-            // One file returned from the database
-            for (let element of file_elements) {
-                const mode = element.dataset.filemode;
-                if (filters[mode](file)) {
-                    // Mapped that file to a grid where it appears
-                    resolve(true);
-                    element.appendChild(fileView(file, mode));
+        engine.files
+            .listFiles((file) => {
+                // One file returned from the database
+                for (let element of file_elements) {
+                    const mode = element.dataset.filemode;
+                    if (filters[mode](file)) {
+                        // Mapped that file to a grid where it appears
+                        resolve(true);
+                        element.appendChild(fileView(file, mode));
+                    }
                 }
-            }
-        }).then(() => resolve(false), reject);
+            })
+            .then(() => resolve(false), reject);
     });
 }
 
-function visitElements(element, modes, file_elements)
-{
+function visitElements(element, modes, file_elements) {
     const data = element.dataset || {};
 
     // Control visibility based on the current mode
@@ -130,7 +126,6 @@ function visitElements(element, modes, file_elements)
             file_elements.push(new_element);
         }
         element.parentNode.replaceChild(new_element, element);
-
     } else {
         // Other: visit children
 
@@ -140,8 +135,7 @@ function visitElements(element, modes, file_elements)
     }
 }
 
-function fileView(file, mode)
-{
+function fileView(file, mode) {
     const item = document.createElement('div');
     item.classList.add('item');
     item.addEventListener('click', () => onclick[mode](file));
