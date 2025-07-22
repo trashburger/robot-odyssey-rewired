@@ -92,7 +92,7 @@ void OutputQueue::renderFrame()
 
 void OutputQueue::pushDelay(uint32_t timestamp, OutputDelayType delay_type)
 {
-    const uint32_t elapsed_msec = roundClocksToMsec(timestamp - reference_timestamp);
+    const uint32_t elapsed_msec = clocksToMsec(timestamp - reference_timestamp);
     if (!elapsed_msec) {
         return;
     }

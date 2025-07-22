@@ -31,22 +31,21 @@ struct OutputItem
 class OutputInterface
 {
  public:
-    static const int CPU_CLOCK_HZ = 4770000;
-    static const unsigned CPU_CLOCKS_PER_SAMPLE = 200;
-    static const unsigned AUDIO_HZ = CPU_CLOCK_HZ / CPU_CLOCKS_PER_SAMPLE;
+    static const uint32_t CPU_CLOCK_KHZ = 4770;
+    static const uint32_t CPU_CLOCK_HZ = CPU_CLOCK_KHZ * 1000;
+    static const uint32_t CPU_CLOCKS_PER_SAMPLE = 200;
+    static const uint32_t AUDIO_HZ = CPU_CLOCK_HZ / CPU_CLOCKS_PER_SAMPLE;
 
     OutputInterface(ColorTable &colorTable);
 
-    static uint32_t msecToClocks(uint32_t millis)
+    static constexpr uint32_t msecToClocks(uint32_t millis)
     {
-        constexpr uint32_t clocks_per_msec = (CPU_CLOCK_HZ + 500) / 1000;
-        return millis * clocks_per_msec;
+        return millis * CPU_CLOCK_KHZ;
     }
 
-    static uint32_t roundClocksToMsec(uint32_t clocks)
+    static constexpr uint32_t clocksToMsec(uint32_t clocks)
     {
-        constexpr uint32_t clocks_per_msec = (CPU_CLOCK_HZ + 500) / 1000;
-        return (clocks + clocks_per_msec / 2) / clocks_per_msec;
+        return clocks / CPU_CLOCK_KHZ;
     }
 
     void setTimeReference(uint32_t timestamp)
