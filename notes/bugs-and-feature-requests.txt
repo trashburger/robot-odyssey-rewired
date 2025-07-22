@@ -34,8 +34,11 @@ add custom characters to the web font, beyond the ones in the original game font
 
 size profiling
 
-cpu efficiency for rgba draw layer?
-- defer high-res render?
+cpu efficiency for rgba draw layer
+- defer high-res render? replace RGBDraw with display list capture, render via JS
+- could avoid CPU rendering entirely
+- could allow flexible output resolution rather than fixed multiple of cropped CGA framebuffer
+- JS display list renderer based on GL? SVG?
 
 avoid canvas readback, to fix Tor browser
 - i think it'd be worth including a small png library in the wasm.
