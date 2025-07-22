@@ -3,7 +3,7 @@ CC          := $(shell which em++)
 NODE        := $(shell which node)
 NPX         := $(shell which npx)
 
-CCFLAGS := -std=c++11 -Oz -flto
+CCFLAGS := -std=c++11 -Oz -flto -fstrict-aliasing -Wall -Wextra -Werror
 
 ZSTD_OPTS := ZSTD_LEGACY_SUPPORT=0 CFLAGS=-Oz
 
