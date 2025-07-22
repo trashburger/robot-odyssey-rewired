@@ -1,4 +1,17 @@
-add a port-specific controls tutorial?
+bug: town magnetic storms seem to periodically freeze sparky's bot animation.
+check for RNG issue? (number of calls equal period?)
+check if DOS and Apple ports have same bug.
+
+first sound effect doesnt play?
+can we buffer sfx that came just prior to audio unblock
+
+compare teleporter sound to apple version
+
+add url fragment shortcuts for main menu items?
+the main menu rows could be normal hyperlinks
+
+can we have a one-page about/controls screen?
+- port-specific controls tutorial
 
 bug: when file import fails (for ex, non-secure context) there is no modal, the "Processing selected files..." stays up until dismissed manually.
 
