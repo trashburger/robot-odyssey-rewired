@@ -2,6 +2,9 @@
 // The game memory is broken up into the major regions (world, circuit, robots) which are each uint8 arrays.
 // For more information about the known structure of the data within, check "rodata.h" in the C++ source.
 
+// Show the PCM data and sample rate, every time the emulated PC speaker renders a complete sound effect
+renderSound = ROEngine.onRenderSound; ROEngine.onRenderSound = function(s,r) { renderSound(s,r); console.log(s,r); }
+
 // Minimal world file built from scratch in a hex editor, with empty sprites and with rooms labeled.
 // (Loads in Innovation Lab; change the last byte to load as a particular game level.)
 % echo https\://robotodyssey.online/\#$((echo -ne \\x11; cat minimal.lsv | zstd) | base64 -w0)
