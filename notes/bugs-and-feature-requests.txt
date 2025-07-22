@@ -2,7 +2,7 @@ add a port-specific controls tutorial?
 
 bug: when file import fails (for ex, non-secure context) there is no modal, the "Processing selected files..." stays up until dismissed manually.
 
-bug: noticed on chrome for android, joystick responds ok in-game but the UI (css animation) lags.
+bug?: noticed on duckduckgo browser for android, joystick responds ok in-game but the UI (css animation) lags. no bug on chrome, firefox, webview.
 
 bug? check teleporter sound effects, I think v0.12 is a regression. sounds like the low-frequency portion of the effect gets skipped after the first time it plays.
 
