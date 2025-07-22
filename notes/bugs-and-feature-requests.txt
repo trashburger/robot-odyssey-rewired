@@ -1,9 +1,5 @@
 enable and fix compiler warnings
 
-automatic source formatting
-- python is already formatted with 'black' manually
-- set up clang-format
-
 bug: town magnetic storms seem to periodically freeze sparky's bot animation.
 check for RNG issue? (number of calls equal period?)
 check if DOS and Apple ports have same bug.
