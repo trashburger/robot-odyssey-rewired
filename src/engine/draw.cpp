@@ -84,7 +84,7 @@ void RGBDraw::playfield(uint8_t *data, uint8_t foreground, uint8_t background) {
 }
 
 void RGBDraw::text(uint8_t *string, uint8_t *font_data, uint8_t x, uint8_t y,
-                   uint8_t color, uint8_t font_id, uint8_t style) {
+                   uint8_t color, uint8_t /* font_id */, uint8_t style) {
     // The game engine calculates font_data to be the offset from character
     // zero, which isn't actually present in the font (-0x20), and from the last
     // line (+7 * 0x60), so the actual pointer we get is to 0x280 past the

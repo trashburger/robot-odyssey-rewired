@@ -784,7 +784,7 @@ class ROData {
     ROCircuit *circuit;
 
     struct {
-        int count;
+        unsigned count;
         RORobot *state;
         RORobotGrabber *grabbers;
         RORobotBatteryAcc *batteryAcc;

@@ -73,7 +73,7 @@ void InputBuffer::setMouseTracking(int x, int y) {
 
 void InputBuffer::setMouseButton(bool button) {
     if (!mouse_buffer.full()) {
-        MouseEvent evt = {EVT_BUTTON, button};
+        MouseEvent evt = {EVT_BUTTON, button, 0};
         mouse_buffer.push_back(evt);
     }
 }

@@ -152,7 +152,7 @@ void Hardware::exit(SBTProcess *exiting_process, uint8_t code) {
 
 void Hardware::registerProcess(SBTProcess *p) { process_vec.push_back(p); }
 
-uint8_t Hardware::in(uint16_t port, uint32_t timestamp) {
+uint8_t Hardware::in(uint16_t port, uint32_t /* timestamp */) {
     switch (port) {
 
     case 0x61: /* PC speaker gate */
@@ -194,12 +194,13 @@ SBTRegs Hardware::interrupt10(SBTRegs reg, SBTStack *stack) {
         break;
 
     default:
+        stack->trace();
         assert(0 && "Unimplemented BIOS Int10");
     }
     return reg;
 }
 
-SBTRegs Hardware::interrupt16(SBTRegs reg, SBTStack *stack) {
+SBTRegs Hardware::interrupt16(SBTRegs reg, SBTStack * /* stack */) {
     switch (reg.ah) {
 
     case 0x00: /* Get keystroke */

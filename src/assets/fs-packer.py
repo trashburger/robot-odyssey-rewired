@@ -21,10 +21,7 @@ def combine_files(fs):
     index = []
     blob = b""
     for name in sorted(fs.keys()):
-        index.append(
-            '\t{ .name = "%s", .offset = %d, .size = %d },'
-            % (name, len(blob), len(fs[name]))
-        )
+        index.append('\t{ "%s", %d, %d },' % (name, len(blob), len(fs[name])))
         blob += fs[name]
     return (index, blob)
 
@@ -58,7 +55,7 @@ def write_blob(cpp, blob):
 
 def write_index(cpp, index):
     cpp.write(
-        "\nstatic const CompressedFileInfo fs_index[%d] = {\n%s\n\t{0}\n};\n"
+        "\nstatic const CompressedFileInfo fs_index[%d] = {\n%s\n\t{nullptr, 0, 0}\n};\n"
         % (
             len(index) + 1,
             "\n".join(index),
