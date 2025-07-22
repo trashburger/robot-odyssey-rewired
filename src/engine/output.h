@@ -99,7 +99,6 @@ class OutputQueue final : public OutputInterface
 
     uint32_t frameskip_value;
     uint32_t frameskip_counter;
-    uint32_t frame_counter;
 
     void dequeueCGAFrame();
     void renderSoundEffect(uint32_t first_timestamp);
