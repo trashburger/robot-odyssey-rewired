@@ -7,68 +7,41 @@
 
 
 OutputInterface::OutputInterface(ColorTable &colorTable)
-    : draw(colorTable)
+    : draw(colorTable), frame_counter(0), reference_timestamp(0)
 {}
 
-void OutputInterface::resetElapsedCpu(uint32_t cpu_clock)
-{
-    reference_cpu_clock = cpu_clock;
-}
-
-void OutputInterface::pushDelayFromElapsedCpu(uint32_t cpu_clock)
-{
-    const uint32_t elapsed = cpu_clock - reference_cpu_clock;
-    constexpr uint32_t clocks_per_msec = (CPU_CLOCK_HZ + 500) / 1000;
-    const uint32_t delay_msec = (elapsed + clocks_per_msec / 2) / clocks_per_msec;
-    const uint32_t quantized_clocks = delay_msec * clocks_per_msec;
-    reference_cpu_clock += quantized_clocks;
-    pushDelay(delay_msec);
-}
-
-OutputMinimal::OutputMinimal(ColorTable &colorTable)
-    : OutputInterface(colorTable)
-{
-    clear();
-}
-
-void OutputMinimal::clear()
+void OutputInterface::clear()
 {
     frame_counter = 0;
-    speaker_counter = 0;
-    delay_accumulator = 0;
 }
 
-void OutputMinimal::pushFrameCGA(SBTStack *stack, uint8_t *framebuffer)
+void OutputInterface::pushFrameCGA(uint32_t, SBTStack *, uint8_t *)
 {
     frame_counter++;
 }
 
-void OutputMinimal::drawFrameRGB()
+void OutputInterface::drawFrameRGB(uint32_t)
 {
     frame_counter++;
 }
 
-void OutputMinimal::pushDelay(uint32_t millis)
-{
-    delay_accumulator += millis;
-}
+void OutputInterface::pushDelay(uint32_t, uint32_t)
+{}
 
-void OutputMinimal::pushSpeakerTimestamp(uint32_t timestamp)
-{
-    speaker_counter++;
-}
+void OutputInterface::pushSpeakerTimestamp(uint32_t)
+{}
 
 OutputQueue::OutputQueue(ColorTable &colorTable)
     : OutputInterface(colorTable),
       frameskip_value(0),
-      frameskip_counter(0),
-      frame_counter(0)
+      frameskip_counter(0)
 {
     clear();
 }
 
 void OutputQueue::clear()
 {
+    OutputInterface::clear();
     items.clear();
     frames.clear();
 }
@@ -78,13 +51,15 @@ void OutputQueue::setFrameSkip(uint32_t frameskip)
     frameskip_value = frameskip;
 }
 
-void OutputQueue::pushFrameCGA(SBTStack *stack, uint8_t *framebuffer)
+void OutputQueue::pushFrameCGA(uint32_t timestamp, SBTStack *stack, uint8_t *framebuffer)
 {
     if (frames.full() || items.full()) {
         stack->trace();
         assert(0 && "Frame queue is too deep! Infinite loop likely.");
         return;
     }
+
+    OutputQueue::pushDelay(timestamp, 0);
 
     OutputItem item;
     item.otype = OUT_CGA_FRAME;
@@ -94,10 +69,15 @@ void OutputQueue::pushFrameCGA(SBTStack *stack, uint8_t *framebuffer)
     frames.push_back(*(CGAFramebuffer*) framebuffer);
 }
 
-void OutputQueue::drawFrameRGB()
+void OutputQueue::drawFrameRGB(uint32_t timestamp)
+{
+    pushDelay(timestamp, 0);
+    renderFrame();
+}
+
+void OutputQueue::renderFrame()
 {
     // Synchronously render a frame. Handles frame skip, if enabled.
-
     if (frameskip_counter < frameskip_value) {
         frameskip_counter++;
     } else {
@@ -109,9 +89,28 @@ void OutputQueue::drawFrameRGB()
     }
 }
 
-void OutputQueue::pushDelay(uint32_t millis)
+void OutputQueue::pushDelay(uint32_t timestamp, uint32_t millis)
 {
-    if (millis && !items.full()) {
+    constexpr uint32_t clocks_per_msec = (CPU_CLOCK_HZ + 500) / 1000;
+
+    const uint32_t elapsed_clocks = timestamp - reference_timestamp;
+    const uint32_t elapsed_msec = (elapsed_clocks + clocks_per_msec / 2) / clocks_per_msec;
+    reference_timestamp += elapsed_msec * clocks_per_msec;
+    millis += elapsed_msec;
+    if (!millis) {
+        return;
+    }
+
+    if (!items.empty()) {
+        OutputItem &back = items.back();
+        if (back.otype == OUT_DELAY) {
+            // Combine with an existing delay
+            back.u.delay += millis;
+            return;
+        }
+    }
+
+    if (!items.full()) {
         OutputItem item;
         item.otype = OUT_DELAY;
         item.u.delay = millis;
@@ -124,6 +123,11 @@ void OutputQueue::pushSpeakerTimestamp(uint32_t timestamp)
     if (items.full()) {
         assert(0 && "Speaker queue is too deep! Infinite loop likely.");
         return;
+    }
+
+    // Generate one OUT_DELAY before the effect begins, then a run of OUT_SPEAKER_TIMESTAMP only.
+    if (items.empty() || items.back().otype != OUT_SPEAKER_TIMESTAMP) {
+        pushDelay(timestamp, 0);
     }
 
     OutputItem item;
@@ -217,7 +221,7 @@ uint32_t OutputQueue::run()
 
             case OUT_CGA_FRAME:
                 dequeueCGAFrame();
-                drawFrameRGB();
+                renderFrame();
                 break;
 
             case OUT_DELAY:

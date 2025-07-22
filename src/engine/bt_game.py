@@ -52,8 +52,7 @@ for call_site in [
     b.patchAndHook(
         call_site,
         "ret",
-        "g.hw->output.pushDelayFromElapsedCpu(g.clock);"
-        "g.hw->output.pushDelay(20);"
+        "g.hw->output.pushDelay(g.clock, 20);"
         "g.proc->continueFrom(r, &sub_%X);" % continue_at.linear,
     )
     b.patch(continue_at, "call 0x%04x" % subroutine.offset, length=2)
@@ -76,7 +75,7 @@ for call_site in [
     b.patchAndHook(
         call_site,
         "ret",
-        "g.hw->output.pushDelayFromElapsedCpu(g.clock);"
+        "g.hw->output.pushDelay(g.clock, 0);"
         "g.proc->continueFrom(r, &sub_%X);" % continue_at.linear,
     )
     b.patch(continue_at, "call 0x%04x" % subroutine.offset, length=2)

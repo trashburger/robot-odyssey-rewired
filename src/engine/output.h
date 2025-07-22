@@ -31,49 +31,41 @@ class OutputInterface
 
     OutputInterface(ColorTable &colorTable);
 
-    virtual void pushFrameCGA(SBTStack *stack, uint8_t *framebuffer) = 0;
-    virtual void drawFrameRGB() = 0;
-    virtual void pushDelay(uint32_t millis) = 0;
-    virtual void pushSpeakerTimestamp(uint32_t timestamp) = 0;
+    void setTimeReference(uint32_t timestamp)
+    {
+        reference_timestamp = timestamp;
+    }
 
-    void resetElapsedCpu(uint32_t cpu_clock);
-    void pushDelayFromElapsedCpu(uint32_t cpu_clock);
+    uint32_t getFrameCount()
+    {
+        return frame_counter;
+    }
+
+    virtual void clear();
+    virtual void pushFrameCGA(uint32_t timestamp, SBTStack *stack, uint8_t *framebuffer);
+    virtual void drawFrameRGB(uint32_t timestamp);
+    virtual void pushDelay(uint32_t timestamp, uint32_t millis);
+    virtual void pushSpeakerTimestamp(uint32_t timestamp);
 
     RGBDraw draw;
 
- private:
-    uint32_t reference_cpu_clock;
-};
-
-class OutputMinimal : public OutputInterface
-{
- public:
-    OutputMinimal(ColorTable &colorTable);
-
-    void clear();
-
-    virtual void pushFrameCGA(SBTStack *stack, uint8_t *framebuffer);
-    virtual void drawFrameRGB();
-    virtual void pushDelay(uint32_t millis);
-    virtual void pushSpeakerTimestamp(uint32_t timestamp);
-
+ protected:
     uint32_t frame_counter;
-    uint32_t speaker_counter;
-    uint32_t delay_accumulator;
+    uint32_t reference_timestamp;
 };
 
-class OutputQueue : public OutputInterface
+class OutputQueue final : public OutputInterface
 {
  public:
     OutputQueue(ColorTable &colorTable);
 
-    void clear();
     void setFrameSkip(uint32_t frameskip);
     uint32_t run();
 
-    virtual void pushFrameCGA(SBTStack *stack, uint8_t *framebuffer);
-    virtual void drawFrameRGB();
-    virtual void pushDelay(uint32_t millis);
+    virtual void clear();
+    virtual void pushFrameCGA(uint32_t timestamp, SBTStack *stack, uint8_t *framebuffer);
+    virtual void drawFrameRGB(uint32_t timestamp);
+    virtual void pushDelay(uint32_t timestamp, uint32_t millis);
     virtual void pushSpeakerTimestamp(uint32_t timestamp);
 
     static const unsigned AUDIO_BUFFER_SECONDS = 10;
@@ -84,18 +76,15 @@ class OutputQueue : public OutputInterface
     static const unsigned MAX_BUFFERED_FRAMES = 128;
     static const unsigned MAX_BUFFERED_EVENTS = 16384;
 
-    uint32_t getFrameCount()
-    {
-        return frame_counter;
-    }
-
  private:
     jm::circular_buffer<OutputItem, MAX_BUFFERED_EVENTS> items;
     jm::circular_buffer<CGAFramebuffer, MAX_BUFFERED_FRAMES> frames;
+
     uint32_t frameskip_value;
     uint32_t frameskip_counter;
     uint32_t frame_counter;
 
     void dequeueCGAFrame();
     void renderSoundEffect(uint32_t first_timestamp);
+    void renderFrame();
 };

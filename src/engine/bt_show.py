@@ -101,7 +101,6 @@ bt_common.patchShowSfxInterruptible(
         "019E:02D3",
         "019E:02D9",
     ],
-    extra_delay_msec=10,
 )
 
 b.writeCodeToFile(os.path.join(basedir, "bt_show.cpp"), "ShowEXE")

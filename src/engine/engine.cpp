@@ -37,7 +37,7 @@ SBT_STATIC_PROCESS(hw, GameEXE);
 SBT_STATIC_PROCESS(hw, TutorialEXE);
 
 // Auxiliary hardware instance, for screenshots. Shares main color table.
-static OutputMinimal outputAux(colorTable);
+static OutputInterface outputAux(colorTable);
 static Hardware hwAux(outputAux);
 SBT_STATIC_PROCESS(hwAux, LabEXE);
 SBT_STATIC_PROCESS(hwAux, GameEXE);
@@ -287,7 +287,7 @@ static val screenshotSaveFile(val buffer, bool compressed)
     do {
         assert(hwAux.process);
         hwAux.process->run();
-    } while (outputAux.frame_counter == 0);
+    } while (outputAux.getFrameCount() == 0);
 
     uint8_t *image_bytes = reinterpret_cast<uint8_t*>(outputAux.draw.backbuffer);
     size_t image_byte_count = sizeof outputAux.draw.backbuffer;

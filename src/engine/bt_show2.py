@@ -53,9 +53,8 @@ b.markSubroutine(final_loop)
 b.patchAndHook(
     final_loop,
     "ret",
-    "g.hw->output.pushDelayFromElapsedCpu(g.clock);"
-    "g.hw->output.pushFrameCGA(g.stack, g.proc->memSeg(0xB800));"
-    "g.hw->output.pushDelay(1000);"
+    "g.hw->output.pushFrameCGA(g.clock, g.stack, g.proc->memSeg(0xB800));"
+    "g.hw->output.pushDelay(g.clock, 1000);"
     "g.proc->continueFrom(r, &sub_%X);" % final_loop.linear,
 )
 
