@@ -1628,7 +1628,7 @@ ret:
 
 
 class BinaryData:
-    """Represents the data portions of a binary image. These parts are RLE
+    """Represents the data portions of a binary image. These parts are
     compressed and converted to an array in the generated code.
     """
 
