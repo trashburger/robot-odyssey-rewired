@@ -19,7 +19,7 @@
 #joystick_zone::before, #joystick_zone::after {
     content: "";
     position: absolute;
-    background: #1c1c1c;
+    background: #2e2e2e;
 }
 
 #joystick_zone::before {
