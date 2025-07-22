@@ -115,7 +115,6 @@ void RGBDraw::text(uint8_t *string, uint8_t *font_data, uint8_t x, uint8_t y,
                 uint8_t *font = font_start + (c - 0x20);
                 for (unsigned line = 0; line < 8; line++) {
                     uint8_t byte = font[line * 0x60];
-                    #pragma unroll
                     for (unsigned bit = 0; bit < 8; bit++) {
                         if ((byte << bit) & 0x80) {
                             if (style == RO_TEXT_BIG) {
