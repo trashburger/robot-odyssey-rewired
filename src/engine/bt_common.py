@@ -32,7 +32,6 @@ def patch(b):
         b.patchAndHook(
             loopJumpAddr,
             "ret",
-            "g.hw->output.pushDelay(g.clock, 0);"
             "g.proc->continueFrom(r, &sub_%X, true);" % loopEntry.linear,
         )
         b.markSubroutine(loopEntry)

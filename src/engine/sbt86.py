@@ -1746,6 +1746,12 @@ void %(className)s::loadEnvironment(SBTStack *stack, SBTRegs reg)
     g.s.load(g.proc, g.r);
 }
 
+void %(className)s::flushOutput()
+{
+    ProcessLocals& g = gProcessLocals;
+    g.hw->output.pushDelay(g.clock, 0);
+}
+
 SBTProcess::continue_func_t %(className)s::getFunction(SBTAddressId id)
 {
     switch (id) {

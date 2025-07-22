@@ -61,6 +61,8 @@ void SBTProcess::run(void)
         continue_func = default_func;
         reg = default_reg;
     }
+
+    flushOutput();
 }
 
 bool SBTProcess::isWaitingInMainLoop()
