@@ -34,6 +34,10 @@ add custom characters to the web font, beyond the ones in the original game font
 
 size profiling
 
+startup time profiling
+
+tinysave shouldn't be setting up its dictionary from static initializers. defer that.
+
 cpu efficiency for rgba draw layer
 - defer high-res render? replace RGBDraw with display list capture, render via JS
 - could avoid CPU rendering entirely
