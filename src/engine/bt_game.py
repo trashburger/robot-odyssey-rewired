@@ -52,7 +52,7 @@ for call_site in [
     b.patchAndHook(
         call_site,
         "ret",
-        "g.hw->output.pushDelay(g.clock, 20);"
+        "g.clock += OutputInterface::msecToClocks(20);"
         "g.proc->continueFrom(r, &sub_%X);" % continue_at.linear,
     )
     b.patch(continue_at, "call 0x%04x" % subroutine.offset, length=2)

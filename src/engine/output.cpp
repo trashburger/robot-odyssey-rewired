@@ -26,7 +26,7 @@ void OutputInterface::drawFrameRGB(uint32_t)
     frame_counter++;
 }
 
-void OutputInterface::pushDelay(uint32_t, uint32_t)
+void OutputInterface::pushDelay(uint32_t, OutputDelayType)
 {}
 
 void OutputInterface::pushSpeakerTimestamp(uint32_t)
@@ -60,7 +60,7 @@ void OutputQueue::pushFrameCGA(uint32_t timestamp, SBTStack *stack, uint8_t *fra
         return;
     }
 
-    pushDelayInternal(timestamp, 0, false);
+    pushDelay(timestamp, OUT_DELAY_FLUSH);
 
     OutputItem item;
     item.otype = OUT_CGA_FRAME;
@@ -72,7 +72,7 @@ void OutputQueue::pushFrameCGA(uint32_t timestamp, SBTStack *stack, uint8_t *fra
 
 void OutputQueue::drawFrameRGB(uint32_t timestamp)
 {
-    pushDelayInternal(timestamp, 0, false);
+    pushDelay(timestamp, OUT_DELAY_FLUSH);
     renderFrame();
 }
 
@@ -90,17 +90,12 @@ void OutputQueue::renderFrame()
     }
 }
 
-void OutputQueue::pushDelay(uint32_t timestamp, uint32_t millis)
+void OutputQueue::pushDelay(uint32_t timestamp, OutputDelayType delay_type)
 {
-    pushDelayInternal(timestamp, millis, true);
-}
-
-void OutputQueue::pushDelayInternal(uint32_t timestamp, uint32_t millis, bool combine_with_sound)
-{
-    constexpr uint32_t clocks_per_msec = (CPU_CLOCK_HZ + 500) / 1000;
-
-    const uint32_t elapsed_clocks = timestamp - reference_timestamp;
-    const uint32_t elapsed_msec = (elapsed_clocks + clocks_per_msec / 2) / clocks_per_msec;
+    const uint32_t elapsed_msec = roundClocksToMsec(timestamp - reference_timestamp);
+    if (!elapsed_msec) {
+        return;
+    }
 
     if (!items.empty()) {
         OutputItem &back = items.back();
@@ -108,26 +103,31 @@ void OutputQueue::pushDelayInternal(uint32_t timestamp, uint32_t millis, bool co
 
             case OUT_DELAY:
                 // Combine with an existing delay
-                back.u.delay += elapsed_msec + millis;
-                reference_timestamp += elapsed_msec * clocks_per_msec;
+                back.u.delay += elapsed_msec;
+                reference_timestamp += msecToClocks(elapsed_msec);
                 return;
 
+            case OUT_CGA_FRAME:
+                break;
+
             case OUT_SPEAKER_TIMESTAMP:
-                if (combine_with_sound) {
-                    // Defer this until later, to avoid breaking up a sound effect
-                    reference_timestamp -= millis * clocks_per_msec;
-                    return;
+                switch (delay_type) {
+                    case OUT_DELAY_FLUSH:
+                        break;
+                    case OUT_DELAY_MERGE_WITH_SOUND:
+                        // Don't advance reference_timestamp
+                        return;
                 }
                 break;
         }
     }
 
-    reference_timestamp += elapsed_msec * clocks_per_msec;
+    reference_timestamp += msecToClocks(elapsed_msec);
 
     if (!items.full()) {
         OutputItem item;
         item.otype = OUT_DELAY;
-        item.u.delay = elapsed_msec + millis;
+        item.u.delay = elapsed_msec;
         if (item.u.delay) {
             items.push_back(item);
         }
@@ -141,7 +141,7 @@ void OutputQueue::pushSpeakerTimestamp(uint32_t timestamp)
         return;
     }
 
-    pushDelayInternal(timestamp, 0, true);
+    pushDelay(timestamp, OUT_DELAY_MERGE_WITH_SOUND);
 
     OutputItem item;
     item.otype = OUT_SPEAKER_TIMESTAMP;

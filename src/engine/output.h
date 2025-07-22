@@ -13,6 +13,12 @@ enum OutputType
     OUT_DELAY,
 };
 
+enum OutputDelayType
+{
+    OUT_DELAY_MERGE_WITH_SOUND,
+    OUT_DELAY_FLUSH,
+};
+
 struct OutputItem
 {
     OutputType otype;
@@ -31,6 +37,18 @@ class OutputInterface
 
     OutputInterface(ColorTable &colorTable);
 
+    static uint32_t msecToClocks(uint32_t millis)
+    {
+        constexpr uint32_t clocks_per_msec = (CPU_CLOCK_HZ + 500) / 1000;
+        return millis * clocks_per_msec;
+    }
+
+    static uint32_t roundClocksToMsec(uint32_t clocks)
+    {
+        constexpr uint32_t clocks_per_msec = (CPU_CLOCK_HZ + 500) / 1000;
+        return (clocks + clocks_per_msec / 2) / clocks_per_msec;
+    }
+
     void setTimeReference(uint32_t timestamp)
     {
         reference_timestamp = timestamp;
@@ -44,7 +62,7 @@ class OutputInterface
     virtual void clear();
     virtual void pushFrameCGA(uint32_t timestamp, SBTStack *stack, uint8_t *framebuffer);
     virtual void drawFrameRGB(uint32_t timestamp);
-    virtual void pushDelay(uint32_t timestamp, uint32_t millis);
+    virtual void pushDelay(uint32_t timestamp, OutputDelayType delayType);
     virtual void pushSpeakerTimestamp(uint32_t timestamp);
 
     RGBDraw draw;
@@ -65,7 +83,7 @@ class OutputQueue final : public OutputInterface
     virtual void clear();
     virtual void pushFrameCGA(uint32_t timestamp, SBTStack *stack, uint8_t *framebuffer);
     virtual void drawFrameRGB(uint32_t timestamp);
-    virtual void pushDelay(uint32_t timestamp, uint32_t millis);
+    virtual void pushDelay(uint32_t timestamp, OutputDelayType delayType);
     virtual void pushSpeakerTimestamp(uint32_t timestamp);
 
     static const unsigned AUDIO_BUFFER_SECONDS = 10;
@@ -84,7 +102,6 @@ class OutputQueue final : public OutputInterface
     uint32_t frameskip_counter;
     uint32_t frame_counter;
 
-    void pushDelayInternal(uint32_t timestamp, uint32_t millis, bool combine_with_sound);
     void dequeueCGAFrame();
     void renderSoundEffect(uint32_t first_timestamp);
     void renderFrame();

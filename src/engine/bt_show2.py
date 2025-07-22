@@ -54,7 +54,7 @@ b.patchAndHook(
     final_loop,
     "ret",
     "g.hw->output.pushFrameCGA(g.clock, g.stack, g.proc->memSeg(0xB800));"
-    "g.hw->output.pushDelay(g.clock, 1000);"
+    "g.clock += OutputInterface::msecToClocks(1000);"
     "g.proc->continueFrom(r, &sub_%X);" % final_loop.linear,
 )
 
@@ -62,7 +62,7 @@ b.patchAndHook(
 bt_common.patchShowKeyboardDelays(
     b,
     [
-        ("019E:018B", 2000),
+        ("019E:018B", 500),
         ("019E:0204", 2000),
         ("019E:0218", 2000),
     ],

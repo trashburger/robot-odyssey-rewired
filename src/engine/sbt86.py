@@ -1749,7 +1749,7 @@ void %(className)s::loadEnvironment(SBTStack *stack, SBTRegs reg)
 void %(className)s::flushOutput()
 {
     ProcessLocals& g = gProcessLocals;
-    g.hw->output.pushDelay(g.clock, 0);
+    g.hw->output.pushDelay(g.clock, OUT_DELAY_FLUSH);
 }
 
 SBTProcess::continue_func_t %(className)s::getFunction(SBTAddressId id)

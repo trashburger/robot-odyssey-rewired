@@ -360,7 +360,7 @@ def patchVideoBlit(b, code):
         """
         if (!noBlit) {
             %s
-            g.hw->output.pushDelay(g.clock, %d);
+            g.clock += OutputInterface::msecToClocks(%d);
         }
     """
         % (code, FRAME_RATE_DELAY),
@@ -557,7 +557,7 @@ def patchShowKeyboardDelays(b, call_site_and_delay_list):
             call_site,
             "ret",
             "g.hw->output.pushFrameCGA(g.clock, g.stack, g.proc->memSeg(0xB800));"
-            "g.hw->output.pushDelay(g.clock, %d);"
+            "g.clock += OutputInterface::msecToClocks(%d);"
             "g.proc->continueFrom(r, &sub_%X);" % (delay, continue_at.linear),
         )
         b.markSubroutine(continue_at)
@@ -591,7 +591,7 @@ def patchShowSfxInterruptible(
             "ret",
             "g.hw->output.pushFrameCGA(g.clock, g.stack, g.proc->memSeg(0xB800));"
             "sub_%X();"
-            "g.hw->output.pushDelay(g.clock, %d);"
+            "g.clock += OutputInterface::msecToClocks(%d);"
             "g.proc->continueFrom(r, &sub_%X);"
             % (target.linear, extra_delay_msec, continue_at.linear),
         )
