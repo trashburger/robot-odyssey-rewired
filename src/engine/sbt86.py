@@ -347,12 +347,10 @@ class Trace:
     def codegen(self):
         return (
             "static SBT_INLINE int %s_probe(%s) {\n"
-            "ProcessLocals& g = gProcessLocals\n;"
-            "SBTRegs& r = g.r\n;"
+            "SBT_LOCALS;"
             "%s\n}\n"
             "static void %s_fire(%s) {\n"
-            "ProcessLocals& g = gProcessLocals\n;"
-            "SBTRegs& r = g.r\n;"
+            "SBT_LOCALS;"
             "%s\n}\n"
         ) % (self.name, self._args, self.probe, self.name, self._args, self.fire)
 
@@ -1610,8 +1608,7 @@ class Subroutine:
 static void
 %(name)s(void)
 {
-  ProcessLocals& g = gProcessLocals;
-  SBTRegs& r = g.r;
+  SBT_LOCALS;
   g.stack->pushret(0x%(offset)04x);
   goto %(label)s;
 %(body)s
@@ -1679,6 +1676,16 @@ class DOSBinary(BinaryImage):
 #include "sbt86.h"
 #include "hardware.h"
 
+// The code generator outputs labels quite verbosely, most are not used
+#pragma clang diagnostic ignored "-Wunused-label"
+
+// We may generate code for functions that don't end up called'
+#pragma clang diagnostic ignored "-Wunused-function"
+#pragma clang diagnostic ignored "-Wunneeded-internal-declaration"
+
+// Generated trace handlers might not use all parameters
+#pragma clang diagnostic ignored "-Wunused-parameter"
+
 SBT_DECL_PROCESS(%(className)s);
 
 %(className)s::%(className)s(Hardware *hardware)
@@ -1699,6 +1706,11 @@ struct ProcessLocals {
     Hardware *hw;
 };
 static ProcessLocals gProcessLocals = {};
+
+#define SBT_LOCALS \
+    ProcessLocals& g = gProcessLocals; \
+    SBTRegs& r = g.r; \
+    (void)r
 
 static const uint8_t dataImage[] = {
 %(dataImage)s};
@@ -1737,18 +1749,18 @@ const char *%(className)s::getFilename()
 
 void %(className)s::loadEnvironment(SBTStack *stack, SBTRegs reg)
 {
-    ProcessLocals& g = gProcessLocals;
+    SBT_LOCALS;
     g.stack = stack;
-    g.r = reg;
+    r = reg;
     g.proc = this;
     g.hw = hardware;
     g.hw->output.setTimeReference(g.clock);
-    g.s.load(g.proc, g.r);
+    g.s.load(g.proc, r);
 }
 
 void %(className)s::flushOutput()
 {
-    ProcessLocals& g = gProcessLocals;
+    SBT_LOCALS;
     g.hw->output.pushDelay(g.clock, OUT_DELAY_FLUSH);
 }
 
@@ -1767,7 +1779,6 @@ int %(className)s::getAddress(SBTAddressId id)
     default: return -1;
     }
 }
-
 """
 
     relocSegment = None
