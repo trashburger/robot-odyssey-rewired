@@ -15,8 +15,7 @@ function joystickAxes(x, y)
     if (zone && thumb) {
         const zone_rect = zone.getBoundingClientRect();
         const scale = 0.5 * zone_rect.height;
-        thumb.style.left = scale * x + 'px';
-        thumb.style.top = scale * y + 'px';
+        thumb.style.transform = 'translate(' + (scale * x) + 'px, ' + (scale * y) + 'px)';
     }
 
     // Apply a nonlinear speed curve here, to make slow-speed control easier.

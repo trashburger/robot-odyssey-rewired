@@ -26,13 +26,13 @@
 
 #joystick_thumb {
     position: absolute;
-    left: 0;
-    top: 0;
+    left: -40px;
+    top: -40px;
     border-radius: 80px;
     width: 80px;
     height: 80px;
-    transform: translate(-40px, -40px);
-    transition: all 0.075s ease;
+    transform: translate(0px, 0px);
+    transition: transform 0.075s ease;
     z-index: 1;
     overflow: hidden;
     color: #585858;
