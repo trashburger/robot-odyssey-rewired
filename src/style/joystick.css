@@ -48,6 +48,7 @@
 
 #joystick_thumb {
     position: absolute;
+    margin: 0;
     left: -40px;
     top: -40px;
     border-radius: 80px;
