@@ -8,12 +8,34 @@
 #joystick_zone {
     flex: 1 0 0;
     position: relative;
-    height: 135px;
-    max-width: 270px;
+    height: 140px;
+    max-width: 280px;
     background: #111;
     border-radius: 4px;
     margin: 0 2px;
     padding: 4px;
+}
+
+#joystick_zone::before, #joystick_zone::after {
+    content: "";
+    position: absolute;
+    background: #1c1c1c;
+}
+
+#joystick_zone::before {
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 4px;
+    margin-left: -2px;
+}
+
+#joystick_zone::after {
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 4px;
+    margin-top: -2px;
 }
 
 #joystick_center {
