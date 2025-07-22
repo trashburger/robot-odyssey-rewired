@@ -46,11 +46,6 @@ class Hardware {
   private:
     std::vector<SBTProcess *> process_vec;
     uint8_t port61;
-    uint16_t keycode;
-    int js_x, js_y;
-    bool js_button_pressed, js_button_held;
-    bool mouse_tracking;
-    int mouse_x, mouse_y;
 
     void exit(SBTProcess *exiting_process, uint8_t code);
 };
