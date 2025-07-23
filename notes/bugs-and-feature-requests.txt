@@ -1,3 +1,18 @@
+bug? sometimes the "wire breaking" sound effect is missing when dragging wired parts to another room
+
+cleanup inconsistent use of snake case and camel case everywhere.
+
+pcm encoder should generate both + and - pulses, possibly include a bandpass filter
+
+file manager:
+filter for regular saves, autosaves, built-in files
+
+cleanup: RO_ROOM_RENDERER is not a thing any more (leftover from DS port)
+
+cleanup sbt86 comments
+
+frameskip implementation could be redone now that we use vsync timing. no need to calculate frameskip from engine speed, could change rules for output interface: first frame presents immediately, second is deferred, further frames cause drop (keep newest rather than oldest frame as deferred)
+
 bug? after submitting form f-12, before using teleporter, save/load and the teleporter disappears.
 
 sbt86: inconsistent use of g.proc->memSeg(r.ds) vs g.s.ds (segment cache). We can always use the segment cache for code inside sbt86 that uses a current segment register value.
