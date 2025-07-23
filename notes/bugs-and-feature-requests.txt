@@ -2,6 +2,9 @@ bug: town magnetic storms seem to periodically freeze sparky's bot animation.
 check for RNG issue? (number of calls equal period?)
 check if DOS and Apple ports have same bug.
 
+bug? take a close look at the PCM sound output, I noticed the buffers have been starting with a one-cycle pulse and this is almost surely wrong.
+probably a fencepost bug in timestamp to pcm converter.
+
 compare teleporter sound to apple version
 
 add url fragment shortcuts for main menu items?
