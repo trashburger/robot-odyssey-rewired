@@ -12,11 +12,21 @@ import bt_common
 basedir = sys.argv[1]
 b = sbt86.DOSBinary(os.path.join(basedir, "game.exe"))
 
+# This flag is nonzero (0xFF) when we're viewing the map of the
+# master computer center. The map uses the same main loop that
+# the level normally runs, but this flag turns many things on and off
+# as needed. It enables a flashing effect for text that's present in the
+# world data, and it changes the control scheme.
+#
+# We need this flag also, to adjust the frame timing and to end mouse tracking.
+
+map_active_addr = 0xBF19
+
 bt_common.patch(b)
-bt_common.patchJoystick(b)
+bt_common.patchJoystick(b, map_active_addr=map_active_addr)
 bt_common.patchChips(b)
 bt_common.patchLoadSave(b)
-bt_common.patchVideoHighLevel(b)
+bt_common.patchVideoHighLevel(b, map_active_addr=map_active_addr)
 
 # Remove modal "Insert disk 1" message on world load failure
 b.patchAndHook("0E3B:2CBE", "ret", 'assert(0 && "World file load failure");')

@@ -11,6 +11,9 @@ import sbt86
 # faster and it's hard to navigate and the puzzles run too quickly.
 FRAME_RATE_DELAY = 1000 // 12
 
+# Slower frame rate for the master computer center map
+MAP_FRAME_DELAY = 1000 // 4
+
 
 def patch(b):
     """Patches that should be applied to all binaries that have the Robot
@@ -325,7 +328,7 @@ def patchLoadSave(b):
     b.patchAndHook(loadChipEntry, "ret", "g.hw->requestLoadChip(r);")
 
 
-def patchJoystick(b):
+def patchJoystick(b, map_active_addr=-1):
     # This game uses cycle timing to poll the joystick; we could emulate that
     # using the global clock, but it's easier and more efficient to replace this
     # with a direct call to a polling hook.
@@ -339,17 +342,31 @@ def patchJoystick(b):
     b.patchAndHook(
         poller,
         "ret",
-        "g.hw->input.pollJoystick(ROWorld::fromProcess(g.proc), "
-        "r.bx, r.cx, g.proc->memSeg(r.ds)[%d]);" % buttons,
+        f"""
+        {{
+            ROWorld *world = ROWorld::fromProcess(g.proc);
+            uint8_t map_active = {map_active_addr} > 0 ? g.s.ds[(uint16_t){map_active_addr}] : 0;
+            if (map_active) {{
+                g.hw->input.endMouseTracking();
+            }} else {{
+                g.hw->input.updateMouse(world);
+            }}
+            g.hw->input.pollJoystick(r.bx, r.cx, g.proc->memSeg(r.ds)[{buttons}]);
+        }}
+    """,
     )
 
 
-def patchVideoBlit(b, code):
+def patchVideoBlit(b, code, map_active_addr=-1):
     # Common code for video blit loop replacement, including timing and enable/disable.
 
     # Replace the game's blitter. The normal blit loop is really large,
     # and unnecessary for us. Replace it with a call to
     # consoleBlitToScreen(), and read directly from the game's backbuffer.
+
+    # Add the bulk of our frame delay after the frame is published, rather than before.
+    # When we are in the master computer center map, set a longer frame delay here.
+    # (Delaying in map-specific code before rendering would increase latency.)
 
     b.decl("static bool noBlit = false;")
     b.patchAndHook(
@@ -357,13 +374,15 @@ def patchVideoBlit(b, code):
             ":803e____01 7503 e95a05 c43e____" "bb2800 a1____ 8cda 8ed8 be0020 33 c0"
         ),
         "ret",
-        """
-        if (!noBlit) {
-            %s
-            g.clock += OutputInterface::msecToClocks(%d);
-        }
-    """
-        % (code, FRAME_RATE_DELAY),
+        f"""
+        if (!noBlit) {{
+            {code}
+            {{
+                uint8_t map_active = {map_active_addr} > 0 ? g.s.ds[(uint16_t){map_active_addr}] : 0;
+                g.clock += OutputInterface::msecToClocks(map_active ? {MAP_FRAME_DELAY} : {FRAME_RATE_DELAY});
+            }}
+        }}
+    """,
     )
 
     # Avoid calling the blitter during initialization. Normally the
@@ -397,7 +416,7 @@ def patchVideoBackbuffer(b):
     )
 
 
-def patchVideoHighLevel(b, trace_debug=False):
+def patchVideoHighLevel(b, trace_debug=False, map_active_addr=-1):
     # Replace all rendering, using our own high-depth backbuffer.
 
     b.decl("#include <stdio.h>")
@@ -543,6 +562,7 @@ def patchVideoHighLevel(b, trace_debug=False):
         """
             g.hw->output.drawFrameRGB(g.clock);
     """,
+        map_active_addr=map_active_addr,
     )
 
 

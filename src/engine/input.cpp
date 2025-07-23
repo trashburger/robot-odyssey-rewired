@@ -119,13 +119,7 @@ void InputBuffer::quantizeJoystickAxis(float input, float &residual,
     }
 }
 
-void InputBuffer::pollJoystick(ROWorld *world, uint16_t &x, uint16_t &y,
-                               uint8_t &status) {
-    // Optional mouse tracking will use the joystick input to move the player
-    // to a chosen cursor location, without violating game collision detection.
-
-    updateMouse(world);
-
+void InputBuffer::pollJoystick(uint16_t &x, uint16_t &y, uint8_t &status) {
     // Convert a floating point joystick in the range [-1, +1] to a quantized
     // value subject to the game's supported range, and save the residual. This
     // removes the game's deadzone correction, allowing it to be re-applied as
