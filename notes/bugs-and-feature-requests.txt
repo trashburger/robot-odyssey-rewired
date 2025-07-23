@@ -1,3 +1,7 @@
+bug? after submitting form f-12, before using teleporter, save/load and the teleporter disappears.
+
+sbt86: inconsistent use of g.proc->memSeg(r.ds) vs g.s.ds (segment cache). We can always use the segment cache for code inside sbt86 that uses a current segment register value.
+
 bug: town magnetic storms seem to periodically freeze sparky's bot animation.
 check for RNG issue? (number of calls equal period?)
 check if DOS and Apple ports have same bug.
