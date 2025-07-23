@@ -43,9 +43,7 @@ void InputBuffer::clearJoystickAxes() {
 }
 
 void InputBuffer::setJoystickButton(bool button) {
-    if (!mouse_buffer.empty()) {
-        endMouseTracking();
-    }
+    endMouseTracking();
     js_button_held = button;
     js_button_pressed = js_button_pressed || button;
 }
@@ -79,10 +77,12 @@ void InputBuffer::setMouseButton(bool button) {
 }
 
 void InputBuffer::endMouseTracking() {
-    mouse_buffer.clear();
-    clearJoystickAxes();
-    js_button_pressed = false;
-    js_button_held = false;
+    if (!mouse_buffer.empty()) {
+        mouse_buffer.clear();
+        clearJoystickAxes();
+        js_button_pressed = false;
+        js_button_held = false;
+    }
 }
 
 uint16_t InputBuffer::checkForKey() {
@@ -155,9 +155,7 @@ void InputBuffer::updateMouse(ROWorld *world) {
     // Keep the mouse buffer empty while the delay timer is in effect
     if (mouse_delay_timer) {
         mouse_delay_timer--;
-        if (!mouse_buffer.empty()) {
-            endMouseTracking();
-        }
+        endMouseTracking();
     }
 
     // Everything else is about handling events
