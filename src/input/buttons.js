@@ -90,16 +90,8 @@ function controlCode(key) {
 }
 
 export function init() {
-    function keycode(ascii, scancode) {
-        if (typeof ascii !== typeof 0) {
-            ascii =
-                ascii.length === 1 ? ascii.charCodeAt(0) : parseInt(ascii, 0);
-        }
-        GameMenu.pressKey(ascii, scancode);
-        audioContextSetup();
-    }
-
     document.body.addEventListener('keydown', function (e) {
+        const press = GameMenu.pressKey;
         const code = e.code || e.key || '';
         const key = e.key || '';
         const shift = e.shiftKey;
@@ -108,28 +100,30 @@ export function init() {
         const meta = e.metaKey;
         const plain = !(ctrl || alt || meta);
 
+        audioContextSetup();
+
         if (code.includes('Arrow')) {
             // Most keys can coexist with mouse tracking, but arrow keys will take over.
             mouseTrackingEnd();
         }
 
-        if (code === 'ArrowUp' && !shift) keycode(0, 0x48);
-        else if (code === 'ArrowUp' && shift) keycode('8', 0x48);
-        else if (code === 'ArrowDown' && !shift) keycode(0, 0x50);
-        else if (code === 'ArrowDown' && shift) keycode('2', 0x50);
-        else if (code === 'ArrowLeft' && !shift) keycode(0, 0x4b);
-        else if (code === 'ArrowLeft' && shift) keycode('4', 0x4b);
-        else if (code === 'ArrowRight' && !shift) keycode(0, 0x4d);
-        else if (code === 'ArrowRight' && shift) keycode('6', 0x4d);
-        else if (code === 'Backspace' && plain) keycode('\x08', 0);
-        else if (code === 'Enter' && plain) keycode('\x0D', 0x1c);
-        else if (code === 'Escape' && plain) keycode('\x1b', 0x01);
+        if (code === 'ArrowUp' && !shift) press(0, 0x48);
+        else if (code === 'ArrowUp' && shift) press('8', 0x48);
+        else if (code === 'ArrowDown' && !shift) press(0, 0x50);
+        else if (code === 'ArrowDown' && shift) press('2', 0x50);
+        else if (code === 'ArrowLeft' && !shift) press(0, 0x4b);
+        else if (code === 'ArrowLeft' && shift) press('4', 0x4b);
+        else if (code === 'ArrowRight' && !shift) press(0, 0x4d);
+        else if (code === 'ArrowRight' && shift) press('6', 0x4d);
+        else if (code === 'Backspace' && plain) press('\x08', 0);
+        else if (code === 'Enter' && plain) press('\x0D', 0x1c);
+        else if (code === 'Escape' && plain) press('\x1b', 0x01);
         else if (key.length === 1 && plain) {
             // Letter keys
-            keycode(key.toUpperCase(), 0);
+            press(key.toUpperCase(), 0);
         } else if (key.length === 1 && ctrl && !alt && !meta) {
             // CTRL keys, useful for sound on-off and for cheats
-            keycode(controlCode(key), 0);
+            press(controlCode(key), 0);
         } else {
             // Unrecognized special key, let the browser keep it.
             return;
@@ -155,7 +149,7 @@ export function init() {
     for (let button of document.getElementsByClassName('keyboard_btn')) {
         const press = () => {
             delay = null;
-            keycode(
+            GameMenu.pressKey(
                 button.dataset.ascii || '0x00',
                 parseInt(button.dataset.scancode || '0', 0),
             );

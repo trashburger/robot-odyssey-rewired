@@ -1,20 +1,21 @@
 import * as EngineLoader from './engineLoader.js';
 
-let context = null;
+// TO DO: Volume control
+let volume_control = 0.1;
+
+let global_context = null;
+let deferred_effect = null;
 
 export function init() {
     EngineLoader.instance.onRenderSound = renderSound;
 }
 
-function renderSound(pcmData, rate) {
-    // TO DO: Volume control
-    const volume = 0.1;
-
-    if (volume > 0.0 && audioContextSetup()) {
-        const buffer = context.createBuffer(1, pcmData.length, rate);
+function renderSoundWithContext(context, volume, pcm, rate) {
+    if (volume > 0.0 && context) {
+        const buffer = context.createBuffer(1, pcm.length, rate);
         const channelData = buffer.getChannelData(0);
-        for (let i = 0; i < pcmData.length; i++) {
-            channelData[i] = pcmData[i] * volume;
+        for (let i = 0; i < pcm.length; i++) {
+            channelData[i] = pcm[i] * volume;
         }
 
         const source = context.createBufferSource();
@@ -24,23 +25,52 @@ function renderSound(pcmData, rate) {
     }
 }
 
+function renderSound(pcm, rate) {
+    if (audioContextSetup()) {
+        // We can play it immediately from the engine's PCM output buffer
+        renderSoundWithContext(global_context, volume_control, pcm, rate);
+    } else {
+        // We might be able to set up the context soon using a different input event.
+        // Make a copy of the sound effect and save it. If audioContextSetup() succeeds
+        // soon, we will play it then.
+        deferred_effect = {
+            deadline: performance.now() + 500,
+            pcm: new Uint8Array(pcm),
+            rate,
+        };
+    }
+}
+
 export function audioContextSetup() {
-    if (context === null) {
-        const AudioContext = window.AudioContext;
-        if (AudioContext) {
-            context = new AudioContext();
+    if (global_context === null) {
+        if (navigator.userActivation && !navigator.userActivation.isActive) {
+            return false;
         }
-        if (!context) {
+        if (window.AudioContext) {
+            global_context = new window.AudioContext();
+        }
+        if (!global_context) {
             return false;
         }
     }
 
-    if (context.state === 'suspended') {
-        context.resume();
-        if (context.state === 'suspended') {
+    if (global_context.state === 'suspended') {
+        global_context.resume();
+        if (global_context.state === 'suspended') {
             return false;
         }
     }
 
+    if (deferred_effect) {
+        if (performance.now() < deferred_effect.deadline) {
+            renderSoundWithContext(
+                global_context,
+                volume_control,
+                deferred_effect.pcm,
+                deferred_effect.rate,
+            );
+        }
+        deferred_effect = null;
+    }
     return true;
 }

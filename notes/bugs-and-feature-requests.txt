@@ -2,9 +2,6 @@ bug: town magnetic storms seem to periodically freeze sparky's bot animation.
 check for RNG issue? (number of calls equal period?)
 check if DOS and Apple ports have same bug.
 
-first sound effect doesnt play?
-can we buffer sfx that came just prior to audio unblock
-
 compare teleporter sound to apple version
 
 add url fragment shortcuts for main menu items?

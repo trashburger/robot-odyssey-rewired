@@ -161,6 +161,10 @@ export function init() {
 export function pressKey(ascii, scancode) {
     const engine = EngineLoader.instance;
 
+    if (typeof ascii !== typeof 0) {
+        ascii = ascii.length === 1 ? ascii.charCodeAt(0) : parseInt(ascii, 0);
+    }
+
     if (current_state === States.SPLASH) {
         if (ascii === 0x0d || ascii === 0x20) {
             // Enter or space
