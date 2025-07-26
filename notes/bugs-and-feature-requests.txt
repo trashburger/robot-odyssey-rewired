@@ -1,49 +1,48 @@
-bug? sometimes the "wire breaking" sound effect is missing when dragging wired parts to another room
+Port Bugs
+=========
 
-cleanup inconsistent use of snake case and camel case everywhere.
+fix keyboard mapper so it's possible to type in lowercase on chip documentation page
+- JS input layer forces uppercase now because original game's mapper requires this. patch the mapper with lowercase keys using sbt86, and remove the uppercase transformation from the JS side.
 
-pcm encoder should generate both + and - pulses, possibly include a bandpass filter
-
-file manager:
-filter for regular saves, autosaves, built-in files
-
-cleanup: RO_ROOM_RENDERER is not a thing any more (leftover from DS port)
-
-cleanup sbt86 comments
-
-frameskip implementation could be redone now that we use vsync timing. no need to calculate frameskip from engine speed, could change rules for output interface: first frame presents immediately, second is deferred, further frames cause drop (keep newest rather than oldest frame as deferred)
-
-bug? after submitting form f-12, before using teleporter, save/load and the teleporter disappears.
-
-sbt86: inconsistent use of g.proc->memSeg(r.ds) vs g.s.ds (segment cache). We can always use the segment cache for code inside sbt86 that uses a current segment register value.
-
-bug: town magnetic storms seem to periodically freeze sparky's bot animation.
-check for RNG issue? (number of calls equal period?)
-check if DOS and Apple ports have same bug.
-
-bug? take a close look at the PCM sound output, I noticed the buffers have been starting with a one-cycle pulse and this is almost surely wrong.
-probably a fencepost bug in timestamp to pcm converter.
-
-compare teleporter sound to apple version
-
-add url fragment shortcuts for main menu items?
-the main menu rows could be normal hyperlinks
-
-can we have a one-page about/controls screen?
-- port-specific controls tutorial
+does the PWA only run in portrait orientation? it should work in landscape too.
 
 bug: when file import fails (for ex, non-secure context) there is no modal, the "Processing selected files..." stays up until dismissed manually.
 
-fix keyboard mapper so it's possible to type in lowercase on chip documentation page
+pcm encoder output (for PC speaker) is not great
+- should generate both + and - pulses, possibly include a bandpass filter
+- take a close look at the PCM sound output, I noticed the buffers have been starting with a one-cycle pulse and this is almost surely wrong. probably a fencepost bug in timestamp to pcm converter.
+
+need to compare sound effect rendering to Apple version
+- especially look at tone quality in cutscenes, is this an emulation bug or an opportunity for enhancement?
+- check teleporter sound
+
+draw bug: sprites clip against the top of screen, but in the original game sprites never clip. fix this or leave it?
+- all original drawing skips the entire sprite/line if any of it goes off-screen
+  - if we want to fix this, need to audit game for spots where junk data is in the world but the player never sees it due to this clipping. (like some of the tutorial text)
+
+
+Port Cleanup
+============
+
+automated tests based on input replay and output capture
+- interpose a movie recorder layer on the input and output queue interfaces
+- get a complete trace of a game playthrough
+- game rng is based on input timing in the early game, deterministic replay should work
+- keep compatibility with some DOS recording tool?
+  - preferably develop "golden" recording on DOS tool, then port to rewired
+- use exec() as synchronization point
+- tasvideos uses this emulator for DOS:
+  - https://tasvideos.org/EmulatorResources/JPC
+  - https://tasvideos.org/EmulatorResources/JPC/JRSRFormat
+  - http://repo.or.cz/w/jpcrr.git
 
 need unit testing!
 
 cross browser testing!
 
-add custom characters to the web font, beyond the ones in the original game font:
-- full-screen icon
-- arrow key icons (fast and slow versions)
-- fractions (for speed control)
+use a fuzzer to find save files that crash the game, and fix those issues.
+
+can we automatically test compatibility with dos version?
 
 size profiling
 
@@ -51,21 +50,40 @@ startup time profiling
 
 tinysave shouldn't be setting up its dictionary from static initializers. defer that.
 
-cpu efficiency for rgba draw layer
-- defer high-res render? replace RGBDraw with display list capture, render via JS
-- could avoid CPU rendering entirely
-- could allow flexible output resolution rather than fixed multiple of cropped CGA framebuffer
-- JS display list renderer based on GL? SVG?
+sbt86 should assert on zstd decompress
 
-avoid canvas readback, to fix Tor browser
-- i think it'd be worth including a small png library in the wasm.
-- this could be used to load palettes from PNG without going through canvas, fixing the tor browser bug
-- also could be used to implement an engine function to save thumbnails directly to PNG. would fix another tor browser bug, plus allow performance improvements for all browsers
-- could go further and move screenshot rendering to a worker thread, instead of rate-limited rendering in the main loop
+i think we can stop polyfilling IntersectionObserver, it's been around almost as long as wasm
+
+cleanup inconsistent use of snake case and camel case everywhere.
+
+RO_ROOM_RENDERER is not a thing any more (leftover from DS port)
+
+some sbt86 comments are out of date
+
+sbt86: inconsistent use of g.proc->memSeg(r.ds) vs g.s.ds (segment cache). We can always use the segment cache for code inside sbt86 that uses a current segment register value.
+
+
+Port Enhancements
+=================
+
+can we have a one-page about/controls screen?
+- port-specific controls tutorial
+
+add url fragment shortcuts for main menu items?
+- the main menu rows could be normal hyperlinks
+
+high-level rendering rewrite using display list approach
+- replace RGBDraw with display list capture, render via JS (gl, canvas, dom, svg?)
+- automatically drop frames with identical content
+- redo frameskip implementation now that we use vsync timing. no need to calculate frameskip from engine speed, could change rules for output interface: first frame presents immediately, second is deferred, further frames cause drop (keep newest rather than oldest frame as deferred)
+- no canvas readback: move palette and screenshots out of engine into JS renderer
+- cache screenshots as blob not png
+- render screenshots from worker thread
 
 allow setting a custom palette (stored in indexeddb or settings)
 
 feature requrests for file manager ui:
+- filter for regular saves, autosaves, built-in files
 - needs support for keyboard and gamepad/joystick navigation! most of the game is playable with an xbox 360 controller, but the file modal requires mouse or touch.
 - view more details about saved games. the browser could include thumbnails of robot interior, information about in-game items.
 - rename and delete files
@@ -75,36 +93,66 @@ additional ui:
 - import / export palette
 - remap controller / keyboard buttons
 
-draw bug: sprites clip against the top of screen, but in the original game sprites never clip. fix this or leave it?
+add custom characters to the web font, beyond the ones in the original game font:
+- full-screen icon
+- arrow key icons (fast and slow versions)
+- fractions (for speed control)
 
-can we automatically test compatibility with dos version?
+show an indication when sound effects are deferred for audio context setup (for example, a flashing mute icon that you can tap to unblock sound)
 
-fix game bugs?:
+controller d-pad should work in the mcc map
+- map input code does not accept shift arrow, patch the mapping
 
-- is the "chip too complex" message broken? overcomplicated chips will usually crash the game.
+is there a way to have sbt86 separate the common engine code from the level-specific logic, to bring the tutorial/lab/game into the same engine?
 
-port robotropolis preview from apple?
 
-built-in editor?
-
-mod / user-script / add-on loader?
-
-fix tutorial bugs?:
+Game Bugs
+=========
 
 can't recharge dead robot in tut3. battery discharged but crystals wont recharge it
-- only affects tut3.
-- same as dos port
-- in 2.0 for Apple? no! drain and recharge work there.
-- anatomy tut1, charging works. crystal F7 does charge sparky, checkers.
-- wiring tut2, no crystal
-- sensors tut3, has bug. crystals F7, F8, F9. fails to charge sparky, scanner, checkers.
-- toolkit tut4, charging works
-- circuits tut5, charging works
-- teamwork tut6, charging works
-- chips tut7, charging works
+- only affects tut3, others have no crystal or charging works.
+- same as dos, bug NOT present in 2.0 for Apple. drain and recharge work there.
 
 corruption after loading a chip: chip design tut7
 - same as dos port
 
-is there a way to have sbt86 separate the common engine code from the level-specific logic, to bring the tutorial/lab/game into the same engine?
+is the "chip too complex" message broken? overcomplicated chips will usually crash the game.
 
+look for and fix game crashes due to corrupted world or circuit data
+- hang when any linked list goes into an infinite loop; fix by memoizing during iteration (c++ hooks) or add pre-frame cleanup
+- can circuits write into arbitrary RAM? I've noticed what seems like this effect in some saves I've got, but haven't fully investigated yet. (object table chaos while remote is on, stops when remote is off, eventually causes a hang.)
+
+bug? sometimes the "wire breaking" sound effect is missing when dragging wired parts to another room
+- check if DOS and Apple ports have same bug.
+
+bug: town magnetic storms seem to periodically freeze sparky's bot animation.
+- check for RNG issue? (number of calls equal period?)
+- check if DOS and Apple ports have same bug.
+
+bug? after submitting form f-12, before using teleporter, save/load and the teleporter disappears.
+- check if DOS and Apple ports have same bug.
+
+
+Game Enhancements
+=================
+
+port robotropolis preview from apple
+
+mod / user-script / add-on loader
+- loader itself
+  - load and run a javascript module directly?
+  - iframe message passing?
+- mod API
+  - enough fidelity to implement game objects that aren't resident in the original 256-entry object table
+    - hook drawing, movement, collision, soldering, etc.
+  - keep portable to different builds of the game, don't include assumptions about memory layout
+  - high-level ROData wrapper
+
+tools that could be built-in or mods:
+- world editor
+- re-recording tool for TAS
+- power tools for circuit building
+  - insert and graph waveforms
+  - decompile chips
+  - import/export standard EDA formats
+- DroidQuest levels/objects in original game
