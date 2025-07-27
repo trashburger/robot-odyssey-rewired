@@ -28,8 +28,7 @@ Port Cleanup
 ============
 
 clean up RE notes
-- migrate/dump/remove ancient IDB files
-- import symbols from newer ghidra DB
+- dump/remove ancient IDB files
 
 stop using emscripten, use wasm directly
 
