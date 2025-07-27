@@ -20,9 +20,18 @@ draw bug: sprites clip against the top of screen, but in the original game sprit
 - all original drawing skips the entire sprite/line if any of it goes off-screen
   - if we want to fix this, need to audit game for spots where junk data is in the world but the player never sees it due to this clipping. (like some of the tutorial text)
 
+main menu often registers undesired inputs when using touch joystick
+- tune sensitivity of main menu joystick, add deadzone especially for immediate response in setJoystickAxes
+
 
 Port Cleanup
 ============
+
+clean up RE notes
+- migrate/dump/remove ancient IDB files
+- import symbols from newer ghidra DB
+
+stop using emscripten, use wasm directly
 
 automated tests based on input replay and output capture
 - interpose a movie recorder layer on the input and output queue interfaces
@@ -66,6 +75,14 @@ sbt86: inconsistent use of g.proc->memSeg(r.ds) vs g.s.ds (segment cache). We ca
 Port Enhancements
 =================
 
+full reset (without page refresh)
+
+automatic save state even in menu and tutorial?
+- so far i've been trying to match the semantics of original game save/load exactly. hence autosaves being based on full saves. but there's room for a save/restore state also
+- users seem to expect PWA to retain all state automatically
+- should save-states be tied to a specific engine version? they will need to include continue_func, which will be extremely build-specific.
+- should we aim for copy-on-write state snapshots?
+
 can we have a one-page about/controls screen?
 - port-specific controls tutorial
 
@@ -79,6 +96,17 @@ high-level rendering rewrite using display list approach
 - no canvas readback: move palette and screenshots out of engine into JS renderer
 - cache screenshots as blob not png
 - render screenshots from worker thread
+
+add cga composite palette
+- can we use pcem/86box as reference?
+  - it's copied from dosbox: https://github.com/sarah-walker-pcem/pcem/blob/dev/src/dosbox/vid_cga_comp.c
+  - this is by one of the "8088 mph" folks: https://www.reenigne.org/blog/1k-colours-on-cga-how-its-done/
+- seems better to pre-encode a tileset but perhaps consider a direct composite option for the new displaylist renderer
+
+move engine to worker thread?
+- keeps it off browser loop
+- add a watchdog timer
+- low bandwidth message passing inputs and outputs (display list)
 
 allow setting a custom palette (stored in indexeddb or settings)
 
