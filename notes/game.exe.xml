@@ -321,7 +321,7 @@
 
 ]>
 <PROGRAM NAME="GAME.EXE" EXE_PATH="/home/micah/re/robotod/GAME.EXE" EXE_FORMAT="Old-style DOS Executable (MZ)" IMAGE_BASE="0000:0000">
-    <INFO_SOURCE USER="micah" TOOL="Ghidra 11.0.3" TIMESTAMP="Sun Jul 27 19:33:50 PDT 2025" />
+    <INFO_SOURCE USER="micah" TOOL="Ghidra 11.0.3" TIMESTAMP="Sun Jul 27 21:14:51 PDT 2025" />
     <PROCESSOR NAME="x86" LANGUAGE_PROVIDER="x86:LE:16:Real Mode:default" ENDIAN="little" />
     <DATATYPES>
         <TYPE_DEF NAME="Color" NAMESPACE="/" DATATYPE="byte" DATATYPE_NAMESPACE="/" />
@@ -3005,7 +3005,16 @@
         <DEFINED_DATA ADDRESS="HEADER::OTHER:0000002e" DATATYPE="undefined[466]" DATATYPE_NAMESPACE="/" SIZE="0x1d2" />
     </DATA>
     <EQUATES>
-        <EQUATE_GROUP />
+        <EQUATE_GROUP>
+            <EQUATE NAME="RO_ROOM_NONE" VALUE="0x3f" />
+            <EQUATE NAME="RO_COLOR_WIRE_COLD" VALUE="0x7" />
+            <EQUATE NAME="RO_OBJ_TOKEN" VALUE="0x4" />
+            <EQUATE NAME="RO_OBJ_CURSOR" VALUE="0xfe" />
+            <EQUATE NAME="RO_OBJ_NONE" VALUE="0xff" />
+            <EQUATE NAME="RO_OBJ_ROBOT_SCANNER_L" VALUE="0xf4" />
+            <EQUATE NAME="RO_OBJ_ROBOT_CHECKERS_L" VALUE="0xf2" />
+            <EQUATE NAME="RO_OBJ_ROBOT_SPARKY_L" VALUE="0xf0" />
+        </EQUATE_GROUP>
     </EQUATES>
     <COMMENTS>
         <COMMENT ADDRESS="0100:bf19" TYPE="end-of-line">0=normal FF=mcc map mode active</COMMENT>
@@ -3054,6 +3063,7 @@
         <COMMENT ADDRESS="0e3b:5e3c" TYPE="end-of-line">Make soldering iron tip cold</COMMENT>
         <COMMENT ADDRESS="0e3b:5e6c" TYPE="end-of-line">Soldering iron hot</COMMENT>
         <COMMENT ADDRESS="0e3b:63bf" TYPE="end-of-line">first node object</COMMENT>
+        <COMMENT ADDRESS="0e3b:6850" TYPE="end-of-line">Move Black crystal to RO_ROOM_NONE</COMMENT>
         <COMMENT ADDRESS="0e3b:6a2f" TYPE="end-of-line">Is this the room the ampire bot starts out in?</COMMENT>
         <COMMENT ADDRESS="0e3b:6d61" TYPE="end-of-line">proboscis?</COMMENT>
         <COMMENT ADDRESS="0e3b:9a79" TYPE="end-of-line">Shield input pin turned off forcibly when remote is off</COMMENT>
@@ -3083,24 +3093,24 @@
     &amp;lt;STATE NAME=&amp;quot;Apply Data Archives&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;756&amp;quot; /&amp;gt;
     &amp;lt;STATE NAME=&amp;quot;CUSTOM_OPTION_CLASS&amp;quot; TYPE=&amp;quot;string&amp;quot; VALUE=&amp;quot;ghidra.app.plugin.core.analysis.StoredAnalyzerTimes&amp;quot; /&amp;gt;
     &amp;lt;STATE NAME=&amp;quot;Call Convention ID&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;22&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Call-Fixup Installer&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;128&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Create Function&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;1255&amp;quot; /&amp;gt;
+    &amp;lt;STATE NAME=&amp;quot;Call-Fixup Installer&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;130&amp;quot; /&amp;gt;
+    &amp;lt;STATE NAME=&amp;quot;Create Function&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;1259&amp;quot; /&amp;gt;
     &amp;lt;STATE NAME=&amp;quot;Data Reference&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;744&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Decompiler Switch Analysis&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;181141&amp;quot; /&amp;gt;
+    &amp;lt;STATE NAME=&amp;quot;Decompiler Switch Analysis&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;181143&amp;quot; /&amp;gt;
     &amp;lt;STATE NAME=&amp;quot;Demangler GNU&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;82&amp;quot; /&amp;gt;
     &amp;lt;STATE NAME=&amp;quot;Disassemble Entry Points&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;2699&amp;quot; /&amp;gt;
     &amp;lt;STATE NAME=&amp;quot;Embedded Media&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;83&amp;quot; /&amp;gt;
     &amp;lt;STATE NAME=&amp;quot;External Entry References&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;0&amp;quot; /&amp;gt;
     &amp;lt;STATE NAME=&amp;quot;Function Start Search&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;177&amp;quot; /&amp;gt;
     &amp;lt;STATE NAME=&amp;quot;Non-Returning Functions - Discovered&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;10115&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Reference&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;693&amp;quot; /&amp;gt;
+    &amp;lt;STATE NAME=&amp;quot;Reference&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;697&amp;quot; /&amp;gt;
     &amp;lt;STATE NAME=&amp;quot;Segmented X86 Calling Conventions&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;150&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Shared Return Calls&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;1717&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Stack&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;11297&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Subroutine References&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;776&amp;quot; /&amp;gt;
+    &amp;lt;STATE NAME=&amp;quot;Shared Return Calls&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;1732&amp;quot; /&amp;gt;
+    &amp;lt;STATE NAME=&amp;quot;Stack&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;11430&amp;quot; /&amp;gt;
+    &amp;lt;STATE NAME=&amp;quot;Subroutine References&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;783&amp;quot; /&amp;gt;
     &amp;lt;STATE NAME=&amp;quot;Wait for Analysis&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;1&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;X86 Function Callee Purge&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;670&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;x86 Constant Reference Analyzer&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;21455&amp;quot; /&amp;gt;
+    &amp;lt;STATE NAME=&amp;quot;X86 Function Callee Purge&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;683&amp;quot; /&amp;gt;
+    &amp;lt;STATE NAME=&amp;quot;x86 Constant Reference Analyzer&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;21681&amp;quot; /&amp;gt;
 &amp;lt;/SAVE_STATE&amp;gt;" />
         <PROPERTY NAME="Program Information.Analyzed" TYPE="bool" VALUE="y" />
         <PROPERTY NAME="Program Information.Created With Ghidra Version" TYPE="string" VALUE="11.0.3" />
@@ -3112,10 +3122,7 @@
         <PROPERTY NAME="Program Information.FSRL" TYPE="string" VALUE="file:///home/micah/re/robotod/GAME.EXE?MD5=5845b1403a827f265cdae3ac1d7ed5fb" />
         <PROPERTY NAME="Program Information.Should Ask To Analyze" TYPE="bool" VALUE="n" />
     </PROPERTIES>
-    <BOOKMARKS>
-        <BOOKMARK ADDRESS="0e3b:208f" TYPE="Error" CATEGORY="Bad Instruction" DESCRIPTION="Failed to disassemble at 1000:043f due to conflicting instruction at 0e3b:2090 (flow from 1000:043d)" />
-        <BOOKMARK ADDRESS="0e3b:43c9" TYPE="Error" CATEGORY="Bad Instruction" DESCRIPTION="Failed to disassemble at 0e3b:43c9 due to conflicting data at 0e3b:43ca" />
-    </BOOKMARKS>
+    <BOOKMARKS />
     <PROGRAM_TREES>
         <TREE NAME="Program Tree">
             <FRAGMENT NAME="HEADER">
@@ -3463,6 +3470,7 @@
         <SYMBOL ADDRESS="0100:bf20" NAME="game_world4_skyway_blinking_timer" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0100:bf21" NAME="game_world4_skyway_blinking_object_id" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0100:bf22" NAME="game_world4_disk_o_tek_state" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0100:bf34" NAME="game_world4_teleporter_visible" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0100:c012" NAME="robot_object_id_table" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0100:c016" NAME="robot_interior_room_id_table" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0100:c07d" NAME="toolbox_counter_text_offset_table" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
@@ -3605,7 +3613,8 @@
         <SYMBOL ADDRESS="0e3b:03de" NAME="video_clear_es" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:03ff" NAME="bios_video_set_page" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:0423" NAME="div_dl_max1_al" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
-        <SYMBOL ADDRESS="0e3b:04fb" NAME="joystick_poll" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:0434" NAME="joystick_poll" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:04fb" NAME="joystick_port_out_in" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:05b7" NAME="world_update_movedby_objects" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:05ed" NAME="world_object_move_bx_relative_di_2" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:05fb" NAME="world_object_move_bx_relative_di" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
@@ -3654,9 +3663,11 @@
         <SYMBOL ADDRESS="0e3b:12b9" NAME="world_overlap_x_offset_pos_2" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:12bb" NAME="world_overlap_x_offset_pos_1" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:12bd" NAME="world_overlap_x_offset_zero" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
-        <SYMBOL ADDRESS="0e3b:12d0" NAME="world_player_movement" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:12d0" NAME="world_player_movement_and_collision" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:12fb" NAME="world_xy_wrap" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:135e" NAME="world_player_movement" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:136b" NAME="world_player_movement_from_keyboard" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:1418" NAME="world_player_movement_from_joystick" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:144c" NAME="world_player_movement_table_lookup" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:14ff" NAME="world_collision_check" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:1608" NAME="abs" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
@@ -3702,6 +3713,7 @@
         <SYMBOL ADDRESS="0e3b:38ac" NAME="game_world_common_init" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:3af0" NAME="sound_queue_effect_cl_in_room_al" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:3bb2" NAME="popup_room_message_from_cl" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:3bfa" NAME="world_player_movement_2" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:3bfe" NAME="game_world_move_callback_disabled" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:3c06" NAME="game_world_move_callback" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:3c0f" NAME="game_world_move_callback_inner" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
@@ -3759,7 +3771,8 @@
         <SYMBOL ADDRESS="0e3b:6328" NAME="circuit_soldering_draw_wire_in_progress" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:635f" NAME="circuit_draw" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:66b2" NAME="game_world0_main" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
-        <SYMBOL ADDRESS="0e3b:6895" NAME="game_world0_prepare_for_world1" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:67c8" NAME="game_world0_leave" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:6895" NAME="game_world1_enter" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:6934" NAME="game_world0_stuck_critters_and_room18" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:6943" NAME="game_world0_draw_stuck_critters" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:698c" NAME="game_world0_animate_stuck_critters" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
@@ -3807,6 +3820,7 @@
         <SYMBOL ADDRESS="0e3b:88fd" NAME="game_world1_teleporter_loop" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:8917" NAME="game_world1_teleporter_enter" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:8991" NAME="game_world1_draw_teleporter" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:89c3" NAME="game_world1_leave_world2_enter" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:8ab4" NAME="game_world2_main" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:8c52" NAME="game_world2_sentry_main" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:8c8b" NAME="game_world2_sentry_current_mode" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
@@ -3818,7 +3832,7 @@
         <SYMBOL ADDRESS="0e3b:94fc" NAME="game_world2_teleporter_loop" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:9516" NAME="game_world2_teleporter_enter" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:9590" NAME="game_world2_draw_teleporter" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
-        <SYMBOL ADDRESS="0e3b:968e" NAME="game_world2_prepare_for_world3" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:968e" NAME="game_world2_leave_world3_enter" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:9a6f" NAME="game_world2_shield_drain_battery_when_active" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:9aba" NAME="game_world2_draw_shield" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:9afc" NAME="game_world2_shield_draw_sprite" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
@@ -3831,6 +3845,8 @@
         <SYMBOL ADDRESS="0e3b:a359" NAME="game_world2_draw_keycard" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:a394" NAME="game_world2_keycard_move_randomly" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:a3ca" NAME="game_world3_main" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:a4fc" NAME="game_world3_leave" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:a565" NAME="game_world4_enter" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:addf" NAME="game_world3_object22_move_up_1px" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:adf1" NAME="game_world3_object22_move_down_1px" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:ae03" NAME="game_world3_object22_move_left_1px" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
@@ -3848,6 +3864,7 @@
         <SYMBOL ADDRESS="0e3b:b6ca" NAME="game_world3_map_blink" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:b6e7" NAME="game_world3_draw_text_if_map_active" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:b6f2" NAME="game_world4_main" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:b806" NAME="game_end_cutscene_popup_and_exit" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:b9b2" NAME="game_world4_sonic_lock_match" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:b9e3" NAME="game_world4_disk_o_tek" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:bb4b" NAME="tmp_loop_index_divide_by_2" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
@@ -3990,7 +4007,7 @@
             <ADDRESS_RANGE START="0e3b:0423" END="0e3b:0433" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:0434" NAME="FUN_0e3b_0434" LIBRARY_FUNCTION="n">
+        <FUNCTION ENTRY_POINT="0e3b:0434" NAME="joystick_poll" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:0434" END="0e3b:046f" />
             <ADDRESS_RANGE START="0e3b:0471" END="0e3b:04b3" />
             <ADDRESS_RANGE START="0e3b:04b5" END="0e3b:04df" />
@@ -3998,7 +4015,7 @@
             <ADDRESS_RANGE START="0e3b:04f5" END="0e3b:04fa" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:04fb" NAME="joystick_poll" LIBRARY_FUNCTION="n">
+        <FUNCTION ENTRY_POINT="0e3b:04fb" NAME="joystick_port_out_in" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:04fb" END="0e3b:0520" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
@@ -4197,7 +4214,7 @@
             <ADDRESS_RANGE START="0e3b:12bf" END="0e3b:12cd" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:12d0" NAME="world_player_movement" LIBRARY_FUNCTION="n">
+        <FUNCTION ENTRY_POINT="0e3b:12d0" NAME="world_player_movement_and_collision" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:12d0" END="0e3b:12fa" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
@@ -4205,7 +4222,7 @@
             <ADDRESS_RANGE START="0e3b:12fb" END="0e3b:135d" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:135e" NAME="FUN_0e3b_135e" LIBRARY_FUNCTION="n">
+        <FUNCTION ENTRY_POINT="0e3b:135e" NAME="world_player_movement" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:135e" END="0e3b:136a" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
@@ -4224,7 +4241,7 @@
             <ADDRESS_RANGE START="0e3b:1412" END="0e3b:1417" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:1418" NAME="FUN_0e3b_1418" LIBRARY_FUNCTION="n">
+        <FUNCTION ENTRY_POINT="0e3b:1418" NAME="world_player_movement_from_joystick" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:1418" END="0e3b:143d" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
@@ -4625,7 +4642,7 @@
             <ADDRESS_RANGE START="0e3b:3bb2" END="0e3b:3bf9" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:3bfa" NAME="FUN_0e3b_3bfa" LIBRARY_FUNCTION="n">
+        <FUNCTION ENTRY_POINT="0e3b:3bfa" NAME="world_player_movement_2" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:3bfa" END="0e3b:3bfd" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
@@ -5171,16 +5188,12 @@
             <ADDRESS_RANGE START="0e3b:66b2" END="0e3b:67c7" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:67c8" NAME="FUN_0e3b_67c8" LIBRARY_FUNCTION="n">
-            <ADDRESS_RANGE START="0e3b:67c8" END="0e3b:6868" />
+        <FUNCTION ENTRY_POINT="0e3b:67c8" NAME="game_world0_leave" LIBRARY_FUNCTION="n">
+            <ADDRESS_RANGE START="0e3b:67c8" END="0e3b:684f" />
             <ADDRESS_RANGE START="0e3b:6871" END="0e3b:6894" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:6869" NAME="FUN_0e3b_6869" LIBRARY_FUNCTION="n">
-            <ADDRESS_RANGE START="0e3b:6869" END="0e3b:6870" />
-            <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" />
-        </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:6895" NAME="game_world0_prepare_for_world1" LIBRARY_FUNCTION="n">
+        <FUNCTION ENTRY_POINT="0e3b:6895" NAME="game_world1_enter" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:6895" END="0e3b:6933" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" />
         </FUNCTION>
@@ -5592,7 +5605,7 @@
             <ADDRESS_RANGE START="0e3b:8991" END="0e3b:89c2" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:89c3" NAME="FUN_0e3b_89c3" LIBRARY_FUNCTION="n">
+        <FUNCTION ENTRY_POINT="0e3b:89c3" NAME="game_world1_leave_world2_enter" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:89c3" END="0e3b:8a2a" />
             <ADDRESS_RANGE START="0e3b:8a2c" END="0e3b:8ab3" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" />
@@ -5727,7 +5740,7 @@
             <ADDRESS_RANGE START="0e3b:9668" END="0e3b:968d" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:968e" NAME="game_world2_prepare_for_world3" LIBRARY_FUNCTION="n">
+        <FUNCTION ENTRY_POINT="0e3b:968e" NAME="game_world2_leave_world3_enter" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:968e" END="0e3b:9721" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" />
         </FUNCTION>
@@ -5898,12 +5911,12 @@
             <ADDRESS_RANGE START="0e3b:a3ca" END="0e3b:a4fb" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:a4fc" NAME="FUN_0e3b_a4fc" LIBRARY_FUNCTION="n">
+        <FUNCTION ENTRY_POINT="0e3b:a4fc" NAME="game_world3_leave" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:a4fc" END="0e3b:a563" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:a564" NAME="FUN_0e3b_a564" LIBRARY_FUNCTION="n">
-            <ADDRESS_RANGE START="0e3b:a564" END="0e3b:a62d" />
+        <FUNCTION ENTRY_POINT="0e3b:a565" NAME="game_world4_enter" LIBRARY_FUNCTION="n">
+            <ADDRESS_RANGE START="0e3b:a565" END="0e3b:a62d" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" />
         </FUNCTION>
         <FUNCTION ENTRY_POINT="0e3b:a62e" NAME="FUN_0e3b_a62e" LIBRARY_FUNCTION="n">
@@ -6122,7 +6135,7 @@
             <ADDRESS_RANGE START="0e3b:b6f2" END="0e3b:b805" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:b806" NAME="FUN_0e3b_b806" LIBRARY_FUNCTION="n">
+        <FUNCTION ENTRY_POINT="0e3b:b806" NAME="game_end_cutscene_popup_and_exit" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:b806" END="0e3b:b81b" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" />
         </FUNCTION>
@@ -8213,33 +8226,23 @@
         <MEMORY_REFERENCE ADDRESS="0e3b:67ad" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:1700" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:67bc" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:093a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:67c5" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:66df" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:67c8" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:3728" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:67cb" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:4851" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:67da" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:06ac" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:67de" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:07ac" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:67e2" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:3c06" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:67e7" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:485a" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:67ea" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:485a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:67f2" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:05ac" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:67fa" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:4851" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:6800" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:08ac" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:6810" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:c016" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:6818" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:05ac" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:6824" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:4859" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:6827" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:0767" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:682a" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:485a" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:6832" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:4851" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:6838" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:08b0" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:684d" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:08b0" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:6861" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:4859" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:6864" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:0767" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:686c" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:4851" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:6873" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:bdb1" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:6878" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:0590" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:687f" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:bdb0" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:6884" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:059b" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:688b" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:bdaf" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:6890" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:059b" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:6897" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:04ac" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:689c" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:08ce" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:68a1" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:03ce" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:68a6" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:03cf" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:68ab" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:09cf" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:68b0" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:0acf" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:68b5" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:bee6" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:68b9" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:bee6" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:68c1" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:c307" PRIMARY="y" />
@@ -8252,13 +8255,16 @@
         <MEMORY_REFERENCE ADDRESS="0e3b:68e0" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:07ac" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:68e4" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:0767" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:68e7" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:bee6" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:68ef" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:4851" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:68f5" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:485a" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:68fb" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:4859" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:6904" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:06ac" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:690a" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:07ac" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:690e" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:0767" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:6914" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:bef2" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:691e" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:3bb2" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:6921" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:135e" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:6931" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:2c00" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:6924" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:4868" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:6934" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:69a2" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:6937" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:69de" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:693a" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:6943" PRIMARY="y" />
@@ -9661,19 +9667,14 @@
         <MEMORY_REFERENCE ADDRESS="0e3b:a4f0" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:093a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:a4f9" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:a3ed" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:a4fc" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:3728" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:a4ff" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:4851" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:a50e" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:06ac" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:a512" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:07ac" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:a516" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:3c06" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:a51b" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:485a" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:a51e" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:485a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:a526" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:05ac" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:a534" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:08ac" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:a542" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:c016" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:a54a" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:05ac" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:a556" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:4859" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:a559" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:0767" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:a55c" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:485a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:a580" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:0bac" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:a586" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:4859" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:a58b" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:06ac" PRIMARY="y" />
@@ -10312,7 +10313,6 @@
         <MEMORY_REFERENCE ADDRESS="0e3b:c863" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:0cac" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:c8a9" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:0904" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:c8ac" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:093a" PRIMARY="y" />
-        <MEMORY_REFERENCE ADDRESS="0e3b:c8bb" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:3af0" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:c8be" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:093a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:c8c1" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:b806" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:c8cf" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:4c78" PRIMARY="y" />
@@ -10510,6 +10510,16 @@
         <MEMORY_REFERENCE ADDRESS="2a6c:011d" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="2a6c:0009" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="2a6c:0124" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="2a6c:006b" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="2a6c:012c" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="2a6c:0094" PRIMARY="y" />
+        <EQUATE_REFERENCE ADDRESS="0e3b:685f" OPERAND_INDEX="0x1" NAME="RO_ROOM_NONE" VALUE="0x3f" />
+        <EQUATE_REFERENCE ADDRESS="0e3b:67f6" OPERAND_INDEX="0x1" NAME="RO_ROOM_NONE" VALUE="0x3f" />
+        <EQUATE_REFERENCE ADDRESS="0e3b:6822" OPERAND_INDEX="0x1" NAME="RO_ROOM_NONE" VALUE="0x3f" />
+        <EQUATE_REFERENCE ADDRESS="0e3b:685a" OPERAND_INDEX="0x1" NAME="RO_COLOR_WIRE_COLD" VALUE="0x7" />
+        <EQUATE_REFERENCE ADDRESS="0e3b:6850" OPERAND_INDEX="0x1" NAME="RO_OBJ_TOKEN" VALUE="0x4" />
+        <EQUATE_REFERENCE ADDRESS="0e3b:67e5" OPERAND_INDEX="0x1" NAME="RO_OBJ_CURSOR" VALUE="0xfe" />
+        <EQUATE_REFERENCE ADDRESS="0e3b:683b" OPERAND_INDEX="0x1" NAME="RO_OBJ_NONE" VALUE="0xff" />
+        <EQUATE_REFERENCE ADDRESS="0e3b:683f" OPERAND_INDEX="0x1" NAME="RO_OBJ_ROBOT_SCANNER_L" VALUE="0xf4" />
+        <EQUATE_REFERENCE ADDRESS="0e3b:6843" OPERAND_INDEX="0x1" NAME="RO_OBJ_ROBOT_CHECKERS_L" VALUE="0xf2" />
+        <EQUATE_REFERENCE ADDRESS="0e3b:6847" OPERAND_INDEX="0x1" NAME="RO_OBJ_ROBOT_SPARKY_L" VALUE="0xf0" />
     </MARKUP>
     <EXT_LIBRARY_TABLE />
 </PROGRAM>
