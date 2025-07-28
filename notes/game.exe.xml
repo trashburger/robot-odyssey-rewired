@@ -321,7 +321,7 @@
 
 ]>
 <PROGRAM NAME="GAME.EXE" EXE_PATH="/home/micah/re/robotod/GAME.EXE" EXE_FORMAT="Old-style DOS Executable (MZ)" IMAGE_BASE="0000:0000">
-    <INFO_SOURCE USER="micah" TOOL="Ghidra 11.0.3" TIMESTAMP="Sun Jul 27 15:26:55 PDT 2025" />
+    <INFO_SOURCE USER="micah" TOOL="Ghidra 11.0.3" TIMESTAMP="Sun Jul 27 17:13:24 PDT 2025" />
     <PROCESSOR NAME="x86" LANGUAGE_PROVIDER="x86:LE:16:Real Mode:default" ENDIAN="little" />
     <DATATYPES>
         <TYPE_DEF NAME="Color" NAMESPACE="/" DATATYPE="byte" DATATYPE_NAMESPACE="/" />
@@ -2436,6 +2436,7 @@
         <EQUATE_GROUP />
     </EQUATES>
     <COMMENTS>
+        <COMMENT ADDRESS="0100:bf19" TYPE="end-of-line">0=normal FF=mcc map mode active</COMMENT>
         <COMMENT ADDRESS="0e3b:02c5" TYPE="end-of-line">Set video mode</COMMENT>
         <COMMENT ADDRESS="0e3b:02c7" TYPE="end-of-line">320x200 CGA mode</COMMENT>
         <COMMENT ADDRESS="0e3b:02c9" TYPE="end-of-line">Video BIOS</COMMENT>
@@ -2881,6 +2882,7 @@
         <SYMBOL ADDRESS="0100:bf0e" NAME="game_world2_elevator_state" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0100:bf0f" NAME="game_world2_elevator_is_busy" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0100:bf10" NAME="game_world2_elevator_at_room" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0100:bf19" NAME="map_active" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0100:bf1a" NAME="game_world3_map_current_room_id" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0100:bf1b" NAME="game_world3_map_blink_color" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0100:bf1e" NAME="game_world4_skyway_state" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
