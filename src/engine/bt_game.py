@@ -20,13 +20,13 @@ b = sbt86.DOSBinary(os.path.join(basedir, "game.exe"))
 #
 # We need this flag also, to adjust the frame timing and to end mouse tracking.
 
-map_active_addr = 0xBF19
+game_world3_map_active = 0xbf19
 
 bt_common.patch(b)
-bt_common.patchJoystick(b, map_active_addr=map_active_addr)
+bt_common.patchJoystick(b, map_active_addr=game_world3_map_active)
 bt_common.patchChips(b)
 bt_common.patchLoadSave(b)
-bt_common.patchVideoHighLevel(b, map_active_addr=map_active_addr)
+bt_common.patchVideoHighLevel(b, map_active_addr=game_world3_map_active)
 
 # Remove modal "Insert disk 1" message on world load failure
 b.patchAndHook("0E3B:2CBE", "ret", 'assert(0 && "World file load failure");')
