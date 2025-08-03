@@ -12,9 +12,9 @@
 .*.swp
 *.pyc
 *.kate-swp
+.ipynb_checkpoints/
 
 /build/
 /dist/
 /.cache/
 /node_modules/
-
