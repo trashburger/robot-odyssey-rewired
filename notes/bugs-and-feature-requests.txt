@@ -8,10 +8,6 @@ does the PWA only run in portrait orientation? it should work in landscape too.
 
 bug: when file import fails (for ex, non-secure context) there is no modal, the "Processing selected files..." stays up until dismissed manually.
 
-pcm encoder output (for PC speaker) is not great
-- should generate both + and - pulses, possibly include a bandpass filter
-- take a close look at the PCM sound output, I noticed the buffers have been starting with a one-cycle pulse and this is almost surely wrong. probably a fencepost bug in timestamp to pcm converter.
-
 need to compare sound effect rendering to Apple version
 - especially look at tone quality in cutscenes, is this an emulation bug or an opportunity for enhancement?
 - check teleporter sound
