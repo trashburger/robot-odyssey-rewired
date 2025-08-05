@@ -3,8 +3,10 @@
 #include "sbt86.h"
 #include <algorithm>
 #include <emscripten.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <type_traits>
 
 OutputInterface::OutputInterface(ColorTable &colorTable)
     : draw(colorTable), frame_counter(0), reference_timestamp(0) {}
@@ -168,42 +170,136 @@ void OutputQueue::renderSoundEffect(uint32_t first_timestamp) {
     // queue position, slurp up all subsequent audio events and generate
     // a single PCM sound effect.
 
-    // The first sample at index zero is always a "1", then the delay
-    // we load from the output queue tells us where to put a "0", then
-    // where to put the next "1", etc.
+    // Filter design from notes/sound-filter-design.ipynb
+    constexpr uint32_t padding_samples = AUDIO_HZ / 10;
+    float filter_state[28][2] = {{0}};
+    constexpr float second_order_stages[28][6] = {
+        {0.009053953112749067, -0.018107906225498134, 0.009053953112749067, 1.0,
+         -1.9796374795399938, 0.9798427166181983}, // 0 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.9816736138512914,
+         0.9818400241394235}, // 1 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.9835061664508131,
+         0.983641081639581}, // 2 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.985155486977734,
+         0.9852648579720966}, // 3 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.9866398923976099,
+         0.9867285483734656}, // 4 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.9879758696565433,
+         0.9880477287809956}, // 5 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.9891782582335584,
+         0.9892364989957404}, // 6 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.9902604145578904,
+         0.9903076150206832}, // 7 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.9912343600727092,
+         0.9912726110131748}, // 8 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.9921109145571194,
+         0.9921419113636548}, // 9 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.992899816163347,
+         0.9929249334576205}, // 10 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.9936098294848998,
+         0.9936301817009935}, // 11 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.994248842843328,
+         0.9942653333957537}, // 12 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.9948239558648986,
+         0.9948373170469392}, // 13 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.9953415583132041,
+         0.9953523836673354}, // 14 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.995807401048457,
+         0.9958161716249172}, // 15 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.9962266598981226,
+         0.9962337655524821}, // 16 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.9966039931458075,
+         0.9966097498105327}, // 17 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.9969435932751376,
+         0.9969482569645431}, // 18 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.997249233542087,
+         0.9972530117072836}, // 19 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.9975243098921462,
+         0.9975273706265284}, // 20 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.9977718786872791,
+         0.9977743581887931}, // 21 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.9979946906612989,
+         0.9979966992811273}, // 22 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.9981952214805052,
+         0.9981968486256011}, // 23 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.9983756992488464,
+         0.9983770173552453}, // 24 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.9985381292629996,
+         0.9985391970158521}, // 25 of 28
+        {1.0, 2.0, 1.0, 1.0, -1.9603951329819316,
+         0.9623976551531928}, // 26 of 28
+        {1.0, -2.0, 1.0, 1.0, -1.9859539013699274,
+         0.986219511050537}, // 27 of 28
+    };
 
-    uint32_t previous_timestamp = first_timestamp;
-    int8_t next_sample = 1;
+    static_assert(sizeof filter_state / sizeof filter_state[0] ==
+                      sizeof second_order_stages /
+                          sizeof second_order_stages[0],
+                  "filter stages and state array length must match");
+    constexpr size_t num_filter_stages =
+        sizeof filter_state / sizeof filter_state[0];
+
+    constexpr int32_t cpu_clocks_per_sample =
+        OutputQueue::CPU_CLOCK_HZ / AUDIO_HZ;
+
     uint32_t sample_count = 0;
-    int32_t clocks_remaining = 0;
+    uint32_t sample_limit = AUDIO_BUFFER_SAMPLES;
+    uint32_t ref_timestamp = first_timestamp;
+    int32_t clocks_until_impulse = 0;
+    float impulse = 1.f;
 
-    while (sample_count < AUDIO_BUFFER_SAMPLES && clocks_remaining >= 0) {
+    while (sample_count < sample_limit) {
+        float signal = 0.f;
 
-        pcm_samples[sample_count] = next_sample;
-        clocks_remaining -= CPU_CLOCKS_PER_SAMPLE;
-        sample_count++;
+        clocks_until_impulse -= cpu_clocks_per_sample;
+        if (clocks_until_impulse < 0) {
+            // Impulse here, and set up for the next one
+            signal = impulse;
+            impulse = -impulse;
 
-        while (clocks_remaining < 0) {
-            if (items.empty()) {
-                break;
+            if (items.empty() || items.front().otype != OUT_SPEAKER_TIMESTAMP) {
+                // No more timestamps; apply the padding and finish.
+                sample_limit =
+                    std::min(sample_limit, sample_count + padding_samples);
+                clocks_until_impulse = INT_MAX;
+            } else {
+                uint32_t timestamp = items.front().u.timestamp;
+                items.pop_front();
+                clocks_until_impulse += int(timestamp - ref_timestamp);
+                ref_timestamp = timestamp;
             }
-            OutputItem &front = items.front();
-            if (front.otype != OUT_SPEAKER_TIMESTAMP) {
-                break;
-            }
-            uint32_t timestamp = front.u.timestamp;
-            items.pop_front();
-            clocks_remaining += timestamp - previous_timestamp;
-            previous_timestamp = timestamp;
-            next_sample = !next_sample;
         }
+
+// IIR filter implemented as second-order stages
+#pragma unroll
+        for (size_t stage = 0; stage < num_filter_stages; stage++) {
+            const float B0 = second_order_stages[stage][0];
+            const float B1 = second_order_stages[stage][1];
+            const float B2 = second_order_stages[stage][2];
+            const float A0 = second_order_stages[stage][3];
+            const float A1 = second_order_stages[stage][4];
+            const float A2 = second_order_stages[stage][5];
+            assert(A0 == 1.f); // wants to be static_assert but the loop
+                               // isn't constexpr
+
+            float &s1 = filter_state[stage][0];
+            float &s2 = filter_state[stage][1];
+
+            float x = signal;
+            float y = B0 * x + s1;
+            s1 = s2 + B1 * x - A1 * y;
+            s2 = B2 * x - A2 * y;
+            signal = y;
+        }
+
+        pcm_samples[sample_count++] = signal;
     }
 
     // Synchronously copy out the buffer and queue it for rendering, in
-    // Javascript
+    // Javascript.
     EM_ASM_(
-        { Module.onRenderSound(HEAP8.subarray($0, $0 + $1), $2); }, pcm_samples,
-        sample_count, AUDIO_HZ);
+        { Module.onRenderSound(HEAPF32.subarray($0 / 4, $0 / 4 + $1), $2); },
+        pcm_samples, sample_count, AUDIO_HZ);
 }
 
 uint32_t OutputQueue::run() {

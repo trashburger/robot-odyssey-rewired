@@ -29,8 +29,6 @@ class OutputInterface {
   public:
     static const uint32_t CPU_CLOCK_KHZ = 4770;
     static const uint32_t CPU_CLOCK_HZ = CPU_CLOCK_KHZ * 1000;
-    static const uint32_t CPU_CLOCKS_PER_SAMPLE = 200;
-    static const uint32_t AUDIO_HZ = CPU_CLOCK_HZ / CPU_CLOCKS_PER_SAMPLE;
 
     OutputInterface(ColorTable &colorTable);
 
@@ -76,14 +74,15 @@ class OutputQueue final : public OutputInterface {
     virtual void pushDelay(uint32_t timestamp, OutputDelayType delayType);
     virtual void pushSpeakerTimestamp(uint32_t timestamp);
 
-    static const unsigned AUDIO_BUFFER_SECONDS = 10;
-    static const unsigned AUDIO_BUFFER_SAMPLES =
+    static constexpr uint32_t AUDIO_HZ = 48000;
+    static constexpr unsigned AUDIO_BUFFER_SECONDS = 8;
+    static constexpr unsigned AUDIO_BUFFER_SAMPLES =
         AUDIO_HZ * AUDIO_BUFFER_SECONDS;
 
-    int8_t pcm_samples[AUDIO_BUFFER_SAMPLES];
+    float pcm_samples[AUDIO_BUFFER_SAMPLES];
 
-    static const unsigned MAX_BUFFERED_FRAMES = 128;
-    static const unsigned MAX_BUFFERED_EVENTS = 16384;
+    static constexpr unsigned MAX_BUFFERED_FRAMES = 128;
+    static constexpr unsigned MAX_BUFFERED_EVENTS = 16384;
 
   private:
     jm::circular_buffer<OutputItem, MAX_BUFFERED_EVENTS> items;
