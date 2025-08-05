@@ -20,7 +20,7 @@ b = sbt86.DOSBinary(os.path.join(basedir, "game.exe"))
 #
 # We need this flag also, to adjust the frame timing and to end mouse tracking.
 
-game_world3_map_active = 0xbf19
+game_world3_map_active = 0xBF19
 
 bt_common.patch(b)
 bt_common.patchJoystick(b, map_active_addr=game_world3_map_active)
