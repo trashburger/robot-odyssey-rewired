@@ -75,7 +75,7 @@ class OutputQueue final : public OutputInterface {
     virtual void pushSpeakerTimestamp(uint32_t timestamp);
 
     static constexpr uint32_t AUDIO_HZ = 48000;
-    static constexpr unsigned AUDIO_BUFFER_SECONDS = 8;
+    static constexpr unsigned AUDIO_BUFFER_SECONDS = 4;
     static constexpr unsigned AUDIO_BUFFER_SAMPLES =
         AUDIO_HZ * AUDIO_BUFFER_SECONDS;
 
