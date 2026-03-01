@@ -59,7 +59,7 @@ import binascii
 import tempfile
 import io
 import xml.sax
-import zstd
+import zstandard
 
 
 def log(msg):
@@ -1828,7 +1828,7 @@ class BinaryData:
         """Convert compressed binary data to a list of hexadecimal values
         suitable for including in a C array.
         """
-        compressed = zstd.compress(bytes(self.data), 22)
+        compressed = zstandard.compress(bytes(self.data), 22)
         return "".join(
             [
                 "0x%02x,%s" % (b, "\n"[: (i & 15) == 15])

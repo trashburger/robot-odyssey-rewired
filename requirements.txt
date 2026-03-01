@@ -1,2 +1,2 @@
 pillow==10.4.0
-zstd==1.5.7.2
+zstandard==0.25.0

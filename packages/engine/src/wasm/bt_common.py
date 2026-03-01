@@ -5,7 +5,6 @@
 
 import sbt86
 
-
 # Default frame rate. This is somewhat faster and more consistent than the
 # original experience would have been, but it seems good for gameplay. Much
 # faster and it's hard to navigate and the puzzles run too quickly.
@@ -284,8 +283,7 @@ def patchLoadSave(b):
             rt.reg.bx = 0x%04x;
             memcpy((char*)rt.seg.ds + 0x%04x, SBT_SAVE_FILE_NAME, sizeof SBT_SAVE_FILE_NAME);
             memcpy((char*)rt.seg.ds + 0x%04x, SBT_SAVE_FILE_NAME, sizeof SBT_SAVE_FILE_NAME);
-        """
-            % (saveFilenameAddr, saveFilenameAddr, loadFilenameAddr),
+        """ % (saveFilenameAddr, saveFilenameAddr, loadFilenameAddr),
         )
 
     # Find the code for the menu that asks you to press "S" to save.

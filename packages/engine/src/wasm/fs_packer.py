@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import sys, os, re, zstd
+import sys, os, re, zstandard
 
 
 def collect_files(in_dir):
@@ -42,7 +42,7 @@ def write_header(cpp):
 
 
 def write_blob(cpp, blob):
-    compressed = zstd.compress(blob, 22)
+    compressed = zstandard.compress(blob, 22)
     print(
         f"Combined files are {len(blob)} bytes, compressed to {len(compressed)} bytes ( { len(compressed) / len(blob) * 100 }% )"
     )

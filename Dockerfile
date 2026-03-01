@@ -4,7 +4,7 @@ FROM debian:rc-buggy
 # Install debian dependencies
 RUN apt-get update && \
 	DEBIAN_FRONTEND=noninteractive apt-get install -y \
-	clang-22 lld-22 npm nasm python3-zstd python3-pillow \
+	clang-22 lld-22 npm nasm python3-zstandard python3-pillow \
 	bzip2 make
 
 ENV CLANG_VER=22
