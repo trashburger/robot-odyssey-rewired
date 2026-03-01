@@ -322,7 +322,7 @@
 
 ]>
 <PROGRAM NAME="GAME.EXE" EXE_PATH="/home/micah/re/robotod/GAME.EXE" EXE_FORMAT="Old-style DOS Executable (MZ)" IMAGE_BASE="0000:0000">
-    <INFO_SOURCE USER="micah" TOOL="Ghidra 11.4" TIMESTAMP="Tue Aug 05 21:54:11 PDT 2025" />
+    <INFO_SOURCE USER="micah" TOOL="Ghidra 11.4.2" TIMESTAMP="Sat Oct 04 21:36:20 PDT 2025" />
     <PROCESSOR NAME="x86" LANGUAGE_PROVIDER="x86:LE:16:Real Mode:default" ENDIAN="little" />
     <DATATYPES>
         <FUNCTION_DEF NAME="_func_1" NAMESPACE="/roData.h/functions">
@@ -1577,10 +1577,9 @@
         <DEFINED_DATA ADDRESS="0100:a800" DATATYPE="byte[1024]" DATATYPE_NAMESPACE="/" SIZE="0x400">
             <DISPLAY_SETTINGS FORMAT="binary" ZERO_PAD="y" />
         </DEFINED_DATA>
-        <DEFINED_DATA ADDRESS="0100:ac00" DATATYPE="undefined1" DATATYPE_NAMESPACE="/" SIZE="0x1" />
-        <DEFINED_DATA ADDRESS="0100:ac01" DATATYPE="undefined1" DATATYPE_NAMESPACE="/" SIZE="0x1" />
-        <DEFINED_DATA ADDRESS="0100:ac06" DATATYPE="undefined1" DATATYPE_NAMESPACE="/" SIZE="0x1" />
-        <DEFINED_DATA ADDRESS="0100:ac07" DATATYPE="undefined1" DATATYPE_NAMESPACE="/" SIZE="0x1" />
+        <DEFINED_DATA ADDRESS="0100:ac00" DATATYPE="byte[8]" DATATYPE_NAMESPACE="/" SIZE="0x8">
+            <DISPLAY_SETTINGS FORMAT="binary" ZERO_PAD="y" />
+        </DEFINED_DATA>
         <DEFINED_DATA ADDRESS="0100:ac08" DATATYPE="byte[64]" DATATYPE_NAMESPACE="/" SIZE="0x40">
             <DISPLAY_SETTINGS FORMAT="binary" ZERO_PAD="y" />
         </DEFINED_DATA>
@@ -2934,6 +2933,15 @@
             <EQUATE NAME="77" VALUE="0x4d" />
             <EQUATE NAME="RO_OBJ_TOOLBOX" VALUE="0xe1" />
             <EQUATE NAME="RO_ROOM_ESC_TEXT" VALUE="0x0" />
+            <EQUATE NAME="&apos;T&apos;" VALUE="0x54" />
+            <EQUATE NAME="&apos;Y&apos;" VALUE="0x59" />
+            <EQUATE NAME="&apos;N&apos;" VALUE="0x4e" />
+            <EQUATE NAME="&apos;A&apos;" VALUE="0x41" />
+            <EQUATE NAME="&apos;Z&apos;" VALUE="0x5a" />
+            <EQUATE NAME="&apos;?&apos;" VALUE="0x3f" />
+            <EQUATE NAME="&apos;/&apos;" VALUE="0x2f" />
+            <EQUATE NAME="&apos;L&apos;" VALUE="0x4c" />
+            <EQUATE NAME="&apos;R&apos;" VALUE="0x52" />
         </EQUATE_GROUP>
     </EQUATES>
     <COMMENTS>
@@ -2971,6 +2979,9 @@
         <COMMENT ADDRESS="0e3b:0980" TYPE="end-of-line">Speaker on</COMMENT>
         <COMMENT ADDRESS="0e3b:09de" TYPE="end-of-line">Speaker off</COMMENT>
         <COMMENT ADDRESS="0e3b:1123" TYPE="end-of-line">Unconditional</COMMENT>
+        <COMMENT ADDRESS="0e3b:250b" TYPE="end-of-line">Unknown chip operations are skipped</COMMENT>
+        <COMMENT ADDRESS="0e3b:2519" TYPE="end-of-line">Argument, immediately after op</COMMENT>
+        <COMMENT ADDRESS="0e3b:2c07" TYPE="end-of-line">si = index of last door (8)</COMMENT>
         <COMMENT ADDRESS="0e3b:2c96" TYPE="end-of-line">exit(0xd5) for end cutscene</COMMENT>
         <COMMENT ADDRESS="0e3b:2f7c" TYPE="end-of-line">insert provided save file number plus &apos;A&apos;</COMMENT>
         <COMMENT ADDRESS="0e3b:3149" TYPE="end-of-line">DOS FINDFIRST</COMMENT>
@@ -3029,50 +3040,7 @@
         <COMMENT ADDRESS="2a6c:00d6" TYPE="end-of-line">Last byte in the sector buffer</COMMENT>
         <COMMENT ADDRESS="2a6c:00db" TYPE="end-of-line">Read it again</COMMENT>
     </COMMENTS>
-    <PROPERTIES>
-        <PROPERTY NAME="Analyzers.Aggressive Instruction Finder" TYPE="bool" VALUE="y" />
-        <PROPERTY NAME="Program Information.Analysis Times.Times" TYPE="custom" VALUE="&amp;lt;SAVE_STATE&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;ASCII Strings&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;1549&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Aggressive Instruction Finder&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;8977&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Aggressive Instruction Finder - One Time&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;1673&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Apply Data Archives&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;756&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;CUSTOM_OPTION_CLASS&amp;quot; TYPE=&amp;quot;string&amp;quot; VALUE=&amp;quot;ghidra.app.plugin.core.analysis.StoredAnalyzerTimes&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Call Convention ID&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;24&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Call-Fixup Installer&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;136&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Create Function&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;1264&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Data Reference&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;804&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Decompiler Switch Analysis&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;181157&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Demangler GNU&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;82&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Disassemble Entry Points&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;2699&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Embedded Media&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;83&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;External Entry References&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;0&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Function Start Search&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;177&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Non-Returning Functions - Discovered&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;10569&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Reference&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;702&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Segmented X86 Calling Conventions&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;150&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Shared Return Calls&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;1927&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Stack&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;11552&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Subroutine References&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;842&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;Wait for Analysis&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;1&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;X86 Function Callee Purge&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;696&amp;quot; /&amp;gt;
-    &amp;lt;STATE NAME=&amp;quot;x86 Constant Reference Analyzer&amp;quot; TYPE=&amp;quot;long&amp;quot; VALUE=&amp;quot;24126&amp;quot; /&amp;gt;
-&amp;lt;/SAVE_STATE&amp;gt;" />
-        <PROPERTY NAME="Program Information.Analyzed" TYPE="bool" VALUE="y" />
-        <PROPERTY NAME="Program Information.Created With Ghidra Version" TYPE="string" VALUE="11.0.3" />
-        <PROPERTY NAME="Program Information.Date Created" TYPE="date" VALUE="0x1913cf4fa98" />
-        <PROPERTY NAME="Program Information.Executable Format" TYPE="string" VALUE="Old-style DOS Executable (MZ)" />
-        <PROPERTY NAME="Program Information.Executable Location" TYPE="string" VALUE="/home/micah/re/robotod/GAME.EXE" />
-        <PROPERTY NAME="Program Information.Executable MD5" TYPE="string" VALUE="5845b1403a827f265cdae3ac1d7ed5fb" />
-        <PROPERTY NAME="Program Information.Executable SHA256" TYPE="string" VALUE="b38bdaf4ea65297ba90e4399a848fec79a0ca898d504a30f56f38f6f79bf61b1" />
-        <PROPERTY NAME="Program Information.FSRL" TYPE="string" VALUE="file:///home/micah/re/robotod/GAME.EXE?MD5=5845b1403a827f265cdae3ac1d7ed5fb" />
-        <PROPERTY NAME="Program Information.Should Ask To Analyze" TYPE="bool" VALUE="n" />
-    </PROPERTIES>
-    <BOOKMARKS>
-        <BOOKMARK ADDRESS="0e3b:3af0" TYPE="Analysis" CATEGORY="Non-Returning Function" DESCRIPTION="Non-Returning Function Found" />
-        <BOOKMARK ADDRESS="0e3b:6827" TYPE="Error" CATEGORY="Bad Instruction" DESCRIPTION="Could not follow disassembly flow into non-existing memory at 1000:eb17 (flow from 0e3b:6827)" />
-        <BOOKMARK ADDRESS="0e3b:8977" TYPE="Error" CATEGORY="Bad Instruction" DESCRIPTION="Could not follow disassembly flow into non-existing memory at 1000:ecea (flow from 0e3b:8977)" />
-        <BOOKMARK ADDRESS="0e3b:8a20" TYPE="Error" CATEGORY="Bad Instruction" DESCRIPTION="Could not follow disassembly flow into non-existing memory at 1000:eb17 (flow from 0e3b:8a20)" />
-    </BOOKMARKS>
+    <BOOKMARKS />
     <PROGRAM_TREES>
         <TREE NAME="Program Tree">
             <FRAGMENT NAME="HEADER">
@@ -3210,16 +3178,16 @@
         <SYMBOL ADDRESS="0100:3dcc" NAME="copyright_string_1981" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0100:47c0" NAME="keyboard_mapping" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0100:47c1" NAME="keyboard_mapping_81" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
-        <SYMBOL ADDRESS="0100:47c2" NAME="keyboard_mapping_82" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
-        <SYMBOL ADDRESS="0100:47c3" NAME="keyboard_mapping_83" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
-        <SYMBOL ADDRESS="0100:47c4" NAME="keyboard_mapping_84" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
-        <SYMBOL ADDRESS="0100:47c5" NAME="keyboard_mapping_85" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
-        <SYMBOL ADDRESS="0100:47c6" NAME="keyboard_mapping_86" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
-        <SYMBOL ADDRESS="0100:47c7" NAME="keyboard_map_bios_53" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
-        <SYMBOL ADDRESS="0100:47c8" NAME="keyboard_map_bios_85" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
-        <SYMBOL ADDRESS="0100:47c9" NAME="keyboard_map_bios_86" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
-        <SYMBOL ADDRESS="0100:47ca" NAME="keyboard_map_bios_87" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
-        <SYMBOL ADDRESS="0100:47cb" NAME="keyboard_map_bios_88" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0100:47c2" NAME="keyboard_map_4800" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0100:47c3" NAME="keyboard_map_5000" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0100:47c4" NAME="keyboard_map_4b00" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0100:47c5" NAME="keyboard_map_4d00" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0100:47c6" NAME="keyboard_map_52xx" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0100:47c7" NAME="keyboard_map_53xx" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0100:47c8" NAME="keyboard_map_85xx" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0100:47c9" NAME="keyboard_map_86xx" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0100:47ca" NAME="keyboard_map_87xx" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0100:47cb" NAME="keyboard_map_88xx" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0100:484d" NAME="world_arg_x" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0100:484e" NAME="world_arg_y" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0100:484f" NAME="world_arg_x_2" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
@@ -3264,6 +3232,16 @@
         <SYMBOL ADDRESS="0100:a000" NAME="chip_data_5" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0100:a400" NAME="chip_data_6" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0100:a800" NAME="chip_data_7" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0100:ac00" NAME="chip_data_ptr_high_table" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0100:ac4a" NAME="chip_current_data_high_ptr_unk2" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0100:ac9a" NAME="chip_stacked_value_count" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0100:ac9b" NAME="chip_current_output" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0100:ac9f" NAME="chip_saved_ret_addr" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0100:aca2" NAME="chip_depth_unk" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0100:aca7" NAME="chip_id_current" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0100:aca8" NAME="chip_current_unk1" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0100:aca9" NAME="chip_current_data_high_ptr_unk1" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0100:acaa" NAME="chip_current_data_ptr" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0100:acac" NAME="circuit_soldering_arg_chip_pin" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0100:acae" NAME="game_world_id" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0100:af1a" NAME="popup_str_buffer" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
@@ -3531,6 +3509,7 @@
         <SYMBOL ADDRESS="0e3b:0363" NAME="keyboard_bios_85" NAMESPACE="keyboard_poll::" TYPE="local" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:036f" NAME="keyboard_bios_52" NAMESPACE="keyboard_poll::" TYPE="local" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:0375" NAME="keyboard_bios_53" NAMESPACE="keyboard_poll::" TYPE="local" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:03ab" NAME="print_keyboard_char" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:03be" NAME="bios_video_write_character" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:03c5" NAME="bios_get_key" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:03d7" NAME="bios_beep" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
@@ -3623,10 +3602,34 @@
         <SYMBOL ADDRESS="0e3b:1608" NAME="abs" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:1700" NAME="video_blit_frame" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:1cb4" NAME="video_draw_sprite" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:24bd" NAME="chip_current_data_ptr_add_al" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:24ce" NAME="chip_instructions_run" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:24d0" NAME="next_op" NAMESPACE="chip_instructions_run::" TYPE="local" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:24e1" NAME="not_op7" NAMESPACE="chip_instructions_run::" TYPE="local" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:24e8" NAME="not_op6" NAMESPACE="chip_instructions_run::" TYPE="local" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:24ef" NAME="not_op5" NAMESPACE="chip_instructions_run::" TYPE="local" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:24f6" NAME="not_op4" NAMESPACE="chip_instructions_run::" TYPE="local" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:24fd" NAME="not_op3" NAMESPACE="chip_instructions_run::" TYPE="local" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:2504" NAME="not_op2" NAMESPACE="chip_instructions_run::" TYPE="local" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:250b" NAME="not_op1" NAMESPACE="chip_instructions_run::" TYPE="local" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:250f" NAME="op4_not" NAMESPACE="chip_instructions_run::" TYPE="local" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:2529" NAME="op3_xor" NAMESPACE="chip_instructions_run::" TYPE="local" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:2549" NAME="op1_and" NAMESPACE="chip_instructions_run::" TYPE="local" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:256a" NAME="op2_or" NAMESPACE="chip_instructions_run::" TYPE="local" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:258b" NAME="op5_flipflop" NAMESPACE="chip_instructions_run::" TYPE="local" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:262f" NAME="chip_store_outputs" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:2646" NAME="not_end_of_list" NAMESPACE="chip_store_outputs::" TYPE="local" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:26c2" NAME="end_of_list" NAMESPACE="chip_store_outputs::" TYPE="local" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:26ce" NAME="chip_store_outputs_unk" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:270f" NAME="chip_op7_end" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:27de" NAME="chip_stack_pop_all" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:2805" NAME="chip_op6_begin_nested" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:29cf" NAME="circuit_draw_chip_wire_cl" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:29fc" NAME="chip_update_all" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:2a5f" NAME="circuit_soldering_tip_on_chip" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:2b3f" NAME="circuit_soldering_add_from_chip" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:2c00" NAME="game_world_main_from_dl" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:2c07" NAME="game_world_main_with_si" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:2ca1" NAME="game_world_load_overlay" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:2cdc" NAME="dos_exit_1" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:2ce2" NAME="game_file_load" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
@@ -3662,6 +3665,7 @@
         <SYMBOL ADDRESS="0e3b:37c9" NAME="toolbox_draw" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:38ac" NAME="game_world_common_init" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:3af0" NAME="sound_queue_effect_cl_in_room_al" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:3b1c" NAME="keyboard_map_help_esc_load_cheat" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:3bb2" NAME="popup_room_message_from_cl" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:3bfa" NAME="world_player_movement_2" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:3bfe" NAME="game_world_move_callback_disabled" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
@@ -3669,6 +3673,7 @@
         <SYMBOL ADDRESS="0e3b:3c0f" NAME="game_world_move_callback_inner" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:429a" NAME="game_tool_update" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:4335" NAME="world_swap_object_dl_with_player_color_and_spriteId" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:437b" NAME="remote_check_toggle" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:439f" NAME="robot_update_thrusters" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:479c" NAME="robot_draw_all" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:47a9" NAME="robot_scanner_draw" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
@@ -3707,6 +3712,7 @@
         <SYMBOL ADDRESS="0e3b:5876" NAME="circuit_gate_update_and" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:589f" NAME="circuit_gate_update_or" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:58c8" NAME="circuit_gate_update_xor" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
+        <SYMBOL ADDRESS="0e3b:58f1" NAME="circuit_obj_update_all" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:5ad2" NAME="circuit_soldering_removing_main" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:5d30" NAME="circuit_find_matching_wired_object_from_al" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
         <SYMBOL ADDRESS="0e3b:5d84" NAME="circuit_soldering_adding_main" NAMESPACE="" TYPE="global" SOURCE_TYPE="USER_DEFINED" PRIMARY="y" />
@@ -3943,6 +3949,10 @@
         </FUNCTION>
         <FUNCTION ENTRY_POINT="0e3b:0388" NAME="FUN_0e3b_0388" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:0388" END="0e3b:03aa" />
+            <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
+        </FUNCTION>
+        <FUNCTION ENTRY_POINT="0e3b:03ab" NAME="print_keyboard_char" LIBRARY_FUNCTION="n">
+            <ADDRESS_RANGE START="0e3b:03ab" END="0e3b:03bd" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
         <FUNCTION ENTRY_POINT="0e3b:03be" NAME="bios_video_write_character" LIBRARY_FUNCTION="n">
@@ -4320,11 +4330,11 @@
             <ADDRESS_RANGE START="0e3b:2491" END="0e3b:24bc" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:24bd" NAME="FUN_0e3b_24bd" LIBRARY_FUNCTION="n">
+        <FUNCTION ENTRY_POINT="0e3b:24bd" NAME="chip_current_data_ptr_add_al" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:24bd" END="0e3b:24cd" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:24ce" NAME="FUN_0e3b_24ce" LIBRARY_FUNCTION="n">
+        <FUNCTION ENTRY_POINT="0e3b:24ce" NAME="chip_instructions_run" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:24ce" END="0e3b:24f4" />
             <ADDRESS_RANGE START="0e3b:24f6" END="0e3b:24fb" />
             <ADDRESS_RANGE START="0e3b:24fd" END="0e3b:2502" />
@@ -4333,26 +4343,26 @@
             <ADDRESS_RANGE START="0e3b:2602" END="0e3b:262e" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:262f" NAME="FUN_0e3b_262f" LIBRARY_FUNCTION="n">
+        <FUNCTION ENTRY_POINT="0e3b:262f" NAME="chip_store_outputs" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:262f" END="0e3b:2644" />
             <ADDRESS_RANGE START="0e3b:2646" END="0e3b:26b3" />
             <ADDRESS_RANGE START="0e3b:26b5" END="0e3b:26cd" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:26ce" NAME="FUN_0e3b_26ce" LIBRARY_FUNCTION="n">
+        <FUNCTION ENTRY_POINT="0e3b:26ce" NAME="chip_store_outputs_unk" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:26ce" END="0e3b:270e" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:270f" NAME="FUN_0e3b_270f" LIBRARY_FUNCTION="n">
+        <FUNCTION ENTRY_POINT="0e3b:270f" NAME="chip_op7_end" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:270f" END="0e3b:2720" />
             <ADDRESS_RANGE START="0e3b:2722" END="0e3b:27dd" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:27de" NAME="FUN_0e3b_27de" LIBRARY_FUNCTION="n">
+        <FUNCTION ENTRY_POINT="0e3b:27de" NAME="chip_stack_pop_all" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:27de" END="0e3b:2804" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:2805" NAME="FUN_0e3b_2805" LIBRARY_FUNCTION="n">
+        <FUNCTION ENTRY_POINT="0e3b:2805" NAME="chip_op6_begin_nested" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:2805" END="0e3b:2850" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" />
         </FUNCTION>
@@ -4372,7 +4382,7 @@
             <ADDRESS_RANGE START="0e3b:29cf" END="0e3b:29fb" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:29fc" NAME="FUN_0e3b_29fc" LIBRARY_FUNCTION="n">
+        <FUNCTION ENTRY_POINT="0e3b:29fc" NAME="chip_update_all" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:29fc" END="0e3b:2a3a" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
@@ -4396,7 +4406,11 @@
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
         <FUNCTION ENTRY_POINT="0e3b:2c00" NAME="game_world_main_from_dl" LIBRARY_FUNCTION="n">
-            <ADDRESS_RANGE START="0e3b:2c00" END="0e3b:2c22" />
+            <ADDRESS_RANGE START="0e3b:2c00" END="0e3b:2c06" />
+            <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" />
+        </FUNCTION>
+        <FUNCTION ENTRY_POINT="0e3b:2c07" NAME="game_world_main_with_si" LIBRARY_FUNCTION="n">
+            <ADDRESS_RANGE START="0e3b:2c07" END="0e3b:2c22" />
             <ADDRESS_RANGE START="0e3b:2c24" END="0e3b:2ca0" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" />
         </FUNCTION>
@@ -4600,7 +4614,7 @@
             <ADDRESS_RANGE START="0e3b:3b19" END="0e3b:3b1a" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:3b1c" NAME="FUN_0e3b_3b1c" LIBRARY_FUNCTION="n">
+        <FUNCTION ENTRY_POINT="0e3b:3b1c" NAME="keyboard_map_help_esc_load_cheat" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:3b1c" END="0e3b:3b87" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
@@ -4719,7 +4733,7 @@
             <ADDRESS_RANGE START="0e3b:4335" END="0e3b:4359" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:437b" NAME="FUN_0e3b_437b" LIBRARY_FUNCTION="n">
+        <FUNCTION ENTRY_POINT="0e3b:437b" NAME="remote_check_toggle" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:437b" END="0e3b:439e" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
@@ -5001,7 +5015,7 @@
             <ADDRESS_RANGE START="0e3b:58c8" END="0e3b:58f0" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
         </FUNCTION>
-        <FUNCTION ENTRY_POINT="0e3b:58f1" NAME="FUN_0e3b_58f1" LIBRARY_FUNCTION="n">
+        <FUNCTION ENTRY_POINT="0e3b:58f1" NAME="circuit_obj_update_all" LIBRARY_FUNCTION="n">
             <ADDRESS_RANGE START="0e3b:58f1" END="0e3b:59bd" />
             <ADDRESS_RANGE START="0e3b:59bf" END="0e3b:59c1" />
             <STACK_FRAME LOCAL_VAR_SIZE="0x2" PARAM_OFFSET="0x2" RETURN_ADDR_SIZE="0x0" BYTES_PURGED="0" />
@@ -6431,11 +6445,15 @@
         <MEMORY_REFERENCE ADDRESS="0e3b:0136" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:acae" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:0140" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:0155" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:014c" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:01a0" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:0155" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:0002" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:0189" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:2c00" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:018d" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:485b" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:01aa" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:acae" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:01b1" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:0002" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:01c0" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:02a5" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:01c4" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:02a3" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:01ce" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:0012" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:01e0" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:37b2" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:01e9" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:0022" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:024d" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:3ad7" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:0262" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:3ad5" PRIMARY="y" />
@@ -7686,14 +7704,21 @@
         <MEMORY_REFERENCE ADDRESS="0e3b:2c4b" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:a3ca" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:2c4e" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:b6f2" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:2c56" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:66b2" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:2c5e" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:acaf" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:2c61" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:2ca1" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:2c64" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:7a7a" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:2c6c" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:acba" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:2c6f" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:2ca1" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:2c72" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:8ab4" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:2c7a" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:acc3" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:2c7d" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:2ca1" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:2c80" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:a3ca" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:2c88" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:accc" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:2c8b" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:2ca1" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:2c8e" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:b6f2" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:2cad" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:37ac" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:2cb0" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:10ec" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:2cb4" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:10ec" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:2cc0" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:03de" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:2cc3" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:4873" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:2cc9" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:31e1" PRIMARY="y" />
@@ -7702,6 +7727,9 @@
         <MEMORY_REFERENCE ADDRESS="0e3b:2cd2" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:4868" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:2cf1" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:02a5" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:2cf5" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:02a3" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:2cff" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:b612" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:2d10" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:8c00" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:2d1c" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:ac08" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:2d26" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:2d4a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:2d2c" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:2d4a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:2d32" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0e3b:2d4a" PRIMARY="y" />
@@ -8125,54 +8153,84 @@
         <MEMORY_REFERENCE ADDRESS="0e3b:38ac" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:b418" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:38b4" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:b418" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:38b9" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:0032" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:38c0" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:0032" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:38dd" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:0042" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3902" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:0052" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:3909" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:0052" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:3926" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:0062" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3947" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:0072" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:394e" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:0072" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:396b" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:0082" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:398a" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:8c00" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3990" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:ac00" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:399c" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:b459" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:399f" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c18a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:39a3" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c18e" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:39a8" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:b489" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:39ab" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c18a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:39af" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c18e" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:39b4" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:b479" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:39b7" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c18a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:39bb" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c18e" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:39c0" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:b4a9" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:39c3" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c18a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:39c7" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c18e" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:39cd" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:b469" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:39d0" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c192" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:39d4" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c196" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:39d9" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:b499" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:39dc" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c192" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:39e0" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c196" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:39e5" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:b469" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:39e8" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c192" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:39ec" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c196" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:39f1" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:b499" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:39f4" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c192" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:39f8" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c196" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:39fe" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:b479" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a01" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c19a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a05" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c19e" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:3a0a" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:b4a9" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a0d" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c19a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a11" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c19e" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:3a16" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:b459" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a19" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c19a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a1d" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c19e" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:3a22" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:b489" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a25" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c19a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a29" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c19e" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:3a2f" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:108c" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a32" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c15a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a36" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c164" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:3a3b" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:b509" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a3e" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c15a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a42" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c164" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:3a47" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:b5c2" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a4a" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c15a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a4e" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c164" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:3a53" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:b5a2" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a56" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c15a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a5a" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c164" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:3a5f" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:b5b2" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a62" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c15a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a66" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c164" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:3a6b" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:b592" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a6e" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c15a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a72" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c164" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:3a77" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:b5f2" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a7a" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c15a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a7e" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c164" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:3a83" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:b5e2" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a86" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c15a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a8a" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c164" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:3a8f" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:b602" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a92" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c15a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a96" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c164" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:3a9b" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:b5d2" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3a9e" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c15a" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3aa2" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c164" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3aad" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:c080" PRIMARY="y" />
+        <MEMORY_REFERENCE ADDRESS="0e3b:3ab9" OPERAND_INDEX="0x1" USER_DEFINED="y" TO_ADDRESS="0100:0cac" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3abc" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c080" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3ac0" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:c096" PRIMARY="y" />
         <MEMORY_REFERENCE ADDRESS="0e3b:3af0" OPERAND_INDEX="0x0" USER_DEFINED="y" TO_ADDRESS="0100:3b62" PRIMARY="y" />
@@ -14481,7 +14539,9 @@
         <EQUATE_REFERENCE ADDRESS="0100:00b3" OPERAND_INDEX="0x0" NAME="END_FILENAME_LIST" VALUE="0xff" />
         <EQUATE_REFERENCE ADDRESS="0e3b:0027" OPERAND_INDEX="0x1" NAME="&apos;0&apos;" VALUE="0x30" />
         <EQUATE_REFERENCE ADDRESS="0e3b:001d" OPERAND_INDEX="0x1" NAME="&apos;0&apos;" VALUE="0x30" />
+        <EQUATE_REFERENCE ADDRESS="0e3b:3014" OPERAND_INDEX="0x1" NAME="&apos;0&apos;" VALUE="0x30" />
         <EQUATE_REFERENCE ADDRESS="0e3b:0022" OPERAND_INDEX="0x1" NAME="&apos;9&apos;" VALUE="0x39" />
+        <EQUATE_REFERENCE ADDRESS="0e3b:3018" OPERAND_INDEX="0x1" NAME="&apos;9&apos;" VALUE="0x39" />
         <EQUATE_REFERENCE ADDRESS="0e3b:0018" OPERAND_INDEX="0x1" NAME="&apos; &apos;" VALUE="0x20" />
         <EQUATE_REFERENCE ADDRESS="0e3b:ae1f" OPERAND_INDEX="0x1" NAME="RO_OBJ_DALEK_L" VALUE="0x22" />
         <EQUATE_REFERENCE ADDRESS="0e3b:ae0d" OPERAND_INDEX="0x1" NAME="RO_OBJ_DALEK_L" VALUE="0x22" />
@@ -14492,6 +14552,16 @@
         <EQUATE_REFERENCE ADDRESS="0e3b:ae3d" OPERAND_INDEX="0x1" NAME="77" VALUE="0x4d" />
         <EQUATE_REFERENCE ADDRESS="0e3b:ac50" OPERAND_INDEX="0x1" NAME="RO_OBJ_TOOLBOX" VALUE="0xe1" />
         <EQUATE_REFERENCE ADDRESS="0e3b:ace1" OPERAND_INDEX="0x1" NAME="RO_ROOM_ESC_TEXT" VALUE="0x0" />
+        <EQUATE_REFERENCE ADDRESS="0e3b:330a" OPERAND_INDEX="0x1" NAME="&apos;T&apos;" VALUE="0x54" />
+        <EQUATE_REFERENCE ADDRESS="0e3b:2f94" OPERAND_INDEX="0x1" NAME="&apos;Y&apos;" VALUE="0x59" />
+        <EQUATE_REFERENCE ADDRESS="0e3b:2f9b" OPERAND_INDEX="0x1" NAME="&apos;N&apos;" VALUE="0x4e" />
+        <EQUATE_REFERENCE ADDRESS="0e3b:301c" OPERAND_INDEX="0x1" NAME="&apos;A&apos;" VALUE="0x41" />
+        <EQUATE_REFERENCE ADDRESS="0e3b:32f0" OPERAND_INDEX="0x1" NAME="&apos;A&apos;" VALUE="0x41" />
+        <EQUATE_REFERENCE ADDRESS="0e3b:3020" OPERAND_INDEX="0x1" NAME="&apos;Z&apos;" VALUE="0x5a" />
+        <EQUATE_REFERENCE ADDRESS="0e3b:3b23" OPERAND_INDEX="0x1" NAME="&apos;?&apos;" VALUE="0x3f" />
+        <EQUATE_REFERENCE ADDRESS="0e3b:3b27" OPERAND_INDEX="0x1" NAME="&apos;/&apos;" VALUE="0x2f" />
+        <EQUATE_REFERENCE ADDRESS="0e3b:3b2f" OPERAND_INDEX="0x1" NAME="&apos;L&apos;" VALUE="0x4c" />
+        <EQUATE_REFERENCE ADDRESS="0e3b:437e" OPERAND_INDEX="0x1" NAME="&apos;R&apos;" VALUE="0x52" />
     </MARKUP>
     <EXT_LIBRARY_TABLE />
 </PROGRAM>
