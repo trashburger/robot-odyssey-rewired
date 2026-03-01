@@ -17,8 +17,6 @@ Notable differences include the "Robotropolis Preview" only available in Apple I
 Build in a Container
 --------------------
 
-This is the recommended way to build currently.
-
 - Place Robot Odyssey 1.1 for DOS game files in the "original" directory
 - Run `notes/docker-build.sh` or something similar
 - The static site will be built into `dist`
@@ -27,8 +25,6 @@ This is the recommended way to build currently.
 Without a Container
 -------------------
 
-This needs work for compatibility with current versions of node and emscripten.
-
 Install system dependencies:
 
 - make
@@ -36,25 +32,25 @@ Install system dependencies:
 - nasm
 - node
 - python3
-- emscripten
+- clang
+- wasm-ld
 
 Prepare the project directory:
 
 - Place Robot Odyssey 1.1 for DOS game files in the "original" directory
 - git submodule update --init --recursive
-- npm install
 - python3 -m venv venv; source venv/bin/activate
 - pip3 install -r requirements.txt
+- npm install
 
 To build a static site into the `dist` directory:
 
-- make
+- npm run build
 
 To run the development hot-reload server:
 
-- make hotserve
+- npm run hotserve
 
 Alternatively, you can just build the static site and serve it from `dist` without hot-reloading:
 
-- make distserve
-
+- npm run distserve

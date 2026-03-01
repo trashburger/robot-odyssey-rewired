@@ -1,0 +1,23 @@
+{
+  "description": "Game engine and data for Robot Odyssey Rewired",
+  "name": "@robot-odyssey-rewired/engine",
+  "version": "0.16.0",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "make -j",
+    "clean": "make -j clean",
+    "test": "npm run build && vitest"
+  },
+  "dependencies": {
+    "audio-buffer": "^5.0.0",
+    "fast-myers-diff": "^3.2.0",
+    "region2d": "^1.0.0"
+  },
+  "devDependencies": {
+    "stylus": "^0.64.0",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4",
+    "webfont": "^11.2.20"
+  }
+}

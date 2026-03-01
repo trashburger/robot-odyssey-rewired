@@ -52,8 +52,6 @@ size profiling
 
 startup time profiling
 
-tinysave shouldn't be setting up its dictionary from static initializers. defer that.
-
 sbt86 should assert on zstd decompress
 
 i think we can stop polyfilling IntersectionObserver, it's been around almost as long as wasm
@@ -63,8 +61,6 @@ cleanup inconsistent use of snake case and camel case everywhere.
 RO_ROOM_RENDERER is not a thing any more (leftover from DS port)
 
 some sbt86 comments are out of date
-
-sbt86: inconsistent use of g.proc->memSeg(r.ds) vs g.s.ds (segment cache). We can always use the segment cache for code inside sbt86 that uses a current segment register value.
 
 
 Port Enhancements

@@ -1,0 +1,8 @@
+{
+    "dest": "./dist/images/",
+    "fontName": "rofont",
+    "formats": ["woff"],
+    "template": "./src/images/font.css",
+    "fixedWidth": true,
+    "startUnicode": 32
+}

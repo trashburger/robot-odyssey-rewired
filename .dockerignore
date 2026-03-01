@@ -1,7 +1,13 @@
 .DS_Store
+.*.swp
 *.pyc
-/build/
-/dist/
+*.kate-swp
+.ipynb_checkpoints/
+
 /.cache/
 /node_modules/
 /venv/
+
+/packages/*/node_modules/
+/packages/*/build/
+/packages/*/dist/

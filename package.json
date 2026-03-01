@@ -1,59 +1,24 @@
 {
-  "name": "robot-odyssey-rewired",
-  "version": "0.15.0",
+  "description": "Port of the classic 1984 adventure game Robot Odyssey",
+  "name": "@robot-odyssey-rewired/workspace",
+  "version": "0.16.0",
   "private": true,
-  "description": "Binary port of a classic 1984 adventure game into HTML5",
-  "main": "src/main.js",
+  "workspaces": [
+    "./packages/*"
+  ],
   "scripts": {
-    "build": "make",
-    "hotserve": "make hotserve",
-    "distserve": "make distserve"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://git.approximate.life/robot-odyssey-rewired.git"
-  },
-  "author": "Micah Elizabeth Scott",
-  "license": "MIT",
-  "dependencies": {
-    "@babel/runtime": "^7.27.6",
-    "base64-arraybuffer": "^0.1.5",
-    "downloadjs": "^1.4.7",
-    "html-dir-content": "^0.1.3",
-    "idb": "^2.1.3",
-    "intersection-observer": "^0.5.1",
-    "jszip": "^3.10.1",
-    "promise-file-reader": "^1.0.3",
-    "relative-date": "^1.1.3"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.28.0",
-    "@babel/plugin-syntax-dynamic-import": "^7.8.3",
-    "@babel/plugin-transform-runtime": "^7.28.0",
-    "@babel/preset-env": "^7.28.0",
-    "babel-eslint": "^8.2.6",
-    "babel-loader": "^8.4.1",
-    "css-loader": "^0.28.11",
-    "cssnano": "^3.10.0",
-    "eslint": "^4.19.1",
-    "eslint-loader": "^2.2.1",
-    "favicons-webpack-plugin": "0.0.9",
-    "file-loader": "^1.1.11",
-    "git-revision-webpack-plugin": "^3.0.6",
-    "html-webpack-inline-source-plugin": "0.0.10",
-    "html-webpack-plugin": "^3.2.0",
-    "mini-css-extract-plugin": "^0.4.5",
-    "offline-plugin": "^5.0.7",
-    "optimize-css-assets-webpack-plugin": "^4.0.3",
-    "region2d": "^1.0.0",
-    "remove-assets-webpack-plugin": "^1.1.0",
-    "uglifyjs-webpack-plugin": "^1.3.0",
-    "url-loader": "^1.1.2",
-    "webfont": "^11.2.20",
-    "webpack": "^4.47.0",
-    "webpack-bundle-analyzer": "^2.13.1",
-    "webpack-cli": "^3.1.1",
-    "webpack-pwa-manifest": "^3.8.0",
-    "webpack-serve": "^1.0.4"
+    "build": "npm run build:engine && npm run build:cli && npm run build:web",
+    "clean": "npm run clean:engine && npm run clean:cli && npm run clean:web",
+    "test": "npm run test:engine",
+    "build:engine": "cd packages/engine && npm run build",
+    "clean:engine": "cd packages/engine && npm run clean",
+    "test:engine": "cd packages/engine && npm run test",
+    "build:web": "cd packages/web && npm run build",
+    "clean:web": "cd packages/web && npm run clean",
+    "build:cli": "cd packages/cli && npm run build",
+    "clean:cli": "cd packages/cli && npm run clean",
+    "hotserve": "npm run build:engine && cd packages/web && npm run hotserve",
+    "distserve": "npm run build:engine && cd packages/web && npm run distserve",
+    "reformat": "notes/reformat.sh"
   }
 }

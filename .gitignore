@@ -14,7 +14,10 @@
 *.kate-swp
 .ipynb_checkpoints/
 
-/build/
-/dist/
 /.cache/
 /node_modules/
+/venv/
+
+/packages/*/node_modules/
+/packages/*/dist/
+/packages/*/build/

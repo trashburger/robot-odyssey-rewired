@@ -1,5 +1,5 @@
-The following license appies to code in this project where a license has
-not been otherwise stated (as in 3rd party code, like circular_buffer.h)
+The following license applies only to source code in this project where a
+license has not been otherwise stated.
 
 This license does NOT cover the original game, which is also not included
 in this repository.
@@ -8,7 +8,7 @@ in this repository.
 
 MIT License
 
-Copyright (c) 2009-2018 Micah Elizabeth Scott
+Copyright (c) 2009-2025 Micah Elizabeth Scott
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

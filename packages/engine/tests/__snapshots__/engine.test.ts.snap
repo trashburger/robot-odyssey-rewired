@@ -1,0 +1,154 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`engine decompresses and reports bundled files 1`] = `
+{
+  "4BITCNTR.CSV": [
+    1333,
+    "1ed033bf756de73b56c631a89878d9ea86dee2561862954edac2e76ec57f85c9",
+  ],
+  "ADDER.CSV": [
+    1333,
+    "61a4465beb1022f994420423ab33470d47f2b7c79a1ea6ee23d9f5dfe2c0cc42",
+  ],
+  "BUS.CSV": [
+    1333,
+    "a0186ce33870f5ca7caed216a379e65cf34bd7d50453fab40f926a9cba366178",
+  ],
+  "CLOCK.CSV": [
+    1333,
+    "f4ad781cfa51507b08c5c3d33db8f19a13814aacc7d49a89f57d925fe46d9959",
+  ],
+  "COMP.WLD": [
+    9920,
+    "063043985d83cbfb8708e7ac3b77d60d643b023ca198e34f626cd2aad62abdfa",
+  ],
+  "COUNTTON.CHP": [
+    426,
+    "86a4a380202eccd0067f32b48d39deb4d49f7c94e6b760b5e9399cc3e4001b62",
+  ],
+  "COUNTTON.CSV": [
+    1333,
+    "a06e8f2d3eed679d27ca93734aca0234538ab96a8d1178504137a24ec87b60ed",
+  ],
+  "COUNTTON.PIN": [
+    8,
+    "31e87e705e674d0b9c12d74dd53e69d5687acfd74465f3c7c619cce434e87dba",
+  ],
+  "DELAY.CSV": [
+    1333,
+    "1b803988acfae4938c028686f15afbcb569c9969f2422b164e3cd91f05c9f04a",
+  ],
+  "LAB.WOR": [
+    13568,
+    "d47cc9efa3e58eedbad0b44442289e420a4b2fa300c50ee64890ea9b4d75969d",
+  ],
+  "ONESHOT.CSV": [
+    1333,
+    "5ddfb5f226706c9432247de44a0890ecc64ed2e8535936027c82db2643ecaeea",
+  ],
+  "PULSE.CHP": [
+    19,
+    "7807c0d58838795580119b1519636d7131d542452f26ff24c6d7505575eda192",
+  ],
+  "PULSE.PIN": [
+    8,
+    "d86e8112f3c4c4442126f8e9f44f16867da487f29052bf91b810457db34209a4",
+  ],
+  "RSFLOP.CSV": [
+    1333,
+    "d42399c7337a9d776b796b1691e8a4167da0f6584fb8ce0f9395f195cf509d2d",
+  ],
+  "SEWER.CIR": [
+    1940,
+    "6b2a22fe9d6a66cc46d27a4018abb5121dd04de43e08e7bfc63605853a9eb010",
+  ],
+  "SEWER.WOR": [
+    13568,
+    "71bbe9327221764e4bd38af806364c5aee1b52edae5195cfa4a263e9f7e7c3c9",
+  ],
+  "SHOW.SHW": [
+    35211,
+    "92d14d39cdf85c5a74a45ac44479457ebaa546f9584a882e0f9d1c2fc0172c4f",
+  ],
+  "SHOW2.SHW": [
+    20048,
+    "939570425843abcaa9f2d4c954fdf0c03035c9a44f00c0bd2359c7060d763031",
+  ],
+  "STEREO.CSV": [
+    1333,
+    "d81f1ea1c32059778597a9942ded683271c3bfcf2b375d82ae16be51e345af37",
+  ],
+  "STREET.WLD": [
+    9920,
+    "df392c71f36317a274e4e2e889cf7de0e16d4e75aac42a65a1361d548ae27841",
+  ],
+  "SUBWAY.WLD": [
+    9920,
+    "ca12a361be9a83869279e7cae9fe5342d5a8d143239c0d420a098962f641584c",
+  ],
+  "TOWN.WLD": [
+    9920,
+    "d895d3ea4c9e4a8598d2912c1e416e59c6bcb80c0f1201eda39f564128a89087",
+  ],
+  "TUT1.CIR": [
+    1556,
+    "d883ba67ae10e9e5376816a982c57850a14c42670d6c4f27ca85a39ffa38be0d",
+  ],
+  "TUT1.WOR": [
+    13568,
+    "91b634ab198d8721f2463d85ccb08b7793a55a4032ce805f1943b77353779043",
+  ],
+  "TUT2.CIR": [
+    1556,
+    "205080f1e435da425cb01a481be54c719fd7377327df9d35dd24e0cbf2c17699",
+  ],
+  "TUT2.WOR": [
+    13568,
+    "e2fc96f83478565aba418fbca723a2ad6202e8c06504a36668649ec37ead1839",
+  ],
+  "TUT3.WOR": [
+    13568,
+    "08a33a53ceb4eb662b6aab9d3f4af1dff7de26c0d4d90f01f451a1705085ea2f",
+  ],
+  "TUT4.CIR": [
+    1556,
+    "1d5839fc3c7c2deacc9ddb2137412f7b1686f76b502aee0f55d1976a634e2e49",
+  ],
+  "TUT4.WOR": [
+    13568,
+    "2842ad5d420d25a013ab7e97680b952ef2601bdcf9485ff8585f0b634e655cfb",
+  ],
+  "TUT5.CIR": [
+    1556,
+    "8e7fa13a8a2bb4c43c366e86122327a5e3262ed4acd01595628818b64fdf7bc1",
+  ],
+  "TUT5.WOR": [
+    13568,
+    "d629d1bef863ecdbd5ecda349d6207f1cc84246233a39ea2329ae95445a61e61",
+  ],
+  "TUT6.WOR": [
+    13568,
+    "07a5313429ca4dbf9f42853d689cda8674a4229dae54241533d2d8fd64d386e9",
+  ],
+  "TUT7.CIR": [
+    1940,
+    "9dfda45b6338cb071f2d34b628c624f960fd705b44310882f9e55634325562df",
+  ],
+  "TUT7.WOR": [
+    13568,
+    "263da2ea2d2bc9e311ec38e72d46b1a8861f8cdd7db581f93b3088bc9b3c1fae",
+  ],
+  "WALLHUG.CHP": [
+    387,
+    "b782957fb66b1c3283245226d586851e999e3e0496619070046bc131ace10421",
+  ],
+  "WALLHUG.CSV": [
+    1333,
+    "86f2fdfb7a8b87f64e7b409bc39bf0783788317c99bc5713e9c99b53b8633d23",
+  ],
+  "WALLHUG.PIN": [
+    8,
+    "04157c6bcdf860ac94c6f000a307b7cfb0e42deea56647c887795cd61d5468af",
+  ],
+}
+`;

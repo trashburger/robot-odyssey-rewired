@@ -1,0 +1,19 @@
+{
+  "description": "Command line tool for Robot Odyssey Rewired",
+  "name": "@robot-odyssey-rewired/cli",
+  "version": "0.16.0",
+  "private": true,
+  "bin": {
+    "rorw": "./bin/rorw"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -Rf dist"
+  },
+  "dependencies": {
+    "@robot-odyssey-rewired/engine": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}

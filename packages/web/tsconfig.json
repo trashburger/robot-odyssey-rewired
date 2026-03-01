@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "lib": ["ES6", "DOM"],
+    "target": "ES6",
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "outDir": "dist/",
+    "strict": true,
+    "esModuleInterop": true
+  },
+  "include": ["src/"]
+}

@@ -1,0 +1,55 @@
+/*
+ * When using SVGDisplayRenderer from '@robot-odyssey-rewired/engine/dist/web/display.js',
+ * import required styles from '@robot-odyssey-rewired/engine/dist/web/display.css'.
+ * Also depends on SVG defs computed at build time by '@robot-odyssey-rewired/engine/dist/web/html.js'
+ */
+
+vendors = official
+root_class = robot-odyssey-rewired
+keyframes_prefix = _rorw_
+defs_prefix = _rorw_
+
+display_width = 160px
+display_height = 192px
+
+x_scale = 8
+y_scale = 5
+
+svg.{root_class} text.error {}
+
+svgref(name)
+    url(unquote('#' + defs_prefix + name))
+
+for color in 0..22
+    svg.{root_class} .color-{color}
+        fill: svgref(color)
+
+    svg.{root_class} path.color-{color}
+        stroke: svgref(color)
+        stroke-width: 1.5px
+        stroke-linejoin: round
+
+    svg.{root_class} rect.color-{color}
+        stroke: svgref(color)
+        stroke-width: 0.5px
+        stroke-linejoin: round
+
+loading_size = 40px
+loading_color = #444;
+
+loading_keyframes = unquote(keyframes_prefix + 'loading')
+loading_size_scaled = x_scale * loading_size
+
+@keyframes {loading_keyframes}
+    cx = round(x_scale * display_width / 2)
+    cy = round(y_scale * display_height / 2)
+    s = round(loading_size_scaled / -2)
+    for i in 0..1
+        {i * 100%}
+            transform: translate(cx, cy) rotate(i * 360deg) translate(s, s)
+
+svg.{root_class} rect.loading
+    width: loading_size_scaled
+    height: loading_size_scaled
+    animation: loading_keyframes 2.0s linear infinite;
+    fill: svgref('loading')
