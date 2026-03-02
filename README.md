@@ -29,7 +29,7 @@ Install system dependencies:
 
 - make
 - git
-- nasm
+- nasm (NOT nasm 3.01, it fails to disassemble 16-bit register indirect jumps)
 - node
 - python3
 - clang
